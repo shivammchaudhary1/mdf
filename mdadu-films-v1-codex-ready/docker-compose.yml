@@ -1,0 +1,12 @@
+services:
+  mongo:
+    image: mongo:8
+    container_name: mdadu-films-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mdadu_mongo_data:/data/db
+
+volumes:
+  mdadu_mongo_data:

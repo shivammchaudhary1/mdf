@@ -1,0 +1,16 @@
+export const routes = {
+  home: "/",
+  about: "/about",
+  projects: "/projects",
+  casting: "/casting",
+  gallery: "/gallery",
+  behindTheScenes: "/behind-the-scenes",
+  shows: "/shows",
+  team: "/team",
+  blog: "/blog",
+  contact: "/contact",
+  login: "/login",
+  signup: "/signup",
+  member: "/member",
+  admin: "/admin",
+} as const;

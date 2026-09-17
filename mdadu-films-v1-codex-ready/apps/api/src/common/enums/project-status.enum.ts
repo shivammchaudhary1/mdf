@@ -1,0 +1,7 @@
+export enum ProjectStatus {
+  DRAFT = "DRAFT",
+  UPCOMING = "UPCOMING",
+  RUNNING = "RUNNING",
+  COMPLETED = "COMPLETED",
+  ARCHIVED = "ARCHIVED",
+}
