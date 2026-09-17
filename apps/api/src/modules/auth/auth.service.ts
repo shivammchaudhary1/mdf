@@ -1,151 +1,160 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import type { Model } from "mongoose";
-import { randomBytes } from "node:crypto";
+import { BadRequestException, ConflictException, Injectable, NotFoundException, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Account, Session } from "./auth.models";
-import { EmailDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
+import { InjectModel } from "@nestjs/mongoose";
+import { OAuth2Client } from "google-auth-library";
+import { Types, type Model } from "mongoose";
+import { randomToken, sha256 } from "../../common/utils/crypto";
+import { RateLimitService } from "../../common/security/rate-limit.service";
+import { Account, PasswordReset, Session, type AuthProvider } from "./auth.models";
+import { EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
 import { hashPassword, tokenDigest, verifyPassword } from "./password";
 import { MailService } from "../mail/mail.service";
+
+export type SessionContext = { ip?: string; userAgent?: string };
+export type AuthPrincipal = { id: string; name: string; email: string; mobile: string; role: "USER" | "SUPER_ADMIN"; verified: boolean; sessionId: string; sessionExpiresAt: Date };
+type AccountLike = Account & { _id: unknown };
+
 @Injectable()
 export class AuthService {
+  private readonly google?: OAuth2Client;
   constructor(
     @InjectModel("Account") private readonly accounts: Model<Account>,
     @InjectModel("Session") private readonly sessions: Model<Session>,
-    @InjectModel("PasswordReset") private readonly resets: Model<Session>,
+    @InjectModel("PasswordReset") private readonly resets: Model<PasswordReset>,
     private readonly mail: MailService,
     private readonly config: ConfigService,
-  ) {}
-  publicAccount(account: Account) {
-    return {
-      id: String(account._id),
-      name: account.name,
-      email: account.email,
-      mobile: account.mobile,
-      role: account.role,
-      verified: account.verified,
-    };
+    private readonly rateLimits: RateLimitService,
+  ) {
+    const clientId = this.config.get<string>("GOOGLE_CLIENT_ID");
+    if (clientId) this.google = new OAuth2Client(clientId);
   }
-  async register(input: RegisterDto) {
-    if (input.password !== input.confirmPassword)
-      throw new BadRequestException("Passwords must match.");
+
+  publicAccount(account: AccountLike) {
+    return { id: String(account._id), name: account.name, email: account.email, mobile: account.mobile, role: account.role, verified: account.verified };
+  }
+  publicPrincipal(principal: AuthPrincipal) {
+    return { id: principal.id, name: principal.name, email: principal.email, mobile: principal.mobile, role: principal.role, verified: principal.verified };
+  }
+  private contextHash(value?: string) {
+    if (!value) return undefined;
+    const pepper = String(this.config.get("COOKIE_SECRET") ?? "development");
+    return sha256(`${pepper}:${value.slice(0, 1000)}`);
+  }
+  private accountId(account: AccountLike) { return new Types.ObjectId(String(account._id)); }
+
+  async register(input: RegisterDto, context: SessionContext) {
+    if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
+    await this.rateLimits.consume("register-email", input.email, 5, 60 * 60 * 1000);
     try {
-      const account = await this.accounts.create({
-        name: input.name.trim(),
-        email: input.email,
-        mobile: input.mobile,
-        passwordHash: await hashPassword(input.password),
-      });
-      await this.mail
-        .send(
-          account.email,
-          "Welcome to M. Dadu Films",
-          `Welcome ${account.name}. Your community account is ready.`,
-        )
-        .catch(() => undefined);
-      return this.createSession(account, false);
+      const account = await this.accounts.create({ name: input.name.trim(), email: input.email, mobile: input.mobile.trim(), passwordHash: await hashPassword(input.password), authProvider: "local" });
+      await this.mail.send(account.email, "Welcome to M. Dadu Films", `Welcome ${account.name}. Your community account is ready.`).catch(() => undefined);
+      return this.createSession(account, false, context);
     } catch (error: unknown) {
-      if (
-        typeof error === "object" &&
-        error &&
-        "code" in error &&
-        error.code === 11000
-      )
-        throw new ConflictException(
-          "An account with this email already exists.",
-        );
+      if (typeof error === "object" && error && "code" in error && error.code === 11000) throw new ConflictException("An account with this email already exists.");
       throw error;
     }
   }
-  async login(input: LoginDto) {
-    const account = await this.accounts
-      .findOne({ email: input.email })
-      .select("+passwordHash");
-    // Do comparable password work for unknown accounts.
-    const stored =
-      account?.passwordHash ?? `${"0".repeat(32)}:${"0".repeat(128)}`;
-    const valid = await verifyPassword(input.password, stored);
-    if (!account || !valid || account.suspended)
-      throw new UnauthorizedException(
-        "Login failed. Check your email and password.",
-      );
-    return this.createSession(account, !!input.remember);
+
+  async login(input: LoginDto, context: SessionContext) {
+    await this.rateLimits.consume("login-email", input.email, 20, 15 * 60 * 1000);
+    const account = await this.accounts.findOne({ email: input.email }).select("+passwordHash +googleSub");
+    const fakeHash = `${"0".repeat(32)}:${"0".repeat(128)}`;
+    const valid = await verifyPassword(input.password, account?.passwordHash ?? fakeHash);
+    if (!account || !valid || account.suspended) throw new UnauthorizedException("Login failed. Check your email and password.");
+    await this.accounts.updateOne({ _id: account._id }, { $set: { lastLoginAt: new Date() }, $inc: { loginCount: 1 } });
+    return this.createSession(account, !!input.remember, context);
   }
-  private async createSession(account: Account, remember: boolean) {
-    const token = randomBytes(32).toString("hex");
-    const duration = remember ? 30 * 86400000 : 12 * 3600000;
-    await this.sessions.create({
-      tokenHash: tokenDigest(token),
-      userId: String(account._id),
-      expiresAt: new Date(Date.now() + duration),
-    });
-    return { token, duration, remember, user: this.publicAccount(account) };
+
+  async googleLogin(input: GoogleAuthDto, context: SessionContext) {
+    const clientId = this.config.get<string>("GOOGLE_CLIENT_ID");
+    if (!this.google || !clientId) throw new ServiceUnavailableException("Google sign-in is not configured yet.");
+    let payload;
+    try {
+      const ticket = await this.google.verifyIdToken({ idToken: input.credential, audience: clientId });
+      payload = ticket.getPayload();
+    } catch { throw new UnauthorizedException("Google sign-in could not be verified."); }
+    if (!payload?.sub || !payload.email || !payload.email_verified) throw new UnauthorizedException("Google did not return a verified email address.");
+    const email = payload.email.trim().toLowerCase();
+    let account = await this.accounts.findOne({ $or: [{ googleSub: payload.sub }, { email }] }).select("+googleSub +passwordHash");
+    if (!account) {
+      if (!input.mobile) throw new BadRequestException("Mobile number is required to complete your first Google sign-in.");
+      account = await this.accounts.create({ name: (input.name || payload.name || email.split("@")[0]).slice(0, 100), email, mobile: input.mobile.trim(), authProvider: "google", googleSub: payload.sub });
+    } else {
+      if (account.suspended) throw new UnauthorizedException("Login failed. Check your account status.");
+      if (!account.googleSub) { account.googleSub = payload.sub; account.authProvider = account.passwordHash ? "both" : "google"; }
+      account.lastLoginAt = new Date();
+      account.loginCount = Number(account.loginCount ?? 0) + 1;
+      await account.save();
+    }
+    return this.createSession(account, !!input.remember, context);
   }
-  async authenticate(token?: string) {
-    if (!token || !/^[a-f0-9]{64}$/.test(token))
-      throw new UnauthorizedException("Please sign in.");
-    const session = await this.sessions.findOne({
-      tokenHash: tokenDigest(token),
-      expiresAt: { $gt: new Date() },
-    });
-    const account = session
-      ? await this.accounts.findById(session.userId)
-      : null;
-    if (!account || account.suspended)
-      throw new UnauthorizedException(
-        "Your session has expired. Please sign in.",
-      );
-    return this.publicAccount(account);
+
+  private async createSession(account: AccountLike, remember: boolean, context: SessionContext) {
+    const token = randomToken(32);
+    const shortHours = Math.max(1, Number(this.config.get("SESSION_SHORT_HOURS") ?? 12));
+    const rememberDays = Math.max(1, Number(this.config.get("SESSION_REMEMBER_DAYS") ?? 30));
+    const duration = remember ? rememberDays * 86_400_000 : shortHours * 3_600_000;
+    const now = new Date();
+    const session = await this.sessions.create({ userId: this.accountId(account), tokenHash: tokenDigest(token), remember, ipHash: this.contextHash(context.ip), userAgentHash: this.contextHash(context.userAgent), lastSeenAt: now, expiresAt: new Date(now.getTime() + duration) });
+    const maxSessions = Math.max(1, Math.min(25, Number(this.config.get("SESSION_MAX_PER_USER") ?? 10)));
+    const stale = await this.sessions.find({ userId: this.accountId(account) }).sort({ createdAt: -1 }).skip(maxSessions).select("_id").lean();
+    if (stale.length) await this.sessions.deleteMany({ _id: { $in: stale.map((item) => item._id) } });
+    return { token, duration, remember, sessionId: String(session._id), user: this.publicAccount(account) };
   }
+
+  async authenticate(token?: string): Promise<AuthPrincipal> {
+    if (!token || !/^[A-Za-z0-9_-]{40,128}$/.test(token)) throw new UnauthorizedException("Please sign in.");
+    const session = await this.sessions.findOne({ tokenHash: tokenDigest(token), expiresAt: { $gt: new Date() } }).lean();
+    const account = session ? await this.accounts.findById(session.userId).lean() : null;
+    if (!session || !account || account.suspended) throw new UnauthorizedException("Your session has expired. Please sign in.");
+    if (!session.lastSeenAt || session.lastSeenAt.getTime() < Date.now() - 15 * 60 * 1000) {
+      void this.sessions.updateOne({ _id: session._id, lastSeenAt: { $lt: new Date(Date.now() - 15 * 60 * 1000) } }, { $set: { lastSeenAt: new Date() } }).catch(() => undefined);
+    }
+    return { ...this.publicAccount(account as AccountLike), sessionId: String(session._id), sessionExpiresAt: session.expiresAt };
+  }
+
   async logout(token?: string) {
-    if (token) await this.sessions.deleteOne({ tokenHash: tokenDigest(token) });
+    if (token && /^[A-Za-z0-9_-]{40,128}$/.test(token)) await this.sessions.deleteOne({ tokenHash: tokenDigest(token) });
     return { message: "Logged out." };
   }
-  async forgot(input: EmailDto) {
-    const account = await this.accounts.findOne({
-      email: input.email,
-      suspended: false,
-    });
-    if (account) {
-      const token = randomBytes(32).toString("hex");
-      await this.resets.deleteMany({ userId: String(account._id) });
-      await this.resets.create({
-        userId: String(account._id),
-        tokenHash: tokenDigest(token),
-        expiresAt: new Date(Date.now() + 3600000),
-      });
-      const origin = String(
-        this.config.get("FRONTEND_URL") ?? "http://localhost:3333",
-      ).split(",")[0];
-      await this.mail
-        .send(
-          account.email,
-          "Reset your password",
-          `Reset your password within one hour: ${origin}/reset-password#token=${token}`,
-        )
-        .catch(() => undefined);
-    }
-    return {
-      message: "If that email is registered, a reset link will be sent.",
-    };
+  async logoutAll(userId: string) {
+    await this.sessions.deleteMany({ userId: new Types.ObjectId(userId) });
+    return { message: "All sessions have been signed out." };
   }
+  async listSessions(userId: string, currentSessionId: string) {
+    const sessions = await this.sessions.find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } }).select("_id remember createdAt lastSeenAt expiresAt").sort({ createdAt: -1 }).lean();
+    return sessions.map((session) => ({ id: String(session._id), remember: session.remember, createdAt: session.createdAt, lastSeenAt: session.lastSeenAt, expiresAt: session.expiresAt, current: String(session._id) === currentSessionId }));
+  }
+  async revokeSession(userId: string, sessionId: string, currentSessionId: string) {
+    if (!Types.ObjectId.isValid(sessionId)) throw new NotFoundException("Session not found.");
+    const result = await this.sessions.deleteOne({ _id: new Types.ObjectId(sessionId), userId: new Types.ObjectId(userId) });
+    if (!result.deletedCount) throw new NotFoundException("Session not found.");
+    return { message: "Session revoked.", currentSessionRevoked: sessionId === currentSessionId };
+  }
+
+  async forgot(input: EmailDto) {
+    await this.rateLimits.consume("forgot-email", input.email, 5, 60 * 60 * 1000);
+    const account = await this.accounts.findOne({ email: input.email, suspended: false });
+    if (account) {
+      const token = randomToken(32);
+      await this.resets.deleteMany({ userId: account._id });
+      await this.resets.create({ userId: account._id, tokenHash: tokenDigest(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) });
+      const origin = String(this.config.get("FRONTEND_URL") ?? "http://localhost:3333").split(",")[0];
+      await this.mail.send(account.email, "Reset your password", `Reset your password within one hour: ${origin}/reset-password#token=${token}`).catch(() => undefined);
+    }
+    return { message: "If that email is registered, a reset link will be sent." };
+  }
+
   async reset(input: ResetPasswordDto) {
-    if (input.password !== input.confirmPassword)
-      throw new BadRequestException("Passwords must match.");
-    const reset = await this.resets.findOneAndDelete({
-      tokenHash: tokenDigest(input.token),
-      expiresAt: { $gt: new Date() },
-    });
-    if (!reset)
-      throw new BadRequestException("This reset link is invalid or expired.");
-    await this.accounts.findByIdAndUpdate(reset.userId, {
-      passwordHash: await hashPassword(input.password),
-    });
+    if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
+    const reset = await this.resets.findOneAndDelete({ tokenHash: tokenDigest(input.token), expiresAt: { $gt: new Date() } });
+    if (!reset) throw new BadRequestException("This reset link is invalid or expired.");
+    const account = await this.accounts.findById(reset.userId).select("+googleSub +passwordHash");
+    if (!account) throw new BadRequestException("This reset link is invalid or expired.");
+    account.passwordHash = await hashPassword(input.password);
+    const provider: AuthProvider = account.googleSub ? "both" : "local";
+    account.authProvider = provider;
+    await account.save();
     await this.sessions.deleteMany({ userId: reset.userId });
     return { message: "Password updated. Please sign in." };
   }

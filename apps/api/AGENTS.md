@@ -1,86 +1,9 @@
 # Backend Instructions
 
-These rules apply to `apps/api`.
+Use a NestJS modular monolith. Projects, castings, applications, profiles, talent, contact, media, auth and admin are dedicated domains. `platform/` is only lightweight CMS (`pages`, `blog`, `team`, `gallery`, `behind-the-scenes`, `shows`, `settings`, `legal`).
 
-## Architecture
+Use REST under `/api/v1`, DTO validation, pagination, ObjectId relationships, bounded arrays, `.lean()` for read-only queries, signed httpOnly session cookies, CSRF on authenticated mutations, ownership/role guards, and rate limiting on sensitive public endpoints. Never log cookies, request bodies or secrets. Never expose password hashes, session digests, Google subject IDs, internal notes or IP hashes.
 
-Use a NestJS modular monolith.
+Store media ObjectIds, not full media URLs. Use `MediaService`/`StorageAdapter`. Local storage is development-only; S3 is the production target.
 
-Each business module should normally contain:
-- controller,
-- service,
-- module,
-- DTOs,
-- schemas/models,
-- tests where meaningful.
-
-Controllers validate/route requests and delegate business logic to services.
-
-## Current refactor direction
-
-`src/modules/platform/` is a transitional consolidation layer created during the foundation build.
-It is not the desired destination for every future feature.
-
-Do not add new unrelated responsibilities to `platform/` by default.
-
-When a domain is actively developed, prefer moving/adding its logic under:
-- `users/`
-- `profiles/`
-- `projects/`
-- `castings/`
-- `applications/`
-- `talent/`
-- `posts/`
-- `team/`
-- `contact/`
-- `settings/`
-- `admin/`
-
-Refactor incrementally as a domain is touched. Do not perform a big-bang rewrite merely to make
-folders look perfect.
-
-Generic content infrastructure may remain useful for lightweight CMS domains such as gallery,
-behind-the-scenes and shows/media. Projects, castings and applications must be allowed to have
-domain-specific schemas/services when their rules require it.
-
-## API
-
-- Prefix: `/api/v1`.
-- Local server: `http://localhost:8888`.
-- REST only in V1.
-- Keep Swagger decorators/documentation current.
-- Return consistent error structures.
-- Use DTO validation and whitelist unknown fields.
-
-## Roles
-
-Only:
-- `SUPER_ADMIN`
-- `USER`
-
-Do not add extra roles without explicit user approval.
-
-## Dynamic data
-
-MongoDB is the source of truth for administrator-editable business content.
-Do not hide editable business content in server constants.
-
-## Authentication
-
-- Hash passwords securely.
-- Use secure httpOnly cookie/token handling.
-- Enforce ownership and role guards.
-- Mobile number is required but no OTP is required in V1.
-- Never expose password hashes.
-
-## Media
-
-Keep storage behind the existing adapter/service boundary.
-Local storage is valid for development; Amazon S3 remains the production target in the media/
-deployment stages.
-
-## Errors and logs
-
-- Never leak stack traces or secrets in production responses.
-- Use meaningful HTTP status codes.
-- Log server-side failures with enough context for debugging.
+Only roles are `USER` and `SUPER_ADMIN`. Deployment remains the final project stage.

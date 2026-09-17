@@ -1,45 +1,119 @@
-import { spawn } from 'node:child_process';
-import { once } from 'node:events';
-import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import assert from 'node:assert/strict';
-import mongoose from 'mongoose';
-import sharp from 'sharp';
-const directory=await mkdtemp(join(tmpdir(),'mdadu-integration-'));
-const database=`mdadu_test_${Date.now()}`;
-const uri=`mongodb://127.0.0.1:27017/${database}`;
-const base='http://127.0.0.1:18888/api/v1';
-const child=spawn(process.execPath,[resolve('apps/api/dist/main.js')],{cwd:directory,env:{...process.env,NODE_ENV:'test',PORT:'18888',MONGODB_URI:uri,FRONTEND_URL:'http://localhost:3333',SMTP_HOST:''},stdio:['ignore','pipe','pipe']});
-let output='';child.stdout.on('data',chunk=>{output+=chunk;});child.stderr.on('data',chunk=>{output+=chunk;});
-let count=0;
-async function check(name,callback){await callback();count++;console.log(`PASS ${name}`);}
-async function request(path,{method='GET',body,cookie,origin}={}){const response=await fetch(base+path,{method,headers:{...(body instanceof FormData?{}:{'Content-Type':'application/json'}),...(cookie?{Cookie:cookie}:{}),...(origin?{Origin:origin}:{})},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body)});const type=response.headers.get('content-type')??'';const data=type.includes('json')?await response.json():await response.arrayBuffer();return {status:response.status,data,cookie:response.headers.get('set-cookie')?.split(';')[0],headers:response.headers};}
-try{
- let ready=false;
- for(let i=0;i<100;i++){if(child.exitCode!==null)throw new Error(output);try{const response=await request('/health');if(response.status===200){ready=true;break;}}catch{}await new Promise(resolve=>setTimeout(resolve,200));}
- assert.ok(ready,`API did not become ready: ${output}`);
- await mongoose.connect(uri);
- const input={name:'Integration Member',email:'member@example.test',mobile:'+919999999999',password:'Integration-pass-123',confirmPassword:'Integration-pass-123'};
- let cookie,userId,otherCookie,adminCookie,opportunityId,applicationId,photo;
- await check('registration returns safe account and httpOnly session',async()=>{const r=await request('/auth/register',{method:'POST',body:input});assert.equal(r.status,201,JSON.stringify(r.data));assert.equal(r.data.role,'USER');assert.equal(r.data.passwordHash,undefined);assert.match(r.headers.get('set-cookie'),/HttpOnly/);cookie=r.cookie;userId=r.data.id;});
- await check('duplicate email and role injection rejected',async()=>{assert.equal((await request('/auth/register',{method:'POST',body:input})).status,409);assert.equal((await request('/auth/register',{method:'POST',body:{...input,email:'injection@example.test',role:'SUPER_ADMIN'}})).status,400);});
- await check('invalid login and unauthenticated profile rejected',async()=>{assert.equal((await request('/auth/login',{method:'POST',body:{email:input.email,password:'bad'}})).status,401);assert.equal((await request('/member/profile')).status,401);});
- await check('session returns only current member and blocks admin',async()=>{assert.equal((await request('/auth/me',{cookie})).data.id,userId);assert.equal((await request('/admin/users',{cookie})).status,403);});
- await check('cross-origin account mutation rejected',async()=>{assert.equal((await request('/member/profile',{cookie,method:'PUT',origin:'https://attacker.example',body:{bio:'malicious change'}})).status,403);});
- await check('profile validation and persistence',async()=>{assert.equal((await request('/member/profile',{cookie,method:'PUT',body:{userId:'other'}})).status,400);const r=await request('/member/profile',{cookie,method:'PUT',body:{bio:'An actor and storyteller.',city:'Pune',profession:'Actor',skills:['Acting'],languages:['Hindi'],experience:'2 years',availability:'Available'}});assert.equal(r.status,200,JSON.stringify(r.data));assert.equal(r.data.completion,70);assert.equal((await request('/member/profile',{cookie})).data.city,'Pune');});
- await check('image upload creates optimised private variants',async()=>{const buffer=await sharp({create:{width:1000,height:700,channels:3,background:'#e53945'}}).png().toBuffer();const form=new FormData();form.append('file',new Blob([buffer],{type:'image/png'}),'test.png');const r=await request('/media',{method:'POST',cookie,body:form});assert.equal(r.status,201,JSON.stringify(r.data));photo=r.data.urls.profile;const image=await request(photo.replace('/api/v1',''),{cookie});assert.equal(image.status,200);assert.equal(image.headers.get('content-type'),'image/webp');assert.equal((await sharp(Buffer.from(image.data)).metadata()).width,800);assert.equal((await request(photo.replace('/api/v1',''))).status,401);});
- await check('other members cannot reference or read private uploads',async()=>{const r=await request('/auth/register',{method:'POST',body:{...input,email:'other@example.test'}});otherCookie=r.cookie;assert.equal((await request('/member/profile',{method:'PUT',cookie:otherCookie,body:{photo}})).status,400);assert.equal((await request(photo.replace('/api/v1',''),{cookie:otherCookie})).status,404);assert.equal((await request('/member/profile',{method:'PUT',cookie,body:{photo}})).status,200);});
- await check('invalid file MIME rejected',async()=>{const form=new FormData();form.append('file',new Blob(['<script>bad</script>'],{type:'image/svg+xml'}),'bad.svg');assert.equal((await request('/media',{method:'POST',cookie,body:form})).status,400);});
- await check('admin draft stays private; publishing creates opportunity',async()=>{const registered=await request('/auth/register',{method:'POST',body:{...input,email:'admin@example.test'}});await mongoose.connection.collection('accounts').updateOne({email:'admin@example.test'},{$set:{role:'SUPER_ADMIN'}});adminCookie=registered.cookie;const draft=await request('/admin/content/casting',{method:'POST',cookie:adminCookie,body:{title:'Integration casting',slug:'integration-casting',status:'Open',published:false}});assert.equal(draft.status,201,JSON.stringify(draft.data));opportunityId=draft.data._id;assert.equal((await request('/content/casting')).data.length,0);assert.equal((await request(`/admin/content/casting/${opportunityId}`,{method:'PUT',cookie:adminCookie,body:{title:'Integration casting',slug:'integration-casting',status:'Open',published:true}})).status,200);assert.equal((await request('/content/casting')).data.length,1);});
- await check('application saved once and admin-only notes stay private',async()=>{const body={opportunityId,coverNote:'I would like to apply for this integration test opportunity.'};const r=await request('/member/applications',{method:'POST',cookie,body});assert.equal(r.status,201,JSON.stringify(r.data));applicationId=r.data._id;assert.equal((await request('/member/applications',{method:'POST',cookie,body})).status,409);assert.equal((await request(`/admin/applications/${applicationId}`,{method:'PATCH',cookie:adminCookie,body:{status:'Shortlisted',adminNotes:'Private note'}})).status,200);const applications=(await request('/member/applications',{cookie})).data;assert.equal(applications[0].status,'Shortlisted');assert.equal(applications[0].adminNotes,undefined);});
- await check('closed casting rejects new application',async()=>{await request(`/admin/content/casting/${opportunityId}`,{method:'PUT',cookie:adminCookie,body:{title:'Integration casting',slug:'integration-casting',status:'Closed',published:true}});assert.equal((await request('/member/applications',{method:'POST',cookie:otherCookie,body:{opportunityId,coverNote:'Another test member application with a cover note.'}})).status,400);});
- await check('contact persists valid submissions',async()=>{assert.equal((await request('/contact',{method:'POST',body:{name:'Test sender',email:'sender@example.test',subject:'Integration',message:'An integration test message.'}})).status,201);assert.equal(await mongoose.connection.collection('contacts').countDocuments(),1);});
- await check('password reset is one-use and revokes sessions',async()=>{const r=await request('/auth/forgot-password',{method:'POST',body:{email:input.email}});assert.equal(r.status,201);const outbox=join(directory,'.local','mail');let token;for(const name of await readdir(outbox)){const mail=JSON.parse(await readFile(join(outbox,name),'utf8'));if(mail.to===input.email&&mail.subject==='Reset your password')token=mail.text.match(/token=([a-f0-9]{64})/)[1];}assert.ok(token);const body={token,password:'Changed-pass-123',confirmPassword:'Changed-pass-123'};assert.equal((await request('/auth/reset-password',{method:'POST',body})).status,201);assert.equal((await request('/auth/reset-password',{method:'POST',body})).status,400);assert.equal((await request('/auth/me',{cookie})).status,401);const login=await request('/auth/login',{method:'POST',body:{email:input.email,password:'Changed-pass-123',remember:true}});assert.equal(login.status,201);assert.match(login.headers.get('set-cookie'),/Max-Age/);cookie=login.cookie;});
- await check('logout invalidates server session',async()=>{assert.equal((await request('/auth/logout',{method:'POST',cookie})).status,201);assert.equal((await request('/auth/me',{cookie})).status,401);});
- console.log(`${count} integration checks passed.`);
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import assert from "node:assert/strict";
+import mongoose from "mongoose";
+
+const directory = await mkdtemp(join(tmpdir(), "mdadu-backend-v2-"));
+const database = `mdadu_v2_test_${Date.now()}`;
+const uri = `mongodb://127.0.0.1:27017/${database}`;
+const base = "http://127.0.0.1:18888/api/v1";
+const child = spawn(process.execPath, [resolve("apps/api/dist/main.js")], {
+  cwd: directory,
+  env: {
+    ...process.env,
+    NODE_ENV: "test",
+    PORT: "18888",
+    MONGODB_URI: uri,
+    FRONTEND_URL: "http://localhost:3333",
+    COOKIE_SECRET: "integration_cookie_secret_that_is_long_enough_123456789",
+    STORAGE_DRIVER: "local",
+    SWAGGER_ENABLED: "false",
+    MONGODB_AUTO_INDEX: "true",
+    GENERAL_RATE_LIMIT_PER_MINUTE: "1000",
+  },
+  stdio: ["ignore", "pipe", "pipe"],
+});
+let output = "";
+child.stdout.on("data", (x) => { output += x; });
+child.stderr.on("data", (x) => { output += x; });
+
+const jar = () => ({ cookies: new Map(), csrf: null });
+function saveCookies(response, state) {
+  const values = typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [response.headers.get("set-cookie")].filter(Boolean);
+  for (const header of values) {
+    const pair = header.split(";")[0];
+    const i = pair.indexOf("=");
+    if (i < 1) continue;
+    const name = pair.slice(0, i), value = pair.slice(i + 1);
+    if (value) state.cookies.set(name, value); else state.cookies.delete(name);
+  }
+}
+async function request(path, { method = "GET", body, state, csrf = true, origin } = {}) {
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (state?.cookies?.size) headers.Cookie = [...state.cookies].map(([k, v]) => `${k}=${v}`).join("; ");
+  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) headers["X-CSRF-Token"] = state.csrf;
+  if (origin) headers.Origin = origin;
+  const response = await fetch(base + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  if (state) saveCookies(response, state);
+  const data = (response.headers.get("content-type") ?? "").includes("json") ? await response.json() : await response.arrayBuffer();
+  if (state && data && typeof data === "object" && typeof data.csrfToken === "string") state.csrf = data.csrfToken;
+  return { status: response.status, data, headers: response.headers };
+}
+
+try {
+  let ready = false;
+  for (let i = 0; i < 80; i++) {
+    if (child.exitCode !== null) throw new Error(output);
+    try { if ((await request("/health")).status === 200) { ready = true; break; } } catch {}
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  assert.ok(ready, output);
+  await mongoose.connect(uri);
+
+  const member = jar(), admin = jar();
+  const memberInput = { name: "Integration Member", email: "member@example.test", mobile: "+919999999999", password: "Integration-pass-123", confirmPassword: "Integration-pass-123" };
+  let r = await request("/auth/register", { method: "POST", body: memberInput, state: member });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  assert.ok(r.data.csrfToken);
+  const memberId = r.data.id;
+
+  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member, csrf: false });
+  assert.equal(r.status, 403);
+  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+
+  r = await request("/auth/register", { method: "POST", body: { ...memberInput, name: "Admin", email: "admin@example.test", mobile: "+918888888888" }, state: admin });
+  assert.equal(r.status, 201);
+  await mongoose.connection.collection("accounts").updateOne({ _id: new mongoose.Types.ObjectId(r.data.id) }, { $set: { role: "SUPER_ADMIN", verified: true } });
+
+  r = await request("/admin/projects", { method: "POST", state: admin, body: { title: "Integration Project", slug: "integration-project", type: "Short Film", status: "Pre-production", published: true } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const projectId = r.data._id;
+
+  r = await request("/admin/castings", { method: "POST", state: admin, body: { title: "Lead Actor", slug: "lead-actor", projectId, role: "Lead Actor", category: "Acting", status: "Open", published: true, deadline: new Date(Date.now() + 86400000).toISOString() } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const castingId = r.data._id;
+
+  r = await request("/member/applications", { method: "POST", state: member, body: { opportunityId: castingId, opportunityType: "CASTING", coverNote: "I would like to apply for this integration casting opportunity." } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const applicationId = r.data._id;
+
+  r = await request(`/admin/applications/${applicationId}`, { method: "PATCH", state: admin, body: { status: "Shortlisted", adminNotes: "Private note" } });
+  assert.equal(r.status, 200);
+  r = await request("/member/applications", { state: member });
+  assert.equal(r.data.items[0].status, "Shortlisted");
+  assert.equal(r.data.items[0].adminNotes, undefined);
+
+  r = await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
+  assert.equal(r.status, 200);
+  r = await request("/talent?city=Indore&profession=Actor");
+  assert.equal(r.status, 200);
+  assert.ok(r.data.items.some((x) => x.id === memberId));
+  assert.equal(r.data.items.find((x) => x.id === memberId).email, undefined);
+
+  r = await request("/admin/dashboard", { state: admin });
+  assert.equal(r.status, 200);
+  assert.ok(r.data.metrics.applications >= 1);
+
+  console.log("PASS backend V2 integration smoke test");
 } finally {
- child.kill('SIGTERM');if(child.exitCode===null)await Promise.race([once(child,'exit'),new Promise(resolve=>setTimeout(resolve,3000))]);if(child.exitCode===null)child.kill('SIGKILL');
- if(mongoose.connection.readyState===1){assert.match(mongoose.connection.name,/^mdadu_test_\d+$/);await mongoose.connection.dropDatabase();await mongoose.disconnect();}
- await rm(directory,{recursive:true,force:true});
+  child.kill("SIGTERM");
+  if (child.exitCode === null) await Promise.race([once(child, "exit"), new Promise((r) => setTimeout(r, 3000))]);
+  if (child.exitCode === null) child.kill("SIGKILL");
+  if (mongoose.connection.readyState === 1) { await mongoose.connection.dropDatabase(); await mongoose.disconnect(); }
+  await rm(directory, { recursive: true, force: true });
 }

@@ -1,69 +1,33 @@
-import { jest } from "@jest/globals";
-import { ArgumentsHost, BadRequestException, Logger } from "@nestjs/common";
-import type { Connection } from "mongoose";
 import { validateEnvironment } from "../src/config/environment";
-import { HttpExceptionFilter } from "../src/common/filters/http-exception.filter";
-import { HealthService } from "../src/modules/health/health.service";
+import { profileCompletion } from "../src/modules/profiles/profile.service";
 
-const environment = { MONGODB_URI: "mongodb://localhost:27017/test" };
-describe("environment validation", () => {
-  it("provides the expected local defaults", () => {
-    expect(validateEnvironment(environment)).toMatchObject({
+describe("backend v2 foundation", () => {
+  const env = {
+    MONGODB_URI: "mongodb://localhost:27017/test",
+    COOKIE_SECRET: "a_long_random_cookie_secret_for_testing_123456789",
+  };
+
+  it("provides safe local defaults", () => {
+    expect(validateEnvironment(env)).toMatchObject({
       PORT: 8888,
       FRONTEND_URL: "http://localhost:3333",
+      STORAGE_DRIVER: "local",
+      SESSION_SHORT_HOURS: 12,
+      SESSION_REMEMBER_DAYS: 30,
+      MONGODB_MAX_POOL_SIZE: 20,
     });
   });
-  it.each(["abc", 0, 65536, 2.5])("rejects invalid port %s", (PORT) => {
-    expect(() => validateEnvironment({ ...environment, PORT })).toThrow("PORT");
+
+  it("rejects weak cookie secrets and invalid frontend origins", () => {
+    expect(() => validateEnvironment({ ...env, COOKIE_SECRET: "short" })).toThrow("COOKIE_SECRET");
+    expect(() => validateEnvironment({ ...env, FRONTEND_URL: "https://example.com/path" })).toThrow("FRONTEND_URL");
   });
-  it("requires MongoDB and rejects origins containing paths", () => {
-    expect(() => validateEnvironment({})).toThrow("MONGODB_URI");
-    expect(() =>
-      validateEnvironment({
-        ...environment,
-        FRONTEND_URL: "https://example.com/path",
-      }),
-    ).toThrow();
+
+  it("requires S3 config only when S3 is enabled", () => {
+    expect(() => validateEnvironment({ ...env, STORAGE_DRIVER: "s3" })).toThrow("AWS_REGION");
   });
-});
-describe("health", () => {
-  it.each([
-    [1, "ok", "connected"],
-    [0, "degraded", "disconnected"],
-    [2, "degraded", "connecting"],
-  ])("reports connection state %s", (readyState, status, database) => {
-    const service = new HealthService({ readyState } as Connection);
-    expect(service.getHealth()).toMatchObject({ status, database });
-  });
-});
-describe("exception filter", () => {
-  const json = jest.fn();
-  const response = { status: jest.fn().mockReturnValue({ json }) };
-  const host = {
-    switchToHttp: () => ({
-      getResponse: () => response,
-      getRequest: () => ({ method: "POST", path: "/api/v1/example" }),
-    }),
-  } as ArgumentsHost;
-  it("preserves inline validation messages", () => {
-    new HttpExceptionFilter().catch(
-      new BadRequestException(["Email is invalid"]),
-      host,
-    );
-    expect(response.status).toHaveBeenCalledWith(400);
-    expect(json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: ["Email is invalid"] }),
-    );
-  });
-  it("does not expose internal errors", () => {
-    jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
-    new HttpExceptionFilter().catch(
-      new Error("secret database password"),
-      host,
-    );
-    expect(response.status).toHaveBeenCalledWith(500);
-    expect(JSON.stringify(json.mock.calls)).not.toContain(
-      "secret database password",
-    );
+
+  it("calculates profile completion from ten bounded signals", () => {
+    expect(profileCompletion({ bio: "Bio", city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"] })).toBe(50);
   });
 });

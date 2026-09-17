@@ -1,16 +1,1 @@
-import { Injectable, Logger, NestMiddleware } from "@nestjs/common";
-import { NextFunction, Request, Response } from "express";
-
-@Injectable()
-export class RequestLoggerMiddleware implements NestMiddleware {
-  private readonly logger = new Logger("HTTP");
-  use(request: Request, response: Response, next: NextFunction) {
-    const started = performance.now();
-    response.on("finish", () => {
-      this.logger.log(
-        `${request.method} ${request.path} ${response.statusCode} ${Math.round(performance.now() - started)}ms`,
-      );
-    });
-    next();
-  }
-}
+import{Injectable,Logger,NestMiddleware}from"@nestjs/common";import type{NextFunction,Request,Response}from"express";import{randomUUID}from"node:crypto";@Injectable()export class RequestLoggerMiddleware implements NestMiddleware{private readonly logger=new Logger("HTTP");use(request:Request,response:Response,next:NextFunction){const started=performance.now();const requestId=randomUUID();(request as Request&{requestId?:string}).requestId=requestId;response.setHeader("X-Request-Id",requestId);response.on("finish",()=>this.logger.log(`${requestId} ${request.method} ${request.path} ${response.statusCode} ${Math.round(performance.now()-started)}ms`));next()}}
