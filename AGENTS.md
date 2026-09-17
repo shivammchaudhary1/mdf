@@ -6,157 +6,238 @@ This repository is the source of truth for the M. Dadu Films Digital Platform.
 
 Before changing code, read these in order:
 
-1. `docs/progress.md` — canonical development checklist and stage order.
-2. `docs/DESIGN_SYSTEM.md` — visual source of truth and reference mapping.
-3. `docs/ARCHITECTURE.md` — technical boundaries, module direction and ports.
-4. `docs/CODEX_WORKFLOW.md` — execution and verification workflow.
-5. `docs/DYNAMIC_CONTENT_RULES.md` — static vs database-driven content.
-6. The nearest nested `AGENTS.md` for the code being edited.
-7. For UI work, inspect the relevant images in `docs/references/ui/`.
+1. `CODEX_START_HERE.md`
+2. `docs/CODEX_COMPLETION_PLAN.md`
+3. `docs/progress.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/CODEX_WORKFLOW.md`
+6. `docs/DYNAMIC_CONTENT_RULES.md`
+7. the nearest nested `AGENTS.md`
 
-## Current checkpoint
+For the current completion phase, visual reference files are for regression comparison only. Do not redesign the UI.
 
-The repository has been flattened and cleaned. The active priority is UI/design alignment and
-foundation hardening before later business-feature stages continue.
+## Current checkpoint — 2026-09-18
 
-Do not jump to Stage 7+ simply because routes or backend primitives already exist. Finish the
-open responsive/visual QA items in Stages 2–3 first unless the user explicitly requests a later
-stage.
+The approved frontend UI is now **frozen**.
 
-Visual approval is a human review gate. Codex must never mark a visual-approval checklist item
-complete on its own.
+Already merged into `master`:
+- public website redesign,
+- authentication UI,
+- member dashboard UI,
+- Super Admin dashboard UI,
+- admin interactions,
+- Backend Core V2,
+- Mongoose 9 query-filter compile fix.
+
+The current task is to finish functionality, integration, tests, security verification and documentation **without changing the approved UI**.
+
+Known first blocker at this checkpoint:
+- GitHub Actions `npm run check` is failing on two `@typescript-eslint/no-explicit-any` errors in
+  `apps/api/src/modules/talent/talent.service.ts`.
+
+Member/admin screens still contain demo/fixture-driven data in places. Replace demo behavior/data with real API data while preserving the exact visual structure.
+
+## Absolute UI freeze
+
+Unless the user explicitly asks for a visual change, Codex MUST NOT:
+
+- edit CSS files for visual purposes,
+- alter colors, spacing, typography, borders, shadows, radii, imagery or responsive breakpoints,
+- redesign components,
+- reorder visible sections,
+- rename or remove existing visual `className` values,
+- change the visible layout,
+- replace the logo,
+- change approved visual copy merely for style,
+- introduce a new component library or design system,
+- make dashboard/public/auth screens look different.
+
+Allowed frontend work:
+- API calls,
+- loading/error/data state wiring using existing components/classes,
+- form submission logic,
+- authentication/session logic,
+- type definitions,
+- service functions,
+- state management,
+- mapping API responses into the existing view models,
+- accessibility/semantic fixes only when they do not alter visual appearance,
+- removing demo fixtures after equivalent real API data is connected.
+
+If a functional fix appears to require a visual change, stop and document the blocker instead of changing the UI.
 
 ## Product constraints
 
 - Version: `1.0.0`.
 - Roles: only `SUPER_ADMIN` and `USER`.
-- Frontend: Next.js + TypeScript + Tailwind CSS.
+- Frontend: Next.js + React + TypeScript + Tailwind CSS.
 - Backend: NestJS + Node.js `24.11.1`.
-- API: REST only. Do not introduce GraphQL in V1.
+- API: REST only.
 - Database: MongoDB + Mongoose.
+- Auth: opaque server-side sessions in signed `httpOnly` cookies.
+- CSRF protection is required for authenticated mutations.
 - Frontend local port: `3333`.
 - Backend local port: `8888`.
 - No Redis in V1.
 - No AWS SES in V1.
+- No GraphQL in V1.
 - No microservices/Kubernetes in V1.
-- Production deployment is Stage 18 only. Do not deploy early.
-- User mobile number is collected but is not OTP-verified in V1.
+- No mobile OTP in V1.
+- Production deployment is Stage 18 only.
 
-## Design source of truth
+## Current implementation direction
 
-Use this priority order:
+Backend is a NestJS modular monolith.
 
-1. Final logo assets.
-2. Approved screenshots in `docs/references/ui/`.
-3. `docs/DESIGN_SYSTEM.md`.
-4. Existing components that already match those references.
-
-Do not treat an older implementation as visually correct merely because it already exists.
-Preserve working behavior/data contracts while improving presentation.
-
-The intended visual system is:
-- cinematic, high-impact homepage,
-- white/light editorial inner pages with generous whitespace,
-- clean light member/admin workspaces,
-- dark contrast used deliberately, not across every screen,
-- cinematic red as the primary action/accent,
-- subtle warm gold only as a premium secondary accent,
-- Playfair Display for editorial headings and Inter for body/UI.
-
-Do not:
-- repeat the same three-card grid for every homepage section,
-- invent stock/remote imagery,
-- use reference screenshots as production website imagery,
-- add arbitrary colors when a design token exists,
-- make dashboards dense or overly dark,
-- use decorative effects that reduce readability.
-
-## Mandatory work loop
-
-For every task:
-
-1. Inspect `docs/progress.md`.
-2. Work on the current active stage before later stages unless explicitly instructed otherwise.
-3. Pick the next unchecked, non-blocked item.
-4. Inspect existing code and relevant UI references before editing.
-5. Preserve working business logic and API contracts unless the task requires changing them.
-6. Implement the smallest complete slice.
-7. Run relevant lint/typecheck/tests/build checks.
-8. Mark an item `[x]` only when implementation and verification both exist.
-9. Mark missing real content `[!]` with a short reason; do not invent it.
-10. Never mark human visual approval as complete without user confirmation.
-
-## Content and data rules
-
-- Administrator-editable business content must become dynamic/database-driven.
-- Do not hardcode production projects, castings, team members, blog posts, gallery items, GST,
-  registration details, phone numbers, addresses, social links, or homepage marketing copy inside
-  route components.
-- Stable technical constants belong in `config/`, constants or enums.
-- Development content belongs only in clearly named placeholder/demo files.
-- When real imagery is missing, use the shared placeholder system.
-- Never invent legal/company data.
-
-## Backend direction
-
-The backend is a NestJS modular monolith.
-
-`platform/` is a transitional consolidation layer from the foundation build. Do not keep adding
-unrelated business responsibilities to it indefinitely.
-
-When new domain functionality is implemented, prefer the appropriate domain module:
-- users,
+Dedicated domains:
+- auth,
 - profiles,
+- media,
 - projects,
 - castings,
 - applications,
 - talent/saved lists,
-- posts/blog,
-- team,
 - contact,
-- settings,
 - admin.
 
-Simple CMS-like content (for example gallery/BTS/shows) may share generic content infrastructure
-when that genuinely reduces duplication. Projects, castings and applications should not be forced
-into a generic CMS model when their business rules diverge.
+`platform/` is only lightweight CMS infrastructure for:
+- pages,
+- blog,
+- team,
+- gallery,
+- behind-the-scenes,
+- shows,
+- settings,
+- legal.
 
-Refactor incrementally while touching a domain; do not perform a risky big-bang backend rewrite.
+Do not move projects, castings, applications, profiles or talent lists back into one generic mega-schema.
 
-## UI/UX implementation rules
+Use:
+- MongoDB `ObjectId` relationships,
+- pagination for list APIs,
+- bounded arrays/string lengths,
+- `.lean()` for read-only Mongoose reads where appropriate,
+- DTO validation,
+- role/ownership guards,
+- audit logs for meaningful admin mutations,
+- rate limiting on sensitive routes,
+- `MediaService`/`StorageAdapter` for media.
 
-- Preserve the finalized logo.
-- Build mobile and desktop together.
-- Prefer semantic design tokens from `globals.css`.
-- Reuse shared UI primitives.
-- Every async action must expose loading/success/error feedback.
-- Use toast notifications for mutation feedback.
-- Use confirmation dialogs for destructive actions.
-- Do not use browser `alert()` or `confirm()`.
-- Show inline validation near invalid fields.
-- Intentionally design loading, empty and error states.
-- Keep accessibility focus states and reduced-motion behavior.
+## Mandatory completion loop
 
-## Safety and quality
+For each remaining checklist item:
 
-- Never commit `.env` files or secrets.
-- Do not weaken TypeScript strictness.
-- Avoid `any`; document unavoidable use.
-- Do not bypass dependency conflicts with `--force` or `--legacy-peer-deps`.
-- Do not delete user work unnecessarily.
-- Avoid destructive Git commands.
-- Keep controllers thin and business logic in services.
-- Add/adjust tests for meaningful business logic.
-- Keep Swagger current.
+1. Read `docs/CODEX_COMPLETION_PLAN.md`.
+2. Read the corresponding section in `docs/progress.md`.
+3. Inspect current implementation before editing.
+4. Confirm whether it is:
+   - already implemented and only needs verification,
+   - partially implemented,
+   - genuinely missing.
+5. Do not rewrite working code just because the checklist was stale.
+6. Implement the smallest safe functional slice.
+7. Preserve current rendered UI.
+8. Add or update tests.
+9. Run the relevant checks.
+10. Mark `[x]` only after implementation + verification pass.
+11. Use `[~]` for implemented/partial work awaiting verification.
+12. Use `[!]` when blocked by real company content, credentials or human visual approval.
+13. Continue to another independent task when blocked.
+14. Do not start Stage 18 deployment.
+
+## Quality gates
+
+Before calling a technical slice complete, run the relevant subset.
+
+Full repository quality gate:
+
+```bash
+npm run check
+```
+
+With MongoDB already running, full local verification:
+
+```bash
+npm run verify
+```
+
+Convenience local verification with default Docker MongoDB:
+
+```bash
+npm run verify:local
+```
+
+MongoDB 7 fallback for hosts where MongoDB 8 Docker cannot start:
+
+```bash
+npm run db:local
+npm run verify
+```
+
+Do not mark Stage 17 complete until the integration suite and manual UAT checklist are complete.
+
+## Dependency and license policy
+
+Avoid new dependencies when the platform or existing dependency can do the job.
+
+If a new dependency is truly needed:
+- prefer permissive licenses such as MIT, Apache-2.0, BSD-2-Clause or BSD-3-Clause,
+- do not add GPL/AGPL/SSPL/proprietary dependencies without explicit user approval,
+- verify the package license and maintenance state before adding it,
+- document the dependency and license in `docs/THIRD_PARTY_LICENSE_POLICY.md`,
+- never use `--force` or `--legacy-peer-deps`.
+
+This dependency policy does **not** relicense the M. Dadu Films source repository itself.
+
+## Security
+
+Never:
+- commit `.env` or real credentials,
+- expose password hashes/session digests/Google subject IDs/IP hashes/internal notes,
+- log cookies, auth tokens or request bodies containing secrets,
+- weaken TypeScript strictness,
+- bypass validation,
+- use destructive Git commands,
+- force-push.
+
+Preserve:
+- signed `httpOnly` cookies,
+- CSRF,
+- origin/CORS checks,
+- Helmet,
+- session revocation,
+- ownership/admin guards,
+- upload restrictions,
+- rate limiting.
+
+## Git workflow
+
+Start completion work from the latest `master` on a new feature branch.
+
+Recommended Codex branch:
+
+```text
+feature/complete-v1-functional-integration
+```
+
+Do not commit directly to `master`.
+Do not deploy.
+Do not delete old feature branches as part of this work.
 
 ## Definition of done
 
-A checklist item is complete only when:
-- code exists,
-- responsive behavior is handled where relevant,
-- loading/error/empty states are handled,
-- relevant checks pass,
-- no fake production data was introduced,
-- documentation/checklist state is accurate.
+V1 technical completion before deployment means:
 
-A visual-approval item additionally requires explicit user approval.
+- GitHub CI is green,
+- `npm run check` passes,
+- `npm run test:integration` passes with MongoDB running,
+- member screens use real APIs instead of demo behavior/data,
+- admin screens use real APIs instead of demo behavior/data,
+- public dynamic domains are verified against real APIs,
+- all required V1 backend APIs exist and are tested,
+- security checklist is verified,
+- real-content/credential blockers are clearly marked `[!]`,
+- `docs/progress.md` accurately reflects reality,
+- README commands are accurate,
+- no approved UI has been visually changed,
+- Stage 18 remains untouched.

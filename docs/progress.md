@@ -1,901 +1,491 @@
-﻿# M. Dadu Films Digital Platform â€” Development Progress
+# M. Dadu Films Digital Platform — Development Progress
 
 **Version:** 1.0.0  
-**Prepared for:** M. Dadu Films  
-**Prepared by:** Shivam Chaudhary  
-**Status:** Planning â†’ Development  
-**Deployment:** Final stage only  
-**Primary rule:** Every stage must be testable before moving to the next stage.
+**Checkpoint:** 2026-09-18  
+**Deployment:** Stage 18 only  
+**Canonical execution plan:** `docs/CODEX_COMPLETION_PLAN.md`
 
-> **Codex checklist rule:** This file is the canonical checklist. Codex may mark an item `[x]` only after implementation and relevant verification pass. If blocked by missing real content, use `[!]` plus a reason and continue another independent task. Do not mark deployment work before Stage 18.
+## Checklist rules
 
+- `[ ]` not started / still missing
+- `[~]` implemented or partially implemented, but final verification/integration is pending
+- `[x]` implemented and verified
+- `[!]` blocked by real content, credentials or human approval
 
----
+Never mark `[x]` from code presence alone.
 
-## Progress Legend
+## Current repository checkpoint
 
-- [ ] Not started
-- [~] In progress
-- [x] Completed
-- [!] Blocked / needs input
+Merged into `master`:
+- [x] Public website redesign
+- [x] Authentication UI redesign
+- [x] Member dashboard UI
+- [x] Super Admin dashboard UI
+- [x] Admin interactions
+- [x] Backend Core V2 modularization
+- [x] Mongoose 9 query-filter compile fix
+- [x] Secure opaque cookie/session architecture added
+- [x] CSRF/origin/rate-limit security foundation added
+- [x] ObjectId-based domain relationships added
+- [x] Local/S3 media abstraction added
 
----
-
-# Stage 0 â€” Project Inputs & Asset Collection
-
-> 2026-09-17 UI alignment checkpoint: repository cleanup/flattening is complete.
-> The active priority is Stage 2–3 visual alignment and responsive QA using
-> docs/DESIGN_SYSTEM.md plus docs/references/ui/.
-> Preserve working auth/profile/media/API behavior while refining presentation.
-> Do not continue into later feature stages unless explicitly requested.
-> Human visual approval must not be marked complete by Codex.
-## Goal
-Collect everything required before coding so development does not stop later.
-
-### Required from M. Dadu Films
-- [x] Final logo files
-- [!] Company legal name â€” blocked: input template unfilled; verified legal name not supplied.
-- [!] GST number â€” blocked: real GST number not supplied.
-- [!] Company registration / CIN details â€” blocked: verified registration details not supplied.
-- [!] Official email address â€” blocked: verified production content not supplied.
-- [!] Phone number â€” blocked: verified production content not supplied.
-- [!] Office / business address â€” blocked: verified production content not supplied.
-- [!] Social media links â€” blocked: verified production content not supplied.
-- [!] YouTube channel link â€” blocked: verified production content not supplied.
-- [!] Instagram profile link â€” blocked: verified production content not supplied.
-- [!] Existing project names and details â€” blocked: verified production content not supplied.
-- [!] Running project details â€” blocked: verified production content not supplied.
-- [!] Upcoming project details â€” blocked: verified production content not supplied.
-- [!] Team member names, roles, photos, bios â€” blocked: verified production content not supplied.
-- [!] Gallery / behind-the-scenes images â€” blocked: verified production content not supplied.
-- [!] Hero/banner images â€” blocked: verified production content not supplied.
-- [!] Casting / vacancy sample data â€” blocked: verified production content not supplied.
-- [!] Blog/article sample content â€” blocked: verified production content not supplied.
-- [!] Contact details â€” blocked: verified production content not supplied.
-- [!] Privacy Policy content or approval to use a basic draft â€” blocked: verified production content not supplied.
-- [!] Terms & Conditions content or approval to use a basic draft â€” blocked: verified production content not supplied.
-
-### Exit Criteria
-- [ ] Core company details received
-- [x] Enough images/content available to build the first frontend version
+Current known blockers/work:
+- [ ] GitHub CI green — currently blocked by two `no-explicit-any` lint errors in `talent.service.ts`
+- [ ] Final merged-master integration suite passes
+- [ ] Member UI fully connected to real APIs
+- [ ] Admin UI fully connected to real APIs
+- [ ] All demo dashboard behavior/data removed after real API wiring
+- [ ] Stage 17 UAT complete
+- [ ] Stage 18 deployment — intentionally not started
 
 ---
 
-# Stage 1 â€” Repository & Project Foundation
+# Stage 0 — Project Inputs & Asset Collection
 
-> Starter monorepo created. Install dependencies and run locally before marking this stage complete.
+- [x] Final logo available
+- [!] Company legal name
+- [!] GST number
+- [!] CIN/registration details
+- [!] Official email
+- [!] Phone
+- [!] Address
+- [!] Social links
+- [!] YouTube/Instagram links
+- [!] Final project/casting content
+- [!] Team details/assets
+- [!] Gallery/BTS assets
+- [!] Blog content
+- [!] Privacy/Terms final content
 
-## Goal
-Create a clean development setup for frontend and backend.
-
-### Frontend
-- [x] Create Next.js project
-- [x] Enable TypeScript
-- [x] Configure Tailwind CSS
-- [x] Configure global theme variables
-- [x] Add typography system
-- [x] Add brand colors
-- [x] Add reusable layout structure
-- [x] Add environment configuration
-- [x] Add ESLint / formatting rules
-
-### Backend
-- [x] Create NestJS project
-- [x] Use Node.js 24.11.1
-- [x] Configure TypeScript
-- [x] Configure environment variables
-- [x] Configure MongoDB connection
-- [x] Configure Mongoose
-- [x] Configure Swagger / OpenAPI
-- [x] Add validation pipeline
-- [x] Add global exception handling
-- [x] Add request logging
-
-### Git
-- [x] Create repository structure
-- [x] Add `.gitignore`
-- [x] Add `.env.example`
-- [x] Add README
-- [x] Add branch strategy
-- [x] Add initial commits
-
-### Testing
-- [x] Frontend runs locally
-- [x] Backend runs locally
-- [x] Backend health API works
-- [x] MongoDB connection works
-- [x] Swagger opens correctly
-
-### Exit Criteria
-- [x] Frontend + backend boot successfully
-- [x] Basic development environment is stable
+**Stage status:** `[~]` development can continue, but real production content remains blocked.
 
 ---
 
-# Stage 2 â€” Design System & Reusable UI
+# Stage 1 — Repository & Foundation
 
-## Goal
-Convert the finalized visual direction into reusable components.
+- [x] Monorepo
+- [x] Next.js + TypeScript frontend
+- [x] NestJS + TypeScript backend
+- [x] MongoDB + Mongoose
+- [x] Swagger
+- [x] Validation/error handling
+- [x] Request logging
+- [x] Environment examples
+- [x] Docker MongoDB workflow
+- [x] GitHub Actions quality workflow exists
 
-### Design System
-- [x] Final logo integration
-- [x] White/light theme foundation
-- [x] Cinematic red accent
-- [x] Black/charcoal text system
-- [x] Serif heading font
-- [x] Sans-serif UI/body font
-- [x] Spacing scale
-- [x] Border radius system
-- [x] Shadow system
-- [x] Button variants
-- [x] Form styles
-- [x] Card styles
-- [x] Badge styles
-- [x] Status colors
-
-### Shared Components
-- [x] Navbar
-- [x] Mobile navbar
-- [x] Footer
-- [x] Section heading
-- [x] CTA buttons
-- [x] Project card
-- [x] Casting card
-- [x] Blog card
-- [x] Team card
-- [x] Gallery card
-- [x] Empty state
-- [x] Loading state
-- [x] Error state
-- [x] Modal / confirmation dialog
-
-### Responsive Testing
-- [ ] Mobile
-- [ ] Tablet
-- [ ] Laptop
-- [ ] Desktop
-
-### Exit Criteria
-- [ ] Reusable component library is ready
-- [ ] Main layouts match approved UI direction
+**Stage status:** `[x]` foundation implemented. Current CI must be returned to green as part of completion work.
 
 ---
 
-# Stage 3 â€” Public Website
+# Stage 2 — Design System & Reusable UI
 
-## Goal
-Build all public-facing pages first.
+- [x] Approved visual system implemented
+- [x] Shared visual components implemented
+- [~] Responsive/manual visual QA still requires human confirmation
 
-### Pages
-- [x] Home
-- [x] About Us
-- [x] Projects
-- [x] Project Details
-- [x] Casting / Vacancies
-- [x] Casting Details
-- [x] Gallery
-- [x] Behind the Scenes
-- [x] Shows / Media
-- [x] Team
-- [x] Blog / Latest Posts
-- [x] Blog Details
-- [x] Contact Us
+**Stage status:** `[~]` UI is now frozen. Codex must not redesign it.
+
+---
+
+# Stage 3 — Public Website
+
+- [x] Public route set implemented
+- [x] Approved public UI implemented
+- [~] Dynamic API/data verification pending for all relevant domains
+- [!] Real GST/CIN/contact/social/company content missing
+- [~] Final responsive/browser/manual review pending
+
+**Stage status:** `[~]`
+
+---
+
+# Stage 4 — Authentication
+
+Implemented:
+- [x] Registration
 - [x] Login
-- [x] Sign Up
-
-### Home Page Sections
-- [x] Hero section
-- [x] Brand message
-- [x] Running / upcoming projects
-- [x] Open casting calls
-- [x] Talent community CTA
-- [x] Behind the scenes
-- [x] Shows / media
-- [x] Latest blog posts
-- [x] Why M. Dadu Films
-- [x] Team preview
-- [x] GST / registration trust section
-- [x] Footer
-
-### Content
-- [ ] GST details displayed
-- [ ] Company registration details displayed
-- [ ] Social links
-- [ ] Official contact details
-
-### Testing
-- [ ] All routes work
-- [ ] No broken links
-- [ ] Responsive layouts work
-- [ ] Forms visually validate
-- [ ] Images load efficiently
-- [x] SEO metadata added
-
-### Exit Criteria
-- [ ] Public website complete with static/sample data
-- [~] Visual alignment in progress — final human review is still required
-
----
-
-# Stage 4 â€” Authentication
-
-## Goal
-Allow members to securely create accounts and sign in.
-
-### Features
-- [x] User registration
-- [x] Full name
-- [x] Email
-- [x] Mobile number
-- [x] Password
-- [x] Confirm password
-- [x] Login
-- [x] Logout
+- [x] Logout backend
 - [x] Remember session
-- [x] Forgot password
-- [x] Reset password
-- [x] Secure cookies / token handling
+- [x] Forgot/reset password
 - [x] Password hashing
-- [x] Route protection
-- [x] Role support
+- [x] `USER` and `SUPER_ADMIN`
+- [x] Signed `httpOnly` session-cookie architecture
+- [x] Server-side session revocation
+- [x] CSRF foundation
+- [x] Route/role guard foundation
 
-### Roles
-- [x] `SUPER_ADMIN`
-- [x] `USER`
+Still verify:
+- [ ] Correct final frontend redirects
+- [ ] Real logout from current member/admin UI
+- [ ] Session/device management end to end
+- [ ] Final merged-master integration suite
 
-### Notes
-- [x] Mobile number is required
-- [x] Mobile OTP verification is NOT required in V1
-
-### Testing
-- [x] Registration success
-- [x] Duplicate email blocked
-- [x] Invalid login blocked
-- [x] Protected routes blocked when logged out
-- [ ] Correct redirect after login
-- [x] Logout clears session
-
-### Exit Criteria
-- [ ] Authentication flow stable
-- [ ] Super Admin and User roles work correctly
+**Stage status:** `[~]`
 
 ---
 
-# Stage 5 â€” Member Profile & Portfolio
+# Stage 5 — Member Profile & Portfolio
 
-## Goal
-Allow a registered member to become part of the M. Dadu Films community.
+Implemented foundation:
+- [x] Profile schema/service/API
+- [x] Profile photo/media relationships
+- [x] Portfolio media relationships
+- [x] Resume/document support
+- [x] Profile completion logic
+- [x] Verified-member field/admin control foundation
 
-### Profile
-- [x] Profile photo
-- [x] Full name
-- [x] Mobile number
-- [x] Email
-- [x] Bio
-- [x] City / location
-- [x] Profession / category
-- [x] Skills
-- [x] Languages
-- [x] Experience
-- [x] Availability
-- [x] Social links
-- [x] YouTube / Vimeo links
-- [x] Optional resume/document
+Still complete/verify:
+- [ ] Current member UI uses real profile API everywhere
+- [ ] Portfolio add/remove flow end to end
+- [ ] External video/showreel flow end to end
+- [ ] Settings flow end to end
+- [ ] Public/private profile privacy review
 
-### Portfolio
-- [x] Portfolio photos
-- [x] Portfolio videos via external links
-- [x] Showreel link
-- [x] Previous work
-- [x] Profile completion percentage
-- [x] Edit profile
-- [x] Manage portfolio
-
-### Verification
-- [x] Verified member badge
-- [x] Badge controlled only by Super Admin
-
-### Testing
-- [x] Create profile
-- [x] Edit profile
-- [x] Upload profile photo
-- [ ] Add portfolio images
-- [ ] Add external video links
-- [x] Profile completion calculation works
-
-### Exit Criteria
-- [ ] User profile + portfolio fully usable
+**Stage status:** `[~]`
 
 ---
 
-# Stage 6 â€” Media Upload & Image Optimization
+# Stage 6 — Media Upload & Optimization
 
-## Goal
-Store media efficiently while keeping image quality high.
-
-### Storage
-- [x] Local development storage adapter
-- [x] S3-ready storage abstraction
-- [x] Secure upload validation
+Implemented:
+- [x] Local storage adapter
+- [x] S3-ready adapter
 - [x] File size validation
 - [x] MIME validation
+- [x] Sharp processing
+- [x] WebP variants
+- [x] Profile/thumb/medium/large variants
+- [x] Ownership checks
+- [x] Private/public visibility foundation
 
-### Image Processing
-- [x] Sharp integration
-- [x] WebP conversion
-- [x] Profile image optimization
-- [x] Thumbnail generation
-- [x] Medium image generation
-- [x] Large image generation
-- [ ] Preserve good visual quality
-- [x] Remove unnecessary metadata where appropriate
+Still verify:
+- [ ] Large-image end-to-end upload
+- [ ] Visual quality
+- [ ] Published/shared visibility edge cases
+- [ ] S3 production configuration later in Stage 18
 
-### Target Sizes
-- [x] Profile: approx. 800Ã—800
-- [x] Thumbnail: approx. 400px
-- [x] Portfolio medium: approx. 1200px
-- [x] Gallery large: approx. 1600â€“1920px
-
-### Testing
-- [ ] Large image uploads successfully
-- [x] Compressed version is generated
-- [ ] Output image remains visually high quality
-- [x] Database stores correct media references
-
-### Exit Criteria
-- [ ] Media workflow ready for local development and future S3 deployment
+**Stage status:** `[~]`
 
 ---
 
-# Stage 7 â€” Projects & Casting Management
+# Stage 7 — Projects & Casting Management
 
-## Goal
-Create the core film/project opportunity system.
+Backend implementation exists:
+- [~] Project create/edit/archive
+- [~] Project status/cover/gallery/description/credits/trailer
+- [~] Casting create/edit/close/archive
+- [~] Casting role/category/age/gender/location/shoot date/experience/compensation/deadline/requirements
+- [~] Public list/detail APIs
 
-### Projects
-- [ ] Create project
-- [ ] Edit project
-- [ ] Delete/archive project
-- [ ] Running project
-- [ ] Upcoming project
-- [ ] Completed project
-- [ ] Cover image
-- [ ] Gallery images
-- [ ] Description
-- [ ] Project status
-- [ ] Team / credits
-- [ ] Trailer link
+Still complete:
+- [ ] Admin UI wired to real project APIs
+- [ ] Admin UI wired to real casting APIs
+- [ ] Public list/detail behavior verified
+- [ ] Partial-update validation edge cases verified
+- [ ] Closed casting application rule verified on final master
 
-### Casting Calls
-- [ ] Create casting call
-- [ ] Edit casting call
-- [ ] Close casting call
-- [ ] Role name
-- [ ] Category
-- [ ] Age range
-- [ ] Gender preference
-- [ ] Location
-- [ ] Shoot date
-- [ ] Experience
-- [ ] Compensation text
-- [ ] Application deadline
-- [ ] Requirements
-
-### Testing
-- [ ] Public projects list
-- [ ] Public project details
-- [ ] Public casting list
-- [ ] Public casting details
-- [ ] Closed casting cannot accept applications
-
-### Exit Criteria
-- [ ] Project and casting modules are fully functional
+**Stage status:** `[~]`
 
 ---
 
-# Stage 8 â€” Project Application Workflow
+# Stage 8 — Application Workflow
 
-## Goal
-Allow members to apply to film projects and casting opportunities.
+Backend implementation exists:
+- [~] Apply to project/casting
+- [~] Cover note
+- [~] Portfolio media
+- [~] Showreel
+- [~] Pitch
+- [~] Optional document
+- [~] Submitted/Under Review/Shortlisted/Selected/Rejected statuses
+- [~] Member list/detail
+- [~] Admin list/detail/update
+- [~] Duplicate application rule
 
-### User Application
-- [ ] Apply to project
-- [ ] Apply to casting role
-- [ ] Cover note
-- [ ] Select portfolio images
-- [ ] Add showreel/video link
-- [ ] Script pitch if applicable
-- [ ] Optional document upload
-- [ ] Submit application
+Still complete:
+- [ ] Member UI wired to real application API
+- [ ] Admin UI wired to real application API
+- [ ] Status changes reflected end to end
+- [ ] Email behavior verified
 
-### Statuses
-- [ ] Submitted
-- [ ] Under Review
-- [ ] Shortlisted
-- [ ] Selected
-- [ ] Rejected
-
-### Member Dashboard
-- [ ] My Applications
-- [ ] Application details
-- [ ] Application status
-- [ ] Recent applications
-- [ ] Recommended opportunities
-
-### Testing
-- [ ] User can apply
-- [ ] Duplicate application rules work
-- [ ] Admin receives application in dashboard
-- [ ] Status changes show to user
-
-### Exit Criteria
-- [ ] Complete user-to-admin application flow works
+**Stage status:** `[~]`
 
 ---
 
-# Stage 9 â€” Member Dashboard
+# Stage 9 — Member Dashboard
 
-## Goal
-Create the approved member dashboard experience.
+- [x] Approved member-dashboard UI exists
+- [~] Backend member-dashboard endpoint exists
+- [ ] Replace demo JSON/dashboard values with real API data
+- [ ] Replace demo logout with real logout
+- [ ] Real recent applications
+- [ ] Real opportunities
+- [ ] Real profile completion/verification
+- [ ] Final desktop/mobile functional verification
 
-### Dashboard
-- [ ] Welcome section
-- [ ] Profile completion
-- [ ] Verification status
-- [ ] Profile summary
-- [ ] Portfolio preview
-- [ ] Showreel preview
-- [ ] Recent applications
-- [ ] Recommended projects
-- [ ] Latest M. Dadu Films posts
-- [ ] Quick actions
-
-### Navigation
-- [ ] Dashboard
-- [ ] Explore opportunities
-- [ ] My Profile
-- [ ] My Portfolio
-- [ ] My Applications
-- [ ] Settings
-
-### Mobile
-- [ ] Bottom navigation
-- [ ] Mobile profile UI
-- [ ] Mobile applications UI
-- [ ] Mobile portfolio UI
-
-### Exit Criteria
-- [ ] Member experience works on desktop and mobile
+**Stage status:** `[~]`
 
 ---
 
-# Stage 10 â€” Super Admin Dashboard
+# Stage 10 — Super Admin Dashboard
 
-## Goal
-Create the management system for the entire platform.
+- [x] Approved Super Admin UI exists
+- [~] Backend dashboard metrics/activity exists
+- [~] Backend users/applications/projects/castings management APIs exist
+- [ ] Replace admin demo JSON/fixture values with real APIs
+- [ ] Verify/unverify wired
+- [ ] Suspend/reactivate wired
+- [ ] Application review/status/notes wired
+- [ ] Project/casting management wired
+- [ ] Final desktop/mobile functional verification
 
-### Dashboard Metrics
-- [ ] Total users
-- [ ] Verified members
-- [ ] New members
-- [ ] Open projects
-- [ ] Open casting calls
-- [ ] Total applications
-- [ ] Pending reviews
-- [ ] Recent activity
-
-### User Management
-- [ ] View all users
-- [ ] Search users
-- [ ] View member details
-- [ ] Verify / unverify member
-- [ ] Suspend / reactivate user if required
-
-### Applications
-- [ ] View all applications
-- [ ] View project-wise applications
-- [ ] Filter by status
-- [ ] Update application status
-- [ ] Internal admin notes
-
-### Project Management
-- [ ] Add project
-- [ ] Edit project
-- [ ] Archive project
-- [ ] Manage castings
-
-### Mobile Admin
-- [ ] Admin dashboard mobile view
-- [ ] Users mobile view
-- [ ] Applications mobile view
-- [ ] Projects mobile view
-
-### Exit Criteria
-- [ ] Super Admin can manage the platform without database access
+**Stage status:** `[~]`
 
 ---
 
-# Stage 11 â€” Talent Search, Filters & Saved Lists
+# Stage 11 — Talent Search & Saved Lists
 
-## Goal
-Make the database useful for casting and production decisions.
+Backend implementation exists:
+- [~] Search/name
+- [~] City
+- [~] Gender
+- [~] Age range
+- [~] Profession
+- [~] Skills
+- [~] Languages
+- [~] Experience
+- [~] Availability
+- [~] Verified
+- [~] Saved-list CRUD
+- [~] Add/remove member
+- [~] Optional project association
 
-### Talent Filters
-- [ ] Name
-- [ ] City
-- [ ] Gender
-- [ ] Age / age range
-- [ ] Profession / category
-- [ ] Skills
-- [ ] Languages
-- [ ] Experience
-- [ ] Availability
-- [ ] Verified only
+Current blocker:
+- [ ] Remove two `no-explicit-any` lint errors in `talent.service.ts`
 
-### Saved Talent Lists
-- [ ] Create list
-- [ ] Rename list
-- [ ] Delete list
-- [ ] Add member to list
-- [ ] Remove member from list
-- [ ] Associate list with project optionally
+Still verify:
+- [ ] Public privacy response
+- [ ] Multiple-filter correctness
+- [ ] Saved-list persistence
+- [ ] Admin UI wiring
+- [ ] Large-list query efficiency
 
-### Testing
-- [ ] Filters return correct users
-- [ ] Multiple filters work together
-- [ ] Saved talent lists persist correctly
-
-### Exit Criteria
-- [ ] Admin talent database is usable for real casting work
+**Stage status:** `[~]`
 
 ---
 
-# Stage 12 â€” Blog / News / Content Management
+# Stage 12 — Blog / News CMS
 
-## Goal
-Allow M. Dadu Films to publish weekly content.
+- [~] Lightweight CMS backend includes blog
+- [x] Admin blog UI exists
+- [x] Public blog UI exists
+- [ ] Wire admin blog UI to real API
+- [ ] Verify create/edit/draft/publish/archive
+- [ ] Verify cover/excerpt/rich content/tags/categories
+- [ ] Verify SEO title/description
+- [ ] Verify publish-date requirement
+- [ ] Verify public list/detail/latest posts
 
-### Blog
-- [ ] Create post
-- [ ] Edit post
-- [ ] Draft
-- [ ] Publish
-- [ ] Archive
-- [ ] Cover image
-- [ ] Excerpt
-- [ ] Rich content
-- [ ] Tags / categories
-- [ ] SEO title
-- [ ] SEO description
-- [ ] Publish date
-
-### Public
-- [ ] Blog listing
-- [ ] Blog details
-- [ ] Latest posts on homepage
-- [ ] Share-friendly URLs
-
-### Exit Criteria
-- [ ] Super Admin can publish weekly content without developer help
+**Stage status:** `[~]`
 
 ---
 
-# Stage 13 â€” Gallery, BTS, Shows & Team CMS
+# Stage 13 — Gallery / BTS / Shows / Team CMS
 
-## Goal
-Make all major public content manageable through admin.
+- [~] Lightweight CMS backend foundation exists
+- [x] Admin UI sections exist
+- [x] Public UI sections exist
+- [ ] Wire admin sections to real APIs
+- [ ] Verify gallery upload/category/reorder/delete
+- [ ] Verify BTS category/project relation
+- [ ] Verify shows external links/thumbnails
+- [ ] Verify team CRUD/social/order
+- [ ] Verify public rendering from published API data
 
-### Gallery
-- [ ] Upload images
-- [ ] Categories
-- [ ] Reorder
-- [ ] Delete
-- [ ] Gallery page
-
-### Behind the Scenes
-- [ ] BTS media
-- [ ] BTS categories
-- [ ] Related project
-
-### Shows & Media
-- [ ] YouTube links
-- [ ] Vimeo links
-- [ ] Instagram links/embeds where technically appropriate
-- [ ] Media thumbnails
-
-### Team
-- [ ] Add member
-- [ ] Edit member
-- [ ] Role
-- [ ] Photo
-- [ ] Bio
-- [ ] Social links
-- [ ] Display order
-
-### Exit Criteria
-- [ ] Public media/team content manageable from Super Admin
+**Stage status:** `[~]`
 
 ---
 
-# Stage 14 â€” Contact, Notifications & Email
+# Stage 14 — Contact / Notifications / Email
 
-## Goal
-Complete communication flows without AWS SES in V1.
+Implemented:
+- [~] Contact persistence/API
+- [~] Admin contact workflow/API
+- [x] Nodemailer service foundation
+- [~] Password reset email path
+- [~] Application received/status email path
+- [~] Contact notification path
 
-### Contact
-- [ ] Contact form
-- [ ] Save submissions in database
-- [ ] Admin contact queries view
+Blocked/remaining:
+- [!] Hostinger SMTP credentials
+- [ ] Real SMTP delivery test
+- [ ] Admin contact UI real API wiring
+- [ ] Welcome email only if still required by product scope
 
-### Email
-- [ ] Nodemailer
-- [ ] Hostinger SMTP
-- [ ] Welcome email
-- [ ] Password reset email
-- [ ] Application received email
-- [ ] Application status update email
-- [ ] Contact form notification
-
-### Email Aliases
-Suggested:
-- [ ] info@mdadufilms.com
-- [ ] casting@mdadufilms.com
-- [ ] applications@mdadufilms.com
-- [ ] contact@mdadufilms.com
-
-### Exit Criteria
-- [ ] Important platform emails work in testing
+**Stage status:** `[~]`
 
 ---
 
-# Stage 15 â€” Settings, Legal & Company Trust Information
+# Stage 15 — Settings / Legal / Trust
 
-## Goal
-Centralize site/company settings.
+- [~] Generic CMS supports `settings` and `legal`
+- [x] Admin settings/legal UI exists
+- [ ] Wire settings/legal UI to API
+- [ ] Ensure singleton-like settings behavior where appropriate
+- [!] Real company name/GST/CIN/email/phone/address/socials
+- [!] Final Privacy Policy
+- [!] Final Terms & Conditions
+- [!] Final consent text
 
-### Settings
-- [ ] Company name
-- [ ] Logo
-- [ ] GST number
-- [ ] CIN / company registration
-- [ ] Email
-- [ ] Phone
-- [ ] Address
-- [ ] Social links
-- [ ] YouTube
-- [ ] Instagram
-
-### Legal
-- [ ] Privacy Policy
-- [ ] Terms & Conditions
-- [ ] Application / portfolio consent text
-- [ ] Copyright footer
-
-### Exit Criteria
-- [ ] Legal/business details are consistently displayed
+**Stage status:** `[~]`
 
 ---
 
-# Stage 16 â€” Security & Quality Hardening
+# Stage 16 — Security & Quality Hardening
 
-## Goal
-Prepare the application for production-level use.
+Security foundation implemented:
+- [~] Input validation
+- [~] Password security
+- [~] Signed secure-cookie architecture
+- [~] CSRF
+- [~] CORS/origin rules
+- [~] Helmet/security headers
+- [~] Rate limiting
+- [~] Upload restrictions
+- [~] Admin authorization
+- [~] Ownership checks
+- [~] Session revocation
+- [~] Audit logs
+- [~] Safe request IDs/error filtering
 
-### Security
-- [ ] Input validation
-- [ ] Output sanitization
-- [ ] Password security
-- [ ] Secure cookies
-- [ ] CORS rules
-- [ ] Helmet/security headers
-- [ ] Rate limiting
-- [ ] File upload restrictions
-- [ ] Admin authorization checks
-- [ ] Ownership checks
-- [ ] Secrets not committed to Git
+Still verify:
+- [ ] `npm run check` green
+- [ ] No public sensitive-field leaks
+- [ ] No unsafe debug/body/cookie logging
+- [ ] Pagination/query bounds
+- [ ] Accessibility regression review without visual redesign
+- [ ] Error/loading/empty functional behavior
+- [ ] Final security test coverage
 
-### Quality
-- [ ] Remove console/debug logs
-- [ ] Error messages reviewed
-- [ ] Empty states
-- [ ] Loading states
-- [ ] 404 page
-- [ ] Error page
-- [ ] Accessibility review
-
-### Exit Criteria
-- [ ] No major known security or UX blockers
+**Stage status:** `[~]`
 
 ---
 
-# Stage 17 â€” Full Testing & UAT
+# Stage 17 — Full Testing & UAT
 
-## Goal
-Test the entire platform before deployment.
-
-### Functional Testing
-- [ ] Registration
-- [ ] Login/logout
-- [ ] Password reset
-- [ ] Profile
-- [ ] Portfolio
-- [ ] Project application
-- [ ] Application status
+Automated:
+- [ ] `npm run check`
+- [ ] `npm run test:integration`
+- [ ] GitHub Actions green
+- [ ] Auth/session flows
+- [ ] Profile/portfolio
+- [ ] Projects/castings
+- [ ] Applications
 - [ ] Admin users
-- [ ] Admin projects
-- [ ] Admin castings
-- [ ] Talent filters
-- [ ] Saved talent lists
-- [ ] Verification badge
-- [ ] Blog
-- [ ] Gallery
-- [ ] Team
-- [ ] Contact
-- [ ] Emails
+- [ ] Talent/saved lists
+- [ ] CMS
+- [ ] Contact/email local path
 
-### Responsive Testing
-- [ ] Mobile
-- [ ] Tablet
-- [ ] Laptop
-- [ ] Large desktop
-
-### Browser Testing
+Manual:
 - [ ] Chrome
-- [ ] Safari
 - [ ] Edge
-- [ ] Mobile Safari
+- [ ] Safari
 - [ ] Mobile Chrome
+- [ ] Mobile Safari
+- [ ] 360 / 768 / 1024 / 1440 functional review
+- [ ] M. Dadu Films UAT
+- [ ] Final content corrections
+- [ ] Final approval
 
-### Performance
-- [ ] Image optimization
-- [ ] Lazy loading
-- [ ] API response review
-- [ ] Lighthouse review
-- [ ] SEO review
-
-### UAT
-- [ ] M. Dadu Films reviews complete site
-- [ ] Final content corrections completed
-- [ ] Final approval received
-
-### Exit Criteria
-- [ ] Production release approved
+**Stage status:** `[ ]` not complete.
 
 ---
 
-# Stage 18 â€” Production Deployment â€” LAST STAGE
+# Stage 18 — Production Deployment — LAST STAGE
 
-## Goal
-Deploy only after development and testing are complete.
+Do not start until Stage 17 is approved.
 
-### Production Infrastructure
-- [ ] AWS Amplify for Next.js frontend
-- [ ] AWS Lightsail 1 GB for NestJS backend
-- [ ] Lightsail static IP
-- [ ] MongoDB Atlas production database
-- [ ] Amazon S3 for media storage
-- [ ] Hostinger domain/DNS
-- [ ] Hostinger SMTP
-- [ ] SSL/HTTPS
+- [ ] Amplify frontend
+- [ ] Lightsail backend
+- [ ] Atlas production DB
+- [ ] S3
+- [ ] Hostinger DNS/SMTP
+- [ ] HTTPS
+- [ ] Production secrets
+- [ ] CI/CD deployment
+- [ ] Production validation
 
-### CI/CD
-- [ ] GitHub Actions frontend workflow
-- [ ] GitHub Actions backend workflow
-- [ ] Build in GitHub Actions
-- [ ] Deploy built backend artifact
-- [ ] Backend restart via PM2/systemd
-- [ ] Production environment secrets configured
-
-### Production Validation
-- [ ] Domain works
-- [ ] API domain works
-- [ ] SSL works
-- [ ] Login works
-- [ ] Upload works
-- [ ] Email works
-- [ ] Applications work
-- [ ] Admin dashboard works
-- [ ] Mobile works
-- [ ] Monitoring/logs checked
-
-### Exit Criteria
-- [ ] M. Dadu Films Version 1.0.0 is live
+**Stage status:** `[ ]` intentionally not started.
 
 ---
 
-# Stage 19 â€” Post-Launch Stabilization
+# Stage 19 — Post-Launch Stabilization
 
-## Goal
-Fix real-world issues after launch without adding unnecessary new features.
+- [ ] Monitoring
+- [ ] Usage review
+- [ ] Logs
+- [ ] Backups
+- [ ] Bug fixes
+- [ ] Support docs
+- [ ] Future backlog
 
-- [ ] Monitor errors
-- [ ] Monitor Lightsail memory/CPU
-- [ ] Review S3 usage
-- [ ] Review MongoDB usage
-- [ ] Review application logs
-- [ ] Fix launch bugs
-- [ ] Take database backup
-- [ ] Document support procedures
-- [ ] Collect future feature requests
+**Stage status:** `[ ]` not started.
 
 ---
 
-# Deferred Features â€” Not Part of V1.0.0
+# Deferred — Not V1
 
 - [ ] Self-tape request workflow
-- [ ] Advanced digital reel builder beyond current portfolio
-- [ ] NDA / e-signature workflow
-- [ ] Script-lock workflow
+- [ ] Advanced reel builder
+- [ ] NDA/e-signature
+- [ ] Script lock
 - [ ] WhatsApp notifications
 - [ ] Native mobile application
 - [ ] GraphQL
 - [ ] Redis
 - [ ] Microservices
 - [ ] Kubernetes
-- [ ] AWS SES unless later required
+- [ ] AWS SES unless later requested
 
 ---
 
-# Current Development Status
+# Current stage summary
 
 | Stage | Status |
 |---|---|
-| Stage 0 â€” Inputs & Assets | [~] In Progress |
-| Stage 1 â€” Project Foundation | [~] Starter Created / Local Verification Pending |
-| Stage 2 â€” Design System | [~] Partial implementation; review pending |
-| Stage 3 â€” Public Website | [~] Partial implementation; review pending |
-| Stage 4 â€” Authentication | [~] Partial implementation; review pending |
-| Stage 5 â€” Member Profile | [~] Partial implementation; review pending |
-| Stage 6 â€” Media Processing | [~] Partial implementation; review pending |
-| Stage 7 â€” Projects & Casting | [~] Partial implementation; review pending |
-| Stage 8 â€” Applications | [~] Partial implementation; review pending |
-| Stage 9 â€” Member Dashboard | [~] Partial implementation; review pending |
-| Stage 10 â€” Admin Dashboard | [~] Partial implementation; review pending |
-| Stage 11 â€” Talent Search | [~] Partial implementation; review pending |
-| Stage 12 â€” Blog | [~] Partial implementation; review pending |
-| Stage 13 â€” Gallery/BTS/Team | [~] Partial implementation; review pending |
-| Stage 14 â€” Contact & Email | [~] Partial implementation; review pending |
-| Stage 15 â€” Settings & Legal | [ ] Not Started |
-| Stage 16 â€” Security | [ ] Not Started |
-| Stage 17 â€” Testing / UAT | [ ] Not Started |
-| Stage 18 â€” Deployment | [ ] Not Started |
-| Stage 19 â€” Stabilization | [ ] Not Started |
+| 0 Inputs | `[~]` real content blocked |
+| 1 Foundation | `[x]` |
+| 2 Design System | `[~]` UI frozen; manual QA remains |
+| 3 Public Website | `[~]` dynamic/content verification remains |
+| 4 Authentication | `[~]` final integration verification |
+| 5 Profile/Portfolio | `[~]` real UI/API wiring verification |
+| 6 Media | `[~]` implementation present; QA remains |
+| 7 Projects/Casting | `[~]` backend present; frontend/test wiring remains |
+| 8 Applications | `[~]` backend present; frontend/test wiring remains |
+| 9 Member Dashboard | `[~]` UI present; real API wiring remains |
+| 10 Admin Dashboard | `[~]` UI/backend present; real API wiring remains |
+| 11 Talent | `[~]` backend present; lint/UI/tests remain |
+| 12 Blog | `[~]` CMS/UI present; wiring/tests remain |
+| 13 Gallery/BTS/Shows/Team | `[~]` CMS/UI present; wiring/tests remain |
+| 14 Contact/Email | `[~]` backend present; SMTP/UI verification remains |
+| 15 Settings/Legal | `[~]` foundation present; content/wiring remains |
+| 16 Security | `[~]` major foundation present; final verification remains |
+| 17 Testing/UAT | `[ ]` |
+| 18 Deployment | `[ ]` |
+| 19 Stabilization | `[ ]` |
 
----
+## Current Codex priority
 
-## Development Rule
+Follow `docs/CODEX_COMPLETION_PLAN.md` in order.
 
-**We complete one stage, test it locally, confirm it works, update this file, and only then move to the next stage. Production deployment stays at the very end.**
+The immediate order is:
 
-
-## Checkpoint evidence â€” 2026-09-17
-
-- Required Node 24.11.1 installed; npm workspace lockfile committed-ready.
-- Foundation lint, strict TypeScript, both builds, and 13 unit tests passed.
-- Fifteen isolated integration checks cover registration, duplicate/injected roles,
-  invalid login, sessions, admin denial, cross-origin denial, profile persistence,
-  image variants, upload ownership, invalid files, publishing visibility,
-  duplicate/closed applications, private admin notes, contact persistence,
-  one-use password resets, session revocation and logout.
-- Public design direction was approved in this task. Browser interaction,
-  responsive layout and cross-browser sign-off remain pending manual review.
-- MongoDB 8 cannot start on this host's Docker kernel; verified MongoDB 7 local
-  fallback uses a separate named volume. Default production decisions unchanged.
-- API build/watch uses TypeScript + Node watch instead of Nest CLI 12 because
-  its scaffolding dependencies require a newer Node than the specified runtime.
-- Public collections now fetch the API. Empty databases display intentional
-  empty states. Hero/about/company copy remains explicitly provisional.
-- Application, CMS, talent-list and contact API groundwork exists. Their full
-  admin screens, broader tests and stage exit criteria are **not complete**.
-- SMTP delivery, real assets/company details, production settings, full security
-  review, UAT and deployment are **not complete**. Local email is private outbox
-  only. No default administrator account was created.
-- User requested a pause after this account/profile checkpoint. Resume only
-  after their manual feedback; no deployment has been performed.
-
-- HTTP smoke checks returned 200 for 21 implemented page routes. Missing
-  routes render the custom not-found UI with `noindex`; Next.js streamed
-  not-found responses use HTTP 200, as documented by the installed framework.
-- Final manual-review focus: signup â†’ profile â†’ portfolio â†’ logout â†’ login.
-  Desktop/mobile interaction review is intentionally left to the user here.
-
+1. make `npm run check` green,
+2. make integration tests green,
+3. audit backend requirement gaps,
+4. wire member UI to real APIs without visual changes,
+5. wire admin UI to real APIs without visual changes,
+6. verify public dynamic data,
+7. finish security/testing/docs,
+8. stop before Stage 18.

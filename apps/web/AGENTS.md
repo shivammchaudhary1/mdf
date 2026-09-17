@@ -2,14 +2,34 @@
 
 These rules apply to `apps/web`.
 
-## Read first for UI changes
+## Current phase: approved UI freeze
 
-Before changing visual code, read:
-- `../../docs/DESIGN_SYSTEM.md`
-- the relevant image(s) in `../../docs/references/ui/`
-- this file
+The user has approved the current visual direction and explicitly requested **no UI disturbance** while V1 functionality is completed.
 
-The reference screenshots define composition and visual character. They are not website content.
+Unless the user explicitly requests a visual change, do not alter:
+- CSS files for styling,
+- colors,
+- typography,
+- spacing,
+- sizing,
+- card/layout structure,
+- breakpoints,
+- shadows/borders/radii,
+- logo/brand presentation,
+- visible section order,
+- existing visual `className` values.
+
+The current task is functional API integration, not redesign.
+
+When connecting real APIs:
+- preserve the existing rendered structure,
+- preserve class names and existing CSS,
+- map API results into the current view-model shape when practical,
+- use existing loading/error/empty UI,
+- do not introduce new styling,
+- remove demo fixtures only after equivalent real data is connected.
+
+If a functional requirement appears to require a visible redesign, stop and document it instead.
 
 ## Structure
 
@@ -24,103 +44,58 @@ The reference screenshots define composition and visual character. They are not 
 
 Do not put large data arrays or production business content directly into page files.
 
-## Visual direction
-
-Use four page families:
-
-1. **Homepage** — cinematic and expressive, with deliberate dark sections, editorial rhythm and
-   stronger imagery/composition.
-2. **Public inner pages** — white/light, spacious, editorial, strong typography, restrained borders.
-3. **Authentication** — clean split layout; dark brand panel plus focused white form area.
-4. **Member/Admin workspaces** — light functional canvas, calm cards, clear navigation and red active
-   states. Do not turn the entire dashboard into a dark theme.
-
-Avoid the template look:
-- do not render every section as the same three equal cards,
-- vary image ratios and composition according to content type,
-- keep casting opportunity cards more informational,
-- keep gallery/BTS visually led,
-- keep blog editorial,
-- keep team portrait-led.
-
-## Tokens and CSS
-
-Use semantic variables from `src/app/globals.css` before introducing one-off values.
-
-Preferred variables include:
-- `--background`
-- `--foreground`
-- `--surface`
-- `--surface-elevated`
-- `--surface-dark`
-- `--muted`
-- `--border`
-- `--brand-red`
-- `--brand-red-hover`
-- `--brand-gold`
-- radius/shadow tokens
-
-Do not scatter new hex values through components unless the value is a deliberate visual effect that
-does not belong in the token system.
-
 ## Dynamic content
 
-When a backend module exists, fetch dynamic content from the API. Placeholder content is allowed
-only until the corresponding API exists and must live in `src/content/placeholders/`.
+When a backend module exists, use the API instead of demo production-like data.
 
-Dynamic examples:
-- hero/homepage CMS copy,
-- company contact/legal details,
+Dynamic domains include:
 - projects/castings,
 - team,
 - blog,
 - gallery/BTS,
 - shows/media,
 - member profiles,
-- applications.
+- applications,
+- member/admin dashboards,
+- contact/settings/legal where applicable.
 
-Static examples:
+Static technical values include:
 - route paths,
 - role identifiers,
-- status-display maps,
+- status display maps,
 - validation limits,
 - design tokens.
 
-## Images
+## Feedback and mutations
 
-Use `SmartImage` for business/content images where a source may be missing.
-Never add random remote imagery just to make a screen look finished.
-Use the correct placeholder category until real media is supplied.
-Never use the UI-reference screenshots as live website imagery.
+Reuse existing UI behavior:
+- `useToast()` for mutation feedback,
+- existing confirmation dialog for destructive actions,
+- existing loading/error/empty states.
 
-## Feedback
+Never use browser `alert()` or `confirm()`.
 
-Use `useToast()` for mutation feedback.
-Use `ConfirmDialog` before destructive actions.
-Never use browser `alert()` / `confirm()`.
+## Security
 
-## Responsive design
+Use the shared API helper so requests preserve:
+- `credentials: "include"`,
+- CSRF token handling,
+- consistent API errors,
+- request IDs where available.
 
-Every screen must be usable at roughly:
-- 360px mobile,
-- 768px tablet,
-- 1024px laptop,
-- 1440px desktop.
+Do not place auth tokens in localStorage/sessionStorage.
 
-Build responsive behavior with the component, not as a later cleanup step.
-Do not mark visual/responsive checklist items complete without actually checking those widths.
+## Next.js rule
 
-<!-- BEGIN:nextjs-agent-rules -->
+This repository may use a newer Next.js version than model training knowledge. Read the relevant installed guide under `node_modules/next/dist/docs/` before using version-sensitive APIs.
 
-# This is NOT the Next.js you know
+## Verification
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your
-training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's
-directory; in monorepos the `next` package may not be visible from the repo root) before writing any
-code. Heed deprecation notices.
+Functional frontend changes must pass:
 
-This block is written and re-added by `next dev` — verify at
-`node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates
-the uncommitted change; committing it with your work keeps the tree clean.
+```bash
+npm run typecheck -w @mdadu/web
+npm run build -w @mdadu/web
+```
 
-<!-- END:nextjs-agent-rules -->
+The absence of visual changes must be confirmed in the handoff summary.
