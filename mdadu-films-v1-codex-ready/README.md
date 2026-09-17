@@ -175,3 +175,68 @@ V1 deployment target later:
 - Amazon S3 — media
 - Hostinger — DNS/email
 - GitHub Actions — CI/CD
+
+## Branch strategy
+
+Keep the root repository's `master` branch stable. Work on `codex/<feature>`
+branches, verify with `npm run check`, and review changes before merging.
+The first development branch is `codex/mdadu-foundation`. Do not deploy until
+Stage 18. The sibling starter archive is a reference, not the working app.
+
+### Local Docker kernel compatibility
+
+If MongoDB 8 exits with `SERVER-121912` on Docker Linux kernels 6.19+,
+use the isolated MongoDB 7 development database:
+
+```bash
+docker compose stop mongo
+npm run db:local
+```
+
+This uses a **different volume** and binds only to `127.0.0.1`. Never point
+MongoDB 7 at an existing MongoDB 8 data volume. The default Compose file and
+production database choice are unchanged. Stop the fallback with:
+
+```bash
+docker compose -p mdadu-local -f docker-compose.local.yml stop
+```
+
+### Build tools
+
+The API builds with TypeScript and uses Node's watch mode with ts-node during
+development. This avoids the Nest CLI 12 scaffolding dependency's higher Node
+minimum while retaining NestJS 12 and the required Node 24.11.1 runtime.
+Jest uses VM modules for NestJS 12's ESM packages.
+
+## Current manual review checkpoint
+
+The public pages read published content through the REST API. Empty collections
+show empty states. Company copy/legal placeholders remain until real content is
+supplied. Demo fixtures are retained for design reference only, not returned as
+live API records.
+
+Create your own local account at `http://localhost:3333/signup`, then check:
+
+1. Sign up, sign out, sign in, and the remember-session checkbox.
+2. Member profile editing and profile completion.
+3. Profile/portfolio photo uploads and saving/removing portfolio selections.
+4. Password reset. Without SMTP, the reset email is written to the private
+   `apps/api/.local/mail/` directory. Open its link locally; these files are
+   ignored by Git and must not be shared or committed.
+5. Public navigation, empty results, and mobile layouts.
+
+SMTP delivery is not yet verified. Admin management screens and the remaining
+stages are not complete; the current admin page only verifies administrator
+access. No default administrator credentials are included.
+
+Validation:
+
+```bash
+npm run check
+npm run test:integration
+```
+
+Integration checks use a disposable `mdadu_test_*` database, a temporary file
+storage/outbox directory, and a short-lived API on port 18888. They do not modify
+the development database or member accounts. MongoDB must already be running.
+The product remains on frontend 3333 and backend 8888.

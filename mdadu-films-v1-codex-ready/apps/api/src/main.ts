@@ -1,3 +1,4 @@
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
@@ -10,8 +11,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableShutdownHooks();
+
   app.setGlobalPrefix("api/v1");
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   app.use(cookieParser(config.get<string>("COOKIE_SECRET")));
 
   app.useGlobalPipes(
@@ -22,7 +26,9 @@ async function bootstrap() {
     }),
   );
 
-  const frontendUrls = (config.get<string>("FRONTEND_URL") ?? "http://localhost:3333")
+  const frontendUrls = (
+    config.get<string>("FRONTEND_URL") ?? "http://localhost:3333"
+  )
     .split(",")
     .map((url) => url.trim());
 
@@ -35,7 +41,7 @@ async function bootstrap() {
     .setTitle("M. Dadu Films API")
     .setDescription("REST API for M. Dadu Films Digital Platform V1.0.0")
     .setVersion("1.0.0")
-    .addBearerAuth()
+    .addCookieAuth("mdadu_session")
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

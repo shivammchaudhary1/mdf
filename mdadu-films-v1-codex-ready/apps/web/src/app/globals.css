@@ -84,3 +84,24 @@ a {
   border-radius: 16px;
   background: white;
 }
+
+:root {
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --shadow-card: 0 8px 30px rgb(17 19 24 / 6%);
+}
+
+:focus-visible { outline: 3px solid var(--brand-red); outline-offset: 4px; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .6; }
+.field { width: 100%; min-height: 48px; border: 1px solid var(--border); border-radius: var(--radius-control); padding: 12px 14px; background: white; color: var(--foreground); }
+.field[aria-invalid="true"] { border-color: var(--danger); }
+.eyebrow { color: var(--brand-red); font-size: .875rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.badge { display: inline-flex; border-radius: 999px; background: #fef2f2; color: #b91c1c; padding: 4px 10px; font-size: .875rem; font-weight: 600; }
+.filter-pill { min-height: 44px; padding: 8px 18px; border-radius: 999px; background: var(--surface); color: var(--muted); border: 1px solid var(--border); font-size: .875rem; }
+.filter-pill-active { background: var(--brand-red); color: white; border-color: var(--brand-red); }
+.skip-link { position: fixed; top: 8px; left: 16px; z-index: 200; transform: translateY(-200%); border-radius: 8px; padding: 12px 18px; background: white; color: #111318; }
+.skip-link:focus { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }

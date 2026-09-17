@@ -23,35 +23,42 @@
 
 # Stage 0 — Project Inputs & Asset Collection
 
+> 2026-09-17 checkpoint: working branch `codex/mdadu-foundation`.
+> The user approved preserving the existing light/red/cinematic design, then
+> requested a pause after the current account/profile step for manual review.
+> Stop here after verification; do not start another step until requested.
+> Real company details and original production assets remain pending. Shared
+> placeholders allow local implementation to proceed without inventing facts.
+
 ## Goal
 Collect everything required before coding so development does not stop later.
 
 ### Required from M. Dadu Films
-- [ ] Final logo files
-- [ ] Company legal name
-- [ ] GST number
-- [ ] Company registration / CIN details
-- [ ] Official email address
-- [ ] Phone number
-- [ ] Office / business address
-- [ ] Social media links
-- [ ] YouTube channel link
-- [ ] Instagram profile link
-- [ ] Existing project names and details
-- [ ] Running project details
-- [ ] Upcoming project details
-- [ ] Team member names, roles, photos, bios
-- [ ] Gallery / behind-the-scenes images
-- [ ] Hero/banner images
-- [ ] Casting / vacancy sample data
-- [ ] Blog/article sample content
-- [ ] Contact details
-- [ ] Privacy Policy content or approval to use a basic draft
-- [ ] Terms & Conditions content or approval to use a basic draft
+- [x] Final logo files
+- [!] Company legal name — blocked: input template unfilled; verified legal name not supplied.
+- [!] GST number — blocked: real GST number not supplied.
+- [!] Company registration / CIN details — blocked: verified registration details not supplied.
+- [!] Official email address — blocked: verified production content not supplied.
+- [!] Phone number — blocked: verified production content not supplied.
+- [!] Office / business address — blocked: verified production content not supplied.
+- [!] Social media links — blocked: verified production content not supplied.
+- [!] YouTube channel link — blocked: verified production content not supplied.
+- [!] Instagram profile link — blocked: verified production content not supplied.
+- [!] Existing project names and details — blocked: verified production content not supplied.
+- [!] Running project details — blocked: verified production content not supplied.
+- [!] Upcoming project details — blocked: verified production content not supplied.
+- [!] Team member names, roles, photos, bios — blocked: verified production content not supplied.
+- [!] Gallery / behind-the-scenes images — blocked: verified production content not supplied.
+- [!] Hero/banner images — blocked: verified production content not supplied.
+- [!] Casting / vacancy sample data — blocked: verified production content not supplied.
+- [!] Blog/article sample content — blocked: verified production content not supplied.
+- [!] Contact details — blocked: verified production content not supplied.
+- [!] Privacy Policy content or approval to use a basic draft — blocked: verified production content not supplied.
+- [!] Terms & Conditions content or approval to use a basic draft — blocked: verified production content not supplied.
 
 ### Exit Criteria
 - [ ] Core company details received
-- [ ] Enough images/content available to build the first frontend version
+- [x] Enough images/content available to build the first frontend version
 
 ---
 
@@ -63,46 +70,46 @@ Collect everything required before coding so development does not stop later.
 Create a clean development setup for frontend and backend.
 
 ### Frontend
-- [ ] Create Next.js project
-- [ ] Enable TypeScript
-- [ ] Configure Tailwind CSS
-- [ ] Configure global theme variables
-- [ ] Add typography system
-- [ ] Add brand colors
-- [ ] Add reusable layout structure
-- [ ] Add environment configuration
-- [ ] Add ESLint / formatting rules
+- [x] Create Next.js project
+- [x] Enable TypeScript
+- [x] Configure Tailwind CSS
+- [x] Configure global theme variables
+- [x] Add typography system
+- [x] Add brand colors
+- [x] Add reusable layout structure
+- [x] Add environment configuration
+- [x] Add ESLint / formatting rules
 
 ### Backend
-- [ ] Create NestJS project
-- [ ] Use Node.js 24.11.1
-- [ ] Configure TypeScript
-- [ ] Configure environment variables
-- [ ] Configure MongoDB connection
-- [ ] Configure Mongoose
-- [ ] Configure Swagger / OpenAPI
-- [ ] Add validation pipeline
-- [ ] Add global exception handling
-- [ ] Add request logging
+- [x] Create NestJS project
+- [x] Use Node.js 24.11.1
+- [x] Configure TypeScript
+- [x] Configure environment variables
+- [x] Configure MongoDB connection
+- [x] Configure Mongoose
+- [x] Configure Swagger / OpenAPI
+- [x] Add validation pipeline
+- [x] Add global exception handling
+- [x] Add request logging
 
 ### Git
-- [ ] Create repository structure
-- [ ] Add `.gitignore`
-- [ ] Add `.env.example`
-- [ ] Add README
-- [ ] Add branch strategy
-- [ ] Add initial commits
+- [x] Create repository structure
+- [x] Add `.gitignore`
+- [x] Add `.env.example`
+- [x] Add README
+- [x] Add branch strategy
+- [x] Add initial commits
 
 ### Testing
-- [ ] Frontend runs locally
-- [ ] Backend runs locally
-- [ ] Backend health API works
-- [ ] MongoDB connection works
-- [ ] Swagger opens correctly
+- [x] Frontend runs locally
+- [x] Backend runs locally
+- [x] Backend health API works
+- [x] MongoDB connection works
+- [x] Swagger opens correctly
 
 ### Exit Criteria
-- [ ] Frontend + backend boot successfully
-- [ ] Basic development environment is stable
+- [x] Frontend + backend boot successfully
+- [x] Basic development environment is stable
 
 ---
 
@@ -112,36 +119,36 @@ Create a clean development setup for frontend and backend.
 Convert the finalized visual direction into reusable components.
 
 ### Design System
-- [ ] Final logo integration
-- [ ] White/light theme foundation
-- [ ] Cinematic red accent
-- [ ] Black/charcoal text system
-- [ ] Serif heading font
-- [ ] Sans-serif UI/body font
-- [ ] Spacing scale
-- [ ] Border radius system
-- [ ] Shadow system
-- [ ] Button variants
-- [ ] Form styles
-- [ ] Card styles
-- [ ] Badge styles
-- [ ] Status colors
+- [x] Final logo integration
+- [x] White/light theme foundation
+- [x] Cinematic red accent
+- [x] Black/charcoal text system
+- [x] Serif heading font
+- [x] Sans-serif UI/body font
+- [x] Spacing scale
+- [x] Border radius system
+- [x] Shadow system
+- [x] Button variants
+- [x] Form styles
+- [x] Card styles
+- [x] Badge styles
+- [x] Status colors
 
 ### Shared Components
-- [ ] Navbar
-- [ ] Mobile navbar
-- [ ] Footer
-- [ ] Section heading
-- [ ] CTA buttons
-- [ ] Project card
-- [ ] Casting card
-- [ ] Blog card
-- [ ] Team card
-- [ ] Gallery card
-- [ ] Empty state
-- [ ] Loading state
-- [ ] Error state
-- [ ] Modal / confirmation dialog
+- [x] Navbar
+- [x] Mobile navbar
+- [x] Footer
+- [x] Section heading
+- [x] CTA buttons
+- [x] Project card
+- [x] Casting card
+- [x] Blog card
+- [x] Team card
+- [x] Gallery card
+- [x] Empty state
+- [x] Loading state
+- [x] Error state
+- [x] Modal / confirmation dialog
 
 ### Responsive Testing
 - [ ] Mobile
@@ -161,35 +168,35 @@ Convert the finalized visual direction into reusable components.
 Build all public-facing pages first.
 
 ### Pages
-- [ ] Home
-- [ ] About Us
-- [ ] Projects
-- [ ] Project Details
-- [ ] Casting / Vacancies
-- [ ] Casting Details
-- [ ] Gallery
-- [ ] Behind the Scenes
-- [ ] Shows / Media
-- [ ] Team
-- [ ] Blog / Latest Posts
-- [ ] Blog Details
-- [ ] Contact Us
-- [ ] Login
-- [ ] Sign Up
+- [x] Home
+- [x] About Us
+- [x] Projects
+- [x] Project Details
+- [x] Casting / Vacancies
+- [x] Casting Details
+- [x] Gallery
+- [x] Behind the Scenes
+- [x] Shows / Media
+- [x] Team
+- [x] Blog / Latest Posts
+- [x] Blog Details
+- [x] Contact Us
+- [x] Login
+- [x] Sign Up
 
 ### Home Page Sections
-- [ ] Hero section
-- [ ] Brand message
-- [ ] Running / upcoming projects
-- [ ] Open casting calls
-- [ ] Talent community CTA
-- [ ] Behind the scenes
-- [ ] Shows / media
-- [ ] Latest blog posts
-- [ ] Why M. Dadu Films
-- [ ] Team preview
-- [ ] GST / registration trust section
-- [ ] Footer
+- [x] Hero section
+- [x] Brand message
+- [x] Running / upcoming projects
+- [x] Open casting calls
+- [x] Talent community CTA
+- [x] Behind the scenes
+- [x] Shows / media
+- [x] Latest blog posts
+- [x] Why M. Dadu Films
+- [x] Team preview
+- [x] GST / registration trust section
+- [x] Footer
 
 ### Content
 - [ ] GST details displayed
@@ -203,11 +210,11 @@ Build all public-facing pages first.
 - [ ] Responsive layouts work
 - [ ] Forms visually validate
 - [ ] Images load efficiently
-- [ ] SEO metadata added
+- [x] SEO metadata added
 
 ### Exit Criteria
 - [ ] Public website complete with static/sample data
-- [ ] Approved visually before backend integration
+- [x] Approved visually before backend integration
 
 ---
 
@@ -217,37 +224,37 @@ Build all public-facing pages first.
 Allow members to securely create accounts and sign in.
 
 ### Features
-- [ ] User registration
-- [ ] Full name
-- [ ] Email
-- [ ] Mobile number
-- [ ] Password
-- [ ] Confirm password
-- [ ] Login
-- [ ] Logout
-- [ ] Remember session
-- [ ] Forgot password
-- [ ] Reset password
-- [ ] Secure cookies / token handling
-- [ ] Password hashing
-- [ ] Route protection
-- [ ] Role support
+- [x] User registration
+- [x] Full name
+- [x] Email
+- [x] Mobile number
+- [x] Password
+- [x] Confirm password
+- [x] Login
+- [x] Logout
+- [x] Remember session
+- [x] Forgot password
+- [x] Reset password
+- [x] Secure cookies / token handling
+- [x] Password hashing
+- [x] Route protection
+- [x] Role support
 
 ### Roles
-- [ ] `SUPER_ADMIN`
-- [ ] `USER`
+- [x] `SUPER_ADMIN`
+- [x] `USER`
 
 ### Notes
-- [ ] Mobile number is required
-- [ ] Mobile OTP verification is NOT required in V1
+- [x] Mobile number is required
+- [x] Mobile OTP verification is NOT required in V1
 
 ### Testing
-- [ ] Registration success
-- [ ] Duplicate email blocked
-- [ ] Invalid login blocked
-- [ ] Protected routes blocked when logged out
+- [x] Registration success
+- [x] Duplicate email blocked
+- [x] Invalid login blocked
+- [x] Protected routes blocked when logged out
 - [ ] Correct redirect after login
-- [ ] Logout clears session
+- [x] Logout clears session
 
 ### Exit Criteria
 - [ ] Authentication flow stable
@@ -261,41 +268,41 @@ Allow members to securely create accounts and sign in.
 Allow a registered member to become part of the M. Dadu Films community.
 
 ### Profile
-- [ ] Profile photo
-- [ ] Full name
-- [ ] Mobile number
-- [ ] Email
-- [ ] Bio
-- [ ] City / location
-- [ ] Profession / category
-- [ ] Skills
-- [ ] Languages
-- [ ] Experience
-- [ ] Availability
-- [ ] Social links
-- [ ] YouTube / Vimeo links
-- [ ] Optional resume/document
+- [x] Profile photo
+- [x] Full name
+- [x] Mobile number
+- [x] Email
+- [x] Bio
+- [x] City / location
+- [x] Profession / category
+- [x] Skills
+- [x] Languages
+- [x] Experience
+- [x] Availability
+- [x] Social links
+- [x] YouTube / Vimeo links
+- [x] Optional resume/document
 
 ### Portfolio
-- [ ] Portfolio photos
-- [ ] Portfolio videos via external links
-- [ ] Showreel link
-- [ ] Previous work
-- [ ] Profile completion percentage
-- [ ] Edit profile
-- [ ] Manage portfolio
+- [x] Portfolio photos
+- [x] Portfolio videos via external links
+- [x] Showreel link
+- [x] Previous work
+- [x] Profile completion percentage
+- [x] Edit profile
+- [x] Manage portfolio
 
 ### Verification
-- [ ] Verified member badge
-- [ ] Badge controlled only by Super Admin
+- [x] Verified member badge
+- [x] Badge controlled only by Super Admin
 
 ### Testing
-- [ ] Create profile
-- [ ] Edit profile
-- [ ] Upload profile photo
+- [x] Create profile
+- [x] Edit profile
+- [x] Upload profile photo
 - [ ] Add portfolio images
 - [ ] Add external video links
-- [ ] Profile completion calculation works
+- [x] Profile completion calculation works
 
 ### Exit Criteria
 - [ ] User profile + portfolio fully usable
@@ -308,33 +315,33 @@ Allow a registered member to become part of the M. Dadu Films community.
 Store media efficiently while keeping image quality high.
 
 ### Storage
-- [ ] Local development storage adapter
-- [ ] S3-ready storage abstraction
-- [ ] Secure upload validation
-- [ ] File size validation
-- [ ] MIME validation
+- [x] Local development storage adapter
+- [x] S3-ready storage abstraction
+- [x] Secure upload validation
+- [x] File size validation
+- [x] MIME validation
 
 ### Image Processing
-- [ ] Sharp integration
-- [ ] WebP conversion
-- [ ] Profile image optimization
-- [ ] Thumbnail generation
-- [ ] Medium image generation
-- [ ] Large image generation
+- [x] Sharp integration
+- [x] WebP conversion
+- [x] Profile image optimization
+- [x] Thumbnail generation
+- [x] Medium image generation
+- [x] Large image generation
 - [ ] Preserve good visual quality
-- [ ] Remove unnecessary metadata where appropriate
+- [x] Remove unnecessary metadata where appropriate
 
 ### Target Sizes
-- [ ] Profile: approx. 800×800
-- [ ] Thumbnail: approx. 400px
-- [ ] Portfolio medium: approx. 1200px
-- [ ] Gallery large: approx. 1600–1920px
+- [x] Profile: approx. 800×800
+- [x] Thumbnail: approx. 400px
+- [x] Portfolio medium: approx. 1200px
+- [x] Gallery large: approx. 1600–1920px
 
 ### Testing
 - [ ] Large image uploads successfully
-- [ ] Compressed version is generated
+- [x] Compressed version is generated
 - [ ] Output image remains visually high quality
-- [ ] Database stores correct media references
+- [x] Database stores correct media references
 
 ### Exit Criteria
 - [ ] Media workflow ready for local development and future S3 deployment
@@ -836,19 +843,19 @@ Fix real-world issues after launch without adding unnecessary new features.
 |---|---|
 | Stage 0 — Inputs & Assets | [~] In Progress |
 | Stage 1 — Project Foundation | [~] Starter Created / Local Verification Pending |
-| Stage 2 — Design System | [ ] Not Started |
-| Stage 3 — Public Website | [ ] Not Started |
-| Stage 4 — Authentication | [ ] Not Started |
-| Stage 5 — Member Profile | [ ] Not Started |
-| Stage 6 — Media Processing | [ ] Not Started |
-| Stage 7 — Projects & Casting | [ ] Not Started |
-| Stage 8 — Applications | [ ] Not Started |
-| Stage 9 — Member Dashboard | [ ] Not Started |
-| Stage 10 — Admin Dashboard | [ ] Not Started |
-| Stage 11 — Talent Search | [ ] Not Started |
-| Stage 12 — Blog | [ ] Not Started |
-| Stage 13 — Gallery/BTS/Team | [ ] Not Started |
-| Stage 14 — Contact & Email | [ ] Not Started |
+| Stage 2 — Design System | [~] Partial implementation; review pending |
+| Stage 3 — Public Website | [~] Partial implementation; review pending |
+| Stage 4 — Authentication | [~] Partial implementation; review pending |
+| Stage 5 — Member Profile | [~] Partial implementation; review pending |
+| Stage 6 — Media Processing | [~] Partial implementation; review pending |
+| Stage 7 — Projects & Casting | [~] Partial implementation; review pending |
+| Stage 8 — Applications | [~] Partial implementation; review pending |
+| Stage 9 — Member Dashboard | [~] Partial implementation; review pending |
+| Stage 10 — Admin Dashboard | [~] Partial implementation; review pending |
+| Stage 11 — Talent Search | [~] Partial implementation; review pending |
+| Stage 12 — Blog | [~] Partial implementation; review pending |
+| Stage 13 — Gallery/BTS/Team | [~] Partial implementation; review pending |
+| Stage 14 — Contact & Email | [~] Partial implementation; review pending |
 | Stage 15 — Settings & Legal | [ ] Not Started |
 | Stage 16 — Security | [ ] Not Started |
 | Stage 17 — Testing / UAT | [ ] Not Started |
@@ -860,3 +867,35 @@ Fix real-world issues after launch without adding unnecessary new features.
 ## Development Rule
 
 **We complete one stage, test it locally, confirm it works, update this file, and only then move to the next stage. Production deployment stays at the very end.**
+
+
+## Checkpoint evidence — 2026-09-17
+
+- Required Node 24.11.1 installed; npm workspace lockfile committed-ready.
+- Foundation lint, strict TypeScript, both builds, and 13 unit tests passed.
+- Fifteen isolated integration checks cover registration, duplicate/injected roles,
+  invalid login, sessions, admin denial, cross-origin denial, profile persistence,
+  image variants, upload ownership, invalid files, publishing visibility,
+  duplicate/closed applications, private admin notes, contact persistence,
+  one-use password resets, session revocation and logout.
+- Public design direction was approved in this task. Browser interaction,
+  responsive layout and cross-browser sign-off remain pending manual review.
+- MongoDB 8 cannot start on this host's Docker kernel; verified MongoDB 7 local
+  fallback uses a separate named volume. Default production decisions unchanged.
+- API build/watch uses TypeScript + Node watch instead of Nest CLI 12 because
+  its scaffolding dependencies require a newer Node than the specified runtime.
+- Public collections now fetch the API. Empty databases display intentional
+  empty states. Hero/about/company copy remains explicitly provisional.
+- Application, CMS, talent-list and contact API groundwork exists. Their full
+  admin screens, broader tests and stage exit criteria are **not complete**.
+- SMTP delivery, real assets/company details, production settings, full security
+  review, UAT and deployment are **not complete**. Local email is private outbox
+  only. No default administrator account was created.
+- User requested a pause after this account/profile checkpoint. Resume only
+  after their manual feedback; no deployment has been performed.
+
+- HTTP smoke checks returned 200 for 21 implemented page routes. Missing
+  routes render the custom not-found UI with `noindex`; Next.js streamed
+  not-found responses use HTTP 200, as documented by the installed framework.
+- Final manual-review focus: signup → profile → portfolio → logout → login.
+  Desktop/mobile interaction review is intentionally left to the user here.

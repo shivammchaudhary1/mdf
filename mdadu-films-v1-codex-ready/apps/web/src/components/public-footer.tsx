@@ -15,8 +15,18 @@ export function PublicFooter() {
         <div>
           <h3 className="mb-4 font-semibold">Quick Links</h3>
           <div className="grid gap-2 text-sm text-white/65">
-            {siteConfig.navigation.slice(0, 6).map((item) => (
-              <Link key={item.href} href={item.href} className="hover:text-white">
+            {[
+              ...siteConfig.navigation,
+              { label: "Gallery", href: "/gallery" },
+              { label: "Behind the Scenes", href: "/behind-the-scenes" },
+              { label: "Shows & Media", href: "/shows" },
+              { label: "Team", href: "/team" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="hover:text-white"
+              >
                 {item.label}
               </Link>
             ))}

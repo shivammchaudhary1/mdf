@@ -1,15 +1,9 @@
-import { PageShell } from "@/components/page-shell";
-
+import { CollectionPage } from "@/components/collection-page";
+import { collectionCopy } from "@/content/placeholders/catalog";
+export const metadata = {
+  title: collectionCopy["casting"].title,
+  description: collectionCopy["casting"].description,
+};
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="Casting Calls"
-      title="Opportunities for Real Talent"
-      description="Discover open roles, project requirements and application deadlines."
-    >
-      <div className="mt-12 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-slate-500">
-        Real content and module implementation will be added in the corresponding development stage.
-      </div>
-    </PageShell>
-  );
+  return <CollectionPage kind="casting" />;
 }

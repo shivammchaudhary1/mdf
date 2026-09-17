@@ -1,5 +1,6 @@
 "use client";
 
+import { runtimeConfig } from "@/config/runtime";
 import Image, { type ImageProps } from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
@@ -43,7 +44,12 @@ export function SmartImage({
   return (
     <Image
       {...props}
-      src={currentSource}
+      src={
+        currentSource.startsWith("/api/v1/media/")
+          ? `${new URL(runtimeConfig.apiUrl).origin}${currentSource}`
+          : currentSource
+      }
+      unoptimized={currentSource.startsWith("/api/v1/media/")}
       alt={alt}
       onError={() => {
         if (currentSource !== fallback) {

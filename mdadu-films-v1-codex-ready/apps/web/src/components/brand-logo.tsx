@@ -5,10 +5,7 @@ type BrandLogoProps = {
   darkInk?: boolean;
 };
 
-export function BrandLogo({
-  className = "",
-  darkInk = false,
-}: BrandLogoProps) {
+export function BrandLogo({ className = "", darkInk = false }: BrandLogoProps) {
   return (
     <Image
       src="/brand/logo.webp"

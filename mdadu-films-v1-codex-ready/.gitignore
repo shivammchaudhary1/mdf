@@ -12,3 +12,7 @@ coverage
 apps/web/.next
 apps/api/dist
 mongo-data
+
+*.tsbuildinfo
+
+.local/

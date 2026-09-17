@@ -17,7 +17,7 @@ export function PageShell({
   return (
     <>
       <PublicHeader light />
-      <main className="min-h-[70vh] bg-white pt-32">
+      <main id="main-content" className="min-h-[70vh] bg-white">
         <section className="container-shell py-16 md:py-24">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--brand-red)]">
             {eyebrow}

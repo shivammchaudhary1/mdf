@@ -2,6 +2,32 @@
 
 Add real M. Dadu Films media here as development progresses.
 
+## Supplied references reviewed — 2026-09-17
+
+The working project is `mdadu-films-v1-codex-ready`; the sibling starter and
+ZIP are retained unchanged. Development branch: `codex/mdadu-foundation`.
+
+The shared `../support/` folder contains logo PNG variants and UI reference
+screens. Reviewed `public-ui.png`, `user-dashboard.png`, and
+`user-dashboard-mobile.png` in `UI-referance/` for public and member layouts.
+These are design references, not individual production photographs or
+verified company content. Do not extract names, contact details, statistics,
+or project records from the mockups as real business data.
+
+Preserve the current white/light editorial foundation, red accents, serif
+headings, sans-serif interface text, and cinematic dark image sections.
+This agrees with `AGENTS.md`, the canonical checklist, existing CSS, and the
+reviewed screens. `../support/UI.md` describes a conflicting dark foundation;
+it must not silently replace the existing theme.
+
+The black logo PNG was visually verified. Both supplied PNGs have alpha
+channels and are 2498×1404; the existing logo WebP is 1600×900 with alpha.
+The existing `public/brand/logo.webp` remains unchanged.
+
+The company input template is unfilled. Separate hero, project, team, and
+gallery source photos have not been supplied; use `SmartImage` placeholders.
+Legal/company details and final business copy remain pending.
+
 ## Existing Logo
 
 The finalized logo is already stored at:

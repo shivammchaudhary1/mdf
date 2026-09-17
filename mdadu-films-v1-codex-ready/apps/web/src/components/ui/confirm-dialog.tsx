@@ -1,7 +1,5 @@
 "use client";
-
-import { useEffect } from "react";
-
+import { useEffect, useId, useRef } from "react";
 type ConfirmDialogProps = {
   open: boolean;
   title: string;
@@ -13,7 +11,6 @@ type ConfirmDialogProps = {
   onConfirm: () => void;
   onCancel: () => void;
 };
-
 export function ConfirmDialog({
   open,
   title,
@@ -25,71 +22,51 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const id = useId();
   useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !loading) {
-        onCancel();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, loading, onCancel]);
-
-  if (!open) return null;
-
+    const dialog = ref.current;
+    if (open && !dialog?.open) dialog?.showModal();
+    else if (!open && dialog?.open) dialog.close();
+  }, [open]);
   return (
-    <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.currentTarget === event.target && !loading) {
-          onCancel();
-        }
+    <dialog
+      ref={ref}
+      aria-labelledby={`${id}-title`}
+      aria-describedby={description ? `${id}-description` : undefined}
+      onCancel={(e) => {
+        e.preventDefault();
+        if (!loading) onCancel();
       }}
+      className="m-auto w-[calc(100%-32px)] max-w-md rounded-3xl border-0 bg-white p-6 text-slate-950 shadow-2xl backdrop:bg-black/45 backdrop:backdrop-blur-sm"
     >
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
-      >
-        <h2
-          id="confirm-dialog-title"
-          className="font-display text-2xl font-semibold text-slate-950"
+      <h2 id={`${id}-title`} className="font-display text-2xl font-semibold">
+        {title}
+      </h2>
+      {description && (
+        <p id={`${id}-description`} className="mt-3 leading-7 text-slate-600">
+          {description}
+        </p>
+      )}
+      <div className="mt-7 flex justify-end gap-3">
+        <button
+          autoFocus
+          type="button"
+          disabled={loading}
+          onClick={onCancel}
+          className="brand-button border border-slate-200"
         >
-          {title}
-        </h2>
-
-        {description ? (
-          <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-        ) : null}
-
-        <div className="mt-7 flex justify-end gap-3">
-          <button
-            type="button"
-            disabled={loading}
-            onClick={onCancel}
-            className="brand-button min-h-10 border border-slate-200 bg-white px-4 text-sm text-slate-700 disabled:opacity-50"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={onConfirm}
-            className={`brand-button min-h-10 px-4 text-sm text-white disabled:opacity-50 ${
-              destructive
-                ? "bg-red-600 hover:bg-red-700"
-                : "brand-button-primary"
-            }`}
-          >
-            {loading ? "Please wait…" : confirmLabel}
-          </button>
-        </div>
-      </section>
-    </div>
+          {cancelLabel}
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onConfirm}
+          className={`brand-button text-white ${destructive ? "bg-red-700" : "brand-button-primary"}`}
+        >
+          {loading ? "Please wait…" : confirmLabel}
+        </button>
+      </div>
+    </dialog>
   );
 }
