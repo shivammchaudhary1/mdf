@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/admin-dashboard.css";
+@import "../styles/admin-interactions.css";
 @import "../styles/member-dashboard.css";
 
 :root {
