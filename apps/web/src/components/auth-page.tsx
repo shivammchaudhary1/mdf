@@ -1,90 +1,158 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/brand-logo";
+
 import { AccountForm } from "@/components/account-form";
+import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 
-export function AuthPage({
-  mode
-}: {
-  mode: "login" | "signup" | "forgot-password" | "reset-password";
-}) {
-  const title =
-    mode === "signup"
-      ? "Create your account"
-      : mode === "login"
-        ? "Welcome back"
-        : "Reset your password";
+type AuthMode =
+  | "login"
+  | "signup"
+  | "forgot-password"
+  | "reset-password";
 
-  const eyebrow =
-    mode === "signup" ? "Join our creative community" : "Member access";
+const copy: Record<
+  AuthMode,
+  {
+    eyebrow: string;
+    title: string;
+    description: string;
+    visualTitle: string;
+    visualFooter: string;
+  }
+> = {
+  login: {
+    eyebrow: "Member Access",
+    title: "Welcome Back",
+    description:
+      "Sign in to continue your creative journey with M. Dadu Films.",
+    visualTitle: "Good People.\nGreat Stories.",
+    visualFooter: "Stories that move people.",
+  },
+
+  signup: {
+    eyebrow: "Join The Community",
+    title: "Create Your Account",
+    description:
+      "Join M. Dadu Films and be part of a community that brings powerful stories to life.",
+    visualTitle: "Creative\nPeople.\nBrighter\nTomorrows.",
+    visualFooter: "Good People. Great Stories.",
+  },
+
+  "forgot-password": {
+    eyebrow: "Account Recovery",
+    title: "Forgot Password?",
+    description:
+      "Enter your account email and we’ll help you continue your journey.",
+    visualTitle: "Every Story\nFinds Its Way\nBack.",
+    visualFooter: "Good People. Great Stories.",
+  },
+
+  "reset-password": {
+    eyebrow: "Secure Your Account",
+    title: "Create New Password",
+    description:
+      "Choose a secure password to regain access to your creative profile.",
+    visualTitle: "Back To\nCreating.",
+    visualFooter: "Good People. Great Stories.",
+  },
+};
+
+export function AuthPage({ mode }: { mode: AuthMode }) {
+  const content = copy[mode];
 
   return (
-    <main id="main-content" className="min-h-screen bg-[#f7f7f5] lg:grid lg:grid-cols-[.92fr_1.08fr]">
-      <section className="relative hidden min-h-screen overflow-hidden bg-[#080808] text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
+    <main id="main-content" className="auth-shell">
+      <section className="auth-visual">
         <SiteMedia
-          alt="M. Dadu Films authentication placeholder"
+          alt="M. Dadu Films cinematic studio placeholder"
           kind="project"
-          className="absolute inset-0 h-full w-full"
-          imageClassName="opacity-48"
+          className="auth-visual-media"
+          imageClassName="auth-visual-image"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/58 to-black/20" />
 
-        <Link href="/" className="relative z-10">
-          <BrandLogo />
-        </Link>
+        <div className="auth-visual-overlay" />
 
-        <div className="relative z-10 max-w-xl">
-          <p className="text-[11px] font-bold uppercase tracking-[.18em] text-white/45">
-            Stories · People · Cinema
-          </p>
-          <p className="font-display mt-4 text-5xl font-semibold leading-[.98] xl:text-6xl">
-            Real People.
-            <br />
-            Real Stories.
-            <br />
-            <span className="text-[var(--brand-red)]">Bigger Possibilities.</span>
-          </p>
-          <p className="mt-6 max-w-md text-sm leading-7 text-white/58">
-            Build your profile, discover opportunities and stay connected to the creative community.
+        <div className="auth-visual-top">
+          <Link href="/" aria-label="M. Dadu Films home">
+            <BrandLogo className="auth-visual-logo" />
+          </Link>
+        </div>
+
+        <div className="auth-visual-content">
+          <div className="auth-rule" />
+
+          <p className="auth-visual-title">
+            {content.visualTitle.split("\n").map((line) => (
+              <span key={line}>{line}</span>
+            ))}
           </p>
         </div>
 
-        <p className="relative z-10 text-xs text-white/38">M. Dadu Films · Creative Network</p>
+        <div className="auth-visual-footer">
+          <div className="auth-rule auth-rule-small" />
+
+          <p>
+            {content.visualFooter.split(". ").map((part, index, array) => (
+              <span key={`${part}-${index}`}>
+                {part}
+                {index < array.length - 1 ? "." : ""}
+                {index < array.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        </div>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10">
-        <div className="w-full max-w-[470px] rounded-[24px] bg-white p-6 shadow-[0_22px_70px_rgba(0,0,0,.06)] sm:p-9">
-          <div className="mb-8 flex items-center justify-between lg:hidden">
-            <Link href="/">
-              <BrandLogo darkInk className="!w-[106px]" />
-            </Link>
-            <Link href="/" className="text-xs font-semibold text-[#777]">Back home</Link>
+      <section className="auth-panel">
+        <div className="auth-mobile-brand">
+          <Link href="/" aria-label="M. Dadu Films home">
+            <BrandLogo darkInk className="auth-mobile-logo" />
+          </Link>
+
+          <p>Good People. Great Stories.</p>
+        </div>
+
+        <div className="auth-form-card">
+          <div className="auth-heading">
+            <p className="auth-kicker">{content.eyebrow}</p>
+
+            <h1>{content.title}</h1>
+
+            <p>{content.description}</p>
           </div>
 
-          <p className="site-kicker">{eyebrow}</p>
-          <h1 className="font-display mt-2 text-4xl font-semibold">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-[#777]">
-            {mode === "login"
-              ? "Sign in to manage your profile, applications and creative opportunities."
-              : mode === "signup"
-                ? "Create a profile and start building your place in the network."
-                : "Use your account email to continue."}
-          </p>
+          <AccountForm mode={mode} />
 
-          <div className="mt-7">
-            <AccountForm mode={mode} />
+          <div className="auth-bottom-link">
+            {mode === "login" && (
+              <>
+                <span>Don&apos;t have an account?</span>{" "}
+                <Link href="/signup">Create one</Link>
+              </>
+            )}
+
+            {mode === "signup" && (
+              <>
+                <span>Already have an account?</span>{" "}
+                <Link href="/login">Sign in</Link>
+              </>
+            )}
+
+            {mode === "forgot-password" && (
+              <>
+                <span>Remember your password?</span>{" "}
+                <Link href="/login">Back to sign in</Link>
+              </>
+            )}
+
+            {mode === "reset-password" && (
+              <>
+                <span>Ready to continue?</span>{" "}
+                <Link href="/login">Sign in</Link>
+              </>
+            )}
           </div>
-
-          <p className="mt-7 text-sm text-[#777]">
-            {mode === "signup" ? "Already a member?" : "New to our community?"}{" "}
-            <Link
-              href={mode === "signup" ? "/login" : "/signup"}
-              className="font-semibold text-[var(--brand-red)]"
-            >
-              {mode === "signup" ? "Sign in" : "Create an account"}
-            </Link>
-          </p>
         </div>
       </section>
     </main>
