@@ -1,6 +1,6 @@
 "use client";
 
-import data from "@/data/public-site.json";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
@@ -10,13 +10,12 @@ import { usePublicUiStore } from "@/store/public-ui-store";
 const tabs = ["Core Team", "Creative Team", "Advisors"];
 
 export function TeamPageView() {
+  const data=usePublicData("team");
   const active = usePublicUiStore((state) => state.teamFilter);
   const setActive = usePublicUiStore((state) => state.setTeamFilter);
 
   const visible =
-    active === "Advisors"
-      ? []
-      : data.team.filter((member) => member.group === active);
+    data.team.filter((member) => member.group === active);
 
   return (
     <>

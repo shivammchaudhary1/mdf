@@ -1,4 +1,5 @@
-import data from "@/data/public-site.json";
+"use client";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
@@ -11,6 +12,7 @@ const values = [
 ];
 
 export function AboutPageView() {
+ const data=usePublicData("brand");
   return (
     <>
       <SiteHeader />

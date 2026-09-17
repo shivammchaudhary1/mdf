@@ -1,30 +1,31 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import data from "@/data/public-site.json";
+import { api } from "@/services/api";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
 import { useToast } from "@/components/ui/toast-provider";
 
 export function ContactPageView() {
+  const data=usePublicData("brand");
   const toast = useToast();
   const [sending, setSending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSending(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    event.currentTarget.reset();
-    setSending(false);
-    toast.success("Thanks — this demo form is ready for backend connection.");
+    if(sending)return;const form=event.currentTarget;const fields=new FormData(form);setSending(true);
+    try{await api("/contact",{method:"POST",body:JSON.stringify({name:fields.get("name"),email:fields.get("email"),subject:fields.get("subject"),message:fields.get("message")})});form.reset();toast.success("Thanks — your message has been received.");}
+    catch(error){toast.error(error instanceof Error?error.message:"Unable to send message.");}finally{setSending(false);}
+
   }
 
   const contacts = [
     ["Email", data.brand.email],
     ["Phone", data.brand.phone],
     ["Location", data.brand.location],
-    ["Business Inquiries", "business@mdadufilms.com"]
+    ["Business Inquiries", data.brand.email]
   ];
 
   return (

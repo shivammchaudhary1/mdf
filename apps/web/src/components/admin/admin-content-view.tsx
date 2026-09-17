@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { contentView } from "@/services/admin-workspace";
+import { api } from "@/services/api";
+import { slugFor } from "@/services/workspace";
 import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
@@ -72,48 +75,22 @@ export function AdminContentView({kind}:{kind:Kind}){
  const active=useAdminDashboardStore(s=>s.contentFilter);
  const setActive=useAdminDashboardStore(s=>s.setContentFilter);
  const config=cfg[kind];
- const [items,setItems]=useState<ContentItem[]>(()=>[...(data[kind] as Array<Record<string,string>>)]);
+ const path=`/admin/content/${kind==="bts"?"behind-the-scenes":kind}`;
+ const [items,,refresh]=useAdminRecords(path,contentView);
  const [creating,setCreating]=useState(false);
  const [editing,setEditing]=useState<ContentItem|null>(null);
 
  const statuses=["All",...Array.from(new Set(items.map(item=>item.status)))];
  const visible=useMemo(()=>items.filter(item=>active==="All"||item.status===active),[active,items]);
 
- function submitNew(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const form=new FormData(event.currentTarget);
-  const title=String(form.get(kind==="team"?"name":"title")??"").trim();
-  if(!title){toast.error("A title or name is required.");return}
-  const item:ContentItem={
-    id:`${kind}-${Date.now()}`,
-    title:kind==="team"?"":title,
-    name:kind==="team"?title:"",
-    category:String(form.get("category")??""),
-    platform:String(form.get("platform")??""),
-    role:String(form.get("role")??""),
-    group:String(form.get("group")??""),
-    author:String(form.get("author")??""),
-    status:String(form.get("status")??"Draft"),
-    date:String(form.get("date")??"Just now"),
-    url:String(form.get("url")??""),
-    summary:String(form.get("summary")??""),
-    image:""
-  };
-  setItems(current=>[item,...current]);
-  setCreating(false);
-  toast.success(`${config.action} added to the UI.`);
+ async function persist(event:FormEvent<HTMLFormElement>,id?:string){
+  event.preventDefault();const form=new FormData(event.currentTarget);const title=String(form.get(kind==="team"?"name":"title")??"").trim();
+  const body={title,...(!id?{slug:slugFor(title)}:{}),category:String(form.get("category")??""),role:String(form.get("role")??""),description:String(form.get("summary")??""),published:form.get("status")==="Published",status:String(form.get("status")??"Draft"),...(form.get("date")?{publishedAt:String(form.get("date"))}:{}),...(form.get("url")?{videoUrl:String(form.get("url"))}:{}),data:{author:String(form.get("author")??""),platform:String(form.get("platform")??""),group:String(form.get("group")??"")}};
+  try {await api(id?`${path}/${id}`:path,{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Content saved.");}
+  catch(error){toast.error(error instanceof Error?error.message:"Unable to save content.");}
  }
-
- function saveEdit(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  if(!editing)return;
-  const form=new FormData(event.currentTarget);
-  const key=kind==="team"?"name":"title";
-  const updated={...editing,[key]:String(form.get(key)??editing[key]??""),status:String(form.get("status")??editing.status),category:String(form.get("category")??editing.category??""),platform:String(form.get("platform")??editing.platform??""),role:String(form.get("role")??editing.role??""),group:String(form.get("group")??editing.group??""),author:String(form.get("author")??editing.author??""),date:String(form.get("date")??editing.date??""),url:String(form.get("url")??editing.url??""),summary:String(form.get("summary")??editing.summary??"")};
-  setItems(current=>current.map(item=>item.id===editing.id?updated:item));
-  setEditing(null);
-  toast.success("Content changes saved in the UI.");
- }
+ function submitNew(event:FormEvent<HTMLFormElement>){return persist(event);}
+ function saveEdit(event:FormEvent<HTMLFormElement>){if(editing)return persist(event,editing.id);}
 
  return <div className="ad-stack">
   <AdminPageHeader eyebrow={config.eyebrow} title={config.title} description={config.description} action={<AdminPrimaryButton onClick={()=>setCreating(true)}>{config.action}</AdminPrimaryButton>}/>
@@ -122,10 +99,10 @@ export function AdminContentView({kind}:{kind:Kind}){
   {kind==="gallery"||kind==="bts"||kind==="team"?
    <section className="ad-content-grid">{visible.map(item=><article className="ad-content-card" key={item.id}>
     <SiteMedia src={item.image} alt={item.title??item.name??"Content"} kind={kind==="team"?"team":"gallery"} className={kind==="team"?"aspect-[4/4.5]":"aspect-[4/3]"}/>
-    <div><div className="ad-content-meta"><span>{item.category??item.group??""}</span><AdminStatus value={item.status}/></div><h2>{item.title||item.name}</h2><p>{item.role||item.date||""}</p><div className="ad-content-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton/></div></div>
+    <div><div className="ad-content-meta"><span>{item.category??item.group??""}</span><AdminStatus value={item.status}/></div><h2>{item.title||item.name}</h2><p>{item.role||item.date||""}</p><div className="ad-content-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${path}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>
    </article>)}</section>
    :
-   <article className="ad-card ad-table-card"><div className="ad-table ad-content-table"><div className="ad-table-head"><span>Title</span><span>Category / Platform</span><span>Date</span><span>Status</span><span></span></div>{visible.map(item=><div className="ad-table-row" key={item.id}><div><strong>{item.title}</strong><span>{item.author??""}</span></div><span>{item.category||item.platform}</span><span>{item.date}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton/></div></div>)}</div></article>
+   <article className="ad-card ad-table-card"><div className="ad-table ad-content-table"><div className="ad-table-head"><span>Title</span><span>Category / Platform</span><span>Date</span><span>Status</span><span></span></div>{visible.map(item=><div className="ad-table-row" key={item.id}><div><strong>{item.title}</strong><span>{item.author??""}</span></div><span>{item.category||item.platform}</span><span>{item.date}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${path}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>)}</div></article>
   }
 
   <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow={config.eyebrow} title={config.action} description={`Create a new ${config.title.toLowerCase()} item without leaving this workspace.`} width="wide">

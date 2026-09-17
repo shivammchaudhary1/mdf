@@ -377,6 +377,21 @@ The application repository itself remains `UNLICENSED` unless the owner explicit
 
 ## Deployment
 
+### Completion verification on a host with MongoDB port conflicts
+
+The integration runner defaults to local port `27017`. If that port belongs to another project, use an isolated test MongoDB and set its port (PowerShell):
+
+```powershell
+docker run -d --name mdadu-v1-integration -p 127.0.0.1:27018:27017 mongo:8
+$env:INTEGRATION_MONGO_PORT='27018'
+npm run verify
+node scripts/verify-ui-freeze.mjs
+```
+
+If that test container already exists, use `docker start mdadu-v1-integration` instead of `docker run`. Each integration run creates and removes its own test database. The UI source check compares existing classes/styles with approved checkpoint `ab9d8ff`; it does not replace human visual UAT.
+
+See [the completion verification report](docs/V1_COMPLETION_VERIFICATION.md) for current results and remaining blockers. Stage 17 is not complete.
+
 Production deployment is intentionally the final stage.
 
 Planned V1 production direction:

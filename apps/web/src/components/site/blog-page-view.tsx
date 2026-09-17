@@ -1,11 +1,13 @@
+"use client";
 import Link from "next/link";
-import data from "@/data/public-site.json";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
 import { SiteMedia } from "@/components/site/site-media";
 
 export function BlogPageView() {
+  const data=usePublicData("blogs");
   const [featured, ...rest] = data.blogs;
 
   return (
@@ -22,7 +24,7 @@ export function BlogPageView() {
 
         <section className="site-section bg-[#fafafa]">
           <div className="site-shell">
-            <Link
+            {featured && <Link
               href={`/blog/${featured.slug}`}
               className="site-card group grid overflow-hidden lg:grid-cols-[1.15fr_.85fr]"
             >
@@ -46,7 +48,7 @@ export function BlogPageView() {
                   Read story →
                 </span>
               </div>
-            </Link>
+            </Link>}
 
             <div className="mt-8 grid gap-5 md:grid-cols-3">
               {rest.map((post) => (

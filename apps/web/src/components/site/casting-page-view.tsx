@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import data from "@/data/public-site.json";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
@@ -10,6 +10,7 @@ import { usePublicUiStore } from "@/store/public-ui-store";
 const filters = ["All", "Acting", "Crew"];
 
 export function CastingPageView() {
+  const data=usePublicData("castings");
   const active = usePublicUiStore((state) => state.castingFilter);
   const setActive = usePublicUiStore((state) => state.setCastingFilter);
 

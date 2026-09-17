@@ -11,6 +11,10 @@ Codex may change logic, services, API calls, types, tests, backend code and data
 
 If a visual change seems necessary, leave it as a documented blocker instead.
 
+## Completion-branch update — 2026-09-18
+
+See [V1_COMPLETION_VERIFICATION.md](V1_COMPLETION_VERIFICATION.md) for verified commands, audit findings, functional wiring and remaining UI-freeze blockers. The historical checkpoint below predates these uncommitted branch changes. Stage 17 remains incomplete; Stage 18 is untouched.
+
 ## Current repository reality
 
 Already implemented and merged:
@@ -38,33 +42,33 @@ Known remaining realities:
 
 ## Phase A — quality gate
 
-- [ ] Fix current lint errors without disabling rules.
-- [ ] `npm run lint` passes.
-- [ ] `npm run typecheck` passes.
-- [ ] API unit tests pass.
-- [ ] Web + API builds pass.
-- [ ] `npm run check` passes.
-- [ ] `git diff --check` passes.
+- [x] Fix current lint errors without disabling rules.
+- [x] `npm run lint` passes.
+- [x] `npm run typecheck` passes.
+- [x] API unit tests pass.
+- [x] Web + API builds pass.
+- [x] `npm run check` passes.
+- [x] `git diff --check` passes.
 - [ ] GitHub Actions quality workflow is green.
 
 ## Phase B — backend integration verification
 
-- [ ] Start isolated local MongoDB.
-- [ ] Run `npm run test:integration`.
-- [ ] Fix integration failures caused by Backend V2.
-- [ ] Verify registration/login/logout/remember session.
-- [ ] Verify CSRF failure on missing/invalid token for authenticated mutations.
-- [ ] Verify cross-origin mutation denial.
-- [ ] Verify password reset is one-use and revokes sessions.
-- [ ] Verify suspension revokes active sessions.
-- [ ] Verify media ownership/private/public access.
+- [x] Start isolated local MongoDB.
+- [x] Run `npm run test:integration`.
+- [x] Fix integration failures caused by Backend V2.
+- [x] Verify registration/login/logout/remember session.
+- [x] Verify CSRF failure on missing/invalid token for authenticated mutations.
+- [x] Verify cross-origin mutation denial.
+- [x] Verify password reset is one-use and revokes sessions.
+- [x] Verify suspension revokes active sessions.
+- [x] Verify media ownership/private/public access.
 - [ ] Verify projects/castings CRUD rules.
-- [ ] Verify closed casting cannot accept applications.
-- [ ] Verify duplicate application blocking.
-- [ ] Verify admin notes are never public/member-visible.
-- [ ] Verify talent filters and saved lists.
-- [ ] Verify contact persistence/admin workflow.
-- [ ] Verify admin dashboard metrics/activity.
+- [x] Verify closed casting cannot accept applications.
+- [x] Verify duplicate application blocking.
+- [x] Verify admin notes are never public/member-visible.
+- [x] Verify talent filters and saved lists.
+- [x] Verify contact persistence/admin workflow.
+- [x] Verify admin dashboard metrics/activity.
 
 ## Phase C — backend requirement audit
 
@@ -80,13 +84,13 @@ Codex must compare existing endpoints with `docs/progress.md` before adding new 
 - [ ] Confirm profile CRUD contract matches frontend needs.
 - [ ] Confirm portfolio/media references are ObjectIds.
 - [ ] Confirm public profile response does not leak private/sensitive fields.
-- [ ] Confirm exact birth date is not exposed publicly unless product requirements explicitly require it.
-- [ ] Confirm resume/document remains private.
+- [x] Confirm exact birth date is not exposed publicly unless product requirements explicitly require it.
+- [x] Confirm resume/document remains private.
 - [ ] Confirm shared/published media visibility cannot be accidentally broken by unrelated profile updates.
 
 ### Projects/castings
 - [ ] Confirm create/update/archive/close behavior.
-- [ ] Confirm partial casting updates validate age/date ranges using existing values when only one side changes.
+- [x] Confirm partial casting updates validate age/date ranges using existing values when only one side changes.
 - [ ] Confirm public list/detail contracts are stable and paginated.
 - [ ] Confirm legacy compatibility only where current frontend/public routes still depend on it.
 
@@ -97,7 +101,7 @@ Codex must compare existing endpoints with `docs/progress.md` before adding new 
 - [ ] Confirm list endpoints are paginated.
 
 ### Talent/saved lists
-- [ ] Remove all explicit `any` lint errors.
+- [x] Remove all explicit `any` lint errors.
 - [ ] Confirm public talent response exposes only approved public fields.
 - [ ] Confirm advanced filters use indexed/query-side filtering rather than loading hundreds of users into memory.
 - [ ] Confirm saved lists persist and support project association.
@@ -114,15 +118,15 @@ Codex must compare existing endpoints with `docs/progress.md` before adding new 
 
 Preserve exact existing visual structure.
 
-- [ ] Replace demo member data with `/member/dashboard`.
-- [ ] Real profile read/save.
-- [ ] Real portfolio/media upload/select/remove.
-- [ ] Real opportunities feed.
-- [ ] Real applications list/detail/apply.
-- [ ] Real application statuses.
-- [ ] Real member settings.
+- [~] Replace demo member data with `/member/dashboard`.
+- [~] Real profile read/save.
+- [~] Real portfolio/media upload/select/remove.
+- [~] Real opportunities feed.
+- [~] Real applications list/detail/apply.
+- [~] Real application statuses.
+- [~] Real member settings.
 - [ ] Real session/device list where current UI supports it.
-- [ ] Real logout instead of demo redirect.
+- [x] Real logout instead of demo redirect.
 - [ ] Remove member demo JSON only after equivalent API data is wired.
 - [ ] Existing loading/error/empty visuals remain unchanged.
 
@@ -130,31 +134,31 @@ Preserve exact existing visual structure.
 
 Preserve exact existing visual structure.
 
-- [ ] Dashboard metrics/activity use real admin API.
-- [ ] Members/talent list uses real API.
-- [ ] Search/filter uses real API.
-- [ ] Verify/unverify uses real API.
+- [~] Dashboard metrics/activity use real admin API.
+- [~] Members/talent list uses real API.
+- [~] Search/filter uses real API.
+- [~] Verify/unverify uses real API.
 - [ ] Suspend/reactivate uses real API.
-- [ ] Applications list/filter/detail/status/admin notes use real API.
-- [ ] Projects CRUD/archive uses real API.
-- [ ] Castings CRUD/close/archive uses real API.
-- [ ] Saved talent lists use real API.
-- [ ] Contact inbox/status uses real API.
-- [ ] Blog CMS uses real API.
-- [ ] Gallery CMS uses real API.
-- [ ] BTS CMS uses real API.
-- [ ] Shows/media CMS uses real API.
-- [ ] Team CMS uses real API.
-- [ ] Settings/legal use real API.
+- [~] Applications list/filter/detail/status/admin notes use real API.
+- [~] Projects CRUD/archive uses real API.
+- [~] Castings CRUD/close/archive uses real API.
+- [~] Saved talent lists use real API.
+- [~] Contact inbox/status uses real API.
+- [~] Blog CMS uses real API.
+- [~] Gallery CMS uses real API.
+- [~] BTS CMS uses real API.
+- [~] Shows/media CMS uses real API.
+- [~] Team CMS uses real API.
+- [~] Settings/legal use real API.
 - [ ] Remove admin demo JSON only after equivalent API data is wired.
 
 ## Phase F — public dynamic-data verification
 
-- [ ] Projects list/detail use API.
-- [ ] Castings list/detail use API.
-- [ ] Blog list/detail use API.
-- [ ] Gallery/BTS/shows/team use API where backend exists.
-- [ ] Homepage dynamic sections use API where appropriate.
+- [~] Projects list/detail use API.
+- [~] Castings list/detail use API.
+- [~] Blog list/detail use API.
+- [~] Gallery/BTS/shows/team use API where backend exists.
+- [~] Homepage dynamic sections use API where appropriate.
 - [ ] Missing real company content stays blocked, not invented.
 - [ ] No public route leaks draft/private content.
 
@@ -183,11 +187,11 @@ Preserve exact existing visual structure.
 
 - [ ] Unit tests cover meaningful business rules.
 - [ ] Integration suite covers final V1 flows.
-- [ ] CI runs `npm ci`.
-- [ ] CI runs `npm run check`.
-- [ ] Add isolated MongoDB integration job/service if reliable.
-- [ ] CI does not deploy.
-- [ ] No tests are weakened merely to pass.
+- [x] CI runs `npm ci`.
+- [x] CI runs `npm run check`.
+- [x] Add isolated MongoDB integration job/service if reliable.
+- [x] CI does not deploy.
+- [x] No tests are weakened merely to pass.
 
 ## Phase I — documentation/checklist
 
@@ -197,7 +201,7 @@ Preserve exact existing visual structure.
 - [ ] Swagger remains accurate.
 - [ ] Document any migration/index steps actually required.
 - [ ] Record added third-party dependencies/licenses.
-- [ ] Confirm no UI/CSS redesign was introduced.
+- [x] Confirm no UI/CSS redesign was introduced.
 
 ## External blockers that should NOT stop independent coding
 

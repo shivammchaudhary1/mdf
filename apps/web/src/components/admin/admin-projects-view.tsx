@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import type data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { projectView } from "@/services/admin-workspace";
+import { api } from "@/services/api";
+import { slugFor } from "@/services/workspace";
 import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
@@ -17,43 +21,20 @@ export function AdminProjectsView(){
  const toast=useToast();
  const active=useAdminDashboardStore(s=>s.projectFilter);
  const setActive=useAdminDashboardStore(s=>s.setProjectFilter);
- const [projects,setProjects]=useState<Project[]>([...data.projects]);
+ const [projects,,refresh]=useAdminRecords(`/admin/projects${active!=="All"?`?status=${encodeURIComponent(active)}`:""}`,projectView);
  const [creating,setCreating]=useState(false);
  const [editing,setEditing]=useState<Project|null>(null);
 
  const visible=useMemo(()=>projects.filter(p=>active==="All"||p.status===active),[active,projects]);
 
- function createProject(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const form=new FormData(event.currentTarget);
-  const title=String(form.get("title")??"").trim();
-  if(!title){toast.error("Project title is required.");return}
-  const project:Project={
-    id:`project-${Date.now()}`,
-    title,
-    type:String(form.get("type")??"Short Film"),
-    status:String(form.get("status")??"Development"),
-    applications:0,
-    team:0,
-    updated:"Just now",
-    image:"",
-    location:String(form.get("location")??""),
-    summary:String(form.get("summary")??"")
-  };
-  setProjects(current=>[project,...current]);
-  setCreating(false);
-  toast.success(`${title} added to the project UI.`);
+ async function persist(event:FormEvent<HTMLFormElement>,id?:string){
+  event.preventDefault();const form=new FormData(event.currentTarget);const title=String(form.get("title")??"").trim();
+  const body={title,type:String(form.get("type")??""),status:String(form.get("status")??"Development"),location:String(form.get("location")??""),summary:String(form.get("summary")??""),...(form.get("startDate")?{startDate:String(form.get("startDate"))}:{}),...(!id?{slug:slugFor(title)}:{})};
+  try {await api(id?`/admin/projects/${id}`:"/admin/projects",{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Project saved.");}
+  catch(error){toast.error(error instanceof Error?error.message:"Unable to save project.");}
  }
-
- function saveProject(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  if(!editing)return;
-  const form=new FormData(event.currentTarget);
-  const updated:Project={...editing,title:String(form.get("title")??editing.title),type:String(form.get("type")??editing.type),status:String(form.get("status")??editing.status),location:String(form.get("location")??editing.location??""),summary:String(form.get("summary")??editing.summary??""),updated:"Just now"};
-  setProjects(current=>current.map(item=>item.id===editing.id?updated:item));
-  setEditing(null);
-  toast.success("Project changes saved in the UI.");
- }
+ function createProject(event:FormEvent<HTMLFormElement>){return persist(event);}
+ function saveProject(event:FormEvent<HTMLFormElement>){if(editing)return persist(event,editing.id);}
 
  return <div className="ad-stack">
   <AdminPageHeader eyebrow="Production management" title="Projects" description="Manage the productions that power casting, content and the public website." action={<AdminPrimaryButton onClick={()=>setCreating(true)}>New Project</AdminPrimaryButton>}/>

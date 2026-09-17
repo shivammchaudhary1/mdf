@@ -138,6 +138,7 @@ export class ProfileService {
     userId: string,
     input: ProfileDto,
   ) {
+    const previous = await this.profiles.findOne({ userId: objectId(userId) }).lean();
     if (
       input.birthDate &&
       new Date(input.birthDate) > new Date()
@@ -149,9 +150,9 @@ export class ProfileService {
 
     await this.media.assertOwnedBy(userId, [
       input.photoMediaId,
-      input.resumeMediaId,
       ...(input.portfolioMediaIds ?? []),
-    ]);
+    ], "image");
+    await this.media.assertOwnedBy(userId, [input.resumeMediaId], "document");
 
     const update: Record<string, unknown> = {
       ...input,
@@ -216,6 +217,8 @@ export class ProfileService {
     } else {
       await this.media.makePrivate(mediaIds);
     }
+    const previousIds = [previous?.photoMediaId, ...(previous?.portfolioMediaIds ?? [])].filter(Boolean).map(String);
+    await this.media.makePrivate(previousIds.filter(id => !mediaIds.includes(id)));
 
     return this.get(userId);
   }
@@ -224,6 +227,12 @@ export class ProfileService {
     userId: string,
     input: MemberSettingsDto,
   ) {
+    if (input.savedOpportunityIds) {
+      const ids = [...new Set(input.savedOpportunityIds)].map(id => objectId(id));
+      const filter = { _id: { $in: ids }, published: true, archived: false };
+      const counts = await Promise.all([this.profiles.db.collection("projects").countDocuments(filter), this.profiles.db.collection("castings").countDocuments(filter)]);
+      if (counts[0] + counts[1] !== ids.length) throw new BadRequestException("One or more saved opportunities are no longer available.");
+    }
     const profile =
       await this.profiles.findOneAndUpdate(
         {

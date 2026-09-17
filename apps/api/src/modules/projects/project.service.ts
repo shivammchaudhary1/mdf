@@ -93,8 +93,10 @@ export class ProjectService {
       this.projects.countDocuments(filter),
     ]);
 
+    const counts = admin ? await this.projects.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {projectId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$projectId", count: {$sum: 1}}}]).toArray() : [];
+    const totals = new Map(counts.map(item=>[String(item._id),item.count]));
     return {
-      items: items.map((item) => this.serialize(item)),
+      items: items.map((item) => ({...this.serialize(item),...(admin?{applications:totals.get(String(item._id))??0}:{})})),
       meta: pageMeta(query.page, query.limit, total),
     };
   }

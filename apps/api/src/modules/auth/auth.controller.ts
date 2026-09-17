@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
 import type { Request, Response } from "express";
 import { randomToken } from "../../common/utils/crypto";
 import { AuthService } from "./auth.service";
-import { EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
+import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
 import { AuthRequest, SessionGuard, sessionToken } from "./auth.guard";
 
 @ApiTags("authentication")
@@ -41,5 +41,7 @@ export class AuthController {
     return result;
   }
   @Post("forgot-password") forgot(@Body() input: EmailDto) { return this.auth.forgot(input); }
+  @Patch("account") @ApiCookieAuth() @UseGuards(SessionGuard) updateAccount(@Req() request: AuthRequest, @Body() input: AccountSettingsDto) { return this.auth.updateAccount(request.user, input); }
+  @Post("deactivate") @ApiCookieAuth() @UseGuards(SessionGuard) async deactivate(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) { const result = await this.auth.deactivate(request.user.id); this.clearCookies(response); return result; }
   @Post("reset-password") reset(@Body() input: ResetPasswordDto) { return this.auth.reset(input); }
 }

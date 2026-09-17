@@ -27,7 +27,7 @@ export function ApplyForm({
         body: JSON.stringify({
           opportunityId,
           coverNote: data.get("coverNote"),
-          ...(data.get("showreel") ? { showreel: data.get("showreel") } : {}),
+          ...(data.get("showreel") ? { showreelUrl: data.get("showreel") } : {}),
         }),
       });
       setDone(true);

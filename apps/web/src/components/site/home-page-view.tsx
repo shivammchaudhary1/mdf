@@ -1,10 +1,12 @@
+"use client";
 import Link from "next/link";
-import data from "@/data/public-site.json";
+import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteMedia } from "@/components/site/site-media";
 
 export function HomePageView() {
+  const data=usePublicData("home");
   return (
     <>
       <SiteHeader dark />

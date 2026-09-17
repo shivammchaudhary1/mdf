@@ -14,6 +14,19 @@
 
 Never mark `[x]` from code presence alone.
 
+## Completion-branch verification — 2026-09-18
+
+Detailed evidence, commands, backend audit and remaining blockers: [V1_COMPLETION_VERIFICATION.md](V1_COMPLETION_VERIFICATION.md).
+
+- [x] Local `npm run verify` passes: lint, web/API typechecks, 3 suites / 10 unit tests, both builds, expanded integration suite.
+- [x] UI source regression check passes against `ab9d8ff`: existing class/style attributes unchanged; no CSS/design changes.
+- [x] Browser smoke checks: login, project create, profile save, account setting save, CMS publish, public blog list/detail, logout.
+- [~] CI includes isolated MongoDB integration; remote run and pinned Node 24.11.1 verification remain.
+- [!] Missing approved controls block several end-to-end workflows. See report; no redesign was performed.
+- [!] Real content, credentials, cross-browser/mobile UAT and final approval remain unavailable.
+
+Stage 17 remains incomplete. Stage 18 has not started.
+
 ## Current repository checkpoint
 
 Merged into `master`:
@@ -30,11 +43,11 @@ Merged into `master`:
 - [x] Local/S3 media abstraction added
 
 Current known blockers/work:
-- [ ] GitHub CI green — currently blocked by two `no-explicit-any` lint errors in `talent.service.ts`
-- [ ] Final merged-master integration suite passes
-- [ ] Member UI fully connected to real APIs
-- [ ] Admin UI fully connected to real APIs
-- [ ] All demo dashboard behavior/data removed after real API wiring
+- [~] GitHub CI green — local lint blocker fixed and quality gate passes; remote run still unverified
+- [x] Completion-branch integration suite passes against isolated MongoDB 8; merged-master rerun still required after merge
+- [~] Member UI connected to real APIs for existing controls; missing-control blockers remain
+- [~] Admin UI connected to real APIs for existing controls; missing-control blockers remain
+- [~] Live dashboard reads/mutations replace demo records; unsupported workflows and fixture type files remain
 - [ ] Stage 17 UAT complete
 - [ ] Stage 18 deployment — intentionally not started
 
@@ -117,8 +130,8 @@ Implemented:
 
 Still verify:
 - [ ] Correct final frontend redirects
-- [ ] Real logout from current member/admin UI
-- [ ] Session/device management end to end
+- [x] Real logout from current member/admin UI — API revocation and browser return to login verified
+- [!] Session API tested; current UI has no session/device management controls
 - [ ] Final merged-master integration suite
 
 **Stage status:** `[~]`
@@ -136,11 +149,11 @@ Implemented foundation:
 - [x] Verified-member field/admin control foundation
 
 Still complete/verify:
-- [ ] Current member UI uses real profile API everywhere
-- [ ] Portfolio add/remove flow end to end
-- [ ] External video/showreel flow end to end
-- [ ] Settings flow end to end
-- [ ] Public/private profile privacy review
+- [~] Existing editable profile fields use real API; skills/showreel/preview controls remain blocked
+- [~] Upload/remove API wiring and privacy integration pass; browser upload/removal UAT remains
+- [!] Showreel URL entry requires a missing approved input under the UI freeze
+- [~] Account/preferences/deactivation wired; account save browser check passed, remaining UAT pending
+- [~] Privacy fixes and key integration cases pass; exhaustive lifecycle/concurrency review remains
 
 **Stage status:** `[~]`
 
@@ -160,7 +173,7 @@ Implemented:
 - [x] Private/public visibility foundation
 
 Still verify:
-- [ ] Large-image end-to-end upload
+- [x] Large-image API upload — 2400×1600 PNG processing/access tested
 - [ ] Visual quality
 - [ ] Published/shared visibility edge cases
 - [ ] S3 production configuration later in Stage 18
@@ -179,10 +192,10 @@ Backend implementation exists:
 - [~] Public list/detail APIs
 
 Still complete:
-- [ ] Admin UI wired to real project APIs
-- [ ] Admin UI wired to real casting APIs
+- [~] Existing project create/edit controls wired; browser creation passed; publishing/media/archive controls absent
+- [~] Creation/applicant reads/archive wired; edit/close controls absent
 - [ ] Public list/detail behavior verified
-- [ ] Partial-update validation edge cases verified
+- [x] Partial casting age/date-update validation verified against existing values
 - [ ] Closed casting application rule verified on final master
 
 **Stage status:** `[~]`
@@ -204,8 +217,8 @@ Backend implementation exists:
 - [~] Duplicate application rule
 
 Still complete:
-- [ ] Member UI wired to real application API
-- [ ] Admin UI wired to real application API
+- [~] Real application list/status wired; approved detail page lacks submission/detail controls
+- [~] Real list/search/review/status/notes wired; full browser review UAT pending
 - [ ] Status changes reflected end to end
 - [ ] Email behavior verified
 
@@ -217,11 +230,11 @@ Still complete:
 
 - [x] Approved member-dashboard UI exists
 - [~] Backend member-dashboard endpoint exists
-- [ ] Replace demo JSON/dashboard values with real API data
-- [ ] Replace demo logout with real logout
-- [ ] Real recent applications
-- [ ] Real opportunities
-- [ ] Real profile completion/verification
+- [~] Replace demo JSON/dashboard values with real API data — profile views/match analytics unavailable
+- [x] Replace demo logout with real logout
+- [x] Real recent applications — API integration and type/build checks pass
+- [x] Real opportunities — API feed and persisted bookmarks verified
+- [x] Real profile completion/verification — integration and browser profile save verified
 - [ ] Final desktop/mobile functional verification
 
 **Stage status:** `[~]`
@@ -233,11 +246,11 @@ Still complete:
 - [x] Approved Super Admin UI exists
 - [~] Backend dashboard metrics/activity exists
 - [~] Backend users/applications/projects/castings management APIs exist
-- [ ] Replace admin demo JSON/fixture values with real APIs
-- [ ] Verify/unverify wired
-- [ ] Suspend/reactivate wired
-- [ ] Application review/status/notes wired
-- [ ] Project/casting management wired
+- [~] Active admin collections/metrics use APIs; type fixtures retained and full UAT pending
+- [~] Verify/unverify wired and backend integration passes; browser verification UAT pending
+- [!] Backend tested; current admin UI has no suspend/reactivate control
+- [~] Wired; API integration and type/build checks pass; browser UAT pending
+- [~] Existing forms wired; additional missing controls listed in verification report
 - [ ] Final desktop/mobile functional verification
 
 **Stage status:** `[~]`
@@ -262,12 +275,12 @@ Backend implementation exists:
 - [~] Optional project association
 
 Current blocker:
-- [ ] Remove two `no-explicit-any` lint errors in `talent.service.ts`
+- [x] Remove two `no-explicit-any` lint errors in `talent.service.ts`
 
 Still verify:
-- [ ] Public privacy response
+- [x] Public privacy response — birth date/email excluded; list and detail assertions pass
 - [ ] Multiple-filter correctness
-- [ ] Saved-list persistence
+- [x] Saved-list persistence and project association — integration verified
 - [ ] Admin UI wiring
 - [ ] Large-list query efficiency
 
@@ -280,11 +293,11 @@ Still verify:
 - [~] Lightweight CMS backend includes blog
 - [x] Admin blog UI exists
 - [x] Public blog UI exists
-- [ ] Wire admin blog UI to real API
+- [~] Existing blog form wired; browser publishing passed; body/SEO/media controls absent
 - [ ] Verify create/edit/draft/publish/archive
 - [ ] Verify cover/excerpt/rich content/tags/categories
 - [ ] Verify SEO title/description
-- [ ] Verify publish-date requirement
+- [x] CMS publish date represented; future publication excluded from public list/detail/search by integration tests
 - [ ] Verify public list/detail/latest posts
 
 **Stage status:** `[~]`
@@ -296,7 +309,7 @@ Still verify:
 - [~] Lightweight CMS backend foundation exists
 - [x] Admin UI sections exist
 - [x] Public UI sections exist
-- [ ] Wire admin sections to real APIs
+- [~] Existing CMS forms wired; additional controls and full browser UAT remain
 - [ ] Verify gallery upload/category/reorder/delete
 - [ ] Verify BTS category/project relation
 - [ ] Verify shows external links/thumbnails
@@ -320,7 +333,7 @@ Implemented:
 Blocked/remaining:
 - [!] Hostinger SMTP credentials
 - [ ] Real SMTP delivery test
-- [ ] Admin contact UI real API wiring
+- [~] Real inbox/status wired and backend verified; reply workflow needs SMTP/composer
 - [ ] Welcome email only if still required by product scope
 
 **Stage status:** `[~]`
@@ -331,7 +344,7 @@ Blocked/remaining:
 
 - [~] Generic CMS supports `settings` and `legal`
 - [x] Admin settings/legal UI exists
-- [ ] Wire settings/legal UI to API
+- [~] Existing settings/legal forms wired; final content and browser UAT remain
 - [ ] Ensure singleton-like settings behavior where appropriate
 - [!] Real company name/GST/CIN/email/phone/address/socials
 - [!] Final Privacy Policy
@@ -360,7 +373,7 @@ Security foundation implemented:
 - [~] Safe request IDs/error filtering
 
 Still verify:
-- [ ] `npm run check` green
+- [x] `npm run check` green — 3 suites / 10 tests plus lint, typechecks and both builds
 - [ ] No public sensitive-field leaks
 - [ ] No unsafe debug/body/cookie logging
 - [ ] Pagination/query bounds
@@ -375,8 +388,8 @@ Still verify:
 # Stage 17 — Full Testing & UAT
 
 Automated:
-- [ ] `npm run check`
-- [ ] `npm run test:integration`
+- [x] `npm run check`
+- [x] `npm run test:integration` — expanded V1 suite, isolated MongoDB on port 27018
 - [ ] GitHub Actions green
 - [ ] Auth/session flows
 - [ ] Profile/portfolio

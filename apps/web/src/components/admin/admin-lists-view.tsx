@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import { useEffect, useState, type FormEvent } from "react";
+import type data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { listView } from "@/services/admin-workspace";
+import { api } from "@/services/api";
 import { useToast } from "@/components/ui/toast-provider";
 import { AdminPageHeader,AdminPrimaryButton,AdminMoreButton } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
@@ -10,19 +13,16 @@ type TalentList=(typeof data.savedLists)[number];
 
 export function AdminListsView(){
  const toast=useToast();
- const [lists,setLists]=useState<TalentList[]>([...data.savedLists]);
+ const [lists,,refresh]=useAdminRecords("/admin/lists",listView);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<TalentList|null>(null);
+ const [details,setDetails]=useState<{id:string;members:{id:string;name:string}[]}|null>(null);
+ useEffect(()=>{if(!selected)return;let active=true;void api<{members:{id:string;name:string}[]}>(`/admin/lists/${selected.id}`).then(result=>{if(active)setDetails({id:selected.id,members:result.members});}).catch(error=>toast.error(error.message));return()=>{active=false;};},[selected,toast]);
 
- function createList(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const form=new FormData(event.currentTarget);
-  const name=String(form.get("name")??"").trim();
-  if(!name){toast.error("List name is required.");return}
-  const list:TalentList={id:`list-${Date.now()}`,name,members:0,updated:"Just now",owner:String(form.get("owner")??"Shivam")};
-  setLists(current=>[list,...current]);
-  setCreating(false);
-  toast.success(`${name} created.`);
+ async function createList(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();const form=new FormData(event.currentTarget);const name=String(form.get("name")??"").trim();
+  try{await api("/admin/lists",{method:"POST",body:JSON.stringify({name,purpose:String(form.get("purpose")??"")})});await refresh();setCreating(false);toast.success("Talent list created.");}
+  catch(error){toast.error(error instanceof Error?error.message:"Unable to create list.");}
  }
 
  return <div className="ad-stack">
@@ -37,7 +37,7 @@ export function AdminListsView(){
     <AdminDialogForm onSubmit={createList}>
       <AdminDialogGrid>
         <AdminFormField label="List Name" wide><input name="name" placeholder="e.g. Lead Actor Options" autoFocus required/></AdminFormField>
-        <AdminFormField label="Owner"><input name="owner" defaultValue="Shivam"/></AdminFormField>
+        <AdminFormField label="Owner"><input name="owner" value="Current account" readOnly/></AdminFormField>
         <AdminFormField label="Purpose"><input name="purpose" placeholder="Casting / Project / Crew"/></AdminFormField>
       </AdminDialogGrid>
       <AdminDialogActions onCancel={()=>setCreating(false)} primaryLabel="Create List"/>
@@ -45,7 +45,7 @@ export function AdminListsView(){
   </AdminDialog>
 
   <AdminDialog open={!!selected} onClose={()=>setSelected(null)} eyebrow="Saved talent list" title={selected?.name??"Talent List"} description="Temporary list preview">
-    {selected&&<div className="ad-list-preview"><div className="ad-list-preview-number">{selected.members}</div><p>Members currently saved to this list.</p><div className="ad-dialog-empty"><strong>No live talent records are loaded yet.</strong><span>After backend integration, this panel will show saved member cards with remove/reorder controls.</span></div><AdminDialogActions onCancel={()=>setSelected(null)} primaryLabel="Add Talent" primaryType="button" onPrimary={()=>toast.success("Talent picker UI will connect to real member data after backend integration.")}/></div>}
+    {selected&&<div className="ad-list-preview"><div className="ad-list-preview-number">{selected.members}</div><p>Members currently saved to this list.</p><div className="ad-dialog-empty"><strong>{details?.id===selected.id?(details.members.map(member=>member.name).join(", ")||"No members saved yet."):"Loading saved members…"}</strong><span>Saved membership is loaded from your talent list.</span></div><AdminDialogActions onCancel={()=>setSelected(null)} primaryLabel="Add Talent" primaryType="button" onPrimary={()=>toast.info("Talent selection is not available in this screen yet.")}/></div>}
   </AdminDialog>
  </div>
 }

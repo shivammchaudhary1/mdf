@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import type data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { memberView } from "@/services/admin-workspace";
+import { api } from "@/services/api";
 import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
@@ -15,39 +18,19 @@ export function AdminMembersView(){
  const active=useAdminDashboardStore(s=>s.memberFilter);
  const setActive=useAdminDashboardStore(s=>s.setMemberFilter);
  const [query,setQuery]=useState("");
- const [members,setMembers]=useState<Member[]>([...data.members]);
+ const [members,,refresh]=useAdminRecords(`/admin/users?search=${encodeURIComponent(query)}${active==="Verified"?"&verified=true":active==="Unverified"||active==="Needs Review"?"&verified=false":""}`,memberView);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<Member|null>(null);
 
  const visible=useMemo(()=>members.filter(m=>(active==="All"||(active==="Verified"?m.verified:active==="Unverified"?!m.verified:m.status===active))&&`${m.name} ${m.email} ${m.role} ${m.city}`.toLowerCase().includes(query.toLowerCase())),[active,query,members]);
 
  function addMember(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const form=new FormData(event.currentTarget);
-  const name=String(form.get("name")??"").trim();
-  if(!name){toast.error("Member name is required.");return}
-  const member:Member={
-    id:`member-${Date.now()}`,
-    name,
-    email:String(form.get("email")??""),
-    role:String(form.get("role")??"Creative Professional"),
-    city:String(form.get("city")??""),
-    joined:"Just now",
-    completion:20,
-    verified:false,
-    status:"Needs Review",
-    image:""
-  };
-  setMembers(current=>[member,...current]);
-  setCreating(false);
-  toast.success(`${name} added to the member UI.`);
+  event.preventDefault(); toast.error("Members must register through the sign-up page. Admin invitations are not available yet.");
  }
-
- function toggleVerify(){
+ async function toggleVerify(){
   if(!selected)return;
-  setMembers(current=>current.map(m=>m.id===selected.id?{...m,verified:!m.verified,status:!m.verified?"Active":"Needs Review"}:m));
-  toast.success(selected.verified?"Verification removed.":"Member verified in the UI.");
-  setSelected(null);
+  try { await api(`/admin/users/${selected.id}`,{method:"PATCH",body:JSON.stringify({verified:!selected.verified})}); await refresh(); toast.success("Verification updated."); setSelected(null); }
+  catch(error){toast.error(error instanceof Error?error.message:"Unable to update member.");}
  }
 
  return <div className="ad-stack">

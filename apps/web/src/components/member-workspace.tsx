@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
 import { useMemberDashboardStore } from "@/store/member-dashboard-store";
-import data from "@/data/member-dashboard.json";
+import { MemberData, useMemberData } from "@/components/member-data";
+import { api } from "@/services/api";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { allPages, uploadMedia, type OpportunityRecord } from "@/services/workspace";
 
 const nav = [
   ["dashboard", "Dashboard", "/member"],
@@ -35,15 +38,16 @@ function Icon({ name }: { name: string }) {
 }
 
 function Shell({ section, children }: { section: string; children: ReactNode }) {
+  const { data } = useMemberData();
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
   const open = useMemberDashboardStore((s) => s.mobileOpen);
   const setOpen = useMemberDashboardStore((s) => s.setMobileOpen);
 
-  function logout() {
-    toast.success("Signed out from the demo dashboard.");
-    router.push("/login");
+  async function logout() {
+    try { await api("/auth/logout", { method: "POST" }); router.replace("/login"); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Unable to sign out."); }
   }
 
   return (
@@ -112,6 +116,7 @@ function Status({ status, tone }: { status: string; tone: string }) {
 }
 
 function Dashboard() {
+  const { data } = useMemberData();
   return (
     <div className="md-stack">
       <section className="md-welcome-grid">
@@ -170,6 +175,22 @@ function Dashboard() {
 }
 
 function Profile() {
+  const { data, refresh } = useMemberData();
+  const fields = useRef<HTMLDivElement>(null);
+  const [saving, setSaving] = useState(false);
+  function choosePhoto() {
+    if(saving)return;const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";
+    input.onchange=async()=>{const file=input.files?.[0];if(!file)return;setSaving(true);try{const result=await uploadMedia(file);await api("/member/profile",{method:"PUT",body:JSON.stringify({photoMediaId:result.id})});await refresh();toast.success("Profile photo saved.");}catch(error){toast.error(error instanceof Error?error.message:"Unable to save photo.");}finally{setSaving(false);}};input.click();
+  }
+  async function save() {
+    if (saving) return;
+    const values = Array.from(fields.current?.querySelectorAll("input, textarea") ?? []).map(field => (field as HTMLInputElement).value);
+    const [bio, profession, city, gender, birthDate, experience, availability] = values;
+    setSaving(true);
+    try { await api("/member/profile", { method: "PUT", body: JSON.stringify({bio,profession,city,gender,...(birthDate?{birthDate}:{}),experience,availability}) }); await refresh(); setEditing(false); toast.success("Profile saved."); }
+    catch(error) { toast.error(error instanceof Error?error.message:"Unable to save profile."); }
+    finally { setSaving(false); }
+  }
   const toast = useToast();
   const [editing,setEditing]=useState(false);
   const p=data.profile;
@@ -177,33 +198,49 @@ function Profile() {
     <Header kicker="Your identity" title="My Profile" description="Keep your public profile current so casting teams see the right version of you." action={<button className="md-secondary" onClick={()=>setEditing(v=>!v)}><Icon name="edit"/>{editing?"Cancel":"Edit Profile"}</button>}/>
     <section className="md-profile-grid">
       <aside className="md-card md-profile-summary">
-        <div className="md-profile-photo"><SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full"/><button><Icon name="edit"/></button></div>
+        <div className="md-profile-photo"><SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full"/><button onClick={choosePhoto} disabled={saving}><Icon name="edit"/></button></div>
         <h2>{data.member.name}</h2><p>{data.member.profession}</p>
-        <div className="md-badges"><span>✓ Verified Member</span><span>{data.member.availability}</span></div>
+        <div className="md-badges"><span>{data.member.verified?"✓ Verified Member":"Not verified"}</span><span>{data.member.availability}</span></div>
         <div className="md-mini-details"><div><span>Location</span><strong>{data.member.location}</strong></div><div><span>Experience</span><strong>{p.experience}</strong></div><div><span>Member since</span><strong>{data.member.memberSince}</strong></div></div>
         <button className="md-primary full">Preview Public Profile</button>
       </aside>
-      <div className="md-form-stack">
+      <div className="md-form-stack" ref={fields} key={`${JSON.stringify(data.profile)}-${editing}`}>
         <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Introduction</p><h2>About You</h2></div></div><label className="md-field"><span>Bio</span><textarea rows={5} defaultValue={p.bio} disabled={!editing}/></label></article>
         <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Basic details</p><h2>Personal & Professional</h2></div></div><div className="md-form-grid">{[["Profession",p.profession],["City",p.city],["Gender",p.gender],["Date of Birth",p.birthDate],["Experience",p.experience],["Availability",p.availability]].map(([l,v])=><label className="md-field" key={l}><span>{l}</span><input defaultValue={v} disabled={!editing}/></label>)}</div></article>
         <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Skills</p><h2>Skills & Languages</h2></div></div><div className="md-tag-block"><span>Skills</span><div>{p.skills.map(x=><i key={x}>{x}</i>)}</div><span>Languages</span><div>{p.languages.map(x=><i key={x}>{x}</i>)}</div></div></article>
-        {editing&&<div className="md-save-row"><button className="md-secondary" onClick={()=>setEditing(false)}>Cancel</button><button className="md-primary" onClick={()=>{setEditing(false);toast.success("Demo profile saved.");}}>Save Changes</button></div>}
+        {editing&&<div className="md-save-row"><button className="md-secondary" onClick={()=>setEditing(false)}>Cancel</button><button className="md-primary" disabled={saving} onClick={save}>Save Changes</button></div>}
       </div>
     </section>
   </div>;
 }
 
 function Portfolio() {
+  const { data, profile, refresh } = useMemberData();
+  const [busy, setBusy] = useState(false);
+  const [removing,setRemoving]=useState<string|null>(null);
+  async function remove(){if(!removing||busy)return;setBusy(true);try{await api("/member/profile",{method:"PUT",body:JSON.stringify({portfolioMediaIds:(profile.portfolioMediaIds??[]).filter(id=>id!==removing)})});await refresh();setRemoving(null);toast.success("Photograph removed from portfolio.");}catch(error){toast.error(error instanceof Error?error.message:"Unable to remove photograph.");}finally{setBusy(false);}}
+  function chooseFile(resume = false) {
+    if (busy) return;
+    const input = document.createElement("input"); input.type="file"; input.accept=resume?"application/pdf":"image/jpeg,image/png,image/webp";
+    input.onchange = async () => {
+      const file = input.files?.[0]; if (!file) return;
+      setBusy(true);
+      try { const result = await uploadMedia(file); await api("/member/profile",{method:"PUT",body:JSON.stringify(resume?{resumeMediaId:result.id}:{portfolioMediaIds:[...new Set([...(profile.portfolioMediaIds??[]),result.id])]})}); await refresh(); toast.success("Upload saved."); }
+      catch(error){toast.error(error instanceof Error?error.message:"Upload failed.");} finally {setBusy(false);}
+    }; input.click();
+  }
   const toast=useToast();
   return <div className="md-stack">
-    <Header kicker="Your work" title="My Portfolio" description="Curate the photographs, showreel and material that represent your creative identity." action={<button className="md-primary" onClick={()=>toast.success("Upload UI ready for media integration.")}><Icon name="upload"/>Add Photos</button>}/>
-    <section className="md-portfolio-hero"><div><p className="md-kicker">Portfolio health</p><h2>Your portfolio is almost casting-ready.</h2><span>Add 2–4 strong photographs and one current showreel for a stronger profile.</span></div><div><strong>6</strong><span>photos</span></div></section>
-    <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Photographs</p><h2>Portfolio Gallery</h2></div><span>Temporary JSON data</span></div><div className="md-portfolio-grid">{data.portfolio.map(i=><div key={i.id} className="md-portfolio-item"><SiteMedia src={i.image} alt={i.title} kind="gallery" className="aspect-[4/5] rounded-xl"/><p>{i.title}<span>{i.category}</span></p><button><Icon name="edit"/></button></div>)}<button className="md-add-photo" onClick={()=>toast.success("Upload placeholder ready.")}><Icon name="upload"/><strong>Add Photograph</strong><span>JPG / PNG / WebP</span></button></div></article>
-    <section className="md-media-grid"><article className="md-card"><p className="md-kicker">Video</p><h2>Showreel</h2><div className="md-empty-media">▶<strong>No showreel added yet</strong><button>Add showreel link</button></div></article><article className="md-card"><p className="md-kicker">Document</p><h2>Resume / CV</h2><div className="md-empty-media">PDF<strong>Resume ready for upload</strong><button>Upload resume</button></div></article></section>
+    <Header kicker="Your work" title="My Portfolio" description="Curate the photographs, showreel and material that represent your creative identity." action={<button className="md-primary" disabled={busy} onClick={()=>chooseFile()}><Icon name="upload"/>Add Photos</button>}/>
+    <section className="md-portfolio-hero"><div><p className="md-kicker">Portfolio health</p><h2>Your portfolio is almost casting-ready.</h2><span>Add 2–4 strong photographs and one current showreel for a stronger profile.</span></div><div><strong>{data.portfolio.length}</strong><span>photos</span></div></section>
+    <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Photographs</p><h2>Portfolio Gallery</h2></div><span>{data.portfolio.length} photographs</span></div><div className="md-portfolio-grid">{data.portfolio.map(i=><div key={i.id} className="md-portfolio-item"><SiteMedia src={i.image} alt={i.title} kind="gallery" className="aspect-[4/5] rounded-xl"/><p>{i.title}<span>{i.category}</span></p><button onClick={()=>setRemoving(i.id)}><Icon name="edit"/></button></div>)}<button className="md-add-photo" disabled={busy} onClick={()=>chooseFile()}><Icon name="upload"/><strong>Add Photograph</strong><span>JPG / PNG / WebP</span></button></div></article>
+    <section className="md-media-grid"><article className="md-card"><p className="md-kicker">Video</p><h2>Showreel</h2><div className="md-empty-media">▶<strong>No showreel added yet</strong><button onClick={()=>toast.info("Showreel editing is not available yet.")}>Add showreel link</button></div></article><article className="md-card"><p className="md-kicker">Document</p><h2>Resume / CV</h2><div className="md-empty-media">PDF<strong>{profile.resume?"Resume uploaded":"Resume ready for upload"}</strong><button disabled={busy} onClick={()=>chooseFile(true)}>Upload resume</button></div></article></section>
+    <ConfirmDialog open={!!removing} title="Remove this photograph?" description="It will be removed from your portfolio. Other published uses are preserved." confirmLabel="Remove" destructive loading={busy} onConfirm={()=>void remove()} onCancel={()=>setRemoving(null)}/>
   </div>;
 }
 
 function Applications() {
+  const { data } = useMemberData();
   const active=useMemberDashboardStore(s=>s.applicationFilter), setActive=useMemberDashboardStore(s=>s.setApplicationFilter);
   const filters=["All","Submitted","Under Review","Shortlisted","Not Selected"];
   const visible=active==="All"?data.applications:data.applications.filter(a=>a.status===active);
@@ -215,25 +252,52 @@ function Applications() {
 }
 
 function Opportunities() {
-  const toast=useToast(), active=useMemberDashboardStore(s=>s.opportunityFilter), setActive=useMemberDashboardStore(s=>s.setOpportunityFilter), saved=useMemberDashboardStore(s=>s.saved), toggle=useMemberDashboardStore(s=>s.toggleSaved);
-  const filters=["All","Acting","Commercial"], visible=active==="All"?data.opportunities:data.opportunities.filter(o=>o.category===active);
+  const { data, profile, refresh } = useMemberData();
+  const saved=profile.savedOpportunityIds??[];
+  const [saving,setSaving]=useState(false);
+  async function toggle(id:string){if(saving)return;setSaving(true);try{await api("/member/settings",{method:"PATCH",body:JSON.stringify({savedOpportunityIds:saved.includes(id)?saved.filter(x=>x!==id):[...saved,id]})});await refresh();}catch(error){toast.error(error instanceof Error?error.message:"Unable to save opportunity.");}finally{setSaving(false);}}
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  async function viewOpportunity(id: string) {
+    try { const opportunity=(await allPages<OpportunityRecord>("/member/opportunities")).find(item=>item._id===id); if(!opportunity)throw new Error("This opportunity is no longer available."); router.push(`/${opportunity.opportunityType==="CASTING"?"casting":"projects"}/${opportunity.slug}`); }
+    catch(error){toast.error(error instanceof Error?error.message:"Unable to open opportunity.");}
+  }
+  const toast=useToast(), active=useMemberDashboardStore(s=>s.opportunityFilter), setActive=useMemberDashboardStore(s=>s.setOpportunityFilter);
+  const filters=["All","Acting","Commercial"], visible=data.opportunities.filter(o=>(active==="All"||o.category===active)&&`${o.title} ${o.project}`.toLowerCase().includes(query.toLowerCase()));
   return <div className="md-stack">
-    <Header kicker="Discover roles" title="Opportunities" description="Explore casting calls selected around your profile, location and creative interests." action={<div className="md-search-box"><Icon name="search"/><input placeholder="Search roles or projects"/></div>}/>
+    <Header kicker="Discover roles" title="Opportunities" description="Explore casting calls selected around your profile, location and creative interests." action={<div className="md-search-box"><Icon name="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search roles or projects"/></div>}/>
     <div className="md-filters">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={active===f?"active":""}>{f}</button>)}</div>
-    <section className="md-opportunity-grid">{visible.map(o=><article className="md-opportunity-card" key={o.id}><div className="md-opp-image"><SiteMedia src={o.image} alt={o.title} kind="team" className="h-full min-h-[210px]"/><span>{o.match} match</span><button className={saved.includes(o.id)?"saved":""} onClick={()=>toggle(o.id)}><Icon name="bookmark"/></button></div><div className="md-opp-body"><p>{o.category} · {o.paid?"Paid":"Unpaid"}</p><h2>{o.title}</h2><strong>{o.project}</strong><div><span>{o.location}</span><span>Deadline {o.deadline}</span></div><button className="md-primary full" onClick={()=>toast.success("Application flow will connect after UI approval.")}>View & Apply</button></div></article>)}</section>
+    <section className="md-opportunity-grid">{visible.map(o=><article className="md-opportunity-card" key={o.id}><div className="md-opp-image"><SiteMedia src={o.image} alt={o.title} kind="team" className="h-full min-h-[210px]"/><span>{o.match} match</span><button className={saved.includes(o.id)?"saved":""} onClick={()=>toggle(o.id)}><Icon name="bookmark"/></button></div><div className="md-opp-body"><p>{o.category} · {"—"}</p><h2>{o.title}</h2><strong>{o.project}</strong><div><span>{o.location}</span><span>Deadline {o.deadline}</span></div><button className="md-primary full" onClick={()=>viewOpportunity(o.id)}>View & Apply</button></div></article>)}</section>
   </div>;
 }
 
 function Settings() {
-  const toast=useToast(); const [cast,setCast]=useState(true),[mail,setMail]=useState(true),[visible,setVisible]=useState(true);
+  const { data, profile, refresh } = useMemberData();
+  const fields=useRef<HTMLDivElement>(null);
+  const [saving,setSaving]=useState(false);
+  const [deactivating,setDeactivating]=useState(false);
+  const router=useRouter();
+  async function deactivate(){if(saving)return;setSaving(true);try{await api("/auth/deactivate",{method:"POST"});router.replace("/login");}catch(error){toast.error(error instanceof Error?error.message:"Unable to deactivate account.");}finally{setSaving(false);}}
+  async function save() {
+    if(saving)return; setSaving(true);
+    const inputs=fields.current?.querySelectorAll("input");
+    try { await api("/auth/account",{method:"PATCH",body:JSON.stringify({email:inputs?.[0].value,mobile:inputs?.[1].value})}); await refresh(); toast.success("Account settings saved."); }
+    catch(error){toast.error(error instanceof Error?error.message:"Unable to save settings.");}finally{setSaving(false);}
+  }
+  async function preference(key: "emailCastingAlerts"|"emailUpdates"|"publicVisible", value: boolean) {
+    try { await api("/member/settings",{method:"PATCH",body:JSON.stringify({[key]:value})}); await refresh(); toast.success("Preference saved."); }
+    catch(error){toast.error(error instanceof Error?error.message:"Unable to save preference.");}
+  }
+  const toast=useToast(); const cast=profile.emailCastingAlerts??true, mail=profile.emailUpdates??true, visible=profile.publicVisible??true;
   const Toggle=({title,desc,value,set}:{title:string;desc:string;value:boolean;set:(v:boolean)=>void})=><div className="md-toggle-row"><div><strong>{title}</strong><p>{desc}</p></div><button className={value?"on":""} onClick={()=>set(!value)}><span/></button></div>;
   return <div className="md-stack">
     <Header kicker="Account controls" title="Settings" description="Manage your account details, preferences and public profile visibility."/>
-    <section className="md-settings-grid"><div className="md-form-stack"><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Account</p><h2>Login Details</h2></div></div><div className="md-form-grid"><label className="md-field"><span>Email</span><input defaultValue={data.member.email}/></label><label className="md-field"><span>Mobile</span><input defaultValue={data.member.mobile}/></label></div><div className="md-save-row"><Link href="/forgot-password" className="md-secondary">Change Password</Link><button className="md-primary" onClick={()=>toast.success("Settings saved for UI demo.")}>Save Changes</button></div></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Notifications</p><h2>Email & Opportunity Alerts</h2></div></div><Toggle title="Casting recommendations" desc="Receive alerts when a role closely matches your profile." value={cast} set={setCast}/><Toggle title="Community updates" desc="Receive useful product news and community updates." value={mail} set={setMail}/></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Privacy</p><h2>Profile Visibility</h2></div></div><Toggle title="Public talent profile" desc="Allow casting teams and visitors to discover your profile." value={visible} set={setVisible}/></article></div><aside className="md-card md-membership"><p className="md-kicker">Account status</p><h2>Your membership</h2><span>Your account is active and ready for opportunities.</span><div><small>ACTIVE</small><strong>Verified Member</strong></div><button>Deactivate Account</button></aside></section>
+    <section className="md-settings-grid"><div className="md-form-stack" ref={fields} key={`${data.member.email}-${data.member.mobile}`}><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Account</p><h2>Login Details</h2></div></div><div className="md-form-grid"><label className="md-field"><span>Email</span><input defaultValue={data.member.email}/></label><label className="md-field"><span>Mobile</span><input defaultValue={data.member.mobile}/></label></div><div className="md-save-row"><Link href="/forgot-password" className="md-secondary">Change Password</Link><button className="md-primary" disabled={saving} onClick={save}>Save Changes</button></div></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Notifications</p><h2>Email & Opportunity Alerts</h2></div></div><Toggle title="Casting recommendations" desc="Receive alerts when a role closely matches your profile." value={cast} set={v=>void preference("emailCastingAlerts",v)}/><Toggle title="Community updates" desc="Receive useful product news and community updates." value={mail} set={v=>void preference("emailUpdates",v)}/></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Privacy</p><h2>Profile Visibility</h2></div></div><Toggle title="Public talent profile" desc="Allow casting teams and visitors to discover your profile." value={visible} set={v=>void preference("publicVisible",v)}/></article></div><aside className="md-card md-membership"><p className="md-kicker">Account status</p><h2>Your membership</h2><span>Your account is active and ready for opportunities.</span><div><small>ACTIVE</small><strong>{data.member.verified?"Verified Member":"Not verified"}</strong></div><button onClick={()=>setDeactivating(true)}>Deactivate Account</button></aside></section>
+    <ConfirmDialog open={deactivating} title="Deactivate your account?" description="You will be signed out. Contact the team to reactivate your account." confirmLabel="Deactivate" destructive loading={saving} onConfirm={()=>void deactivate()} onCancel={()=>setDeactivating(false)}/>
   </div>;
 }
 
 export function MemberWorkspace({section="dashboard"}:{section?:string}) {
   const safe = ["dashboard","profile","portfolio","applications","opportunities","settings"].includes(section)?section:"dashboard";
-  return <Shell section={safe}>{safe==="profile"?<Profile/>:safe==="portfolio"?<Portfolio/>:safe==="applications"?<Applications/>:safe==="opportunities"?<Opportunities/>:safe==="settings"?<Settings/>:<Dashboard/>}</Shell>;
+  return <MemberData><Shell section={safe}>{safe==="profile"?<Profile/>:safe==="portfolio"?<Portfolio/>:safe==="applications"?<Applications/>:safe==="opportunities"?<Opportunities/>:safe==="settings"?<Settings/>:<Dashboard/>}</Shell></MemberData>;
 }

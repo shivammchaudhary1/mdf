@@ -125,8 +125,10 @@ export class CastingService {
       this.castings.countDocuments(filter),
     ]);
 
+    const counts = admin ? await this.castings.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {opportunityId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$opportunityId", count: {$sum: 1}}}]).toArray() : [];
+    const totals = new Map(counts.map(item=>[String(item._id),item.count]));
     return {
-      items: items.map((item) => this.serialize(item)),
+      items: items.map((item) => ({...this.serialize(item),...(admin?{applications:totals.get(String(item._id))??0}:{})})),
       meta: pageMeta(query.page, query.limit, total),
     };
   }
@@ -267,7 +269,15 @@ export class CastingService {
     input: UpdateCastingDto,
     actorId: string,
   ) {
-    await this.validate(input);
+    const existing = await this.castings.findOne({ _id: objectId(id), archived: false }).lean();
+    if (!existing) throw new NotFoundException("Casting call not found.");
+    await this.validate({
+      ageMin: existing.ageMin,
+      ageMax: existing.ageMax,
+      deadline: existing.deadline?.toISOString(),
+      shootDate: existing.shootDate?.toISOString(),
+      ...input,
+    });
     await this.media.assertOwnedBy(actorId, [
       input.coverMediaId,
     ]);

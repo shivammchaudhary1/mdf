@@ -1,7 +1,12 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import type data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { castingView } from "@/services/admin-workspace";
+import { allPages, slugFor, type ApplicationRecord } from "@/services/workspace";
+import type { ProjectRecord } from "@/services/admin-workspace";
+import { api } from "@/services/api";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminStatus } from "@/components/admin/admin-shared";
@@ -9,44 +14,27 @@ import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFor
 
 type Casting=(typeof data.castings)[number] & { age?:string; gender?:string; compensation?:string; description?:string };
 
-const demoApplicants=[
- {name:"Aarav Mehta",status:"Under Review"},
- {name:"Meera Joshi",status:"Shortlisted"},
- {name:"Kabir Verma",status:"Submitted"}
-];
-
 export function AdminCastingView(){
  const toast=useToast();
  const active=useAdminDashboardStore(s=>s.castingFilter);
  const setActive=useAdminDashboardStore(s=>s.setCastingFilter);
- const [castings,setCastings]=useState<Casting[]>([...data.castings]);
+ const [castings,,refresh]=useAdminRecords("/admin/castings",castingView);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<Casting|null>(null);
+ const [applicants,setApplicants]=useState<ApplicationRecord[]>([]);
+ useEffect(()=>{if(!selected)return;let active=true;void allPages<ApplicationRecord>(`/admin/applications?opportunityId=${selected.id}`).then(items=>{if(active)setApplicants(items);}).catch(error=>toast.error(error.message));return()=>{active=false;};},[selected,toast]);
+
 
  const visible=useMemo(()=>castings.filter(c=>active==="All"||c.status===active),[active,castings]);
 
- function createCasting(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const form=new FormData(event.currentTarget);
-  const title=String(form.get("title")??"").trim();
-  if(!title){toast.error("Casting title is required.");return}
-  const item:Casting={
-    id:`casting-${Date.now()}`,
-    title,
-    project:String(form.get("project")??"Independent Production"),
-    category:String(form.get("category")??"Acting"),
-    location:String(form.get("location")??""),
-    deadline:String(form.get("deadline")??""),
-    applications:0,
-    status:String(form.get("status")??"Draft"),
-    age:String(form.get("age")??""),
-    gender:String(form.get("gender")??"Any"),
-    compensation:String(form.get("compensation")??"Paid"),
-    description:String(form.get("description")??"")
-  };
-  setCastings(current=>[item,...current]);
-  setCreating(false);
-  toast.success(`${title} added to casting calls.`);
+ async function createCasting(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();const form=new FormData(event.currentTarget);const title=String(form.get("title")??"").trim();
+  try {
+   const projectName=String(form.get("project")??"").trim();const projects=await allPages<ProjectRecord>(`/admin/projects?search=${encodeURIComponent(projectName)}`);const project=projects.find(p=>p.title.toLowerCase()===projectName.toLowerCase());if(!project)throw new Error("Choose the exact name of an existing project.");
+   const age=String(form.get("age")??"").trim();const range=age.match(/^(\d+)\s*[-–]\s*(\d+)$/);if(age&&!range)throw new Error("Use an age range such as 22–30.");
+   const status=String(form.get("status"));const body={title,slug:slugFor(title),projectId:project._id,role:title,category:String(form.get("category")??""),location:String(form.get("location")??""),...(form.get("deadline")?{deadline:String(form.get("deadline"))}:{}),...(range?{ageMin:Number(range[1]),ageMax:Number(range[2])}:{}),gender:String(form.get("gender")??"Any"),compensation:String(form.get("compensation")??""),description:String(form.get("description")??""),status:status==="Draft"?"Draft":"Open",published:status!=="Draft"};
+   await api("/admin/castings",{method:"POST",body:JSON.stringify(body)});await refresh();setCreating(false);toast.success("Casting call saved.");
+  }catch(error){toast.error(error instanceof Error?error.message:"Unable to save casting.");}
  }
 
  return <div className="ad-stack">
@@ -57,7 +45,7 @@ export function AdminCastingView(){
     <div className="ad-casting-top"><span>{c.category}</span><AdminStatus value={c.status}/></div>
     <h2>{c.title}</h2><p>{c.project}</p>
     <div className="ad-casting-detail"><div><span>Location</span><strong>{c.location||"—"}</strong></div><div><span>Deadline</span><strong>{c.deadline||"—"}</strong></div><div><span>Applications</span><strong>{c.applications}</strong></div></div>
-    <div className="ad-casting-actions"><button onClick={()=>setSelected(c)}>View Applicants</button><AdminMoreButton/></div>
+    <div className="ad-casting-actions"><button onClick={()=>setSelected(c)}>View Applicants</button><AdminMoreButton onArchive={async()=>{await api(`/admin/castings/${c.id}`,{method:"DELETE"});await refresh();}}/></div>
   </article>)}</section>
 
   <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Create opportunity" title="New Casting Call" description="Add the role details now. Publishing to the backend comes after UI approval." width="wide">
@@ -82,7 +70,7 @@ export function AdminCastingView(){
     <div className="ad-applicant-panel">
       <div className="ad-applicant-summary"><span>Total applications</span><strong>{selected?.applications??0}</strong></div>
       <div className="ad-applicant-demo-list">
-        {demoApplicants.map(person=><div key={person.name}><div className="ad-mini-avatar">{person.name[0]}</div><div><strong>{person.name}</strong><span>Demo application preview</span></div><AdminStatus value={person.status}/><button type="button" onClick={()=>toast.success(`Opening ${person.name}'s application.`)}>Review</button></div>)}
+        {applicants.map(person=><div key={person.applicant.name}><div className="ad-mini-avatar">{person.applicant.name[0]}</div><div><strong>{person.applicant.name}</strong><span>Application submission</span></div><AdminStatus value={person.status}/><button type="button" onClick={()=>window.location.assign("/admin/applications")}>Review</button></div>)}
       </div>
       <p className="ad-dialog-footnote">This is temporary reference data. The final list will come from the Applications API filtered by casting ID.</p>
       <AdminDialogActions onCancel={()=>setSelected(null)} primaryLabel="Open Applications Page" primaryType="button" onPrimary={()=>{setSelected(null);window.location.assign("/admin/applications")}}/>

@@ -16,7 +16,7 @@ export const useMemberDashboardStore = create<State>((set) => ({
   mobileOpen: false,
   applicationFilter: "All",
   opportunityFilter: "All",
-  saved: ["o1"],
+  saved: [],
   setMobileOpen: (mobileOpen) => set({ mobileOpen }),
   setApplicationFilter: (applicationFilter) => set({ applicationFilter }),
   setOpportunityFilter: (opportunityFilter) => set({ opportunityFilter }),

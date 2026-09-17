@@ -6,7 +6,7 @@ import { Types, type Model } from "mongoose";
 import { randomToken, sha256 } from "../../common/utils/crypto";
 import { RateLimitService } from "../../common/security/rate-limit.service";
 import { Account, PasswordReset, Session, type AuthProvider } from "./auth.models";
-import { EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
+import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
 import { hashPassword, tokenDigest, verifyPassword } from "./password";
 import { MailService } from "../mail/mail.service";
 
@@ -117,9 +117,32 @@ export class AuthService {
     if (token && /^[A-Za-z0-9_-]{40,128}$/.test(token)) await this.sessions.deleteOne({ tokenHash: tokenDigest(token) });
     return { message: "Logged out." };
   }
+  async updateAccount(principal: AuthPrincipal, input: AccountSettingsDto) {
+    const account = await this.accounts.findById(principal.id);
+    if (!account) throw new NotFoundException("Account not found.");
+    // Changing an identity used by Google requires a separate verified linking flow.
+    if (input.email && input.email !== account.email && account.authProvider !== "local") {
+      throw new BadRequestException("The email linked to Google sign-in cannot be changed here.");
+    }
+    try {
+      if (input.email !== undefined) account.email = input.email;
+      if (input.mobile !== undefined) account.mobile = input.mobile;
+      await account.save();
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) throw new ConflictException("This email is already registered.");
+      throw error;
+    }
+    return this.publicAccount(account);
+  }
   async logoutAll(userId: string) {
     await this.sessions.deleteMany({ userId: new Types.ObjectId(userId) });
     return { message: "All sessions have been signed out." };
+  }
+  async deactivate(userId: string) {
+    const account = await this.accounts.findOneAndUpdate({ _id: new Types.ObjectId(userId), role: "USER" }, { $set: { suspended: true } }, { new: true });
+    if (!account) throw new BadRequestException("An administrator account cannot be deactivated here.");
+    await this.sessions.deleteMany({ userId: account._id });
+    return { message: "Account deactivated. Contact the team to reactivate it." };
   }
   async listSessions(userId: string, currentSessionId: string) {
     const sessions = await this.sessions.find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } }).select("_id remember createdAt lastSeenAt expiresAt").sort({ createdAt: -1 }).lean();

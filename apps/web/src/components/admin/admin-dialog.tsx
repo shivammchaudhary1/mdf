@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 export function AdminDialog({
   open,
@@ -73,10 +73,20 @@ export function AdminDialogForm({
   onSubmit,
 }: {
   children: ReactNode;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void | Promise<void>;
 }) {
+  const pending = useRef(false);
+  const [busy,setBusy] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if(pending.current)return;
+    const form=event.currentTarget; pending.current=true;setBusy(true);
+    const buttons=Array.from(form.querySelectorAll("button"));
+    const disabled=buttons.map(button=>button.disabled);
+    try {const result=onSubmit(event);buttons.forEach(button=>{button.disabled=true;});await result;}
+    finally{buttons.forEach((button,index)=>{button.disabled=disabled[index];});pending.current=false;setBusy(false);}
+  }
   return (
-    <form className="ad-dialog-form" onSubmit={onSubmit}>
+    <form className="ad-dialog-form" onSubmit={submit} aria-busy={busy}>
       {children}
     </form>
   );

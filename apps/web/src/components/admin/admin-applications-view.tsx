@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import data from "@/data/admin-dashboard.json";
+import type data from "@/data/admin-dashboard.json";
+import { useAdminRecords } from "./use-admin-records";
+import { applicationView } from "@/services/admin-workspace";
+import { api } from "@/services/api";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";
@@ -14,28 +17,18 @@ export function AdminApplicationsView(){
  const active=useAdminDashboardStore(s=>s.applicationFilter);
  const setActive=useAdminDashboardStore(s=>s.setApplicationFilter);
  const [query,setQuery]=useState("");
- const [applications,setApplications]=useState<Application[]>([...data.applications]);
+ const [applications,,refresh]=useAdminRecords(`/admin/applications?search=${encodeURIComponent(query)}${active!=="All"?`&status=${encodeURIComponent(active)}`:""}`,applicationView);
  const [selected,setSelected]=useState<Application|null>(null);
 
  const visible=useMemo(()=>applications.filter(a=>(active==="All"||a.status===active)&&`${a.applicant} ${a.role} ${a.project}`.toLowerCase().includes(query.toLowerCase())),[active,query,applications]);
 
- function saveReview(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
+ async function update(status:string,notes?:string){
   if(!selected)return;
-  const form=new FormData(event.currentTarget);
-  const status=String(form.get("status")??selected.status);
-  const notes=String(form.get("notes")??"");
-  setApplications(current=>current.map(item=>item.id===selected.id?{...item,status,notes}:item));
-  toast.success(`${selected.applicant} updated to ${status}.`);
-  setSelected(null);
+  try {await api(`/admin/applications/${selected.id}`,{method:"PATCH",body:JSON.stringify({status,...(notes!==undefined?{adminNotes:notes}:{})})});await refresh();toast.success("Application updated.");setSelected(null);}
+  catch(error){toast.error(error instanceof Error?error.message:"Unable to update application.");}
  }
-
- function quickStatus(status:string){
-  if(!selected)return;
-  setApplications(current=>current.map(item=>item.id===selected.id?{...item,status}:item));
-  toast.success(`${selected.applicant} updated to ${status}.`);
-  setSelected(null);
- }
+ function saveReview(event:FormEvent<HTMLFormElement>){event.preventDefault();const form=new FormData(event.currentTarget);return update(String(form.get("status")),String(form.get("notes")??""));}
+ function quickStatus(status:string){void update(status);}
 
  return <div className="ad-stack">
   <AdminPageHeader eyebrow="Casting workflow" title="Applications" description="Review submissions, shortlist talent and keep every casting decision organized."/>

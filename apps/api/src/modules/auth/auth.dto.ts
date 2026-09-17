@@ -3,6 +3,10 @@ import { IsBoolean, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 const normalizeEmail = ({ value }: { value: unknown }) => typeof value === "string" ? value.trim().toLowerCase() : value;
 export class EmailDto { @ApiProperty() @IsEmail() @MaxLength(254) @Transform(normalizeEmail) email!: string; }
+export class AccountSettingsDto {
+  @ApiPropertyOptional() @IsOptional() @IsEmail() @MaxLength(254) @Transform(normalizeEmail) email?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() @Matches(/^\+?[\d ()-]{7,20}$/) mobile?: string;
+}
 export class LoginDto extends EmailDto { @ApiProperty() @IsString() @MinLength(1) @MaxLength(128) password!: string; @ApiPropertyOptional() @IsOptional() @IsBoolean() remember?: boolean; }
 export class RegisterDto extends EmailDto {
   @ApiProperty() @IsString() @MinLength(2) @MaxLength(100) name!: string;

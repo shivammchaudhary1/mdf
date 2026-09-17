@@ -244,6 +244,7 @@ export class MediaService {
   async assertOwnedBy(
     userId: string,
     values: (string | undefined)[],
+    kind?: "image" | "document",
   ) {
     const supplied = values
       .filter(Boolean)
@@ -269,6 +270,7 @@ export class MediaService {
         ),
       },
       ownerId: new Types.ObjectId(userId),
+      ...(kind ? { kind } : {}),
     });
 
     if (count !== ids.length) {
@@ -296,6 +298,7 @@ export class MediaService {
 
     await this.media.updateMany(
       {
+        kind: "image",
         _id: {
           $in: valid.map(
             (id) => new Types.ObjectId(id),
@@ -326,10 +329,19 @@ export class MediaService {
 
     if (!valid.length) return;
 
+    const objectIds = valid.map(id => new Types.ObjectId(id));
+    // A profile visibility change must not privatize an image still published elsewhere.
+    const references = await Promise.all([
+      this.media.db.collection("projects").find({ published: true, archived: false, $or: [{ coverMediaId: { $in: objectIds } }, { galleryMediaIds: { $in: objectIds } }] }).project({ coverMediaId: 1, galleryMediaIds: 1 }).toArray(),
+      this.media.db.collection("castings").find({ published: true, archived: false, coverMediaId: { $in: objectIds } }).project({ coverMediaId: 1 }).toArray(),
+      this.media.db.collection("contents").find({ published: true, archived: false, $or: [{ coverMediaId: { $in: objectIds } }, { mediaIds: { $in: objectIds } }] }).project({ coverMediaId: 1, mediaIds: 1 }).toArray(),
+      this.media.db.collection("profiles").find({ publicVisible: true, $or: [{ photoMediaId: { $in: objectIds } }, { portfolioMediaIds: { $in: objectIds } }] }).project({ photoMediaId: 1, portfolioMediaIds: 1 }).toArray(),
+    ]);
+    const published = new Set(references.flat().flatMap(record => [record.coverMediaId, record.photoMediaId, ...(record.galleryMediaIds ?? []), ...(record.mediaIds ?? []), ...(record.portfolioMediaIds ?? [])]).filter(Boolean).map(String));
     await this.media.updateMany(
       {
         _id: {
-          $in: valid.map(
+          $in: valid.filter(id => !published.has(id)).map(
             (id) => new Types.ObjectId(id),
           ),
         },
@@ -376,7 +388,7 @@ export class MediaService {
       throw new NotFoundException();
     }
 
-    if (record.visibility !== "public") {
+    if (record.kind === "document" || record.visibility !== "public") {
       const user = await this.auth.authenticate(token);
 
       if (
@@ -400,7 +412,7 @@ export class MediaService {
             ? "application/pdf"
             : "image/webp",
         private:
-          record.visibility !== "public",
+          record.kind === "document" || record.visibility !== "public",
         originalName: record.originalName,
       };
     } catch {

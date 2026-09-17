@@ -2,44 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAdminDashboard } from "./use-admin-dashboard";
 import { AdminIcon } from "@/components/admin/admin-icons";
 
-const notifications = [
-  {
-    id: "n1",
-    title: "3 applications need review",
-    meta: "The Last Frame · Lead Actor",
-    time: "8m",
-    href: "/admin/applications",
-    unread: true,
-  },
-  {
-    id: "n2",
-    title: "New member awaiting verification",
-    meta: "Dev Arora · Editor",
-    time: "32m",
-    href: "/admin/users",
-    unread: true,
-  },
-  {
-    id: "n3",
-    title: "Casting closes soon",
-    meta: "Assistant Director · Rangmanch",
-    time: "1h",
-    href: "/admin/casting",
-    unread: false,
-  },
-  {
-    id: "n4",
-    title: "New contact query",
-    meta: "Brand collaboration",
-    time: "2h",
-    href: "/admin/contacts",
-    unread: false,
-  },
-];
-
 export function AdminNotifications() {
+ const dashboard=useAdminDashboard();
+ const notifications=dashboard.recentActivity.map((x,i)=>({id:`${x.title}-${x.time}-${i}`,title:x.title,meta:x.meta,time:x.time,href:"/admin",unread:true}));
   const [open, setOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
 
