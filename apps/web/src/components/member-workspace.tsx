@@ -1,431 +1,239 @@
 "use client";
+
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import { Workspace, useApiData, LoadError } from "@/components/workspace";
-import { api, type CurrentUser } from "@/services/api";
-import { LoadingState, EmptyState } from "@/components/ui/feedback";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
+import { BrandLogo } from "@/components/brand-logo";
+import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
-import { SmartImage } from "@/components/ui/smart-image";
-import { MediaUpload } from "@/components/media-upload";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { runtimeConfig } from "@/config/runtime";
-import { CollectionBrowser } from "@/components/collection-browser";
-import type { ApiContent } from "@/services/content";
-type Profile = {
-  completion: number;
-  bio?: string;
-  city?: string;
-  profession?: string;
-  gender?: string;
-  birthDate?: string;
-  skills?: string[];
-  languages?: string[];
-  experience?: string;
-  availability?: string;
-  photo?: string;
-  portfolio?: string[];
-  videos?: string[];
-  showreel?: string;
-  previousWork?: string;
-  socialLinks?: string[];
-  resume?: string;
-};
-export type ApplicationRecord = {
-  _id: string;
-  userId: string;
-  opportunityId: string;
-  opportunityTitle: string;
-  status: string;
-  coverNote: string;
-  adminNotes?: string;
-  createdAt: string;
-};
-function Applications() {
-  const { data, error, reload } = useApiData<ApplicationRecord[]>(
-    "/member/applications",
-  );
-  if (error) return <LoadError message={error} retry={reload} />;
-  if (!data) return <LoadingState />;
-  return data.length ? (
-    <div className="grid gap-4">
-      {data.map((item) => (
-        <article key={item._id} className="card p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="font-display text-2xl">{item.opportunityTitle}</h2>
-            <span className="badge">{item.status}</span>
-          </div>
-          <p className="mt-3 text-sm text-slate-500">
-            Applied {new Date(item.createdAt).toLocaleDateString()}
-          </p>
-          <details className="mt-4">
-            <summary className="cursor-pointer text-sm font-semibold">
-              View your application
-            </summary>
-            <p className="mt-4 whitespace-pre-wrap leading-7 text-slate-600">
-              {item.coverNote}
-            </p>
-          </details>
-        </article>
-      ))}
-    </div>
-  ) : (
-    <EmptyState
-      title="Your next story starts with an application."
-      description="Explore opportunities to find a role that fits your skills."
-    />
-  );
+import { useMemberDashboardStore } from "@/store/member-dashboard-store";
+import data from "@/data/member-dashboard.json";
+
+const nav = [
+  ["dashboard", "Dashboard", "/member"],
+  ["profile", "My Profile", "/member/profile"],
+  ["portfolio", "My Portfolio", "/member/portfolio"],
+  ["applications", "Applications", "/member/applications"],
+  ["opportunities", "Opportunities", "/member/opportunities"],
+  ["settings", "Settings", "/member/settings"]
+] as const;
+
+function Icon({ name }: { name: string }) {
+  const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  if (name === "profile") return <svg {...common}><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>;
+  if (name === "portfolio") return <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m6 16 4-4 3 3 2-2 3 3"/></svg>;
+  if (name === "applications") return <svg {...common}><rect x="5" y="5" width="14" height="16" rx="2"/><path d="M8 10h8M8 14h6"/></svg>;
+  if (name === "opportunities") return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>;
+  if (name === "settings") return <svg {...common}><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.4 1A7 7 0 0 0 15 6l-.4-2.6h-4L10 6a7 7 0 0 0-1.5 1L6 6 4 9.5 6 11a7 7 0 0 0 0 2l-2 1.5L6 18l2.5-1A7 7 0 0 0 10 18l.5 2.6h4L15 18a7 7 0 0 0 1.5-1L19 18l2-3.5-2-1.5a7 7 0 0 0 0-1Z"/></svg>;
+  if (name === "search") return <svg {...common}><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>;
+  if (name === "bell") return <svg {...common}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>;
+  if (name === "bookmark") return <svg {...common}><path d="M6 4h12v17l-6-4-6 4z"/></svg>;
+  if (name === "edit") return <svg {...common}><path d="m4 20 4.5-1 10-10-3.5-3.5-10 10z"/></svg>;
+  if (name === "upload") return <svg {...common}><path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/></svg>;
+  if (name === "check") return <svg {...common}><path d="m5 12 4 4L19 6"/></svg>;
+  return <svg {...common}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>;
 }
-function ProfileEditor({ portfolioOnly = false }: { portfolioOnly?: boolean }) {
-  const { data, error, reload } = useApiData<Profile>("/member/profile");
-  if (error) return <LoadError message={error} retry={reload} />;
-  if (!data) return <LoadingState />;
-  return (
-    <ProfileForm
-      key={JSON.stringify(data)}
-      profile={data}
-      reload={reload}
-      portfolioOnly={portfolioOnly}
-    />
-  );
-}
-function ProfileForm({
-  profile,
-  reload,
-  portfolioOnly,
-}: {
-  profile: Profile;
-  reload: () => void;
-  portfolioOnly: boolean;
-}) {
+
+function Shell({ section, children }: { section: string; children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const toast = useToast();
-  const [photo, setPhoto] = useState(profile.photo ?? "");
-  const [portfolio, setPortfolio] = useState(profile.portfolio ?? []);
-  const [resume, setResume] = useState(profile.resume ?? "");
-  const [remove, setRemove] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  async function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (pending) return;
-    const values = Object.fromEntries(new FormData(event.currentTarget));
-    const payload: Record<string, unknown> = { photo, portfolio, resume };
-    for (const [key, value] of Object.entries(values)) {
-      const text = String(value).trim();
-      if (["skills", "languages", "videos", "socialLinks"].includes(key))
-        payload[key] = text
-          .split(key === "skills" || key === "languages" ? "," : "\n")
-          .map((v) => v.trim())
-          .filter(Boolean);
-      else if (text || !["showreel", "birthDate"].includes(key))
-        payload[key] = text;
-    }
-    setPending(true);
-    setError("");
-    try {
-      await api("/member/profile", {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-      toast.success("Changes saved successfully.");
-      reload();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to save.";
-      setError(message);
-      toast.error(message);
-    } finally {
-      setPending(false);
-    }
+  const open = useMemberDashboardStore((s) => s.mobileOpen);
+  const setOpen = useMemberDashboardStore((s) => s.setMobileOpen);
+
+  function logout() {
+    toast.success("Signed out from the demo dashboard.");
+    router.push("/login");
   }
-  const textFields = [
-    ["bio", "About you"],
-    ["city", "City"],
-    ["profession", "Profession / category"],
-    ["gender", "Gender (optional)"],
-    ["experience", "Experience"],
-    ["availability", "Availability"],
-    ["previousWork", "Previous work"],
-  ];
+
   return (
-    <form onSubmit={save} className="grid gap-8">
-      <div className="card p-6">
-        <p className="mb-4 font-semibold">
-          Profile completion · {profile.completion}%
-        </p>
-        <progress
-          className="h-2 w-full accent-red-600"
-          value={profile.completion}
-          max={100}
-        />
-      </div>
-      {!portfolioOnly && (
-        <div className="card grid gap-6 p-6 sm:grid-cols-2">
-          <div>
-            <SmartImage
-              src={photo}
-              placeholderKind="team"
-              alt="Your profile photo"
-              width={160}
-              height={160}
-              className="mb-5 rounded-xl"
-            />
-            <MediaUpload onUploaded={(media) => setPhoto(media.urls.profile)} />
-          </div>
-          <div className="grid gap-5">
-            {textFields.slice(1, 3).map(([name, label]) => (
-              <label key={name} className="grid gap-2 text-sm font-semibold">
-                {label}
-                <input
-                  name={name}
-                  defaultValue={String(profile[name as keyof Profile] ?? "")}
-                  className="field"
-                  maxLength={100}
-                />
-              </label>
-            ))}
-            <label className="grid gap-2 text-sm font-semibold">
-              Date of birth
-              <input
-                type="date"
-                name="birthDate"
-                defaultValue={profile.birthDate?.slice(0, 10)}
-                max={new Date().toISOString().slice(0, 10)}
-                className="field"
-              />
-            </label>
-          </div>
-          {textFields
-            .filter(([,], index) => index !== 1 && index !== 2)
-            .map(([name, label]) => (
-              <label key={name} className="grid gap-2 text-sm font-semibold">
-                {label}
-                <textarea
-                  name={name}
-                  defaultValue={String(profile[name as keyof Profile] ?? "")}
-                  className="field"
-                  rows={3}
-                  maxLength={name === "previousWork" ? 5000 : 1000}
-                />
-              </label>
-            ))}
-          {["skills", "languages"].map((name) => (
-            <label
-              key={name}
-              className="grid gap-2 text-sm font-semibold capitalize"
-            >
-              {name} (comma separated)
-              <input
-                name={name}
-                defaultValue={(
-                  profile[name as "skills" | "languages"] ?? []
-                ).join(", ")}
-                className="field"
-              />
-            </label>
-          ))}
+    <div className="md-member-shell">
+      <aside className={`md-member-sidebar ${open ? "is-open" : ""}`}>
+        <div className="md-side-head">
+          <Link href="/"><BrandLogo darkInk className="!w-[108px]" /></Link>
+          <button onClick={() => setOpen(false)} className="md-close">×</button>
         </div>
-      )}
-      <div className="card grid gap-6 p-6">
-        <h2 className="font-display text-2xl">Portfolio photographs</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {portfolio.map((path) => (
-            <div key={path}>
-              <SmartImage
-                src={path}
-                alt="Portfolio photograph"
-                placeholderKind="gallery"
-                width={400}
-                height={300}
-                className="aspect-[4/3] w-full rounded-xl object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setRemove(path)}
-                className="mt-2 text-sm text-red-700"
-              >
-                Remove photo
-              </button>
-            </div>
-          ))}
+
+        <div className="md-mini-user">
+          <div className="md-avatar">{data.member.firstName[0]}</div>
+          <div><strong>{data.member.name}</strong><span>{data.member.profession}</span></div>
         </div>
-        {portfolio.length < 30 && (
-          <MediaUpload
-            onUploaded={(media) =>
-              setPortfolio((values) => [...values, media.urls.medium])
-            }
-          />
-        )}
-        <p className="text-sm text-slate-500">
-          Save changes after adding or removing photos.
-        </p>
-      </div>
-      <div className="card grid gap-5 p-6">
-        <label className="grid gap-2 text-sm font-semibold">
-          Showreel URL
-          <input
-            name="showreel"
-            type="url"
-            className="field"
-            placeholder="https://"
-            defaultValue={profile.showreel}
-          />
-        </label>
-        {["videos", "socialLinks"].map((name) => (
-          <label key={name} className="grid gap-2 text-sm font-semibold">
-            {name === "videos" ? "Video URLs" : "Social profile URLs"} (one
-            HTTPS link per line)
-            <textarea
-              name={name}
-              className="field"
-              rows={3}
-              defaultValue={(
-                profile[name as "videos" | "socialLinks"] ?? []
-              ).join("\n")}
-            />
-          </label>
-        ))}
-        <MediaUpload
-          document
-          onUploaded={(media) => setResume(media.urls.document)}
-        />
-        {resume && (
-          <a
-            href={`${new URL(runtimeConfig.apiUrl).origin}${resume}`}
-            className="text-sm text-red-700"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Download your resume ↗
-          </a>
-        )}
-      </div>
-      {error && (
-        <p role="alert" className="text-red-700">
-          {error}
-        </p>
-      )}
-      <button
-        disabled={pending}
-        className="brand-button brand-button-primary justify-self-start"
-      >
-        {pending ? "Saving…" : "Save changes"}
-      </button>
-      <ConfirmDialog
-        open={!!remove}
-        title="Remove this portfolio photo?"
-        description="It will be removed from your portfolio when you save changes."
-        destructive
-        onCancel={() => setRemove(null)}
-        onConfirm={() => {
-          setPortfolio((values) => values.filter((value) => value !== remove));
-          setRemove(null);
-        }}
-      />
-    </form>
-  );
-}
-function Opportunities() {
-  const { data, error, reload } = useApiData<ApiContent[]>("/content/casting");
-  if (error) return <LoadError message={error} retry={reload} />;
-  return data ? (
-    <CollectionBrowser kind="casting" items={data} />
-  ) : (
-    <LoadingState />
-  );
-}
-function Overview({ user }: { user: CurrentUser }) {
-  const { data } = useApiData<Profile>("/member/profile");
-  return (
-    <>
-      <div className="mb-8 rounded-2xl bg-[var(--surface-dark)] p-8 text-white">
-        <p className="text-sm uppercase tracking-widest text-[var(--brand-gold)]">
-          People · Stories · Cinema
-        </p>
-        <h1 className="font-display mt-4 text-4xl">Welcome, {user.name}.</h1>
-        <p className="mt-4 text-white/70">
-          Keep creating. Your next opportunity starts here.
-        </p>
-      </div>
-      <div className="mb-8 grid gap-5 sm:grid-cols-2">
-        <Link href="/member/profile" className="card p-6">
-          <h2 className="font-semibold">Complete your profile</h2>
-          <p className="mt-3 text-3xl font-semibold">
-            {data?.completion ?? 0}%
-          </p>
-          <progress
-            className="mt-4 h-2 w-full accent-red-600"
-            value={data?.completion ?? 0}
-            max={100}
-          />
-        </Link>
-        <div className="card p-6">
-          <h2 className="font-semibold">Verification status</h2>
-          <p className="mt-3 text-lg">
-            {user.verified ? "Verified member" : "Not yet verified"}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Member verification is managed by M. Dadu Films.
-          </p>
-        </div>
-      </div>
-      <h2 className="font-display mb-6 text-3xl">Your applications</h2>
-      <Applications />
-      <Link
-        href="/member/opportunities"
-        className="brand-button brand-button-primary mt-8"
-      >
-        Explore opportunities →
-      </Link>
-    </>
-  );
-}
-export function MemberWorkspace({
-  section = "dashboard",
-}: {
-  section?: string;
-}) {
-  return (
-    <Workspace section={section}>
-      {(user) => (
-        <>
-          {section !== "dashboard" && (
-            <h1 className="font-display mb-8 text-4xl font-semibold">
-              {(
-                {
-                  profile: "My profile",
-                  portfolio: "My portfolio",
-                  applications: "My applications",
-                  opportunities: "Explore opportunities",
-                  settings: "Account settings",
-                } as Record<string, string>
-              )[section] ?? "Member dashboard"}
-            </h1>
-          )}
-          {section === "profile" ? (
-            <ProfileEditor />
-          ) : section === "portfolio" ? (
-            <ProfileEditor portfolioOnly />
-          ) : section === "applications" ? (
-            <Applications />
-          ) : section === "opportunities" ? (
-            <Opportunities />
-          ) : section === "settings" ? (
-            <div className="card p-7">
-              <h2 className="font-semibold">{user.name}</h2>
-              <p className="mt-3">{user.email}</p>
-              <p className="mt-2">{user.mobile}</p>
-              <Link
-                href="/forgot-password"
-                className="brand-button mt-6 border"
-              >
-                Change password
+
+        <nav className="md-side-nav">
+          {nav.map(([key, label, href]) => {
+            const active = key === "dashboard" ? pathname === "/member" : pathname.startsWith(href);
+            return (
+              <Link key={key} href={href} onClick={() => setOpen(false)} className={active ? "active" : ""}>
+                <Icon name={key}/><span>{label}</span>
               </Link>
-            </div>
-          ) : (
-            <Overview user={user} />
-          )}
-        </>
-      )}
-    </Workspace>
+            );
+          })}
+        </nav>
+
+        <div className="md-side-bottom">
+          <Link href="/">← Public website</Link>
+          <button onClick={logout}>Sign out</button>
+        </div>
+      </aside>
+
+      {open && <button className="md-backdrop" onClick={() => setOpen(false)} aria-label="Close navigation" />}
+
+      <div className="md-main">
+        <header className="md-topbar">
+          <div className="md-topbar-left">
+            <button className="md-menu" onClick={() => setOpen(true)}>☰</button>
+            <div><span>M. Dadu Films Community</span><strong>{nav.find(([k]) => k === section)?.[1] ?? "Dashboard"}</strong></div>
+          </div>
+          <div className="md-top-actions">
+            <Link href="/member/opportunities" className="md-search-pill"><Icon name="search"/> Find opportunities</Link>
+            <button className="md-icon-button"><Icon name="bell"/><i /></button>
+            <Link href="/member/profile" className="md-avatar md-top-avatar">{data.member.firstName[0]}</Link>
+          </div>
+        </header>
+        <main className="md-content">{children}</main>
+      </div>
+
+      <nav className="md-mobile-nav">
+        {nav.slice(0,5).map(([key, label, href]) => {
+          const active = key === "dashboard" ? pathname === "/member" : pathname.startsWith(href);
+          return <Link key={key} href={href} className={active ? "active" : ""}><Icon name={key}/><span>{label.replace("My ","")}</span></Link>;
+        })}
+      </nav>
+    </div>
   );
+}
+
+function Header({ kicker, title, description, action }: { kicker: string; title: string; description: string; action?: ReactNode }) {
+  return <section className="md-page-header"><div><p>{kicker}</p><h1>{title}</h1><span>{description}</span></div>{action}</section>;
+}
+
+function Status({ status, tone }: { status: string; tone: string }) {
+  return <span className={`md-status ${tone}`}>{status}</span>;
+}
+
+function Dashboard() {
+  return (
+    <div className="md-stack">
+      <section className="md-welcome-grid">
+        <article className="md-welcome">
+          <div><p className="md-kicker">Good evening, {data.member.firstName}</p><h1>Keep creating. Your next opportunity starts here.</h1><span>Stay visible, keep your portfolio fresh and apply to roles that match your craft.</span></div>
+          <div className="md-actions"><Link href="/member/opportunities" className="md-primary">Explore Opportunities →</Link><Link href="/member/profile" className="md-secondary dark">Update Profile</Link></div>
+        </article>
+        <Link href="/member/profile" className="md-profile-strength">
+          <div><p className="md-kicker">Profile strength</p><h2>{data.member.profileCompletion}% complete</h2></div>
+          <div className="md-ring" style={{"--p": `${data.member.profileCompletion * 3.6}deg`} as React.CSSProperties}><span>{data.member.profileCompletion}%</span></div>
+          <div className="md-progress"><i style={{width:`${data.member.profileCompletion}%`}} /></div>
+          <span>Add portfolio photos and a showreel to improve visibility.</span>
+        </Link>
+      </section>
+
+      <section className="md-stats">
+        {data.stats.map((s,i)=><article key={s.label}><div className="md-stat-icon"><Icon name={i===0?"applications":i===1?"check":i===2?"profile":"bookmark"}/></div><div><strong>{s.value}</strong><p>{s.label}</p><span>{s.helper}</span></div></article>)}
+      </section>
+
+      <section className="md-dashboard-grid">
+        <div className="md-main-column">
+          <article className="md-card">
+            <div className="md-card-head"><div><p className="md-kicker">Current progress</p><h2>Recent Applications</h2></div><Link href="/member/applications">View all →</Link></div>
+            <div className="md-app-list">
+              {data.applications.slice(0,3).map(a=><div key={a.id} className="md-app-row"><div className="md-project-mark">{a.project[0]}</div><div><strong>{a.role}</strong><span>{a.project} · {a.location}</span></div><Status status={a.status} tone={a.tone}/></div>)}
+            </div>
+          </article>
+
+          <article className="md-card">
+            <div className="md-card-head"><div><p className="md-kicker">Matched for you</p><h2>Recommended Opportunities</h2></div><Link href="/member/opportunities">Explore all →</Link></div>
+            <div className="md-rec-grid">
+              {data.opportunities.slice(0,2).map(o=><Link href="/member/opportunities" key={o.id} className="md-rec-card"><SiteMedia src={o.image} alt={o.title} kind="team" className="aspect-[16/8] rounded-xl"/><div><span>{o.match} match</span><h3>{o.title}</h3><p>{o.project} · {o.location}</p></div></Link>)}
+            </div>
+          </article>
+        </div>
+
+        <aside className="md-side-column">
+          <article className="md-card">
+            <div className="md-card-head"><div><p className="md-kicker">Profile setup</p><h2>Complete your profile</h2></div></div>
+            <div className="md-checklist">{data.profileChecklist.map(i=><div key={i.label} className={i.done?"done":""}><span>{i.done?<Icon name="check"/>:""}</span>{i.label}</div>)}</div>
+            <Link href="/member/profile" className="md-text-link">Continue profile setup →</Link>
+          </article>
+          <article className="md-card">
+            <div className="md-card-head"><div><p className="md-kicker">Latest updates</p><h2>Activity</h2></div></div>
+            <div className="md-activity">{data.activity.map(x=><div key={x.title}><i/><p>{x.title}<span>{x.time}</span></p></div>)}</div>
+          </article>
+        </aside>
+      </section>
+
+      <article className="md-card">
+        <div className="md-card-head"><div><p className="md-kicker">Learn & grow</p><h2>From the Journal</h2></div><Link href="/blog">Visit blog →</Link></div>
+        <div className="md-posts">{data.posts.map(p=><Link href="/blog" key={p.title}><SiteMedia src={p.image} alt={p.title} kind="blog" className="aspect-[16/8] rounded-xl"/><p className="md-kicker">{p.category}</p><h3>{p.title}</h3><span>{p.date}</span></Link>)}</div>
+      </article>
+    </div>
+  );
+}
+
+function Profile() {
+  const toast = useToast();
+  const [editing,setEditing]=useState(false);
+  const p=data.profile;
+  return <div className="md-stack">
+    <Header kicker="Your identity" title="My Profile" description="Keep your public profile current so casting teams see the right version of you." action={<button className="md-secondary" onClick={()=>setEditing(v=>!v)}><Icon name="edit"/>{editing?"Cancel":"Edit Profile"}</button>}/>
+    <section className="md-profile-grid">
+      <aside className="md-card md-profile-summary">
+        <div className="md-profile-photo"><SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full"/><button><Icon name="edit"/></button></div>
+        <h2>{data.member.name}</h2><p>{data.member.profession}</p>
+        <div className="md-badges"><span>✓ Verified Member</span><span>{data.member.availability}</span></div>
+        <div className="md-mini-details"><div><span>Location</span><strong>{data.member.location}</strong></div><div><span>Experience</span><strong>{p.experience}</strong></div><div><span>Member since</span><strong>{data.member.memberSince}</strong></div></div>
+        <button className="md-primary full">Preview Public Profile</button>
+      </aside>
+      <div className="md-form-stack">
+        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Introduction</p><h2>About You</h2></div></div><label className="md-field"><span>Bio</span><textarea rows={5} defaultValue={p.bio} disabled={!editing}/></label></article>
+        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Basic details</p><h2>Personal & Professional</h2></div></div><div className="md-form-grid">{[["Profession",p.profession],["City",p.city],["Gender",p.gender],["Date of Birth",p.birthDate],["Experience",p.experience],["Availability",p.availability]].map(([l,v])=><label className="md-field" key={l}><span>{l}</span><input defaultValue={v} disabled={!editing}/></label>)}</div></article>
+        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Skills</p><h2>Skills & Languages</h2></div></div><div className="md-tag-block"><span>Skills</span><div>{p.skills.map(x=><i key={x}>{x}</i>)}</div><span>Languages</span><div>{p.languages.map(x=><i key={x}>{x}</i>)}</div></div></article>
+        {editing&&<div className="md-save-row"><button className="md-secondary" onClick={()=>setEditing(false)}>Cancel</button><button className="md-primary" onClick={()=>{setEditing(false);toast.success("Demo profile saved.");}}>Save Changes</button></div>}
+      </div>
+    </section>
+  </div>;
+}
+
+function Portfolio() {
+  const toast=useToast();
+  return <div className="md-stack">
+    <Header kicker="Your work" title="My Portfolio" description="Curate the photographs, showreel and material that represent your creative identity." action={<button className="md-primary" onClick={()=>toast.success("Upload UI ready for media integration.")}><Icon name="upload"/>Add Photos</button>}/>
+    <section className="md-portfolio-hero"><div><p className="md-kicker">Portfolio health</p><h2>Your portfolio is almost casting-ready.</h2><span>Add 2–4 strong photographs and one current showreel for a stronger profile.</span></div><div><strong>6</strong><span>photos</span></div></section>
+    <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Photographs</p><h2>Portfolio Gallery</h2></div><span>Temporary JSON data</span></div><div className="md-portfolio-grid">{data.portfolio.map(i=><div key={i.id} className="md-portfolio-item"><SiteMedia src={i.image} alt={i.title} kind="gallery" className="aspect-[4/5] rounded-xl"/><p>{i.title}<span>{i.category}</span></p><button><Icon name="edit"/></button></div>)}<button className="md-add-photo" onClick={()=>toast.success("Upload placeholder ready.")}><Icon name="upload"/><strong>Add Photograph</strong><span>JPG / PNG / WebP</span></button></div></article>
+    <section className="md-media-grid"><article className="md-card"><p className="md-kicker">Video</p><h2>Showreel</h2><div className="md-empty-media">▶<strong>No showreel added yet</strong><button>Add showreel link</button></div></article><article className="md-card"><p className="md-kicker">Document</p><h2>Resume / CV</h2><div className="md-empty-media">PDF<strong>Resume ready for upload</strong><button>Upload resume</button></div></article></section>
+  </div>;
+}
+
+function Applications() {
+  const active=useMemberDashboardStore(s=>s.applicationFilter), setActive=useMemberDashboardStore(s=>s.setApplicationFilter);
+  const filters=["All","Submitted","Under Review","Shortlisted","Not Selected"];
+  const visible=active==="All"?data.applications:data.applications.filter(a=>a.status===active);
+  return <div className="md-stack">
+    <Header kicker="Track your progress" title="My Applications" description="See every role you applied to and where each application currently stands."/>
+    <div className="md-filters">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={active===f?"active":""}>{f}</button>)}</div>
+    <article className="md-card md-table-card"><div className="md-table-head"><span>Role / Project</span><span>Applied</span><span>Location</span><span>Status</span></div>{visible.map(a=><div className="md-table-row" key={a.id}><div><strong>{a.role}</strong><span>{a.project} · {a.type}</span></div><span>{a.appliedOn}</span><span>{a.location}</span><Status status={a.status} tone={a.tone}/></div>)}</article>
+  </div>;
+}
+
+function Opportunities() {
+  const toast=useToast(), active=useMemberDashboardStore(s=>s.opportunityFilter), setActive=useMemberDashboardStore(s=>s.setOpportunityFilter), saved=useMemberDashboardStore(s=>s.saved), toggle=useMemberDashboardStore(s=>s.toggleSaved);
+  const filters=["All","Acting","Commercial"], visible=active==="All"?data.opportunities:data.opportunities.filter(o=>o.category===active);
+  return <div className="md-stack">
+    <Header kicker="Discover roles" title="Opportunities" description="Explore casting calls selected around your profile, location and creative interests." action={<div className="md-search-box"><Icon name="search"/><input placeholder="Search roles or projects"/></div>}/>
+    <div className="md-filters">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={active===f?"active":""}>{f}</button>)}</div>
+    <section className="md-opportunity-grid">{visible.map(o=><article className="md-opportunity-card" key={o.id}><div className="md-opp-image"><SiteMedia src={o.image} alt={o.title} kind="team" className="h-full min-h-[210px]"/><span>{o.match} match</span><button className={saved.includes(o.id)?"saved":""} onClick={()=>toggle(o.id)}><Icon name="bookmark"/></button></div><div className="md-opp-body"><p>{o.category} · {o.paid?"Paid":"Unpaid"}</p><h2>{o.title}</h2><strong>{o.project}</strong><div><span>{o.location}</span><span>Deadline {o.deadline}</span></div><button className="md-primary full" onClick={()=>toast.success("Application flow will connect after UI approval.")}>View & Apply</button></div></article>)}</section>
+  </div>;
+}
+
+function Settings() {
+  const toast=useToast(); const [cast,setCast]=useState(true),[mail,setMail]=useState(true),[visible,setVisible]=useState(true);
+  const Toggle=({title,desc,value,set}:{title:string;desc:string;value:boolean;set:(v:boolean)=>void})=><div className="md-toggle-row"><div><strong>{title}</strong><p>{desc}</p></div><button className={value?"on":""} onClick={()=>set(!value)}><span/></button></div>;
+  return <div className="md-stack">
+    <Header kicker="Account controls" title="Settings" description="Manage your account details, preferences and public profile visibility."/>
+    <section className="md-settings-grid"><div className="md-form-stack"><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Account</p><h2>Login Details</h2></div></div><div className="md-form-grid"><label className="md-field"><span>Email</span><input defaultValue={data.member.email}/></label><label className="md-field"><span>Mobile</span><input defaultValue={data.member.mobile}/></label></div><div className="md-save-row"><Link href="/forgot-password" className="md-secondary">Change Password</Link><button className="md-primary" onClick={()=>toast.success("Settings saved for UI demo.")}>Save Changes</button></div></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Notifications</p><h2>Email & Opportunity Alerts</h2></div></div><Toggle title="Casting recommendations" desc="Receive alerts when a role closely matches your profile." value={cast} set={setCast}/><Toggle title="Community updates" desc="Receive useful product news and community updates." value={mail} set={setMail}/></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Privacy</p><h2>Profile Visibility</h2></div></div><Toggle title="Public talent profile" desc="Allow casting teams and visitors to discover your profile." value={visible} set={setVisible}/></article></div><aside className="md-card md-membership"><p className="md-kicker">Account status</p><h2>Your membership</h2><span>Your account is active and ready for opportunities.</span><div><small>ACTIVE</small><strong>Verified Member</strong></div><button>Deactivate Account</button></aside></section>
+  </div>;
+}
+
+export function MemberWorkspace({section="dashboard"}:{section?:string}) {
+  const safe = ["dashboard","profile","portfolio","applications","opportunities","settings"].includes(section)?section:"dashboard";
+  return <Shell section={safe}>{safe==="profile"?<Profile/>:safe==="portfolio"?<Portfolio/>:safe==="applications"?<Applications/>:safe==="opportunities"?<Opportunities/>:safe==="settings"?<Settings/>:<Dashboard/>}</Shell>;
 }

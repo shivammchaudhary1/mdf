@@ -1,9 +1,7 @@
-import { CollectionPage } from "@/components/collection-page";
-import { collectionCopy } from "@/content/placeholders/catalog";
-export const metadata = {
-  title: collectionCopy["blog"].title,
-  description: collectionCopy["blog"].description,
-};
+import { BlogPageView } from "@/components/site/blog-page-view";
+
+export const metadata = { title: "Blog" };
+
 export default function Page() {
-  return <CollectionPage kind="blog" />;
+  return <BlogPageView />;
 }
