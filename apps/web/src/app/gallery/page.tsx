@@ -1,9 +1,7 @@
-import { CollectionPage } from "@/components/collection-page";
-import { collectionCopy } from "@/content/placeholders/catalog";
-export const metadata = {
-  title: collectionCopy["gallery"].title,
-  description: collectionCopy["gallery"].description,
-};
+import { GalleryPageView } from "@/components/site/gallery-page-view";
+
+export const metadata = { title: "Gallery" };
+
 export default function Page() {
-  return <CollectionPage kind="gallery" />;
+  return <GalleryPageView />;
 }

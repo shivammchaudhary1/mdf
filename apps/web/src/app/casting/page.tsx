@@ -1,9 +1,7 @@
-import { CollectionPage } from "@/components/collection-page";
-import { collectionCopy } from "@/content/placeholders/catalog";
-export const metadata = {
-  title: collectionCopy["casting"].title,
-  description: collectionCopy["casting"].description,
-};
+import { CastingPageView } from "@/components/site/casting-page-view";
+
+export const metadata = { title: "Casting Calls" };
+
 export default function Page() {
-  return <CollectionPage kind="casting" />;
+  return <CastingPageView />;
 }
