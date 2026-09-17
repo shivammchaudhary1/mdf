@@ -1,34 +1,42 @@
-# Prompt to Start Codex
+# Start Codex Here — M. Dadu Films V1.0.0
 
-You can give Codex this prompt after opening the repository:
+Work on the current M. Dadu Films repository without skipping the active checkpoint.
 
----
+Read in this order:
 
-Work on the M. Dadu Films V1.0.0 repository.
+1. `AGENTS.md`
+2. `docs/progress.md`
+3. `docs/DESIGN_SYSTEM.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/CODEX_WORKFLOW.md`
+6. the nearest nested `AGENTS.md`
+7. relevant screenshots under `docs/references/ui/`
 
-First read `AGENTS.md`, `docs/progress.md`, `docs/ARCHITECTURE.md`,
-`docs/CODEX_WORKFLOW.md`, and the nearest nested `AGENTS.md`.
+## Current priority
 
-Treat `docs/progress.md` as the canonical checklist. Work through the current
-stage in order. For each unchecked item, inspect the existing code, implement
-it, run the relevant tests/typechecks/build checks, and only then mark that
-specific item complete. If an item is blocked by missing real content, mark it
-blocked with the reason and continue with another independent item.
+The repository has already been cleaned and flattened. The next work is **UI alignment + responsive
+QA**, not deployment and not a blind continuation into later feature stages.
 
-Do not deploy anything until the deployment stage. Do not add GraphQL, Redis,
-extra roles, mobile OTP, microservices, Kubernetes, or SES.
+Preserve working authentication, API, profile, media and feedback behavior while improving the
+presentation.
 
-Frontend must run on port 3333 and backend on 8888.
+For UI work:
+- use the screenshots as visual references, not as production page images,
+- homepage may be cinematic/dark where appropriate,
+- public inner pages should stay light/editorial/spacious,
+- member/admin workspaces should remain clean and light,
+- do not reuse the exact same card/grid treatment for every section,
+- use centralized tokens rather than arbitrary colors,
+- test roughly 360 / 768 / 1024 / 1440 widths.
 
-Keep administrator-editable content dynamic. Do not hardcode production
-projects, people, posts, company legal details or gallery data in components.
-If a required image has not been provided, use the repository's shared
-placeholder system and continue.
+Treat `docs/progress.md` as canonical. Do not mark human visual approval complete without explicit
+user confirmation.
 
-All async actions must have intentional loading/success/error feedback using
-the shared toast system. Destructive actions must use the shared confirmation
-dialog, not browser alert/confirm.
+Do not deploy before Stage 18. Do not add GraphQL, Redis, extra roles, mobile OTP, microservices,
+Kubernetes or SES.
 
-Start with the first incomplete item in the current development stage and
-continue through independent remaining items until blocked or the requested
-scope is complete.
+Frontend: `3333`
+Backend: `8888`
+
+After each coherent slice run the relevant checks. Prefer `npm run check` for the full repository
+quality gate.

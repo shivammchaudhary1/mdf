@@ -1,4 +1,4 @@
-# M. Dadu Films Digital Platform — V1.0.0
+﻿# M. Dadu Films Digital Platform â€” V1.0.0
 
 Codex-ready monorepo starter for the M. Dadu Films production-house website,
 member community, casting/application platform and Super Admin CMS.
@@ -33,33 +33,33 @@ member community, casting/application platform and Super Admin CMS.
 
 ```text
 .
-├── AGENTS.md
-├── CODEX_START_HERE.md
-├── apps/
-│   ├── web/
-│   │   ├── AGENTS.md
-│   │   ├── public/
-│   │   │   ├── brand/
-│   │   │   └── placeholders/
-│   │   └── src/
-│   │       ├── app/
-│   │       ├── components/
-│   │       ├── config/
-│   │       ├── content/placeholders/
-│   │       ├── providers/
-│   │       └── ...
-│   └── api/
-│       ├── AGENTS.md
-│       └── src/
-├── docs/
-│   ├── progress.md
-│   ├── ARCHITECTURE.md
-│   ├── CODEX_WORKFLOW.md
-│   ├── DYNAMIC_CONTENT_RULES.md
-│   ├── ASSET_GUIDE.md
-│   └── CONTENT_INPUT_TEMPLATE.md
-├── docker-compose.yml
-└── package.json
+â”œâ”€â”€ AGENTS.md
+â”œâ”€â”€ CODEX_START_HERE.md
+â”œâ”€â”€ apps/
+â”‚   â”œâ”€â”€ web/
+â”‚   â”‚   â”œâ”€â”€ AGENTS.md
+â”‚   â”‚   â”œâ”€â”€ public/
+â”‚   â”‚   â”‚   â”œâ”€â”€ brand/
+â”‚   â”‚   â”‚   â””â”€â”€ placeholders/
+â”‚   â”‚   â””â”€â”€ src/
+â”‚   â”‚       â”œâ”€â”€ app/
+â”‚   â”‚       â”œâ”€â”€ components/
+â”‚   â”‚       â”œâ”€â”€ config/
+â”‚   â”‚       â”œâ”€â”€ content/placeholders/
+â”‚   â”‚       â”œâ”€â”€ providers/
+â”‚   â”‚       â””â”€â”€ ...
+â”‚   â””â”€â”€ api/
+â”‚       â”œâ”€â”€ AGENTS.md
+â”‚       â””â”€â”€ src/
+â”œâ”€â”€ docs/
+â”‚   â”œâ”€â”€ progress.md
+â”‚   â”œâ”€â”€ ARCHITECTURE.md
+â”‚   â”œâ”€â”€ CODEX_WORKFLOW.md
+â”‚   â”œâ”€â”€ DYNAMIC_CONTENT_RULES.md
+â”‚   â”œâ”€â”€ ASSET_GUIDE.md
+â”‚   â””â”€â”€ CONTENT_INPUT_TEMPLATE.md
+â”œâ”€â”€ docker-compose.yml
+â””â”€â”€ package.json
 ```
 
 ## First setup
@@ -162,6 +162,17 @@ docs/DYNAMIC_CONTENT_RULES.md
 Administrator-editable business content must become API/database-driven.
 Technical constants stay separated in config/enums.
 
+## Design source of truth
+
+Before frontend visual work, read:
+
+`	ext
+docs/DESIGN_SYSTEM.md
+docs/references/ui/
+`
+
+Reference screenshots define visual direction but are not production website assets.
+
 ## Development and deployment
 
 The project is developed and tested stage-by-stage.
@@ -169,19 +180,21 @@ The project is developed and tested stage-by-stage.
 Production deployment is intentionally postponed until Stage 18.
 
 V1 deployment target later:
-- AWS Amplify — frontend
-- AWS Lightsail 1 GB — backend
-- MongoDB Atlas — database
-- Amazon S3 — media
-- Hostinger — DNS/email
-- GitHub Actions — CI/CD
+- AWS Amplify â€” frontend
+- AWS Lightsail 1 GB â€” backend
+- MongoDB Atlas â€” database
+- Amazon S3 â€” media
+- Hostinger â€” DNS/email
+- GitHub Actions â€” CI/CD
 
 ## Branch strategy
 
-Keep the root repository's `master` branch stable. Work on `codex/<feature>`
-branches, verify with `npm run check`, and review changes before merging.
-The first development branch is `codex/mdadu-foundation`. Do not deploy until
-Stage 18. The sibling starter archive is a reference, not the working app.
+master is the clean baseline branch. For future feature work, create a short-lived branch such as
+codex/<scope>, run 
+pm run check, review the diff, then merge back into master.
+
+There is no sibling starter project/archive anymore; the repository root is the working application.
+Production deployment remains Stage 18 only.
 
 ### Local Docker kernel compatibility
 
@@ -240,3 +253,4 @@ Integration checks use a disposable `mdadu_test_*` database, a temporary file
 storage/outbox directory, and a short-lived API on port 18888. They do not modify
 the development database or member accounts. MongoDB must already be running.
 The product remains on frontend 3333 and backend 8888.
+

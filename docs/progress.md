@@ -1,9 +1,9 @@
-# M. Dadu Films Digital Platform — Development Progress
+﻿# M. Dadu Films Digital Platform â€” Development Progress
 
 **Version:** 1.0.0  
 **Prepared for:** M. Dadu Films  
 **Prepared by:** Shivam Chaudhary  
-**Status:** Planning → Development  
+**Status:** Planning â†’ Development  
 **Deployment:** Final stage only  
 **Primary rule:** Every stage must be testable before moving to the next stage.
 
@@ -21,40 +21,39 @@
 
 ---
 
-# Stage 0 — Project Inputs & Asset Collection
+# Stage 0 â€” Project Inputs & Asset Collection
 
-> 2026-09-17 checkpoint: working branch `codex/mdadu-foundation`.
-> The user approved preserving the existing light/red/cinematic design, then
-> requested a pause after the current account/profile step for manual review.
-> Stop here after verification; do not start another step until requested.
-> Real company details and original production assets remain pending. Shared
-> placeholders allow local implementation to proceed without inventing facts.
-
+> 2026-09-17 UI alignment checkpoint: repository cleanup/flattening is complete.
+> The active priority is Stage 2–3 visual alignment and responsive QA using
+> docs/DESIGN_SYSTEM.md plus docs/references/ui/.
+> Preserve working auth/profile/media/API behavior while refining presentation.
+> Do not continue into later feature stages unless explicitly requested.
+> Human visual approval must not be marked complete by Codex.
 ## Goal
 Collect everything required before coding so development does not stop later.
 
 ### Required from M. Dadu Films
 - [x] Final logo files
-- [!] Company legal name — blocked: input template unfilled; verified legal name not supplied.
-- [!] GST number — blocked: real GST number not supplied.
-- [!] Company registration / CIN details — blocked: verified registration details not supplied.
-- [!] Official email address — blocked: verified production content not supplied.
-- [!] Phone number — blocked: verified production content not supplied.
-- [!] Office / business address — blocked: verified production content not supplied.
-- [!] Social media links — blocked: verified production content not supplied.
-- [!] YouTube channel link — blocked: verified production content not supplied.
-- [!] Instagram profile link — blocked: verified production content not supplied.
-- [!] Existing project names and details — blocked: verified production content not supplied.
-- [!] Running project details — blocked: verified production content not supplied.
-- [!] Upcoming project details — blocked: verified production content not supplied.
-- [!] Team member names, roles, photos, bios — blocked: verified production content not supplied.
-- [!] Gallery / behind-the-scenes images — blocked: verified production content not supplied.
-- [!] Hero/banner images — blocked: verified production content not supplied.
-- [!] Casting / vacancy sample data — blocked: verified production content not supplied.
-- [!] Blog/article sample content — blocked: verified production content not supplied.
-- [!] Contact details — blocked: verified production content not supplied.
-- [!] Privacy Policy content or approval to use a basic draft — blocked: verified production content not supplied.
-- [!] Terms & Conditions content or approval to use a basic draft — blocked: verified production content not supplied.
+- [!] Company legal name â€” blocked: input template unfilled; verified legal name not supplied.
+- [!] GST number â€” blocked: real GST number not supplied.
+- [!] Company registration / CIN details â€” blocked: verified registration details not supplied.
+- [!] Official email address â€” blocked: verified production content not supplied.
+- [!] Phone number â€” blocked: verified production content not supplied.
+- [!] Office / business address â€” blocked: verified production content not supplied.
+- [!] Social media links â€” blocked: verified production content not supplied.
+- [!] YouTube channel link â€” blocked: verified production content not supplied.
+- [!] Instagram profile link â€” blocked: verified production content not supplied.
+- [!] Existing project names and details â€” blocked: verified production content not supplied.
+- [!] Running project details â€” blocked: verified production content not supplied.
+- [!] Upcoming project details â€” blocked: verified production content not supplied.
+- [!] Team member names, roles, photos, bios â€” blocked: verified production content not supplied.
+- [!] Gallery / behind-the-scenes images â€” blocked: verified production content not supplied.
+- [!] Hero/banner images â€” blocked: verified production content not supplied.
+- [!] Casting / vacancy sample data â€” blocked: verified production content not supplied.
+- [!] Blog/article sample content â€” blocked: verified production content not supplied.
+- [!] Contact details â€” blocked: verified production content not supplied.
+- [!] Privacy Policy content or approval to use a basic draft â€” blocked: verified production content not supplied.
+- [!] Terms & Conditions content or approval to use a basic draft â€” blocked: verified production content not supplied.
 
 ### Exit Criteria
 - [ ] Core company details received
@@ -62,7 +61,7 @@ Collect everything required before coding so development does not stop later.
 
 ---
 
-# Stage 1 — Repository & Project Foundation
+# Stage 1 â€” Repository & Project Foundation
 
 > Starter monorepo created. Install dependencies and run locally before marking this stage complete.
 
@@ -113,7 +112,7 @@ Create a clean development setup for frontend and backend.
 
 ---
 
-# Stage 2 — Design System & Reusable UI
+# Stage 2 â€” Design System & Reusable UI
 
 ## Goal
 Convert the finalized visual direction into reusable components.
@@ -162,7 +161,7 @@ Convert the finalized visual direction into reusable components.
 
 ---
 
-# Stage 3 — Public Website
+# Stage 3 â€” Public Website
 
 ## Goal
 Build all public-facing pages first.
@@ -214,11 +213,11 @@ Build all public-facing pages first.
 
 ### Exit Criteria
 - [ ] Public website complete with static/sample data
-- [x] Approved visually before backend integration
+- [~] Visual alignment in progress — final human review is still required
 
 ---
 
-# Stage 4 — Authentication
+# Stage 4 â€” Authentication
 
 ## Goal
 Allow members to securely create accounts and sign in.
@@ -262,7 +261,7 @@ Allow members to securely create accounts and sign in.
 
 ---
 
-# Stage 5 — Member Profile & Portfolio
+# Stage 5 â€” Member Profile & Portfolio
 
 ## Goal
 Allow a registered member to become part of the M. Dadu Films community.
@@ -309,7 +308,7 @@ Allow a registered member to become part of the M. Dadu Films community.
 
 ---
 
-# Stage 6 — Media Upload & Image Optimization
+# Stage 6 â€” Media Upload & Image Optimization
 
 ## Goal
 Store media efficiently while keeping image quality high.
@@ -332,10 +331,10 @@ Store media efficiently while keeping image quality high.
 - [x] Remove unnecessary metadata where appropriate
 
 ### Target Sizes
-- [x] Profile: approx. 800×800
+- [x] Profile: approx. 800Ã—800
 - [x] Thumbnail: approx. 400px
 - [x] Portfolio medium: approx. 1200px
-- [x] Gallery large: approx. 1600–1920px
+- [x] Gallery large: approx. 1600â€“1920px
 
 ### Testing
 - [ ] Large image uploads successfully
@@ -348,7 +347,7 @@ Store media efficiently while keeping image quality high.
 
 ---
 
-# Stage 7 — Projects & Casting Management
+# Stage 7 â€” Projects & Casting Management
 
 ## Goal
 Create the core film/project opportunity system.
@@ -394,7 +393,7 @@ Create the core film/project opportunity system.
 
 ---
 
-# Stage 8 — Project Application Workflow
+# Stage 8 â€” Project Application Workflow
 
 ## Goal
 Allow members to apply to film projects and casting opportunities.
@@ -434,7 +433,7 @@ Allow members to apply to film projects and casting opportunities.
 
 ---
 
-# Stage 9 — Member Dashboard
+# Stage 9 â€” Member Dashboard
 
 ## Goal
 Create the approved member dashboard experience.
@@ -470,7 +469,7 @@ Create the approved member dashboard experience.
 
 ---
 
-# Stage 10 — Super Admin Dashboard
+# Stage 10 â€” Super Admin Dashboard
 
 ## Goal
 Create the management system for the entire platform.
@@ -516,7 +515,7 @@ Create the management system for the entire platform.
 
 ---
 
-# Stage 11 — Talent Search, Filters & Saved Lists
+# Stage 11 â€” Talent Search, Filters & Saved Lists
 
 ## Goal
 Make the database useful for casting and production decisions.
@@ -551,7 +550,7 @@ Make the database useful for casting and production decisions.
 
 ---
 
-# Stage 12 — Blog / News / Content Management
+# Stage 12 â€” Blog / News / Content Management
 
 ## Goal
 Allow M. Dadu Films to publish weekly content.
@@ -581,7 +580,7 @@ Allow M. Dadu Films to publish weekly content.
 
 ---
 
-# Stage 13 — Gallery, BTS, Shows & Team CMS
+# Stage 13 â€” Gallery, BTS, Shows & Team CMS
 
 ## Goal
 Make all major public content manageable through admin.
@@ -618,7 +617,7 @@ Make all major public content manageable through admin.
 
 ---
 
-# Stage 14 — Contact, Notifications & Email
+# Stage 14 â€” Contact, Notifications & Email
 
 ## Goal
 Complete communication flows without AWS SES in V1.
@@ -649,7 +648,7 @@ Suggested:
 
 ---
 
-# Stage 15 — Settings, Legal & Company Trust Information
+# Stage 15 â€” Settings, Legal & Company Trust Information
 
 ## Goal
 Centralize site/company settings.
@@ -677,7 +676,7 @@ Centralize site/company settings.
 
 ---
 
-# Stage 16 — Security & Quality Hardening
+# Stage 16 â€” Security & Quality Hardening
 
 ## Goal
 Prepare the application for production-level use.
@@ -709,7 +708,7 @@ Prepare the application for production-level use.
 
 ---
 
-# Stage 17 — Full Testing & UAT
+# Stage 17 â€” Full Testing & UAT
 
 ## Goal
 Test the entire platform before deployment.
@@ -764,7 +763,7 @@ Test the entire platform before deployment.
 
 ---
 
-# Stage 18 — Production Deployment — LAST STAGE
+# Stage 18 â€” Production Deployment â€” LAST STAGE
 
 ## Goal
 Deploy only after development and testing are complete.
@@ -804,7 +803,7 @@ Deploy only after development and testing are complete.
 
 ---
 
-# Stage 19 — Post-Launch Stabilization
+# Stage 19 â€” Post-Launch Stabilization
 
 ## Goal
 Fix real-world issues after launch without adding unnecessary new features.
@@ -821,7 +820,7 @@ Fix real-world issues after launch without adding unnecessary new features.
 
 ---
 
-# Deferred Features — Not Part of V1.0.0
+# Deferred Features â€” Not Part of V1.0.0
 
 - [ ] Self-tape request workflow
 - [ ] Advanced digital reel builder beyond current portfolio
@@ -841,26 +840,26 @@ Fix real-world issues after launch without adding unnecessary new features.
 
 | Stage | Status |
 |---|---|
-| Stage 0 — Inputs & Assets | [~] In Progress |
-| Stage 1 — Project Foundation | [~] Starter Created / Local Verification Pending |
-| Stage 2 — Design System | [~] Partial implementation; review pending |
-| Stage 3 — Public Website | [~] Partial implementation; review pending |
-| Stage 4 — Authentication | [~] Partial implementation; review pending |
-| Stage 5 — Member Profile | [~] Partial implementation; review pending |
-| Stage 6 — Media Processing | [~] Partial implementation; review pending |
-| Stage 7 — Projects & Casting | [~] Partial implementation; review pending |
-| Stage 8 — Applications | [~] Partial implementation; review pending |
-| Stage 9 — Member Dashboard | [~] Partial implementation; review pending |
-| Stage 10 — Admin Dashboard | [~] Partial implementation; review pending |
-| Stage 11 — Talent Search | [~] Partial implementation; review pending |
-| Stage 12 — Blog | [~] Partial implementation; review pending |
-| Stage 13 — Gallery/BTS/Team | [~] Partial implementation; review pending |
-| Stage 14 — Contact & Email | [~] Partial implementation; review pending |
-| Stage 15 — Settings & Legal | [ ] Not Started |
-| Stage 16 — Security | [ ] Not Started |
-| Stage 17 — Testing / UAT | [ ] Not Started |
-| Stage 18 — Deployment | [ ] Not Started |
-| Stage 19 — Stabilization | [ ] Not Started |
+| Stage 0 â€” Inputs & Assets | [~] In Progress |
+| Stage 1 â€” Project Foundation | [~] Starter Created / Local Verification Pending |
+| Stage 2 â€” Design System | [~] Partial implementation; review pending |
+| Stage 3 â€” Public Website | [~] Partial implementation; review pending |
+| Stage 4 â€” Authentication | [~] Partial implementation; review pending |
+| Stage 5 â€” Member Profile | [~] Partial implementation; review pending |
+| Stage 6 â€” Media Processing | [~] Partial implementation; review pending |
+| Stage 7 â€” Projects & Casting | [~] Partial implementation; review pending |
+| Stage 8 â€” Applications | [~] Partial implementation; review pending |
+| Stage 9 â€” Member Dashboard | [~] Partial implementation; review pending |
+| Stage 10 â€” Admin Dashboard | [~] Partial implementation; review pending |
+| Stage 11 â€” Talent Search | [~] Partial implementation; review pending |
+| Stage 12 â€” Blog | [~] Partial implementation; review pending |
+| Stage 13 â€” Gallery/BTS/Team | [~] Partial implementation; review pending |
+| Stage 14 â€” Contact & Email | [~] Partial implementation; review pending |
+| Stage 15 â€” Settings & Legal | [ ] Not Started |
+| Stage 16 â€” Security | [ ] Not Started |
+| Stage 17 â€” Testing / UAT | [ ] Not Started |
+| Stage 18 â€” Deployment | [ ] Not Started |
+| Stage 19 â€” Stabilization | [ ] Not Started |
 
 ---
 
@@ -869,7 +868,7 @@ Fix real-world issues after launch without adding unnecessary new features.
 **We complete one stage, test it locally, confirm it works, update this file, and only then move to the next stage. Production deployment stays at the very end.**
 
 
-## Checkpoint evidence — 2026-09-17
+## Checkpoint evidence â€” 2026-09-17
 
 - Required Node 24.11.1 installed; npm workspace lockfile committed-ready.
 - Foundation lint, strict TypeScript, both builds, and 13 unit tests passed.
@@ -897,5 +896,6 @@ Fix real-world issues after launch without adding unnecessary new features.
 - HTTP smoke checks returned 200 for 21 implemented page routes. Missing
   routes render the custom not-found UI with `noindex`; Next.js streamed
   not-found responses use HTTP 200, as documented by the installed framework.
-- Final manual-review focus: signup → profile → portfolio → logout → login.
+- Final manual-review focus: signup â†’ profile â†’ portfolio â†’ logout â†’ login.
   Desktop/mobile interaction review is intentionally left to the user here.
+

@@ -36,7 +36,59 @@ MongoDB
 - MongoDB / Mongoose
 - REST + Swagger
 - Amazon S3 later for production media
-- Hostinger SMTP later for application email
+- Hostinger SMTP + Nodemailer for V1 email
+
+## Frontend boundaries
+
+```text
+apps/web/src/
+├── app/                  # routes + composition
+├── components/           # reusable application/presentation components
+│   └── ui/               # generic UI primitives
+├── config/               # stable technical config/constants
+├── content/placeholders/ # development fallbacks only
+├── providers/
+├── services/             # API access
+└── types/
+```
+
+Business content that an administrator should edit belongs in the API/database, not page source.
+
+Visual rules live in `docs/DESIGN_SYSTEM.md`.
+Reference screenshots live in `docs/references/ui/`.
+
+## Backend domain direction
+
+The API is a modular monolith.
+
+Target business domains:
+
+- auth
+- users
+- profiles
+- projects
+- castings
+- applications
+- talent / saved lists
+- posts/blog
+- media
+- gallery/BTS/shows content
+- team
+- contact
+- admin
+- settings
+
+### Transitional `platform` module
+
+`src/modules/platform/` currently contains multiple foundation-era concerns. It remains valid while
+the product is stabilizing, but it must not become a permanent catch-all.
+
+Rules:
+- do not add unrelated new features there by default,
+- migrate a concern when that domain is actively developed,
+- keep lightweight CMS content generic when appropriate,
+- give projects/castings/applications domain-specific models/services when business rules diverge,
+- refactor incrementally and keep tests green.
 
 ## V1 deployment target — final stage only
 
@@ -51,24 +103,6 @@ CI/CD         -> GitHub Actions
 ```
 
 Do not implement production deployment until Stage 18.
-
-## Business domains
-
-Backend modules are expected to grow around:
-
-- auth
-- users
-- profiles
-- projects
-- castings
-- applications
-- talent / saved lists
-- posts/blog
-- media/gallery/BTS
-- team
-- contact
-- admin
-- settings
 
 ## Roles
 
