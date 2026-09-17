@@ -7,7 +7,7 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import {
   Types,
-  type FilterQuery,
+  type QueryFilter,
   type Model,
   type PipelineStage,
 } from "mongoose";
@@ -221,7 +221,7 @@ export class ApplicationService {
     userId: string,
     query: MemberApplicationQueryDto,
   ) {
-    const filter: FilterQuery<Application> = {
+    const filter: QueryFilter<Application> = {
       userId: objectId(userId),
     };
 
@@ -261,7 +261,7 @@ export class ApplicationService {
   }
 
   async adminList(query: AdminApplicationQueryDto) {
-    const filter: FilterQuery<Application> = {};
+    const filter: QueryFilter<Application> = {};
 
     if (query.status) filter.status = query.status;
     if (query.opportunityType) {
