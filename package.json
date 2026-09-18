@@ -28,7 +28,8 @@
     "format:check": "prettier --check \"apps/**/*.{ts,tsx}\" \"*.json\" \"*.mjs\"",
     "format": "prettier --write \"apps/**/*.{ts,tsx}\" \"*.json\" \"*.mjs\"",
     "db:local": "docker compose -p mdadu-local -f docker-compose.local.yml up -d",
-    "test:integration": "npm run build -w @mdadu/api && node scripts/integration-test.mjs"
+    "test:integration": "npm run build -w @mdadu/api && node scripts/integration-test.mjs",
+    "db:seed:our-work": "node --env-file=apps/api/.env scripts/seed-our-work.mjs"
   },
   "devDependencies": {
     "concurrently": "9.2.4",

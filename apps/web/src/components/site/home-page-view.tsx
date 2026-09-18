@@ -4,6 +4,7 @@ import { usePublicData } from "./use-public-data";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteMedia } from "@/components/site/site-media";
+import { OurWorkSection } from "@/components/site/our-work-section";
 
 export function HomePageView() {
   const data=usePublicData("home");
@@ -74,6 +75,8 @@ export function HomePageView() {
             </div>
           </div>
         </section>
+
+        <OurWorkSection />
 
         <section className="site-section bg-white">
           <div className="site-shell">

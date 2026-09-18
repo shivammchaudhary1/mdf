@@ -9,7 +9,7 @@ import { AdminListsView } from "@/components/admin/admin-lists-view";
 import { AdminContactsView } from "@/components/admin/admin-contacts-view";
 import { AdminSettingsView } from "@/components/admin/admin-settings-view";
 
-const valid=["dashboard","users","applications","projects","casting","blog","gallery","behind-the-scenes","shows","team","lists","contacts","settings","legal"] as const;
+const valid=["dashboard","users","applications","projects","casting","work","blog","gallery","behind-the-scenes","shows","team","lists","contacts","settings","legal"] as const;
 
 export function AdminWorkspace({section="dashboard"}:{section?:string}){
  const safe=valid.includes(section as (typeof valid)[number])?section:"dashboard";
@@ -18,6 +18,7 @@ export function AdminWorkspace({section="dashboard"}:{section?:string}){
    safe==="applications"?<AdminApplicationsView/>:
    safe==="projects"?<AdminProjectsView/>:
    safe==="casting"?<AdminCastingView/>:
+   safe==="work"?<AdminContentView kind="work"/>:
    safe==="blog"?<AdminContentView kind="blog"/>:
    safe==="gallery"?<AdminContentView kind="gallery"/>:
    safe==="behind-the-scenes"?<AdminContentView kind="bts"/>:

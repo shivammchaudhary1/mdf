@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/toast-provider";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
-type Member=(typeof data.members)[number];
+type Member=(typeof data.members)[number] & {suspended:boolean};
 
 export function AdminMembersView(){
  const toast=useToast();
@@ -27,11 +27,8 @@ export function AdminMembersView(){
  function addMember(event:FormEvent<HTMLFormElement>){
   event.preventDefault(); toast.error("Members must register through the sign-up page. Admin invitations are not available yet.");
  }
- async function toggleVerify(){
-  if(!selected)return;
-  try { await api(`/admin/users/${selected.id}`,{method:"PATCH",body:JSON.stringify({verified:!selected.verified})}); await refresh(); toast.success("Verification updated."); setSelected(null); }
-  catch(error){toast.error(error instanceof Error?error.message:"Unable to update member.");}
- }
+ async function toggleVerify(){if(!selected)return;try{await api(`/admin/users/${selected.id}`,{method:"PATCH",body:JSON.stringify({verified:!selected.verified})});await refresh();toast.success("Verification updated.");setSelected(null);}catch(error){toast.error(error instanceof Error?error.message:"Unable to update member.");}}
+ async function toggleSuspended(){if(!selected)return;try{await api(`/admin/users/${selected.id}`,{method:"PATCH",body:JSON.stringify({suspended:!selected.suspended})});await refresh();toast.success(selected.suspended?"Member reactivated.":"Member suspended and sessions revoked.");setSelected(null);}catch(error){toast.error(error instanceof Error?error.message:"Unable to update member.");}}
 
  return <div className="ad-stack">
   <AdminPageHeader eyebrow="Community management" title="Members & Talent" description="Search, verify and review the people who make up the M. Dadu Films community." action={<AdminPrimaryButton onClick={()=>setCreating(true)}>Add Member</AdminPrimaryButton>}/>
@@ -65,7 +62,7 @@ export function AdminMembersView(){
     {selected&&<div className="ad-member-review">
       <div className="ad-member-review-top"><div className="ad-avatar">{selected.name.slice(0,2).toUpperCase()}</div><div><strong>{selected.email}</strong><span>Profile completion {selected.completion}%</span></div></div>
       <div className="ad-review-summary"><div><span>Status</span><strong>{selected.status}</strong></div><div><span>Joined</span><strong>{selected.joined}</strong></div><div><span>Verification</span><strong>{selected.verified?"Verified":"Not verified"}</strong></div></div>
-      <div className="ad-dialog-actions"><button type="button" className="ad-dialog-cancel" onClick={()=>setSelected(null)}>Close</button><button type="button" className="ad-dialog-primary" onClick={toggleVerify}>{selected.verified?"Remove Verification":"Verify Member"}</button></div>
+      <div className="ad-dialog-actions"><button type="button" className="ad-dialog-cancel" onClick={()=>setSelected(null)}>Close</button><button type="button" className="ad-dialog-secondary" onClick={toggleSuspended}>{selected.suspended?"Reactivate":"Suspend"}</button><button type="button" className="ad-dialog-primary" onClick={toggleVerify}>{selected.verified?"Remove Verification":"Verify Member"}</button></div>
     </div>}
   </AdminDialog>
  </div>
