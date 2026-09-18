@@ -4,10 +4,11 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useAdminRecords } from "./use-admin-records";
 import { contentView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
-import { slugFor } from "@/services/workspace";
+import { slugFor, uploadMedia } from "@/services/workspace";
 import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
@@ -69,7 +70,7 @@ function CreateFields({kind}:{kind:Kind}){
 
 function UploadBox({kind}:{kind:Kind}){
  if(kind==="shows") return null;
- return <div className="ad-dialog-upload"><span>{kind==="team"?"Profile photo":"Media file"}</span><strong>Upload control ready for S3 integration</strong><small>The current UI will use the standard placeholder until storage is connected.</small></div>;
+ return <div className="ad-dialog-upload"><span>{kind==="team"?"Profile photo":"Cover / media image"}</span><strong>Upload JPEG, PNG or WebP</strong><small>The media service optimises images and stores them using the configured storage adapter.</small><input name="cover" type="file" accept="image/jpeg,image/png,image/webp"/></div>;
 }
 
 export function AdminContentView({kind}:{kind:Kind}){
@@ -78,7 +79,7 @@ export function AdminContentView({kind}:{kind:Kind}){
  const setActive=useAdminDashboardStore(s=>s.setContentFilter);
  const config=cfg[kind];
  const path=`/admin/content/${kind==="bts"?"behind-the-scenes":kind==="work"?"our-work":kind}`;
- const [items,,refresh]=useAdminRecords(path,contentView);
+ const [items,,refresh,meta,setPage]=useAdminRecords(path,contentView,true,1,20);
  const [creating,setCreating]=useState(false);
  const [editing,setEditing]=useState<ContentItem|null>(null);
 
@@ -87,8 +88,9 @@ export function AdminContentView({kind}:{kind:Kind}){
 
  async function persist(event:FormEvent<HTMLFormElement>,id?:string){
   event.preventDefault();const form=new FormData(event.currentTarget);const title=String(form.get(kind==="team"?"name":"title")??"").trim();
-  const body={title,...(!id?{slug:slugFor(title)}:{}),category:String(form.get("category")??""),role:String(form.get("role")??""),description:String(form.get("summary")??""),published:form.get("status")==="Published",status:String(form.get("status")??"Draft"),...(form.get("date")?{publishedAt:String(form.get("date"))}:{}),...(form.get("url")?{videoUrl:String(form.get("url"))}:{}),data:{author:String(form.get("author")??""),platform:String(form.get("platform")??""),group:String(form.get("group")??"")}};
-  try {await api(id?`${path}/${id}`:path,{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Content saved.");}
+  const cover=form.get("cover");let coverMediaId:string|undefined;if(cover instanceof File&&cover.size>0)coverMediaId=(await uploadMedia(cover)).id;
+  const body={title,...(!id?{slug:slugFor(title)}:{}),category:String(form.get("category")??""),role:String(form.get("role")??""),description:String(form.get("summary")??""),published:form.get("status")==="Published",status:String(form.get("status")??"Draft"),...(form.get("date")?{publishedAt:String(form.get("date"))}:{}),...(form.get("url")?{videoUrl:String(form.get("url"))}:{}),...(coverMediaId?{coverMediaId}:{}),data:{author:String(form.get("author")??""),platform:String(form.get("platform")??""),group:String(form.get("group")??"")}};
+  try {await api(id?`[object Object]/${id}`:path,{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Content saved.");}
   catch(error){toast.error(error instanceof Error?error.message:"Unable to save content.");}
  }
  function submitNew(event:FormEvent<HTMLFormElement>){return persist(event);}
@@ -107,6 +109,8 @@ export function AdminContentView({kind}:{kind:Kind}){
    <article className="ad-card ad-table-card"><div className="ad-table ad-content-table"><div className="ad-table-head"><span>Title</span><span>Category / Platform</span><span>Date</span><span>Status</span><span></span></div>{visible.map(item=><div className="ad-table-row" key={item.id}><div><strong>{item.title}</strong><span>{item.author??""}</span></div><span>{item.category||item.platform}</span><span>{item.date}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${path}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>)}</div></article>
   }
 
+  <PaginationControls meta={meta} onPage={setPage}/>
+
   <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow={config.eyebrow} title={config.action} description={`Create a new ${config.title.toLowerCase()} item without leaving this workspace.`} width="wide">
     <AdminDialogForm onSubmit={submitNew}>
       <AdminDialogGrid><CreateFields kind={kind}/></AdminDialogGrid>
@@ -115,7 +119,7 @@ export function AdminContentView({kind}:{kind:Kind}){
     </AdminDialogForm>
   </AdminDialog>
 
-  <AdminDialog open={!!editing} onClose={()=>setEditing(null)} eyebrow="Edit content" title={editing?.title||editing?.name||config.title} description="Update this item in place. Changes remain local until backend CMS integration." width="wide">
+  <AdminDialog open={!!editing} onClose={()=>setEditing(null)} eyebrow="Edit content" title={editing?.title||editing?.name||config.title} description="Update this CMS item in place. Published changes are reflected on the public website." width="wide">
    {editing&&<AdminDialogForm onSubmit={saveEdit}>
     <AdminDialogGrid>
       <AdminFormField label={kind==="team"?"Full Name":"Title"} wide><input name={kind==="team"?"name":"title"} defaultValue={kind==="team"?editing.name:editing.title} required/></AdminFormField>
@@ -126,6 +130,7 @@ export function AdminContentView({kind}:{kind:Kind}){
       <AdminFormField label="Status"><select name="status" defaultValue={editing.status}><option>Published</option><option>Draft</option><option>Scheduled</option></select></AdminFormField>
       {kind!=="team"&&<AdminFormField label="Date"><input name="date" defaultValue={editing.date}/></AdminFormField>}
       {kind==="shows"&&<AdminFormField label="External URL" wide><input name="url" type="url" defaultValue={editing.url}/></AdminFormField>}
+      {kind!=="shows"&&<AdminFormField label="Replace Image" wide><input name="cover" type="file" accept="image/jpeg,image/png,image/webp"/></AdminFormField>}
       <AdminFormField label="Notes / Summary" wide><textarea name="summary" rows={4} defaultValue={editing.summary}/></AdminFormField>
     </AdminDialogGrid>
     <AdminDialogActions onCancel={()=>setEditing(null)} primaryLabel="Save Changes"/>

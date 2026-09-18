@@ -121,6 +121,9 @@ export class AuthService {
     const account = await this.accounts.findById(principal.id);
     if (!account) throw new NotFoundException("Account not found.");
     // Changing an identity used by Google requires a separate verified linking flow.
+    if (input.email && input.email !== account.email && account.verified) {
+      throw new BadRequestException("Verified account email cannot be changed here. Contact support if your verified email must be updated.");
+    }
     if (input.email && input.email !== account.email && account.authProvider !== "local") {
       throw new BadRequestException("The email linked to Google sign-in cannot be changed here.");
     }

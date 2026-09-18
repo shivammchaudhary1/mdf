@@ -83,15 +83,13 @@ export class ProjectService {
       ];
     }
 
-    const [items, total] = await Promise.all([
-      this.projects
-        .find(filter)
-        .sort({ order: 1, createdAt: -1 })
-        .skip((query.page - 1) * query.limit)
-        .limit(query.limit)
-        .lean(),
-      this.projects.countDocuments(filter),
+    const [result] = await this.projects.aggregate<{items: Project[]; total: {count: number}[]}>([
+      { $match: filter },
+      { $sort: { order: 1, createdAt: -1, _id: -1 } },
+      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
     ]);
+    const items = result?.items ?? [];
+    const total = Number(result?.total?.[0]?.count ?? 0);
 
     const counts = admin ? await this.projects.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {projectId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$projectId", count: {$sum: 1}}}]).toArray() : [];
     const totals = new Map(counts.map(item=>[String(item._id),item.count]));

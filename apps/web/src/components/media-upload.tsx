@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { api } from "@/services/api";
+import { uploadMedia } from "@/services/workspace";
 import { useToast } from "@/components/ui/toast-provider";
 export type UploadedMedia = {
   id: string;
@@ -41,12 +41,7 @@ export function MediaUpload({
           }
           setPending(true);
           try {
-            const form = new FormData();
-            form.append("file", file);
-            const media = await api<UploadedMedia>("/media", {
-              method: "POST",
-              body: form,
-            });
+            const media = await uploadMedia(file) as UploadedMedia;
             onUploaded(media);
             toast.success("Upload complete.");
           } catch (error) {

@@ -16,7 +16,7 @@ export function AdminSettingsView({legal=false}:{legal?:boolean}){
  const fields=useRef<HTMLDivElement>(null);
  const settings=records.find(x=>x.slug==="company")?.data??{};
  const registration=records.find(x=>x.slug==="registration")?.data??{};
- const data={settings:{companyName:"",tagline:"",email:"",phone:"",location:"",instagram:"",youtube:"",linkedin:"",...settings},legal:{gst:"",registration:"",copyright:"",privacyUpdated:records.find(x=>x.slug==="privacy")?.published?"Published":"Draft",termsUpdated:records.find(x=>x.slug==="terms")?.published?"Published":"Draft",...registration}};
+ const data={settings:{companyName:"",tagline:"",email:"",phone:"",location:"",instagram:"",youtube:"",linkedin:"",facebook:"",...settings},legal:{gst:"",registration:"",copyright:"",privacyUpdated:records.find(x=>x.slug==="privacy")?.published?"Published":"Draft",termsUpdated:records.find(x=>x.slug==="terms")?.published?"Published":"Draft",...registration}};
  async function persist(slug:string,title:string,body:Record<string,unknown>){const existing=records.find(x=>x.slug===slug);await api(`/admin/content/${legal?"legal":"settings"}${existing?`/${existing._id}`:""}`,{method:existing?"PATCH":"POST",body:JSON.stringify({slug,title,...body})});await refresh();}
 
  const[saving,setSaving]=useState(false);
@@ -25,7 +25,7 @@ export function AdminSettingsView({legal=false}:{legal?:boolean}){
  async function save(){
   if(saving)return;setSaving(true);
   const inputs=Array.from(fields.current?.querySelectorAll("input")??[]).map(input=>input.value);
-  const keys=legal?["gst","registration","copyright"]:["companyName","tagline","email","phone","location","instagram","youtube","linkedin"];
+  const keys=legal?["gst","registration","copyright"]:["companyName","tagline","email","phone","location","instagram","youtube","linkedin","facebook"];
   try{await persist(legal?"registration":"company",legal?"Company registration":"Company settings",{published:true,data:Object.fromEntries(keys.map((key,i)=>[key,inputs[i]??""]))});toast.success("Settings saved.");}
   catch(error){toast.error(error instanceof Error?error.message:"Unable to save settings.");}finally{setSaving(false);}
  }
@@ -62,10 +62,10 @@ export function AdminSettingsView({legal=false}:{legal?:boolean}){
    <div className="ad-form-stack" ref={fields} key={JSON.stringify(legal?data.legal:data.settings)}>
     <article className="ad-card"><div className="ad-card-head"><div><p className="ad-kicker">Brand</p><h2>Company Identity</h2></div></div><div className="ad-form-grid"><label className="ad-field"><span>Company Name</span><input defaultValue={data.settings.companyName}/></label><label className="ad-field"><span>Tagline</span><input defaultValue={data.settings.tagline}/></label></div></article>
     <article className="ad-card"><div className="ad-card-head"><div><p className="ad-kicker">Contact</p><h2>Public Contact Details</h2></div></div><div className="ad-form-grid"><label className="ad-field"><span>Email</span><input defaultValue={data.settings.email}/></label><label className="ad-field"><span>Phone</span><input defaultValue={data.settings.phone}/></label><label className="ad-field ad-field-wide"><span>Location</span><input defaultValue={data.settings.location}/></label></div></article>
-    <article className="ad-card"><div className="ad-card-head"><div><p className="ad-kicker">Social</p><h2>Social Profiles</h2></div></div><div className="ad-form-grid"><label className="ad-field"><span>Instagram</span><input defaultValue={data.settings.instagram}/></label><label className="ad-field"><span>YouTube</span><input defaultValue={data.settings.youtube}/></label><label className="ad-field ad-field-wide"><span>LinkedIn</span><input defaultValue={data.settings.linkedin}/></label></div></article>
+    <article className="ad-card"><div className="ad-card-head"><div><p className="ad-kicker">Social</p><h2>Social Profiles</h2></div></div><div className="ad-form-grid"><label className="ad-field"><span>Instagram</span><input defaultValue={data.settings.instagram}/></label><label className="ad-field"><span>YouTube</span><input defaultValue={data.settings.youtube}/></label><label className="ad-field"><span>LinkedIn</span><input defaultValue={data.settings.linkedin}/></label><label className="ad-field"><span>Facebook</span><input defaultValue={data.settings.facebook}/></label></div></article>
     <button className="ad-primary ad-save" disabled={saving} onClick={save}>{saving?"Saving…":"Save Settings"}</button>
    </div>
-   <aside className="ad-card ad-settings-note"><p className="ad-kicker">CMS direction</p><h2>Database-driven later.</h2><p>This screen currently uses temporary JSON for UI approval. After approval, these fields should load from the Settings API and MongoDB.</p></aside>
+   <aside className="ad-card ad-settings-note"><p className="ad-kicker">Public configuration</p><h2>Connected to the Settings API.</h2><p>Changes saved here are stored in MongoDB and are used by public-facing sections such as contact details and social links.</p></aside>
   </section>
  </div>
 }

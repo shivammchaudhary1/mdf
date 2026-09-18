@@ -8,6 +8,7 @@ import { api } from "@/services/api";
 import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
@@ -18,7 +19,7 @@ export function AdminMembersView(){
  const active=useAdminDashboardStore(s=>s.memberFilter);
  const setActive=useAdminDashboardStore(s=>s.setMemberFilter);
  const [query,setQuery]=useState("");
- const [members,,refresh]=useAdminRecords(`/admin/users?search=${encodeURIComponent(query)}${active==="Verified"?"&verified=true":active==="Unverified"||active==="Needs Review"?"&verified=false":""}`,memberView);
+ const [members,,refresh,meta,setPage]=useAdminRecords(`/admin/users?search=${encodeURIComponent(query)}${active==="Verified"?"&verified=true":active==="Unverified"||active==="Needs Review"?"&verified=false":""}`,memberView,true,1,25);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<Member|null>(null);
 
@@ -43,7 +44,7 @@ export function AdminMembersView(){
     <div className="ad-member-status">{m.verified?<span className="verified">✓ Verified</span>:<AdminStatus value={m.status}/>}</div>
     <AdminMoreButton onEdit={()=>setSelected(m)}/>
    </div>)}
-  </div>{!visible.length&&<div className="ad-empty">No members match this filter.</div>}</article>
+  </div>{!visible.length&&<div className="ad-empty">No members match this filter.</div>}</article><PaginationControls meta={meta} onPage={setPage}/>
 
   <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Community" title="Add Member" description="Create a temporary member record for UI review." width="wide">
     <AdminDialogForm onSubmit={addMember}>

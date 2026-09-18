@@ -1,4 +1,4 @@
-import { PublicFooter } from "@/components/public-footer";
+import { SiteFooter } from "@/components/site/site-footer";
 import { PublicHeader } from "@/components/public-header";
 
 type PageShellProps = {
@@ -36,7 +36,7 @@ export function PageShell({
 
         <section className="container-shell section-pad">{children}</section>
       </main>
-      <PublicFooter />
+      <SiteFooter />
     </>
   );
 }

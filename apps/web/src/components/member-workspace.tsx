@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
@@ -10,7 +10,8 @@ import { useMemberDashboardStore } from "@/store/member-dashboard-store";
 import { MemberData, useMemberData } from "@/components/member-data";
 import { api } from "@/services/api";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { allPages, uploadMedia, type OpportunityRecord } from "@/services/workspace";
+import { dateLabel, fetchPage, mediaUrl, uploadMedia, type ApplicationRecord, type OpportunityRecord, type PageMeta } from "@/services/workspace";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 const nav = [
   ["dashboard", "Dashboard", "/member"],
@@ -241,35 +242,21 @@ function Portfolio() {
 }
 
 function Applications() {
-  const { data } = useMemberData();
-  const active=useMemberDashboardStore(s=>s.applicationFilter), setActive=useMemberDashboardStore(s=>s.setApplicationFilter);
+  const active=useMemberDashboardStore(s=>s.applicationFilter),setActive=useMemberDashboardStore(s=>s.setApplicationFilter),toast=useToast();
+  const[page,setPage]=useState(1),[items,setItems]=useState<ApplicationRecord[]>([]),[meta,setMeta]=useState<PageMeta>();
   const filters=["All","Submitted","Under Review","Shortlisted","Not Selected"];
-  const visible=active==="All"?data.applications:data.applications.filter(a=>a.status===active);
-  return <div className="md-stack">
-    <Header kicker="Track your progress" title="My Applications" description="See every role you applied to and where each application currently stands."/>
-    <div className="md-filters">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={active===f?"active":""}>{f}</button>)}</div>
-    <article className="md-card md-table-card"><div className="md-table-head"><span>Role / Project</span><span>Applied</span><span>Location</span><span>Status</span></div>{visible.map(a=><div className="md-table-row" key={a.id}><div><strong>{a.role}</strong><span>{a.project} · {a.type}</span></div><span>{a.appliedOn}</span><span>{a.location}</span><Status status={a.status} tone={a.tone}/></div>)}</article>
-  </div>;
+  useEffect(()=>{let mounted=true;const status=active==="Not Selected"?"Rejected":active==="All"?"":active;const path=`/member/applications${status?`?status=${encodeURIComponent(status)}`:""}`;void fetchPage<ApplicationRecord>(path,page,10).then(r=>{if(mounted){setItems(r.items);setMeta(r.meta)}}).catch(e=>toast.error(e instanceof Error?e.message:"Unable to load applications."));return()=>{mounted=false}},[active,page,toast]);
+  const rows=items.map(x=>({id:x._id,role:x.roleSnapshot??x.opportunityTitle,project:x.opportunityTitle,type:x.opportunityType,location:x.applicant.city??"—",appliedOn:dateLabel(x.createdAt),status:x.status==="Rejected"?"Not Selected":x.status,tone:x.status==="Shortlisted"||x.status==="Selected"?"success":x.status==="Under Review"?"warning":x.status==="Rejected"?"danger":"neutral"}));
+  return <div className="md-stack"><Header kicker="Track your progress" title="My Applications" description="See every role you applied to and where each application currently stands."/><div className="md-filters">{filters.map(f=><button key={f} onClick={()=>{setActive(f);setPage(1)}} className={active===f?"active":""}>{f}</button>)}</div><article className="md-card md-table-card"><div className="md-table-head"><span>Role / Project</span><span>Applied</span><span>Location</span><span>Status</span></div>{rows.map(a=><div className="md-table-row" key={a.id}><div><strong>{a.role}</strong><span>{a.project} · {a.type}</span></div><span>{a.appliedOn}</span><span>{a.location}</span><Status status={a.status} tone={a.tone}/></div>)}</article><PaginationControls meta={meta} onPage={setPage}/></div>;
 }
 
 function Opportunities() {
-  const { data, profile, refresh } = useMemberData();
-  const saved=profile.savedOpportunityIds??[];
-  const [saving,setSaving]=useState(false);
-  async function toggle(id:string){if(saving)return;setSaving(true);try{await api("/member/settings",{method:"PATCH",body:JSON.stringify({savedOpportunityIds:saved.includes(id)?saved.filter(x=>x!==id):[...saved,id]})});await refresh();}catch(error){toast.error(error instanceof Error?error.message:"Unable to save opportunity.");}finally{setSaving(false);}}
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-  async function viewOpportunity(id: string) {
-    try { const opportunity=(await allPages<OpportunityRecord>("/member/opportunities")).find(item=>item._id===id); if(!opportunity)throw new Error("This opportunity is no longer available."); router.push(`/${opportunity.opportunityType==="CASTING"?"casting":"projects"}/${opportunity.slug}`); }
-    catch(error){toast.error(error instanceof Error?error.message:"Unable to open opportunity.");}
-  }
-  const toast=useToast(), active=useMemberDashboardStore(s=>s.opportunityFilter), setActive=useMemberDashboardStore(s=>s.setOpportunityFilter);
-  const filters=["All","Acting","Commercial"], visible=data.opportunities.filter(o=>(active==="All"||o.category===active)&&`${o.title} ${o.project}`.toLowerCase().includes(query.toLowerCase()));
-  return <div className="md-stack">
-    <Header kicker="Discover roles" title="Opportunities" description="Explore casting calls selected around your profile, location and creative interests." action={<div className="md-search-box"><Icon name="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search roles or projects"/></div>}/>
-    <div className="md-filters">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={active===f?"active":""}>{f}</button>)}</div>
-    <section className="md-opportunity-grid">{visible.map(o=><article className="md-opportunity-card" key={o.id}><div className="md-opp-image"><SiteMedia src={o.image} alt={o.title} kind="team" className="h-full min-h-[210px]"/><span>{o.match} match</span><button className={saved.includes(o.id)?"saved":""} onClick={()=>toggle(o.id)}><Icon name="bookmark"/></button></div><div className="md-opp-body"><p>{o.category} · {o.compensation||"—"}</p><h2>{o.title}</h2><strong>{o.project}</strong><div><span>{o.location}</span><span>Deadline {o.deadline}</span></div><button className="md-primary full" onClick={()=>viewOpportunity(o.id)}>View & Apply</button></div></article>)}</section>
-  </div>;
+  const {profile,refresh}=useMemberData();const saved=profile.savedOpportunityIds??[],router=useRouter(),toast=useToast(),active=useMemberDashboardStore(s=>s.opportunityFilter),setActive=useMemberDashboardStore(s=>s.setOpportunityFilter);
+  const[saving,setSaving]=useState(false),[query,setQuery]=useState(""),[page,setPage]=useState(1),[items,setItems]=useState<OpportunityRecord[]>([]),[meta,setMeta]=useState<PageMeta>();
+  const filters=["All","Acting","Commercial"];
+  useEffect(()=>{let mounted=true;const params=new URLSearchParams();if(active!=="All")params.set("category",active);if(query.trim())params.set("search",query.trim());const path=`/member/opportunities${params.toString()?`?${params}`:""}`;void fetchPage<OpportunityRecord>(path,page,12).then(r=>{if(mounted){setItems(r.items);setMeta(r.meta)}}).catch(e=>toast.error(e instanceof Error?e.message:"Unable to load opportunities."));return()=>{mounted=false}},[active,query,page,toast]);
+  async function toggle(id:string){if(saving)return;setSaving(true);try{await api("/member/settings",{method:"PATCH",body:JSON.stringify({savedOpportunityIds:saved.includes(id)?saved.filter(x=>x!==id):[...saved,id]})});await refresh()}catch(error){toast.error(error instanceof Error?error.message:"Unable to save opportunity.")}finally{setSaving(false)}}
+  return <div className="md-stack"><Header kicker="Discover roles" title="Opportunities" description="Explore casting calls selected around your profile, location and creative interests." action={<div className="md-search-box"><Icon name="search"/><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Search roles or projects"/></div>}/><div className="md-filters">{filters.map(f=><button key={f} onClick={()=>{setActive(f);setPage(1)}} className={active===f?"active":""}>{f}</button>)}</div><section className="md-opportunity-grid">{items.map(o=><article className="md-opportunity-card" key={o._id}><div className="md-opp-image"><SiteMedia src={mediaUrl(o.coverImage)} alt={o.title} kind="team" className="h-full min-h-[210px]"/><span>— match</span><button className={saved.includes(o._id)?"saved":""} onClick={()=>toggle(o._id)}><Icon name="bookmark"/></button></div><div className="md-opp-body"><p>{o.category??""} · {o.compensation||"—"}</p><h2>{o.title}</h2><strong>{o.role??o.title}</strong><div><span>{o.location??"—"}</span><span>Deadline {dateLabel(o.deadline)}</span></div><button className="md-primary full" onClick={()=>router.push(`/${o.opportunityType==="CASTING"?"casting":"projects"}/${o.slug}`)}>View & Apply</button></div></article>)}</section><PaginationControls meta={meta} onPage={setPage}/></div>;
 }
 
 function Settings() {
@@ -281,8 +268,8 @@ function Settings() {
   async function deactivate(){if(saving)return;setSaving(true);try{await api("/auth/deactivate",{method:"POST"});router.replace("/login");}catch(error){toast.error(error instanceof Error?error.message:"Unable to deactivate account.");}finally{setSaving(false);}}
   async function save() {
     if(saving)return; setSaving(true);
-    const inputs=fields.current?.querySelectorAll("input");
-    try { await api("/auth/account",{method:"PATCH",body:JSON.stringify({email:inputs?.[0].value,mobile:inputs?.[1].value})}); await refresh(); toast.success("Account settings saved."); }
+    const email=fields.current?.querySelector<HTMLInputElement>('input[name="email"]')?.value;const mobile=fields.current?.querySelector<HTMLInputElement>('input[name="mobile"]')?.value;
+    try { await api("/auth/account",{method:"PATCH",body:JSON.stringify({mobile,...(data.member.verified?{}:{email})})}); await refresh(); toast.success("Account settings saved."); }
     catch(error){toast.error(error instanceof Error?error.message:"Unable to save settings.");}finally{setSaving(false);}
   }
   async function preference(key: "emailCastingAlerts"|"emailUpdates"|"publicVisible", value: boolean) {
@@ -293,7 +280,7 @@ function Settings() {
   const Toggle=({title,desc,value,set}:{title:string;desc:string;value:boolean;set:(v:boolean)=>void})=><div className="md-toggle-row"><div><strong>{title}</strong><p>{desc}</p></div><button className={value?"on":""} onClick={()=>set(!value)}><span/></button></div>;
   return <div className="md-stack">
     <Header kicker="Account controls" title="Settings" description="Manage your account details, preferences and public profile visibility."/>
-    <section className="md-settings-grid"><div className="md-form-stack" ref={fields} key={`${data.member.email}-${data.member.mobile}`}><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Account</p><h2>Login Details</h2></div></div><div className="md-form-grid"><label className="md-field"><span>Email</span><input defaultValue={data.member.email}/></label><label className="md-field"><span>Mobile</span><input defaultValue={data.member.mobile}/></label></div><div className="md-save-row"><Link href="/forgot-password" className="md-secondary">Change Password</Link><button className="md-primary" disabled={saving} onClick={save}>Save Changes</button></div></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Notifications</p><h2>Email & Opportunity Alerts</h2></div></div><Toggle title="Casting recommendations" desc="Receive alerts when a role closely matches your profile." value={cast} set={v=>void preference("emailCastingAlerts",v)}/><Toggle title="Community updates" desc="Receive useful product news and community updates." value={mail} set={v=>void preference("emailUpdates",v)}/></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Privacy</p><h2>Profile Visibility</h2></div></div><Toggle title="Public talent profile" desc="Allow casting teams and visitors to discover your profile." value={visible} set={v=>void preference("publicVisible",v)}/></article></div><aside className="md-card md-membership"><p className="md-kicker">Account status</p><h2>Your membership</h2><span>Your account is active and ready for opportunities.</span><div><small>ACTIVE</small><strong>{data.member.verified?"Verified Member":"Not verified"}</strong></div><button onClick={()=>setDeactivating(true)}>Deactivate Account</button></aside></section>
+    <section className="md-settings-grid"><div className="md-form-stack" ref={fields} key={`${data.member.email}-${data.member.mobile}`}><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Account</p><h2>Login Details</h2></div></div><div className="md-form-grid"><label className="md-field"><span>Email</span><input name="email" defaultValue={data.member.email} disabled={data.member.verified}/>{data.member.verified&&<small>Verified email is locked. Contact support to change it.</small>}</label><label className="md-field"><span>Mobile</span><input name="mobile" defaultValue={data.member.mobile}/></label></div><div className="md-save-row"><Link href="/forgot-password" className="md-secondary">Change Password</Link><button className="md-primary" disabled={saving} onClick={save}>Save Changes</button></div></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Notifications</p><h2>Email & Opportunity Alerts</h2></div></div><Toggle title="Casting recommendations" desc="Receive alerts when a role closely matches your profile." value={cast} set={v=>void preference("emailCastingAlerts",v)}/><Toggle title="Community updates" desc="Receive useful product news and community updates." value={mail} set={v=>void preference("emailUpdates",v)}/></article><article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Privacy</p><h2>Profile Visibility</h2></div></div><Toggle title="Public talent profile" desc="Allow casting teams and visitors to discover your profile." value={visible} set={v=>void preference("publicVisible",v)}/></article></div><aside className="md-card md-membership"><p className="md-kicker">Account status</p><h2>Your membership</h2><span>Your account is active and ready for opportunities.</span><div><small>ACTIVE</small><strong>{data.member.verified?"Verified Member":"Not verified"}</strong></div><button onClick={()=>setDeactivating(true)}>Deactivate Account</button></aside></section>
     <ConfirmDialog open={deactivating} title="Deactivate your account?" description="You will be signed out. Contact the team to reactivate your account." confirmLabel="Deactivate" destructive loading={saving} onConfirm={()=>void deactivate()} onCancel={()=>setDeactivating(false)}/>
   </div>;
 }
