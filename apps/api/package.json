@@ -4,11 +4,17 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
-    "start:dev": "node --watch -r ts-node/register src/main.ts",
+    "start": "node --env-file=.env.prod dist/main.js",
+    "start:dev": "node --env-file=.env.dev --watch -r ts-node/register src/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand",
-    "db:indexes": "node -r ts-node/register src/scripts/create-indexes.ts"
+    "db:indexes": "npm run db:indexes:dev",
+    "prestart:dev": "node ../../scripts/check-env-files.mjs dev api",
+    "prestart": "node ../../scripts/check-env-files.mjs prod api",
+    "prestart:prod": "node ../../scripts/check-env-files.mjs prod api",
+    "start:prod": "node --env-file=.env.prod dist/main.js",
+    "db:indexes:dev": "node --env-file=.env.dev -r ts-node/register src/scripts/create-indexes.ts",
+    "db:indexes:prod": "node --env-file=.env.prod -r ts-node/register src/scripts/create-indexes.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",
