@@ -99,6 +99,15 @@ export class CastingService {
       ...(query.projectId
         ? { projectId: objectId(query.projectId) }
         : {}),
+      ...(query.closingSoon
+        ? {
+            status: "Open",
+            deadline: {
+              $gt: new Date(),
+              $lt: new Date(Date.now() + 7 * 86_400_000),
+            },
+          }
+        : {}),
     };
 
     if (query.search) {

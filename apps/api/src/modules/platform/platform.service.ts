@@ -33,10 +33,16 @@ export class PlatformService {
       kind:this.kind(kind),archived:false,
       ...(admin?{}:{published:true,$or:[{publishedAt:{$exists:false}},{publishedAt:null},{publishedAt:{$lte:new Date()}}]}),
       ...(q.category?{category:q.category}:{}),
-      ...(q.status?{status:q.status}:{}),
       ...(q.projectId?{projectId:objectId(q.projectId)}:{})
     };
-    if(q.search){const s=new RegExp(escapeSearch(q.search.trim()),"i");filter.$and=[{$or:[{title:s},{description:s},{category:s}]}]}
+    const conditions:Record<string,unknown>[]=[];
+    if(q.status){
+      if(q.status==="Published")conditions.push({$or:[{status:"Published"},{status:{$exists:false},published:true}]});
+      else if(q.status==="Draft")conditions.push({$or:[{status:"Draft"},{status:{$exists:false},published:false}]});
+      else conditions.push({status:q.status});
+    }
+    if(q.search){const s=new RegExp(escapeSearch(q.search.trim()),"i");conditions.push({$or:[{title:s},{description:s},{category:s}]})}
+    if(conditions.length)filter.$and=conditions;
     const [result]=await this.content.aggregate<{items:ContentRecord[];total:{count:number}[]}>([
       {$match:filter},{$sort:{order:1,createdAt:-1,_id:-1}},
       {$facet:{items:[{$skip:(q.page-1)*q.limit},{$limit:q.limit}],total:[{$count:"count"}]}}
@@ -67,7 +73,7 @@ export class PlatformService {
   async create(kind:string,input:ContentDto,actorId:string){
     const k=this.kind(kind);await this.validate(input,actorId);
     try{
-      const item=await this.content.create({...input,publishedAt:input.publishedAt??(input.published?new Date():undefined),kind:k,coverMediaId:input.coverMediaId?new Types.ObjectId(input.coverMediaId):undefined,mediaIds:input.mediaIds?.map(id=>new Types.ObjectId(id)),projectId:input.projectId?new Types.ObjectId(input.projectId):undefined,createdBy:new Types.ObjectId(actorId),updatedBy:new Types.ObjectId(actorId)});
+      const item=await this.content.create({...input,status:input.status??(input.published?"Published":"Draft"),publishedAt:input.publishedAt??(input.published?new Date():undefined),kind:k,coverMediaId:input.coverMediaId?new Types.ObjectId(input.coverMediaId):undefined,mediaIds:input.mediaIds?.map(id=>new Types.ObjectId(id)),projectId:input.projectId?new Types.ObjectId(input.projectId):undefined,createdBy:new Types.ObjectId(actorId),updatedBy:new Types.ObjectId(actorId)});
       if(item.published)await this.media.makePublic([input.coverMediaId,...(input.mediaIds??[])]);
       await this.audit.record({actorId,action:"content.create",entityType:k,entityId:String(item._id),summary:item.title});
       return this.serialize(item.toObject());
@@ -77,6 +83,7 @@ export class PlatformService {
   async update(kind:string,id:string,input:UpdateContentDto,actorId:string){
     const k=this.kind(kind);await this.validate(input,actorId);
     const update:Record<string,unknown>={...input,updatedBy:new Types.ObjectId(actorId)};
+    if(input.status===undefined&&input.published!==undefined)update.status=input.published?"Published":"Draft";
     if(input.coverMediaId)update.coverMediaId=new Types.ObjectId(input.coverMediaId);
     if(input.mediaIds)update.mediaIds=input.mediaIds.map(v=>new Types.ObjectId(v));
     if(input.projectId)update.projectId=new Types.ObjectId(input.projectId);

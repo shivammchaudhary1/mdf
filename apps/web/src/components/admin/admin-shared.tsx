@@ -25,6 +25,25 @@ export function AdminSearch({value,onChange,placeholder="Search"}:{value:string;
   return <label className="ad-section-search"><AdminIcon name="search"/><input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/></label>
 }
 
+export function AdminCollectionState({
+  loading,
+  error,
+  empty,
+  emptyText="No records found.",
+  onRetry,
+}:{
+  loading:boolean;
+  error:string;
+  empty:boolean;
+  emptyText?:string;
+  onRetry?:()=>void;
+}){
+  if(loading)return <div className="ad-empty">Loading…</div>;
+  if(error)return <div className="ad-empty"><span>{error}</span>{onRetry&&<button type="button" className="ad-dialog-secondary" onClick={onRetry}>Try Again</button>}</div>;
+  if(empty)return <div className="ad-empty">{emptyText}</div>;
+  return null;
+}
+
 export function AdminMoreButton({onEdit,onArchive}:{onEdit?:()=>void;onArchive?:()=>Promise<void>}){
   const [open,setOpen]=useState(false);
   const [confirm,setConfirm]=useState(false);

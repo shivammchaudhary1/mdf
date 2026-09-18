@@ -7,12 +7,12 @@ import type { ContentRecord } from "@/services/workspace";
 const identity=(x:ContentRecord)=>x;
 
 import { useToast } from "@/components/ui/toast-provider";
-import { AdminPageHeader } from "@/components/admin/admin-shared";
+import { AdminCollectionState,AdminPageHeader } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminFormField } from "@/components/admin/admin-dialog";
 
 export function AdminSettingsView({legal=false}:{legal?:boolean}){
  const toast=useToast();
- const [records,,refresh]=useAdminRecords(`/admin/content/${legal?"legal":"settings"}`,identity);
+ const [records,,refresh,,,,loading,error]=useAdminRecords(`/admin/content/${legal?"legal":"settings"}`,identity);
  const fields=useRef<HTMLDivElement>(null);
  const settings=records.find(x=>x.slug==="company")?.data??{};
  const registration=records.find(x=>x.slug==="registration")?.data??{};
@@ -21,6 +21,8 @@ export function AdminSettingsView({legal=false}:{legal?:boolean}){
 
  const[saving,setSaving]=useState(false);
  const[policy,setPolicy]=useState<"privacy"|"terms"|null>(null);
+
+ if(loading||error)return <div className="ad-stack"><AdminPageHeader eyebrow={legal?"Trust & compliance":"Platform configuration"} title={legal?"Legal Content":"Company Settings"} description={legal?"Keep registration details, copyright text and policy publishing status in one place.":"Manage the public-facing company identity, contact details and social links."}/><AdminCollectionState loading={loading} error={error} empty={false} onRetry={()=>void refresh()}/></div>;
 
  async function save(){
   if(saving)return;setSaving(true);

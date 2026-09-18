@@ -100,6 +100,10 @@ try {
   r = await request("/admin/castings", { method: "POST", state: admin, body: { title: "Lead Actor", slug: "lead-actor", projectId, role: "Lead Actor", category: "Acting", status: "Open", published: true, deadline: new Date(Date.now() + 86400000).toISOString() } });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   const castingId = r.data._id;
+  r = await request("/admin/castings?closingSoon=true&limit=1", { state: admin });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.meta.total, 1);
+  assert.equal(r.data.items[0]._id, castingId);
   assert.equal((await request("/member/settings", { method: "PATCH", state: member, body: { savedOpportunityIds: [castingId] } })).status, 200);
   assert.deepEqual((await request("/member/profile", { state: member })).data.profile.savedOpportunityIds, [castingId]);
 
@@ -206,14 +210,21 @@ try {
     const contentId = r.data._id;
     assert.equal((await request(`/content/${kind}/integration-${kind}`)).status, 404);
     assert.equal((await request(`/admin/content/${kind}/${contentId}`, { method: "PATCH", state: admin, body: { published: true } })).status, 200);
+    r = await request(`/admin/content/${kind}?status=Published&limit=1`, { state: admin });
+    assert.equal(r.status, 200);
+    assert.ok(r.data.meta.total >= 1);
     assert.equal((await request(`/content/${kind}/integration-${kind}`)).status, 200);
     assert.equal((await request(`/admin/content/${kind}/${contentId}`, { method: "DELETE", state: admin })).status, 200);
     assert.equal((await request(`/content/${kind}/integration-${kind}`)).status, 404);
   }
-  r = await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Scheduled story", slug: "scheduled-story", published: true, publishedAt: new Date(Date.now()+86400000).toISOString() } });
+  r = await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Scheduled story", slug: "scheduled-story", status: "Scheduled", published: true, publishedAt: new Date(Date.now()+86400000).toISOString() } });
   assert.equal(r.status, 201);
   assert.equal((await request("/content/blog/scheduled-story")).status, 404);
   assert.equal((await request("/content/blog?search=Scheduled")).data.items.length, 0);
+  r = await request("/admin/content/blog?status=Scheduled", { state: admin });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.meta.total, 1);
+  assert.equal(r.data.items[0].slug, "scheduled-story");
   assert.equal((await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Duplicate slug", slug: "scheduled-story" } })).status, 409);
   assert.equal((await request(`/admin/projects/${projectId}`, { state: admin })).status, 200);
   assert.equal((await request("/projects/integration-project")).status, 200);
