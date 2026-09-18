@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useAdminRecords } from "./use-admin-records";
 import { contentView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
@@ -9,7 +9,7 @@ import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
 import { PaginationControls } from "@/components/ui/pagination-controls";
-import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminStatus } from "@/components/admin/admin-shared";
+import { AdminCollectionState,AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
 type Kind="blog"|"gallery"|"bts"|"shows"|"team"|"work";
@@ -78,19 +78,19 @@ export function AdminContentView({kind}:{kind:Kind}){
  const active=useAdminDashboardStore(s=>s.contentFilter);
  const setActive=useAdminDashboardStore(s=>s.setContentFilter);
  const config=cfg[kind];
- const path=`/admin/content/${kind==="bts"?"behind-the-scenes":kind==="work"?"our-work":kind}`;
- const [items,,refresh,meta,setPage]=useAdminRecords(path,contentView,true,1,20);
+ const basePath=`/admin/content/${kind==="bts"?"behind-the-scenes":kind==="work"?"our-work":kind}`;
+ const statuses=kind==="shows"?["All","Published","Scheduled","Draft"]:["All","Published","Draft"];
+ const path=`${basePath}${active!=="All"?`?status=${encodeURIComponent(active)}`:""}`;
+ const [items,,refresh,meta,setPage,,loading,error]=useAdminRecords(path,contentView,true,1,20);
  const [creating,setCreating]=useState(false);
  const [editing,setEditing]=useState<ContentItem|null>(null);
 
- const statuses=["All",...Array.from(new Set(items.map(item=>item.status)))];
- const visible=useMemo(()=>items.filter(item=>active==="All"||item.status===active),[active,items]);
 
  async function persist(event:FormEvent<HTMLFormElement>,id?:string){
   event.preventDefault();const form=new FormData(event.currentTarget);const title=String(form.get(kind==="team"?"name":"title")??"").trim();
   const cover=form.get("cover");let coverMediaId:string|undefined;if(cover instanceof File&&cover.size>0)coverMediaId=(await uploadMedia(cover)).id;
   const body={title,...(!id?{slug:slugFor(title)}:{}),category:String(form.get("category")??""),role:String(form.get("role")??""),description:String(form.get("summary")??""),published:form.get("status")==="Published",status:String(form.get("status")??"Draft"),...(form.get("date")?{publishedAt:String(form.get("date"))}:{}),...(form.get("url")?{videoUrl:String(form.get("url"))}:{}),...(coverMediaId?{coverMediaId}:{}),data:{author:String(form.get("author")??""),platform:String(form.get("platform")??""),group:String(form.get("group")??"")}};
-  try {await api(id?`[object Object]/${id}`:path,{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Content saved.");}
+  try {await api(id?`${basePath}/${id}`:basePath,{method:id?"PATCH":"POST",body:JSON.stringify(body)});await refresh();setCreating(false);setEditing(null);toast.success("Content saved.");}
   catch(error){toast.error(error instanceof Error?error.message:"Unable to save content.");}
  }
  function submitNew(event:FormEvent<HTMLFormElement>){return persist(event);}
@@ -99,14 +99,15 @@ export function AdminContentView({kind}:{kind:Kind}){
  return <div className="ad-stack">
   <AdminPageHeader eyebrow={config.eyebrow} title={config.title} description={config.description} action={<AdminPrimaryButton onClick={()=>setCreating(true)}>{config.action}</AdminPrimaryButton>}/>
   <AdminFilters values={statuses} active={active} onChange={setActive}/>
+  <AdminCollectionState loading={loading} error={error} empty={!items.length} emptyText="No content matches this filter." onRetry={()=>void refresh()}/>
 
   {kind==="gallery"||kind==="bts"||kind==="team"?
-   <section className="ad-content-grid">{visible.map(item=><article className="ad-content-card" key={item.id}>
+   <section className="ad-content-grid">{items.map(item=><article className="ad-content-card" key={item.id}>
     <SiteMedia src={item.image} alt={item.title??item.name??"Content"} kind={kind==="team"?"team":"gallery"} className={kind==="team"?"aspect-[4/4.5]":"aspect-[4/3]"}/>
-    <div><div className="ad-content-meta"><span>{item.category??item.group??""}</span><AdminStatus value={item.status}/></div><h2>{item.title||item.name}</h2><p>{item.role||item.date||""}</p><div className="ad-content-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${path}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>
+    <div><div className="ad-content-meta"><span>{item.category??item.group??""}</span><AdminStatus value={item.status}/></div><h2>{item.title||item.name}</h2><p>{item.role||item.date||""}</p><div className="ad-content-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${basePath}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>
    </article>)}</section>
    :
-   <article className="ad-card ad-table-card"><div className="ad-table ad-content-table"><div className="ad-table-head"><span>Title</span><span>Category / Platform</span><span>Date</span><span>Status</span><span></span></div>{visible.map(item=><div className="ad-table-row" key={item.id}><div><strong>{item.title}</strong><span>{item.author??""}</span></div><span>{item.category||item.platform}</span><span>{item.date}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${path}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>)}</div></article>
+   <article className="ad-card ad-table-card"><div className="ad-table ad-content-table"><div className="ad-table-head"><span>Title</span><span>Category / Platform</span><span>Date</span><span>Status</span><span></span></div>{items.map(item=><div className="ad-table-row" key={item.id}><div><strong>{item.title}</strong><span>{item.author??""}</span></div><span>{item.category||item.platform}</span><span>{item.date}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setEditing(item)}>Edit</button><AdminMoreButton onArchive={async()=>{await api(`${basePath}/${item.id}`,{method:"DELETE"});await refresh();}}/></div></div>)}</div></article>
   }
 
   <PaginationControls meta={meta} onPage={setPage}/>

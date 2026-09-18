@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
@@ -156,6 +157,12 @@ export class UpdateCastingDto extends PartialType(
 ) {}
 
 export class CastingQueryDto extends PageQueryDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === "true" ? true : value === "false" ? false : value)
+  @IsBoolean()
+  closingSoon?: boolean;
+
   @ApiPropertyOptional({ enum: castingStatuses })
   @IsOptional()
   @IsIn(castingStatuses)

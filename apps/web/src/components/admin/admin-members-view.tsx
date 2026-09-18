@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import type data from "@/data/admin-dashboard.json";
 import { useAdminRecords } from "./use-admin-records";
 import { memberView } from "@/services/admin-workspace";
@@ -9,7 +9,7 @@ import { SiteMedia } from "@/components/site/site-media";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useToast } from "@/components/ui/toast-provider";
 import { PaginationControls } from "@/components/ui/pagination-controls";
-import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";
+import { AdminCollectionState,AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
 type Member=(typeof data.members)[number] & {suspended:boolean};
@@ -19,11 +19,10 @@ export function AdminMembersView(){
  const active=useAdminDashboardStore(s=>s.memberFilter);
  const setActive=useAdminDashboardStore(s=>s.setMemberFilter);
  const [query,setQuery]=useState("");
- const [members,,refresh,meta,setPage]=useAdminRecords(`/admin/users?search=${encodeURIComponent(query)}${active==="Verified"?"&verified=true":active==="Unverified"||active==="Needs Review"?"&verified=false":""}`,memberView,true,1,25);
+ const [members,,refresh,meta,setPage,,loading,error]=useAdminRecords(`/admin/users?search=${encodeURIComponent(query)}${active==="Verified"?"&verified=true":active==="Unverified"||active==="Needs Review"?"&verified=false":""}`,memberView,true,1,25);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<Member|null>(null);
 
- const visible=useMemo(()=>members.filter(m=>(active==="All"||(active==="Verified"?m.verified:active==="Unverified"?!m.verified:m.status===active))&&`${m.name} ${m.email} ${m.role} ${m.city}`.toLowerCase().includes(query.toLowerCase())),[active,query,members]);
 
  function addMember(event:FormEvent<HTMLFormElement>){
   event.preventDefault(); toast.error("Members must register through the sign-up page. Admin invitations are not available yet.");
@@ -35,16 +34,17 @@ export function AdminMembersView(){
   <AdminPageHeader eyebrow="Community management" title="Members & Talent" description="Search, verify and review the people who make up the M. Dadu Films community." action={<AdminPrimaryButton onClick={()=>setCreating(true)}>Add Member</AdminPrimaryButton>}/>
   <section className="ad-toolbar"><AdminFilters values={["All","Verified","Unverified","Needs Review"]} active={active} onChange={setActive}/><AdminSearch value={query} onChange={setQuery} placeholder="Search members"/></section>
 
+  <AdminCollectionState loading={loading} error={error} empty={!members.length} emptyText="No members match this filter." onRetry={()=>void refresh()}/>
   <article className="ad-card ad-table-card"><div className="ad-table ad-members-table">
    <div className="ad-table-head"><span>Member</span><span>Category</span><span>Location</span><span>Profile</span><span>Status</span><span></span></div>
-   {visible.map(m=><div key={m.id} className="ad-table-row">
+   {members.map(m=><div key={m.id} className="ad-table-row">
     <div className="ad-person-cell"><SiteMedia src={m.image} alt={m.name} kind="team" className="h-10 w-10 shrink-0 rounded-full"/><div><strong>{m.name}</strong><span>{m.email}</span></div></div>
     <span>{m.role}</span><span>{m.city}</span>
     <div className="ad-completion"><strong>{m.completion}%</strong><i><b style={{width:`${m.completion}%`}}/></i></div>
     <div className="ad-member-status">{m.verified?<span className="verified">✓ Verified</span>:<AdminStatus value={m.status}/>}</div>
     <AdminMoreButton onEdit={()=>setSelected(m)}/>
    </div>)}
-  </div>{!visible.length&&<div className="ad-empty">No members match this filter.</div>}</article><PaginationControls meta={meta} onPage={setPage}/>
+  </div></article><PaginationControls meta={meta} onPage={setPage}/>
 
   <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Community" title="Add Member" description="Create a temporary member record for UI review." width="wide">
     <AdminDialogForm onSubmit={addMember}>

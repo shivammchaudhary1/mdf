@@ -7,14 +7,14 @@ import { listView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
 import { useToast } from "@/components/ui/toast-provider";
 import { PaginationControls } from "@/components/ui/pagination-controls";
-import { AdminPageHeader,AdminPrimaryButton,AdminMoreButton } from "@/components/admin/admin-shared";
+import { AdminCollectionState,AdminPageHeader,AdminPrimaryButton,AdminMoreButton } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
 type TalentList=(typeof data.savedLists)[number];
 
 export function AdminListsView(){
  const toast=useToast();
- const [lists,,refresh,meta,setPage]=useAdminRecords("/admin/lists",listView,true,1,20);
+ const [lists,,refresh,meta,setPage,,loading,error]=useAdminRecords("/admin/lists",listView,true,1,20);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<TalentList|null>(null);
  const [details,setDetails]=useState<{id:string;members:{id:string;name:string}[]}|null>(null);
@@ -28,6 +28,7 @@ export function AdminListsView(){
 
  return <div className="ad-stack">
   <AdminPageHeader eyebrow="Talent organization" title="Saved Talent Lists" description="Build reusable shortlists for projects, casting discussions and production planning." action={<AdminPrimaryButton onClick={()=>setCreating(true)}>New Talent List</AdminPrimaryButton>}/>
+  <AdminCollectionState loading={loading} error={error} empty={!lists.length} emptyText="No saved talent lists yet." onRetry={()=>void refresh()}/>
   <section className="ad-list-grid">{lists.map(list=><article className="ad-list-card" key={list.id}>
     <div className="ad-list-stack"><i>{list.members}</i><i/><i/></div>
     <div><p className="ad-kicker">Saved list</p><h2>{list.name}</h2><span>{list.members} members · Updated {list.updated}</span><small>Owner: {list.owner}</small></div>
