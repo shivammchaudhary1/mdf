@@ -6,6 +6,7 @@ import { useAdminRecords } from "./use-admin-records";
 import { listView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
 import { useToast } from "@/components/ui/toast-provider";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { AdminPageHeader,AdminPrimaryButton,AdminMoreButton } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
@@ -13,7 +14,7 @@ type TalentList=(typeof data.savedLists)[number];
 
 export function AdminListsView(){
  const toast=useToast();
- const [lists,,refresh]=useAdminRecords("/admin/lists",listView);
+ const [lists,,refresh,meta,setPage]=useAdminRecords("/admin/lists",listView,true,1,20);
  const [creating,setCreating]=useState(false);
  const [selected,setSelected]=useState<TalentList|null>(null);
  const [details,setDetails]=useState<{id:string;members:{id:string;name:string}[]}|null>(null);
@@ -31,9 +32,9 @@ export function AdminListsView(){
     <div className="ad-list-stack"><i>{list.members}</i><i/><i/></div>
     <div><p className="ad-kicker">Saved list</p><h2>{list.name}</h2><span>{list.members} members · Updated {list.updated}</span><small>Owner: {list.owner}</small></div>
     <div className="ad-list-actions"><button onClick={()=>setSelected(list)}>Open List</button><AdminMoreButton/></div>
-  </article>)}</section>
+  </article>)}</section><PaginationControls meta={meta} onPage={setPage}/>
 
-  <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Talent organization" title="New Talent List" description="Create a shortlist container now and add real members after backend integration.">
+  <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Talent organization" title="New Talent List" description="Create a reusable shortlist for casting, projects or production planning.">
     <AdminDialogForm onSubmit={createList}>
       <AdminDialogGrid>
         <AdminFormField label="List Name" wide><input name="name" placeholder="e.g. Lead Actor Options" autoFocus required/></AdminFormField>
@@ -44,7 +45,7 @@ export function AdminListsView(){
     </AdminDialogForm>
   </AdminDialog>
 
-  <AdminDialog open={!!selected} onClose={()=>setSelected(null)} eyebrow="Saved talent list" title={selected?.name??"Talent List"} description="Temporary list preview">
+  <AdminDialog open={!!selected} onClose={()=>setSelected(null)} eyebrow="Saved talent list" title={selected?.name??"Talent List"} description="Saved talent currently attached to this list">
     {selected&&<div className="ad-list-preview"><div className="ad-list-preview-number">{selected.members}</div><p>Members currently saved to this list.</p><div className="ad-dialog-empty"><strong>{details?.id===selected.id?(details.members.map(member=>member.name).join(", ")||"No members saved yet."):"Loading saved members…"}</strong><span>Saved membership is loaded from your talent list.</span></div><AdminDialogActions onCancel={()=>setSelected(null)} primaryLabel="Add Talent" primaryType="button" onPrimary={()=>toast.info("Talent selection is not available in this screen yet.")}/></div>}
   </AdminDialog>
  </div>

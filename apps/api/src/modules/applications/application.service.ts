@@ -229,15 +229,14 @@ export class ApplicationService {
       filter.status = query.status;
     }
 
-    const [items, total] = await Promise.all([
-      this.applications
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip((query.page - 1) * query.limit)
-        .limit(query.limit)
-        .lean(),
-      this.applications.countDocuments(filter),
+    const [result] = await this.applications.aggregate<{items: Application[]; total: {count: number}[]}>([
+      { $match: filter },
+      { $project: { adminNotes: 0, reviewedBy: 0, reviewedAt: 0 } },
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
     ]);
+    const items = result?.items ?? [];
+    const total = Number(result?.total?.[0]?.count ?? 0);
 
     return {
       items: items.map((item) => this.serialize(item)),
@@ -288,16 +287,13 @@ export class ApplicationService {
       ];
     }
 
-    const [items, total] = await Promise.all([
-      this.applications
-        .find(filter)
-        .select("+adminNotes")
-        .sort({ createdAt: -1 })
-        .skip((query.page - 1) * query.limit)
-        .limit(query.limit)
-        .lean(),
-      this.applications.countDocuments(filter),
+    const [result] = await this.applications.aggregate<{items: Application[]; total: {count: number}[]}>([
+      { $match: filter },
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
     ]);
+    const items = result?.items ?? [];
+    const total = Number(result?.total?.[0]?.count ?? 0);
 
     return {
       items: items.map((item) => this.serialize(item)),
@@ -463,20 +459,13 @@ export class ApplicationService {
       },
     ];
 
-    const [items, count] = await Promise.all([
-      this.castings.aggregate([
-        ...pipeline,
-        { $sort: { createdAt: -1 } },
-        { $skip: (query.page - 1) * query.limit },
-        { $limit: query.limit },
-      ]),
-      this.castings.aggregate([
-        ...pipeline,
-        { $count: "total" },
-      ]),
+    const [result] = await this.castings.aggregate<{items: Array<Record<string, unknown>>; total: {count: number}[]}>([
+      ...pipeline,
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
     ]);
-
-    const total = Number(count[0]?.total ?? 0);
+    const items = result?.items ?? [];
+    const total = Number(result?.total?.[0]?.count ?? 0);
 
     return {
       items: items.map((item) => {

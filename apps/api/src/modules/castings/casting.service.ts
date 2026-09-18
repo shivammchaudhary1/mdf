@@ -115,15 +115,13 @@ export class CastingService {
       ];
     }
 
-    const [items, total] = await Promise.all([
-      this.castings
-        .find(filter)
-        .sort({ deadline: 1, createdAt: -1 })
-        .skip((query.page - 1) * query.limit)
-        .limit(query.limit)
-        .lean(),
-      this.castings.countDocuments(filter),
+    const [result] = await this.castings.aggregate<{items: Casting[]; total: {count: number}[]}>([
+      { $match: filter },
+      { $sort: { deadline: 1, createdAt: -1, _id: -1 } },
+      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
     ]);
+    const items = result?.items ?? [];
+    const total = Number(result?.total?.[0]?.count ?? 0);
 
     const counts = admin ? await this.castings.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {opportunityId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$opportunityId", count: {$sum: 1}}}]).toArray() : [];
     const totals = new Map(counts.map(item=>[String(item._id),item.count]));

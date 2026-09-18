@@ -30,6 +30,13 @@ export async function allPages<T>(path: string): Promise<T[]> {
   return items;
 }
 export async function uploadMedia(file: File) {
-  const body = new FormData(); body.append("file", file);
-  return api<{ id: string; urls: Record<string,string> }>("/media", { method: "POST", body });
+  if (file.size > 10 * 1024 * 1024) throw new Error("Choose a file up to 10 MB.");
+  const body = new FormData();
+  body.append("file", file);
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("mdadu-upload-start"));
+  try {
+    return await api<{ id: string; urls: Record<string,string> }>("/media", { method: "POST", body });
+  } finally {
+    if (typeof window !== "undefined") window.dispatchEvent(new Event("mdadu-upload-end"));
+  }
 }
