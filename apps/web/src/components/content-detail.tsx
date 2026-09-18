@@ -67,22 +67,24 @@ export async function ContentDetail({
                   </div>
                 ))}
             </dl>
-            {kind !== "blog" ? (
+
+            {kind === "projects" || kind === "casting" ? (
               <ApplyForm
                 opportunityId={item._id}
+                opportunityType={kind === "casting" ? "CASTING" : "PROJECT"}
                 closed={
                   ["Closed", "Completed"].includes(item.status ?? "") ||
                   !!(item.deadline && new Date(item.deadline) <= new Date())
                 }
               />
-            ) : (
+            ) : kind === "blog" ? (
               <Link
                 href="/blog"
                 className="brand-button brand-button-primary mt-8"
               >
                 More from the journal →
               </Link>
-            )}
+            ) : null}
           </aside>
         </div>
       </div>
