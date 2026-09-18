@@ -404,3 +404,37 @@ Planned V1 production direction:
 - GitHub Actions — CI/CD
 
 Do not deploy before Stage 17 testing/UAT is approved.
+
+
+## Environment convention
+
+Create the development environment files:
+
+### Git Bash / macOS / Linux
+
+```bash
+cp apps/api/.env.example apps/api/.env.dev
+cp apps/web/.env.example apps/web/.env.dev
+```
+
+For production configuration later, copy the same safe templates and then replace values:
+
+```bash
+cp apps/api/.env.example apps/api/.env.prod
+cp apps/web/.env.example apps/web/.env.prod```
+
+The project intentionally uses only `.env.dev` and `.env.prod` for application environments. Do not use `.env`, `.env.local`, `.env.development` or `.env.production` as alternate sources of truth.
+
+Validate development configuration without printing secrets:
+
+```bash
+npm run env:check:dev
+```
+
+Validate production structure later:
+
+```bash
+npm run env:check:prod
+```
+
+Read `docs/ENVIRONMENTS.md` for the full convention.
