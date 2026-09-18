@@ -12,6 +12,7 @@ export type ApiContent = ContentItem & {
   requirements?: string;
   compensation?: string;
   credits?: string;
+  acceptingApplications?: boolean;
 };
 async function publicFetch<T>(path: string): Promise<T> {
   const response = await fetch(`${runtimeConfig.apiUrl}${path}`, {

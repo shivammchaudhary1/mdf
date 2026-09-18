@@ -127,10 +127,9 @@ export class CastingService {
 
     const counts = admin ? await this.castings.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {opportunityId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$opportunityId", count: {$sum: 1}}}]).toArray() : [];
     const totals = new Map(counts.map(item=>[String(item._id),item.count]));
-    return {
-      items: items.map((item) => ({...this.serialize(item),...(admin?{applications:totals.get(String(item._id))??0}:{})})),
-      meta: pageMeta(query.page, query.limit, total),
-    };
+    const ids=[...new Set(items.map(i=>i.projectId).filter(Boolean).map(String))].map(id=>new Types.ObjectId(id));
+    const rows=ids.length?await this.projects.find({_id:{$in:ids}}).select("_id title").lean():[]; const titles=new Map(rows.map(p=>[String(p._id),p.title]));
+    return {items:items.map(i=>({...this.serialize(i),projectTitle:i.projectId?titles.get(String(i.projectId))??"":"",...(admin?{applications:totals.get(String(i._id))??0}:{})})),meta:pageMeta(query.page,query.limit,total)};
   }
 
   async bySlug(slug: string) {

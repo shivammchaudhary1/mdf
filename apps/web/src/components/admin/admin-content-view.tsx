@@ -11,10 +11,11 @@ import { useToast } from "@/components/ui/toast-provider";
 import { AdminFilters,AdminMoreButton,AdminPageHeader,AdminPrimaryButton,AdminStatus } from "@/components/admin/admin-shared";
 import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";
 
-type Kind="blog"|"gallery"|"bts"|"shows"|"team";
+type Kind="blog"|"gallery"|"bts"|"shows"|"team"|"work";
 type ContentItem=Record<string,string>;
 
 const cfg={
+ work:{eyebrow:"Production services",title:"Our Work",description:"Manage production work categories shown on the public website.",action:"Add Work Item"},
  blog:{eyebrow:"Editorial CMS",title:"Blog & News",description:"Draft, publish and manage editorial content for the public journal.",action:"New Post"},
  gallery:{eyebrow:"Media CMS",title:"Gallery",description:"Curate the public image gallery without mixing references with production assets.",action:"Add Media"},
  bts:{eyebrow:"Media CMS",title:"Behind the Scenes",description:"Manage production-process media and on-set stories.",action:"Add BTS Item"},
@@ -23,6 +24,7 @@ const cfg={
 } as const;
 
 function CreateFields({kind}:{kind:Kind}){
+ if(kind==="work") return <><AdminFormField label="Title" wide><input name="title" placeholder="Feature Films" autoFocus required/></AdminFormField><AdminFormField label="Category"><input name="category" defaultValue="Production"/></AdminFormField><AdminFormField label="Status"><select name="status"><option>Published</option><option>Draft</option></select></AdminFormField><AdminFormField label="Description" wide><textarea name="summary" rows={5}/></AdminFormField></>;
  if(kind==="blog") return <>
   <AdminFormField label="Post Title" wide><input name="title" placeholder="Article title" autoFocus required/></AdminFormField>
   <AdminFormField label="Category"><select name="category"><option>Casting</option><option>Production</option><option>Stories</option><option>Talent</option><option>News</option></select></AdminFormField>
@@ -75,7 +77,7 @@ export function AdminContentView({kind}:{kind:Kind}){
  const active=useAdminDashboardStore(s=>s.contentFilter);
  const setActive=useAdminDashboardStore(s=>s.setContentFilter);
  const config=cfg[kind];
- const path=`/admin/content/${kind==="bts"?"behind-the-scenes":kind}`;
+ const path=`/admin/content/${kind==="bts"?"behind-the-scenes":kind==="work"?"our-work":kind}`;
  const [items,,refresh]=useAdminRecords(path,contentView);
  const [creating,setCreating]=useState(false);
  const [editing,setEditing]=useState<ContentItem|null>(null);
@@ -118,7 +120,7 @@ export function AdminContentView({kind}:{kind:Kind}){
     <AdminDialogGrid>
       <AdminFormField label={kind==="team"?"Full Name":"Title"} wide><input name={kind==="team"?"name":"title"} defaultValue={kind==="team"?editing.name:editing.title} required/></AdminFormField>
       {kind==="team"&&<><AdminFormField label="Role"><input name="role" defaultValue={editing.role}/></AdminFormField><AdminFormField label="Group"><select name="group" defaultValue={editing.group}><option>Core Team</option><option>Creative Team</option><option>Advisors</option></select></AdminFormField></>}
-      {(kind==="gallery"||kind==="bts"||kind==="blog")&&<AdminFormField label="Category"><input name="category" defaultValue={editing.category}/></AdminFormField>}
+      {(kind==="gallery"||kind==="bts"||kind==="blog"||kind==="work")&&<AdminFormField label="Category"><input name="category" defaultValue={editing.category}/></AdminFormField>}
       {kind==="shows"&&<AdminFormField label="Platform"><select name="platform" defaultValue={editing.platform}><option>YouTube</option><option>Instagram</option><option>Vimeo</option><option>Other</option></select></AdminFormField>}
       {kind==="blog"&&<AdminFormField label="Author"><input name="author" defaultValue={editing.author}/></AdminFormField>}
       <AdminFormField label="Status"><select name="status" defaultValue={editing.status}><option>Published</option><option>Draft</option><option>Scheduled</option></select></AdminFormField>

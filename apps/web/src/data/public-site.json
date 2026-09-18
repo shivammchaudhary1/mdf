@@ -9,19 +9,56 @@
     "location": "Indore, Madhya Pradesh, India"
   },
   "navigation": [
-    { "label": "Home", "href": "/" },
-    { "label": "Projects", "href": "/projects" },
-    { "label": "Talent", "href": "/talent" },
-    { "label": "Casting", "href": "/casting" },
-    { "label": "About", "href": "/about" },
-    { "label": "Blog", "href": "/blog" },
-    { "label": "Contact", "href": "/contact" }
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Projects",
+      "href": "/projects"
+    },
+    {
+      "label": "Our Work",
+      "href": "/our-work"
+    },
+    {
+      "label": "Talent",
+      "href": "/talent"
+    },
+    {
+      "label": "Casting",
+      "href": "/casting"
+    },
+    {
+      "label": "About",
+      "href": "/about"
+    },
+    {
+      "label": "Blog",
+      "href": "/blog"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact"
+    }
   ],
   "stats": [
-    { "value": "50+", "label": "Projects" },
-    { "value": "10K+", "label": "Talents in Community" },
-    { "value": "100+", "label": "Casting Calls" },
-    { "value": "5+", "label": "Years of Trust" }
+    {
+      "value": "50+",
+      "label": "Projects"
+    },
+    {
+      "value": "10K+",
+      "label": "Talents in Community"
+    },
+    {
+      "value": "100+",
+      "label": "Casting Calls"
+    },
+    {
+      "value": "5+",
+      "label": "Years of Trust"
+    }
   ],
   "projects": [
     {
@@ -148,18 +185,66 @@
     }
   ],
   "gallery": [
-    { "title": "Camera Test", "category": "BTS", "image": "" },
-    { "title": "Table Read", "category": "Projects", "image": "" },
-    { "title": "Slate Ready", "category": "BTS", "image": "" },
-    { "title": "Edit Suite", "category": "Projects", "image": "" },
-    { "title": "Talent Portrait", "category": "Talent", "image": "" },
-    { "title": "Golden Hour", "category": "Events", "image": "" },
-    { "title": "Lighting Setup", "category": "BTS", "image": "" },
-    { "title": "Crew Huddle", "category": "Events", "image": "" },
-    { "title": "Director's Monitor", "category": "Projects", "image": "" },
-    { "title": "Location Recce", "category": "Projects", "image": "" },
-    { "title": "Lens Detail", "category": "BTS", "image": "" },
-    { "title": "Set Wrap", "category": "Events", "image": "" }
+    {
+      "title": "Camera Test",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Table Read",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Slate Ready",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Edit Suite",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Talent Portrait",
+      "category": "Talent",
+      "image": ""
+    },
+    {
+      "title": "Golden Hour",
+      "category": "Events",
+      "image": ""
+    },
+    {
+      "title": "Lighting Setup",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Crew Huddle",
+      "category": "Events",
+      "image": ""
+    },
+    {
+      "title": "Director's Monitor",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Location Recce",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Lens Detail",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Set Wrap",
+      "category": "Events",
+      "image": ""
+    }
   ],
   "castings": [
     {
@@ -221,7 +306,11 @@
       "role": "Actor",
       "location": "Mumbai",
       "experience": "4 years",
-      "skills": ["Hindi", "English", "Theatre"],
+      "skills": [
+        "Hindi",
+        "English",
+        "Theatre"
+      ],
       "verified": true,
       "image": ""
     },
@@ -230,7 +319,11 @@
       "role": "Actor / Voice Artist",
       "location": "Indore",
       "experience": "3 years",
-      "skills": ["Hindi", "Voice", "Commercial"],
+      "skills": [
+        "Hindi",
+        "Voice",
+        "Commercial"
+      ],
       "verified": true,
       "image": ""
     },
@@ -239,7 +332,11 @@
       "role": "Director of Photography",
       "location": "Bhopal",
       "experience": "5 years",
-      "skills": ["Camera", "Lighting", "Documentary"],
+      "skills": [
+        "Camera",
+        "Lighting",
+        "Documentary"
+      ],
       "verified": false,
       "image": ""
     },
@@ -248,7 +345,11 @@
       "role": "Writer",
       "location": "Delhi",
       "experience": "4 years",
-      "skills": ["Screenwriting", "Hindi", "Research"],
+      "skills": [
+        "Screenwriting",
+        "Hindi",
+        "Research"
+      ],
       "verified": true,
       "image": ""
     },
@@ -257,7 +358,11 @@
       "role": "Editor",
       "location": "Pune",
       "experience": "6 years",
-      "skills": ["Premiere Pro", "Resolve", "Narrative"],
+      "skills": [
+        "Premiere Pro",
+        "Resolve",
+        "Narrative"
+      ],
       "verified": true,
       "image": ""
     },
@@ -266,7 +371,11 @@
       "role": "Production Designer",
       "location": "Mumbai",
       "experience": "3 years",
-      "skills": ["Art Direction", "Sets", "Props"],
+      "skills": [
+        "Art Direction",
+        "Sets",
+        "Props"
+      ],
       "verified": false,
       "image": ""
     }

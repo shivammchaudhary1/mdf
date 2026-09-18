@@ -6,7 +6,7 @@ import { api, ApiError } from "@/services/api";
 import { allPages, dateLabel, mediaUrl, type ApplicationRecord, type ContentRecord, type MemberProfile, type OpportunityRecord, type ProfileRecord } from "@/services/workspace";
 import type demo from "@/data/member-dashboard.json";
 
-type View = typeof demo;
+type View = Omit<typeof demo,"opportunities"> & { opportunities: Array<(typeof demo.opportunities)[number] & { compensation?: string }> };
 type Dashboard = { applicationSummary: { total: number; shortlisted: number; submitted: number; underReview: number } };
 const empty: View = { member: { name:"",firstName:"",email:"",mobile:"",location:"",profession:"",verified:false,profileCompletion:0,availability:"",memberSince:"",photo:"" }, stats:[],profileChecklist:[],applications:[],opportunities:[],portfolio:[],profile:{bio:"",city:"",profession:"",gender:"",birthDate:"",experience:"",availability:"",skills:[],languages:[]},activity:[],posts:[] };
 const Context = createContext({ data: empty, profile: {} as ProfileRecord, memberId: "", refresh: async () => {} });
@@ -26,7 +26,7 @@ export function MemberData({ children }: { children: ReactNode }) {
       profileChecklist:[{label:"Basic information",done:!!(p.bio&&p.city&&p.profession)},{label:"Profile photograph",done:!!p.photoMediaId},{label:"Skills & languages",done:!!(p.skills?.length&&p.languages?.length)},{label:"Portfolio photographs",done:!!p.portfolioMediaIds?.length},{label:"Showreel",done:!!p.showreel}],
       profile:{bio:p.bio??"",city:p.city??"",profession:p.profession??"",gender:p.gender??"",birthDate:p.birthDate?.slice(0,10)??"",experience:p.experience??"",availability:p.availability??"",skills:p.skills??[],languages:p.languages??[]},
       applications:applications.map(x=>({id:x._id,role:x.roleSnapshot??x.opportunityTitle,project:x.opportunityTitle,type:x.opportunityType,location:"—",appliedOn:dateLabel(x.createdAt),status:x.status==="Rejected"?"Not Selected":x.status,tone:x.status==="Shortlisted"||x.status==="Selected"?"success":x.status==="Under Review"?"warning":x.status==="Rejected"?"danger":"neutral"})),
-      opportunities:opportunities.map(x=>({id:x._id,title:x.title,project:x.role??x.title,category:x.category??"",location:x.location??"—",deadline:dateLabel(x.deadline),match:"—",paid:false,image:mediaUrl(x.coverImage)})),
+      opportunities:opportunities.map(x=>({id:x._id,title:x.title,project:x.role??x.title,category:x.category??"",location:x.location??"—",deadline:dateLabel(x.deadline),match:"—",paid:!!x.compensation,compensation:x.compensation??"",image:mediaUrl(x.coverImage)})),
       portfolio:(p.portfolioMediaIds??[]).map((id,i)=>({id,title:`Photograph ${i+1}`,category:"Portfolio",image:mediaUrl(p.portfolio?.[i])})),
       activity:applications.slice(0,5).map(x=>({title:`${x.status} — ${x.opportunityTitle}`,time:dateLabel(x.createdAt)})),
       posts:posts.slice(0,2).map(x=>({title:x.title,category:x.category??"",date:dateLabel(x.publishedAt??x.createdAt),image:mediaUrl(x.coverImage)})),

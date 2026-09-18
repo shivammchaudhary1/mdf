@@ -43,7 +43,7 @@ export class CreateApplicationDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(8)
   @IsMongoId({ each: true })
   portfolioMediaIds?: string[];
 

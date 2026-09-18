@@ -4,6 +4,7 @@ import { getContentItem } from "@/services/content";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteMedia } from "@/components/site/site-media";
+import { ApplyForm } from "@/components/apply-form";
 
 type DetailKind = "projects" | "blogs" | "castings";
 
@@ -60,6 +61,7 @@ export async function StaticDetailView({
               {item.body?.slice(1).join("\n\n")??""}
             </p>
           </article>
+          {kind!=="blogs"&&<div className="mx-auto max-w-3xl pb-12"><ApplyForm opportunityId={String(item._id)} opportunityType={kind==="castings"?"CASTING":"PROJECT"} closed={kind==="castings"?item.acceptingApplications===false:["Completed","Archived"].includes(String(item.status??""))}/></div>}
         </section>
       </main>
       <SiteFooter />

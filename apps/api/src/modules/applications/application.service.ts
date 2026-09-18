@@ -162,9 +162,8 @@ export class ApplicationService {
       .findById(objectId(userId))
       .lean();
 
-    if (!account || account.suspended) {
-      throw new BadRequestException("Account is not available.");
-    }
+    if (!account || account.suspended) { throw new BadRequestException("Account is not available."); }
+    const applicantProfile=await this.applications.db.collection("profiles").findOne({userId:account._id},{projection:{city:1}});
 
     try {
       const application = await this.applications.create({
@@ -179,6 +178,7 @@ export class ApplicationService {
           name: account.name,
           email: account.email,
           mobile: account.mobile,
+          city: typeof applicantProfile?.city === "string" ? applicantProfile.city : undefined,
         },
         coverNote: input.coverNote,
         portfolioMediaIds: input.portfolioMediaIds?.map(
@@ -434,6 +434,7 @@ export class ApplicationService {
           location: 1,
           status: 1,
           deadline: 1,
+          compensation: 1,
           coverMediaId: 1,
           createdAt: 1,
           opportunityType: { $literal: "CASTING" },

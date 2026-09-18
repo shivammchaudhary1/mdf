@@ -1,14 +1,13 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback,useEffect,useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast-provider";
-import { api, ApiError } from "@/services/api";
-import { allPages } from "@/services/workspace";
-
-export function useAdminRecords<Source, View>(path: string, map: (item: Source) => View, paginated = true) {
-  const [records,setRecords]=useState<View[]>([]);
-  const toast=useToast(); const router=useRouter();
-  const refresh=useCallback(async()=>{const result=paginated?await allPages<Source>(path):await api<Source[]>(path);setRecords(result.map(map));},[path,map,paginated]);
-  useEffect(()=>{let active=true;const load=async()=>{const result=paginated?await allPages<Source>(path):await api<Source[]>(path);if(active)setRecords(result.map(map));};void load().catch(error=>{if(!active)return;if(error instanceof ApiError&&error.status===401)router.replace("/login");else toast.error(error instanceof Error?error.message:"Unable to load records.");});return()=>{active=false;};},[path,map,paginated,toast,router]);
-  return [records,setRecords,refresh] as const;
+import { api,ApiError } from "@/services/api";
+import { fetchPage,type PageMeta } from "@/services/workspace";
+export function useAdminRecords<Source,View>(path:string,map:(x:Source)=>View,paginated=true,page=1,limit=20){
+ const[records,setRecords]=useState<View[]>([]),[meta,setMeta]=useState<PageMeta|undefined>();const toast=useToast(),router=useRouter();
+ const load=useCallback(async()=>{if(paginated){const r=await fetchPage<Source>(path,page,limit);setRecords(r.items.map(map));setMeta(r.meta);}else{const r=await api<Source[]>(path);setRecords(r.map(map));setMeta(undefined);}},[path,map,paginated,page,limit]);
+ const refresh=useCallback(async()=>{await load();},[load]);
+ useEffect(()=>{let active=true;void load().catch(e=>{if(!active)return;if(e instanceof ApiError&&e.status===401)router.replace("/login");else toast.error(e instanceof Error?e.message:"Unable to load records.")});return()=>{active=false}},[load,toast,router]);
+ return[records,setRecords,refresh,meta]as const;
 }

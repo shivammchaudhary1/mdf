@@ -6,9 +6,11 @@ import { useToast } from "@/components/ui/toast-provider";
 export function ApplyForm({
   opportunityId,
   closed,
+  opportunityType,
 }: {
   opportunityId: string;
   closed: boolean;
+  opportunityType: "PROJECT" | "CASTING";
 }) {
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
@@ -26,6 +28,7 @@ export function ApplyForm({
         method: "POST",
         body: JSON.stringify({
           opportunityId,
+          opportunityType,
           coverNote: data.get("coverNote"),
           ...(data.get("showreel") ? { showreelUrl: data.get("showreel") } : {}),
         }),
