@@ -20,6 +20,17 @@ type StatusCount = {
   count: number;
 };
 
+function cleanList(values?: string[]) {
+  if (!values) return values;
+  return [
+    ...new Set(
+      values
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
 export function profileCompletion(
   profile: Partial<Profile>,
 ) {
@@ -27,6 +38,8 @@ export function profileCompletion(
     profile.bio,
     profile.city,
     profile.profession,
+    profile.gender,
+    profile.birthDate,
     profile.skills?.length,
     profile.languages?.length,
     profile.experience,
@@ -138,7 +151,9 @@ export class ProfileService {
     userId: string,
     input: ProfileDto,
   ) {
-    const previous = await this.profiles.findOne({ userId: objectId(userId) }).lean();
+    const userObjectId = objectId(userId);
+    const previous = await this.profiles.findOne({ userId: userObjectId }).lean();
+
     if (
       input.birthDate &&
       new Date(input.birthDate) > new Date()
@@ -148,15 +163,49 @@ export class ProfileService {
       );
     }
 
-    await this.media.assertOwnedBy(userId, [
-      input.photoMediaId,
-      ...(input.portfolioMediaIds ?? []),
-    ], "image");
-    await this.media.assertOwnedBy(userId, [input.resumeMediaId], "document");
+    if (input.portfolioMediaIds) {
+      const unique = new Set(input.portfolioMediaIds);
+      if (unique.size !== input.portfolioMediaIds.length) {
+        throw new BadRequestException(
+          "The same photograph cannot be added to the portfolio more than once.",
+        );
+      }
+    }
+
+    await this.media.assertOwnedBy(
+      userId,
+      [
+        input.photoMediaId,
+        ...(input.portfolioMediaIds ?? []),
+      ],
+      "image",
+    );
+    await this.media.assertOwnedBy(
+      userId,
+      [input.resumeMediaId],
+      "document",
+    );
 
     const update: Record<string, unknown> = {
       ...input,
     };
+    const unset: Record<string, 1> = {};
+
+    if (input.skills !== undefined) {
+      update.skills = cleanList(input.skills);
+    }
+
+    if (input.languages !== undefined) {
+      update.languages = cleanList(input.languages);
+    }
+
+    if (input.socialLinks !== undefined) {
+      update.socialLinks = cleanList(input.socialLinks);
+    }
+
+    if (input.videos !== undefined) {
+      update.videos = cleanList(input.videos);
+    }
 
     if (input.birthDate !== undefined) {
       update.birthDate = new Date(
@@ -164,21 +213,32 @@ export class ProfileService {
       );
     }
 
-    if (input.photoMediaId) {
+    if (input.photoMediaId === null) {
+      delete update.photoMediaId;
+      unset.photoMediaId = 1;
+    } else if (input.photoMediaId !== undefined) {
       update.photoMediaId =
         new Types.ObjectId(
           input.photoMediaId,
         );
     }
 
-    if (input.resumeMediaId) {
+    if (input.resumeMediaId === null) {
+      delete update.resumeMediaId;
+      unset.resumeMediaId = 1;
+    } else if (input.resumeMediaId !== undefined) {
       update.resumeMediaId =
         new Types.ObjectId(
           input.resumeMediaId,
         );
     }
 
-    if (input.portfolioMediaIds) {
+    if (input.showreel === null) {
+      delete update.showreel;
+      unset.showreel = 1;
+    }
+
+    if (input.portfolioMediaIds !== undefined) {
       update.portfolioMediaIds =
         input.portfolioMediaIds.map(
           (id) => new Types.ObjectId(id),
@@ -188,12 +248,15 @@ export class ProfileService {
     const profile =
       await this.profiles.findOneAndUpdate(
         {
-          userId: objectId(userId),
+          userId: userObjectId,
         },
         {
           $set: update,
+          ...(Object.keys(unset).length
+            ? { $unset: unset }
+            : {}),
           $setOnInsert: {
-            userId: objectId(userId),
+            userId: userObjectId,
           },
         },
         {
@@ -203,7 +266,7 @@ export class ProfileService {
         },
       );
 
-    const mediaIds = [
+    const publicMediaIds = [
       profile.photoMediaId
         ? String(profile.photoMediaId)
         : undefined,
@@ -213,12 +276,49 @@ export class ProfileService {
     ];
 
     if (profile.publicVisible) {
-      await this.media.makePublic(mediaIds);
+      await this.media.makePublic(publicMediaIds);
     } else {
-      await this.media.makePrivate(mediaIds);
+      await this.media.makePrivate(publicMediaIds);
     }
-    const previousIds = [previous?.photoMediaId, ...(previous?.portfolioMediaIds ?? [])].filter(Boolean).map(String);
-    await this.media.makePrivate(previousIds.filter(id => !mediaIds.includes(id)));
+
+    const previousPublicIds = [
+      previous?.photoMediaId,
+      ...(previous?.portfolioMediaIds ?? []),
+    ]
+      .filter(Boolean)
+      .map(String);
+
+    await this.media.makePrivate(
+      previousPublicIds.filter(
+        (id) => !publicMediaIds.includes(id),
+      ),
+    );
+
+    const previousOwnedIds = [
+      previous?.photoMediaId,
+      ...(previous?.portfolioMediaIds ?? []),
+      previous?.resumeMediaId,
+    ]
+      .filter(Boolean)
+      .map(String);
+
+    const currentOwnedIds = new Set(
+      [
+        profile.photoMediaId,
+        ...(profile.portfolioMediaIds ?? []),
+        profile.resumeMediaId,
+      ]
+        .filter(Boolean)
+        .map(String),
+    );
+
+    for (const id of previousOwnedIds) {
+      if (!currentOwnedIds.has(id)) {
+        await this.media
+          .removeIfUnreferencedOwned(id, userId)
+          .catch(() => undefined);
+      }
+    }
 
     return this.get(userId);
   }

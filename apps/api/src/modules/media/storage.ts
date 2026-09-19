@@ -25,7 +25,7 @@ export abstract class StorageAdapter {
   abstract delete(key: string): Promise<void>;
 }
 
-function validateKey(key: string) {
+export function validateStorageKey(key: string) {
   if (
     !/^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/.test(
       key,
@@ -48,7 +48,7 @@ export class LocalStorageAdapter extends StorageAdapter {
   private filePath(key: string) {
     const file = resolve(
       this.root,
-      validateKey(key),
+      validateStorageKey(key),
     );
 
     const separator =
@@ -140,13 +140,10 @@ export class S3StorageAdapter extends StorageAdapter {
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
-        Key: validateKey(key),
+        Key: validateStorageKey(key),
         Body: data,
         ContentType: contentType,
-        CacheControl:
-          contentType === "application/pdf"
-            ? "private, no-store"
-            : "public, max-age=31536000, immutable",
+        CacheControl: "private, max-age=31536000, immutable",
         ServerSideEncryption: "AES256",
       }),
     );
@@ -156,7 +153,7 @@ export class S3StorageAdapter extends StorageAdapter {
     const response = await this.client.send(
       new GetObjectCommand({
         Bucket: this.bucket,
-        Key: validateKey(key),
+        Key: validateStorageKey(key),
       }),
     );
 
@@ -175,7 +172,7 @@ export class S3StorageAdapter extends StorageAdapter {
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: this.bucket,
-        Key: validateKey(key),
+        Key: validateStorageKey(key),
       }),
     );
   }
