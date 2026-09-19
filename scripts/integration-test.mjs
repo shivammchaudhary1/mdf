@@ -127,6 +127,11 @@ try {
   assert.equal(r.data.items.find((x) => x.id === memberId).profile.birthDate, undefined);
   assert.equal((await request(`/talent/${memberId}`)).data.profile.birthDate, undefined);
   assert.equal((await request("/talent?city=NoSuchCity")).data.meta.total, 0);
+  assert.equal((await request("/talent?skills=Acting")).data.items.some((x) => x.id === memberId), true);
+  assert.equal((await request("/talent?languages=Hindi")).data.items.some((x) => x.id === memberId), true);
+  assert.equal((await request("/talent?gender=Male")).data.items.some((x) => x.id === memberId), true);
+  assert.equal((await request("/talent?ageMin=20&ageMax=40")).data.items.some((x) => x.id === memberId), true);
+  assert.equal((await request("/talent?search=Acting")).data.items.some((x) => x.id === memberId), true);
   assert.equal((await request("/talent?limit=10000")).status, 400);
 
   r = await request(`/admin/castings/${castingId}`, { method: "PATCH", state: admin, body: { ageMin: 20, ageMax: 40, shootDate: new Date(Date.now() + 3 * 86400000).toISOString() } });
