@@ -112,7 +112,7 @@ export class ProjectService {
       throw new BadRequestException("Project end date must follow start date.");
     }
 
-    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])], "image", "project");
 
     const { startDate, endDate, coverMediaId, galleryMediaIds, ...rest } = input;
 
@@ -162,7 +162,7 @@ export class ProjectService {
       throw new BadRequestException("Project end date must follow start date.");
     }
 
-    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])], "image", "project");
 
     const oldMedia = [existing.coverMediaId ? String(existing.coverMediaId) : undefined, ...(existing.galleryMediaIds ?? []).map(String)];
     const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };

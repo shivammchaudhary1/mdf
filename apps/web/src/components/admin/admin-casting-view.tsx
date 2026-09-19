@@ -111,7 +111,7 @@ export function AdminCastingView() {
     const ageMaxRaw = String(form.get("ageMax") ?? "").trim();
 
     let coverMediaId: string | null | undefined;
-    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover)).id;
+    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover, "casting")).id;
     else if (id && form.get("removeCover") === "on") coverMediaId = null;
 
     return {

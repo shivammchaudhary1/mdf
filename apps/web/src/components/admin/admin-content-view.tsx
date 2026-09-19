@@ -162,6 +162,18 @@ export function AdminContentView({ kind }: { kind: Kind }) {
   const [items, , refresh, meta, setPage, , loading, error] = useAdminRecords<Source, Item>(path, mapItem, true, 1, 20);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const mediaPurpose =
+    kind === "blog"
+      ? "blog"
+      : kind === "gallery"
+        ? "gallery"
+        : kind === "bts"
+          ? "bts"
+          : kind === "shows"
+            ? "show"
+            : kind === "team"
+              ? "team"
+              : "website-image";
 
   async function persist(event: FormEvent<HTMLFormElement>, id?: string) {
     event.preventDefault();
@@ -173,12 +185,12 @@ export function AdminContentView({ kind }: { kind: Kind }) {
     const cover = form.get("cover");
     const extraFiles = form.getAll("media").filter((value): value is File => value instanceof File && value.size > 0);
     let coverMediaId: string | null | undefined;
-    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover)).id;
+    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover, mediaPurpose)).id;
     else if (id && form.get("removeCover") === "on") coverMediaId = null;
     let mediaIds: string[] | undefined;
     if (extraFiles.length) {
       mediaIds = [];
-      for (const file of extraFiles) mediaIds.push((await uploadMedia(file)).id);
+      for (const file of extraFiles) mediaIds.push((await uploadMedia(file, mediaPurpose)).id);
     } else if (id && form.get("clearMedia") === "on") mediaIds = [];
 
     const body = {

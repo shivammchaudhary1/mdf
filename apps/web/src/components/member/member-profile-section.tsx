@@ -121,7 +121,7 @@ export function MemberProfileSection() {
     setSaving(true);
     let uploaded: Awaited<ReturnType<typeof uploadMedia>> | undefined;
     try {
-      uploaded = await uploadMedia(file);
+      uploaded = await uploadMedia(file, "user-profile");
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({ photoMediaId: uploaded.id }),

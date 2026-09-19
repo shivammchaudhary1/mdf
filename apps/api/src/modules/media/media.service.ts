@@ -13,7 +13,7 @@ import sharp, { type Metadata } from "sharp";
 import { sha256 } from "../../common/utils/crypto";
 import { objectId } from "../../common/utils/object-id";
 import { AuthService } from "../auth/auth.service";
-import { Media } from "./media.model";
+import { Media, type MediaPurpose, mediaPurposes } from "./media.model";
 import { StorageAdapter } from "./storage";
 
 export type Upload = {
@@ -30,6 +30,8 @@ const IMAGE_VARIANTS = {
   large: { width: 1920, quality: 84 },
 } as const;
 
+const ASSET_PURPOSES = new Set<MediaPurpose>(["website-image", "project", "casting", "blog", "gallery", "team", "bts", "show"]);
+
 export type MediaVariant = keyof typeof IMAGE_VARIANTS | "document";
 
 @Injectable()
@@ -41,18 +43,60 @@ export class MediaService {
     private readonly auth: AuthService,
   ) {}
 
-  private storageKey(id: Types.ObjectId | string, variant: MediaVariant) {
+  private purpose(value?: string): MediaPurpose {
+    if (!value || !(mediaPurposes as readonly string[]).includes(value)) {
+      throw new BadRequestException("Choose a valid media purpose.");
+    }
+
+    return value as MediaPurpose;
+  }
+
+  private storagePrefix(ownerId: Types.ObjectId | string, id: Types.ObjectId | string, purpose: MediaPurpose): string {
+    const owner = String(ownerId);
+    const mediaId = String(id);
+
+    switch (purpose) {
+      case "website-image":
+        return `assets/website-images/${mediaId}`;
+      case "project":
+        return `assets/projects/${mediaId}`;
+      case "casting":
+        return `assets/castings/${mediaId}`;
+      case "blog":
+        return `assets/blog/${mediaId}`;
+      case "gallery":
+        return `assets/gallery/${mediaId}`;
+      case "team":
+        return `assets/team/${mediaId}`;
+      case "bts":
+        return `assets/bts/${mediaId}`;
+      case "show":
+        return `assets/shows/${mediaId}`;
+      case "user-profile":
+        return `users/${owner}/profile-pic/${mediaId}`;
+      case "user-portfolio":
+        return `users/${owner}/portfolio-images/${mediaId}`;
+      case "user-resume":
+        return `users/${owner}/resume/${mediaId}`;
+      default:
+        throw new BadRequestException("Unsupported media purpose.");
+    }
+  }
+
+  private storageKey(record: Pick<Media, "_id" | "ownerId" | "storagePrefix">, variant: MediaVariant) {
     const extension = variant === "document" ? "pdf" : "webp";
-    return `media/${String(id)}/${variant}.${extension}`;
+    const prefix = record.storagePrefix?.trim() || `media/${String(record._id)}`;
+    return `${prefix}/${variant}.${extension}`;
   }
 
   private variantsFor(kind: "image" | "document"): MediaVariant[] {
     return kind === "document" ? ["document"] : ["thumb", "profile", "medium", "large"];
   }
 
-  private async deleteStored(id: Types.ObjectId | string, kind: "image" | "document") {
-    const variants = this.variantsFor(kind);
-    const results = await Promise.allSettled(variants.map((variant) => this.storage.delete(this.storageKey(id, variant))));
+  private async deleteStored(record: Pick<Media, "_id" | "ownerId" | "storagePrefix" | "kind">) {
+    const results = await Promise.allSettled(
+      this.variantsFor(record.kind).map((variant) => this.storage.delete(this.storageKey(record, variant))),
+    );
 
     if (results.some((result) => result.status === "rejected")) {
       throw new ServiceUnavailableException("Media storage is temporarily unavailable. Please try again.");
@@ -83,21 +127,30 @@ export class MediaService {
 
   urlsFor(id: string, kind: "image" | "document" = "image") {
     if (kind === "document") {
-      return {
-        document: `/api/v1/media/${id}/document`,
-      };
+      return { document: `/api/v1/media/${id}/document` };
     }
 
     return Object.fromEntries(Object.keys(IMAGE_VARIANTS).map((variant) => [variant, `/api/v1/media/${id}/${variant}`]));
   }
 
-  async upload(ownerId: string, file?: Upload) {
-    if (!file) {
-      throw new BadRequestException("Select a file.");
+  async upload(ownerId: string, role: "USER" | "SUPER_ADMIN", file?: Upload, rawPurpose?: string) {
+    if (!file) throw new BadRequestException("Select a file.");
+    if (file.size > 10 * 1024 * 1024) throw new BadRequestException("Select a file up to 10 MB.");
+
+    const purpose = this.purpose(rawPurpose);
+    if (ASSET_PURPOSES.has(purpose) && role !== "SUPER_ADMIN") {
+      throw new ForbiddenException("Only administrators can upload website and production media.");
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      throw new BadRequestException("Select a file up to 10 MB.");
+    const documentPurpose = purpose === "user-resume";
+    const isPdf = file.mimetype === "application/pdf" && file.buffer.subarray(0, 5).toString() === "%PDF-";
+
+    if (documentPurpose && !isPdf) {
+      throw new BadRequestException("Resume/supporting documents must be valid PDF files.");
+    }
+
+    if (!documentPurpose && file.mimetype === "application/pdf") {
+      throw new BadRequestException("This media destination accepts images only.");
     }
 
     const owner = objectId(ownerId, "Account not found.");
@@ -106,6 +159,7 @@ export class MediaService {
     const duplicate = await this.media
       .findOne({
         ownerId: owner,
+        purpose,
         contentHash,
       })
       .lean();
@@ -114,6 +168,7 @@ export class MediaService {
       return {
         id: String(duplicate._id),
         kind: duplicate.kind,
+        purpose: duplicate.purpose,
         visibility: duplicate.visibility,
         urls: this.urlsFor(String(duplicate._id), duplicate.kind),
         duplicate: true,
@@ -121,10 +176,18 @@ export class MediaService {
     }
 
     const id = new Types.ObjectId();
+    const prefix = this.storagePrefix(owner, id, purpose);
 
-    if (file.mimetype === "application/pdf" && file.buffer.subarray(0, 5).toString() === "%PDF-") {
+    if (documentPurpose) {
+      const provisional = {
+        _id: id,
+        ownerId: owner,
+        storagePrefix: prefix,
+        kind: "document" as const,
+      };
+
       try {
-        await this.storage.write(this.storageKey(id, "document"), file.buffer, "application/pdf");
+        await this.storage.write(this.storageKey(provisional, "document"), file.buffer, "application/pdf");
       } catch {
         throw new ServiceUnavailableException("Media storage is temporarily unavailable. Please try again.");
       }
@@ -134,6 +197,8 @@ export class MediaService {
           _id: id,
           ownerId: owner,
           kind: "document",
+          purpose,
+          storagePrefix: prefix,
           visibility: "private",
           originalName: file.originalname.slice(0, 150),
           sourceMime: "application/pdf",
@@ -144,68 +209,71 @@ export class MediaService {
         return {
           id: String(record._id),
           kind: record.kind,
+          purpose: record.purpose,
           visibility: record.visibility,
           urls: this.urlsFor(String(record._id), "document"),
           duplicate: false,
         };
       } catch (error) {
-        await this.deleteStored(id, "document").catch(() => undefined);
+        await this.deleteStored(provisional).catch(() => undefined);
         throw error;
       }
     }
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) {
-      throw new BadRequestException("Use JPEG, PNG, WebP or PDF files.");
+      throw new BadRequestException("Use JPEG, PNG or WebP image files.");
     }
 
     let metadata: Metadata;
-    const processed = new Map<keyof typeof IMAGE_VARIANTS, Buffer>();
-
     try {
-      const input = sharp(file.buffer, {
+      metadata = await sharp(file.buffer, {
         limitInputPixels: 40_000_000,
         sequentialRead: true,
-      }).rotate();
+      })
+        .rotate()
+        .metadata();
 
-      metadata = await input.metadata();
-
-      if (!["jpeg", "png", "webp"].includes(metadata.format ?? "")) {
-        throw new Error("Unsupported image format.");
-      }
-
-      for (const [variant, settings] of Object.entries(IMAGE_VARIANTS)) {
-        const size = settings as {
-          width: number;
-          height?: number;
-          quality: number;
-        };
-
-        processed.set(
-          variant as keyof typeof IMAGE_VARIANTS,
-          await input
-            .clone()
-            .resize(size.width, size.height, {
-              fit: size.height ? "cover" : "inside",
-              withoutEnlargement: true,
-              position: "attention",
-            })
-            .webp({
-              quality: size.quality,
-              smartSubsample: true,
-            })
-            .toBuffer(),
-        );
+      if (!["jpeg", "png", "webp"].includes(metadata.format ?? "") || !metadata.width || !metadata.height) {
+        throw new Error("Unsupported image.");
       }
     } catch {
       throw new BadRequestException("The image could not be processed. Use a valid image under 40 megapixels.");
     }
 
+    const provisional = {
+      _id: id,
+      ownerId: owner,
+      storagePrefix: prefix,
+      kind: "image" as const,
+    };
+    const written: MediaVariant[] = [];
+
     try {
-      for (const [variant, buffer] of processed.entries()) {
-        await this.storage.write(this.storageKey(id, variant), buffer, "image/webp");
+      for (const [variant, settings] of Object.entries(IMAGE_VARIANTS)) {
+        const size = settings as { width: number; height?: number; quality: number };
+        const buffer = await sharp(file.buffer, {
+          limitInputPixels: 40_000_000,
+          sequentialRead: true,
+        })
+          .rotate()
+          .resize(size.width, size.height, {
+            fit: size.height ? "cover" : "inside",
+            withoutEnlargement: true,
+            position: "attention",
+          })
+          .webp({
+            quality: size.quality,
+            smartSubsample: true,
+            effort: 4,
+          })
+          .toBuffer();
+
+        const typedVariant = variant as keyof typeof IMAGE_VARIANTS;
+        await this.storage.write(this.storageKey(provisional, typedVariant), buffer, "image/webp");
+        written.push(typedVariant);
       }
     } catch {
-      await this.deleteStored(id, "image").catch(() => undefined);
+      await Promise.allSettled(written.map((variant) => this.storage.delete(this.storageKey(provisional, variant))));
       throw new ServiceUnavailableException("Media storage is temporarily unavailable. Please try again.");
     }
 
@@ -214,6 +282,8 @@ export class MediaService {
         _id: id,
         ownerId: owner,
         kind: "image",
+        purpose,
+        storagePrefix: prefix,
         visibility: "private",
         originalName: file.originalname.slice(0, 150),
         sourceMime: file.mimetype,
@@ -226,17 +296,23 @@ export class MediaService {
       return {
         id: String(record._id),
         kind: record.kind,
+        purpose: record.purpose,
         visibility: record.visibility,
         urls: this.urlsFor(String(record._id), "image"),
         duplicate: false,
       };
     } catch (error) {
-      await this.deleteStored(id, "image").catch(() => undefined);
+      await this.deleteStored(provisional).catch(() => undefined);
       throw error;
     }
   }
 
-  async assertOwnedBy(userId: string, values: (string | null | undefined)[], kind?: "image" | "document") {
+  async assertOwnedBy(
+    userId: string,
+    values: (string | null | undefined)[],
+    kind?: "image" | "document",
+    purpose?: MediaPurpose | MediaPurpose[],
+  ) {
     const supplied = values.filter((value): value is string => typeof value === "string" && value.length > 0);
 
     if (supplied.some((value) => !Types.ObjectId.isValid(value))) {
@@ -246,16 +322,16 @@ export class MediaService {
     const ids = [...new Set(supplied)];
     if (!ids.length) return;
 
+    const purposes = purpose ? (Array.isArray(purpose) ? purpose : [purpose]) : undefined;
     const count = await this.media.countDocuments({
-      _id: {
-        $in: ids.map((id) => new Types.ObjectId(id)),
-      },
+      _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
       ownerId: new Types.ObjectId(userId),
       ...(kind ? { kind } : {}),
+      ...(purposes ? { purpose: { $in: purposes } } : {}),
     });
 
     if (count !== ids.length) {
-      throw new BadRequestException("Use media uploaded to the current account.");
+      throw new BadRequestException("Use media uploaded to the correct destination for the current account.");
     }
   }
 
@@ -269,17 +345,8 @@ export class MediaService {
     if (!valid.length) return;
 
     await this.media.updateMany(
-      {
-        kind: "image",
-        _id: {
-          $in: valid.map((id) => new Types.ObjectId(id)),
-        },
-      },
-      {
-        $set: {
-          visibility: "public",
-        },
-      },
+      { kind: "image", _id: { $in: valid.map((id) => new Types.ObjectId(id)) } },
+      { $set: { visibility: "public" } },
     );
   }
 
@@ -315,6 +382,7 @@ export class MediaService {
         .project({ photoMediaId: 1, portfolioMediaIds: 1 })
         .toArray(),
     ]);
+
     const published = new Set(
       references
         .flat()
@@ -328,48 +396,35 @@ export class MediaService {
         .filter(Boolean)
         .map(String),
     );
+
     await this.media.updateMany(
       {
         _id: {
           $in: valid.filter((id) => !published.has(id)).map((id) => new Types.ObjectId(id)),
         },
       },
-      {
-        $set: {
-          visibility: "private",
-        },
-      },
+      { $set: { visibility: "private" } },
     );
   }
 
   async read(id: string, variant: string, token?: string) {
     const mediaId = objectId(id);
 
-    if (!["thumb", "profile", "medium", "large", "document"].includes(variant)) {
-      throw new NotFoundException();
-    }
+    if (!["thumb", "profile", "medium", "large", "document"].includes(variant)) throw new NotFoundException();
 
     const record = await this.media.findById(mediaId).lean();
+    if (!record) throw new NotFoundException();
 
-    if (!record) {
-      throw new NotFoundException();
-    }
-
-    if ((record.kind === "document") !== (variant === "document")) {
-      throw new NotFoundException();
-    }
+    if ((record.kind === "document") !== (variant === "document")) throw new NotFoundException();
 
     if (record.kind === "document" || record.visibility !== "public") {
       const user = await this.auth.authenticate(token);
-
-      if (String(record.ownerId) !== user.id && user.role !== "SUPER_ADMIN") {
-        throw new NotFoundException();
-      }
+      if (String(record.ownerId) !== user.id && user.role !== "SUPER_ADMIN") throw new NotFoundException();
     }
 
     try {
       return {
-        buffer: await this.storage.read(this.storageKey(mediaId, variant as MediaVariant)),
+        buffer: await this.storage.read(this.storageKey(record, variant as MediaVariant)),
         type: record.kind === "document" ? "application/pdf" : "image/webp",
         private: record.kind === "document" || record.visibility !== "public",
         originalName: record.originalName,
@@ -387,49 +442,37 @@ export class MediaService {
       ownerId: new Types.ObjectId(ownerId),
     });
 
-    if (!record || (await this.referenced(record._id))) {
-      return false;
-    }
+    if (!record || (await this.referenced(record._id))) return false;
 
-    await this.deleteStored(record._id, record.kind);
+    await this.deleteStored(record);
     await record.deleteOne();
     return true;
   }
 
-  async remove(
-    id: string,
-    actor: {
-      id: string;
-      role: "USER" | "SUPER_ADMIN";
-    },
-  ) {
+  async remove(id: string, actor: { id: string; role: "USER" | "SUPER_ADMIN" }) {
     const record = await this.media.findById(objectId(id));
-
-    if (!record) {
-      throw new NotFoundException();
-    }
+    if (!record) throw new NotFoundException();
 
     if (actor.role !== "SUPER_ADMIN" && String(record.ownerId) !== actor.id) {
       throw new ForbiddenException("You cannot delete this media.");
     }
 
     if (await this.referenced(record._id)) {
-      throw new ConflictException("Remove this file from your profile, portfolio or application before deleting it.");
+      throw new ConflictException("Remove this file from its profile, portfolio, content or application before deleting it.");
     }
 
     if (record.visibility === "public" && actor.role !== "SUPER_ADMIN") {
       await this.makePrivate([String(record._id)]);
       const refreshed = await this.media.findById(record._id).lean();
+
       if (refreshed?.visibility === "public") {
         throw new ForbiddenException("Published media can only be removed after it is no longer used publicly.");
       }
     }
 
-    await this.deleteStored(record._id, record.kind);
+    await this.deleteStored(record);
     await record.deleteOne();
 
-    return {
-      message: "Media deleted.",
-    };
+    return { message: "Media deleted." };
   }
 }

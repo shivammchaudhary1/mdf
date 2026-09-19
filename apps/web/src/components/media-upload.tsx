@@ -2,11 +2,19 @@
 import { useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
-import { type UploadedMediaResult, uploadMedia } from "@/services/workspace";
+import { type MediaPurpose, type UploadedMediaResult, uploadMedia } from "@/services/workspace";
 
 export type UploadedMedia = UploadedMediaResult;
 
-export function MediaUpload({ onUploaded, document = false }: { onUploaded: (media: UploadedMedia) => void; document?: boolean }) {
+export function MediaUpload({
+  onUploaded,
+  purpose,
+  document = false,
+}: {
+  onUploaded: (media: UploadedMedia) => void;
+  purpose: MediaPurpose;
+  document?: boolean;
+}) {
   const [pending, setPending] = useState(false);
   const toast = useToast();
   return (
@@ -28,7 +36,7 @@ export function MediaUpload({ onUploaded, document = false }: { onUploaded: (med
           }
           setPending(true);
           try {
-            const media = await uploadMedia(file);
+            const media = await uploadMedia(file, purpose);
             onUploaded(media);
             toast.success(media.duplicate ? "This file was already uploaded." : "Upload complete.");
           } catch (error) {

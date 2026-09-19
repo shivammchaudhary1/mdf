@@ -4,16 +4,21 @@ import { dirname, resolve } from "node:path";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
 
+const LEGACY_IMAGE = /^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const LEGACY_DOCUMENT = /^media\/[a-f0-9]{24}\/document\.pdf$/;
+const ASSET_IMAGE =
+  /^assets\/(website-images|projects|castings|blog|gallery|team|bts|shows)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const USER_IMAGE = /^users\/[a-f0-9]{24}\/(profile-pic|portfolio-images)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const USER_DOCUMENT = /^users\/[a-f0-9]{24}\/resume\/[a-f0-9]{24}\/document\.pdf$/;
+
 export abstract class StorageAdapter {
   abstract write(key: string, data: Buffer, contentType?: string): Promise<void>;
-
   abstract read(key: string): Promise<Buffer>;
-
   abstract delete(key: string): Promise<void>;
 }
 
 export function validateStorageKey(key: string) {
-  if (!/^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/.test(key) && !/^media\/[a-f0-9]{24}\/document\.pdf$/.test(key)) {
+  if (![LEGACY_IMAGE, LEGACY_DOCUMENT, ASSET_IMAGE, USER_IMAGE, USER_DOCUMENT].some((pattern) => pattern.test(key))) {
     throw new Error("Invalid storage key.");
   }
 
@@ -25,7 +30,6 @@ export class LocalStorageAdapter extends StorageAdapter {
 
   private filePath(key: string) {
     const file = resolve(this.root, validateStorageKey(key));
-
     const separator = process.platform === "win32" ? "\\" : "/";
 
     if (!file.startsWith(`${this.root}${separator}`)) {
@@ -37,15 +41,8 @@ export class LocalStorageAdapter extends StorageAdapter {
 
   async write(key: string, data: Buffer) {
     const file = this.filePath(key);
-
-    await mkdir(dirname(file), {
-      recursive: true,
-      mode: 0o700,
-    });
-
-    await writeFile(file, data, {
-      mode: 0o600,
-    });
+    await mkdir(dirname(file), { recursive: true, mode: 0o700 });
+    await writeFile(file, data, { mode: 0o600 });
   }
 
   async read(key: string) {
@@ -53,9 +50,7 @@ export class LocalStorageAdapter extends StorageAdapter {
   }
 
   async delete(key: string) {
-    await rm(this.filePath(key), {
-      force: true,
-    });
+    await rm(this.filePath(key), { force: true });
   }
 }
 
@@ -112,10 +107,7 @@ export class S3StorageAdapter extends StorageAdapter {
       }),
     );
 
-    if (!response.Body) {
-      throw new Error("Stored object is empty.");
-    }
-
+    if (!response.Body) throw new Error("Stored object is empty.");
     return Buffer.from(await response.Body.transformToByteArray());
   }
 

@@ -64,13 +64,13 @@ export function AdminProjectsView() {
     const galleryFiles = form.getAll("gallery").filter((value): value is File => value instanceof File && value.size > 0);
 
     let coverMediaId: string | null | undefined;
-    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover)).id;
+    if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover, "project")).id;
     else if (id && form.get("removeCover") === "on") coverMediaId = null;
 
     let galleryMediaIds: string[] | undefined;
     if (galleryFiles.length) {
       galleryMediaIds = [];
-      for (const file of galleryFiles) galleryMediaIds.push((await uploadMedia(file)).id);
+      for (const file of galleryFiles) galleryMediaIds.push((await uploadMedia(file, "project")).id);
     } else if (id && form.get("clearGallery") === "on") {
       galleryMediaIds = [];
     }

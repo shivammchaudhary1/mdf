@@ -80,9 +80,23 @@ export type ContentRecord = {
   body?: string[];
   data?: Record<string, string>;
 };
+export type MediaPurpose =
+  | "website-image"
+  | "project"
+  | "casting"
+  | "blog"
+  | "gallery"
+  | "team"
+  | "bts"
+  | "show"
+  | "user-profile"
+  | "user-portfolio"
+  | "user-resume";
+
 export type UploadedMediaResult = {
   id: string;
   kind: "image" | "document";
+  purpose: MediaPurpose;
   visibility: "private" | "public";
   urls: Record<string, string>;
   duplicate?: boolean;
@@ -110,10 +124,11 @@ export async function allPages<T>(path: string): Promise<T[]> {
     items.push(...(await api<Page<T>>(`${path}${separator}limit=100&page=${page}`)).items);
   return items;
 }
-export async function uploadMedia(file: File): Promise<UploadedMediaResult> {
+export async function uploadMedia(file: File, purpose: MediaPurpose): Promise<UploadedMediaResult> {
   if (file.size > 10 * 1024 * 1024) throw new Error("Choose a file up to 10 MB.");
   const body = new FormData();
   body.append("file", file);
+  body.append("purpose", purpose);
   if (typeof window !== "undefined") window.dispatchEvent(new Event("mdadu-upload-start"));
   try {
     return await api<UploadedMediaResult>("/media", { method: "POST", body });
