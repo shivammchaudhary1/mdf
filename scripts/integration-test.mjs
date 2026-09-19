@@ -313,11 +313,28 @@ try {
   r = await request("/auth/sessions", { state: remembered });
   assert.equal(r.data.length, 2);
   assert.equal(r.data[0].tokenHash, undefined);
+  assert.equal(typeof r.data[0].deviceLabel, "string");
+  assert.equal(r.data.filter((session) => session.current).length, 1);
   const oldSession = r.data.find(x => !x.current);
   assert.equal((await request(`/auth/sessions/${oldSession.id}`, { method: "DELETE", state: remembered })).status, 200);
   assert.equal((await request("/auth/me", { state: member })).status, 401);
   assert.equal((await request("/auth/logout", { method: "POST", state: remembered })).status, 201);
   assert.equal((await request("/auth/me", { state: remembered })).status, 401);
+
+  const currentRevoke = jar();
+  assert.equal((await request("/auth/login", { method: "POST", state: currentRevoke, body: { email: memberInput.email, password: memberInput.password } })).status, 201);
+  r = await request("/auth/sessions", { state: currentRevoke });
+  const currentSession = r.data.find((session) => session.current);
+  assert.ok(currentSession);
+  r = await request(`/auth/sessions/${currentSession.id}`, { method: "DELETE", state: currentRevoke });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.currentSessionRevoked, true);
+  assert.equal((await request("/auth/me", { state: currentRevoke })).status, 401);
+
+  const logoutAll = jar();
+  assert.equal((await request("/auth/login", { method: "POST", state: logoutAll, body: { email: memberInput.email, password: memberInput.password } })).status, 201);
+  assert.equal((await request("/auth/logout-all", { method: "POST", state: logoutAll })).status, 201);
+  assert.equal((await request("/auth/me", { state: logoutAll })).status, 401);
 
   assert.equal((await request("/auth/login", { method: "POST", state: member, body: { email: memberInput.email, password: memberInput.password } })).status, 201);
   assert.equal((await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { suspended: true } })).status, 200);

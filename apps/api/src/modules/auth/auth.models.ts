@@ -44,6 +44,7 @@ export interface Session {
   remember: boolean;
   ipHash?: Buffer;
   userAgentHash?: Buffer;
+  deviceLabel?: string;
   createdAt: Date;
   lastSeenAt: Date;
   expiresAt: Date;
@@ -55,6 +56,7 @@ export const SessionSchema = new Schema<Session>(
     remember: { type: Boolean, default: false },
     ipHash: { type: Buffer, select: false },
     userAgentHash: { type: Buffer, select: false },
+    deviceLabel: { type: String, maxlength: 80 },
     lastSeenAt: { type: Date, required: true },
     expiresAt: { type: Date, required: true },
   },

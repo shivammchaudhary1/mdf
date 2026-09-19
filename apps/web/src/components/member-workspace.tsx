@@ -7,6 +7,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { MemberPortfolioSection } from "@/components/member/member-portfolio-section";
 import { MemberProfileSection } from "@/components/member/member-profile-section";
+import { MemberSessions } from "@/components/member/member-sessions";
 import { MemberData, useMemberData } from "@/components/member-data";
 import { SiteMedia } from "@/components/site/site-media";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -191,10 +192,6 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
             <Link href="/member/opportunities" className="md-search-pill">
               <Icon name="search" /> Find opportunities
             </Link>
-            <button className="md-icon-button">
-              <Icon name="bell" />
-              <i />
-            </button>
             <Link href="/member/profile" className="md-avatar md-top-avatar">
               {data.member.firstName[0]}
             </Link>
@@ -739,6 +736,7 @@ function Settings() {
               set={(v) => void preference("publicVisible", v)}
             />
           </article>
+          <MemberSessions />
         </div>
         <aside className="md-card md-membership">
           <p className="md-kicker">Account status</p>

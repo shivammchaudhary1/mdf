@@ -34,8 +34,6 @@ export function AdminShell({ section, children }: { section: string; children: R
     toast = useToast();
   const open = useAdminDashboardStore((s) => s.mobileOpen),
     setOpen = useAdminDashboardStore((s) => s.setMobileOpen);
-  const query = useAdminDashboardStore((s) => s.query),
-    setQuery = useAdminDashboardStore((s) => s.setQuery);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const data = {
     admin: {
@@ -115,11 +113,6 @@ export function AdminShell({ section, children }: { section: string; children: R
             </div>
           </div>
           <div className="ad-topbar-right">
-            <label className="ad-global-search">
-              <AdminIcon name="search" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search platform" />
-              <kbd>⌘ K</kbd>
-            </label>
             <AdminNotifications />
             <div className="ad-avatar ad-avatar-top">{data.admin.initials}</div>
           </div>
