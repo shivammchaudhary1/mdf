@@ -67,11 +67,17 @@ try {
   await mongoose.connect(uri);
 
   const member = jar(), admin = jar();
-  const memberInput = { name: "Integration Member", email: "member@example.test", mobile: "+919999999999", password: "Integration-pass-123", confirmPassword: "Integration-pass-123" };
+  const memberInput = { name: "Integration Member", email: "member@example.test", mobile: "+919999999999", password: "Integration-pass-123", confirmPassword: "Integration-pass-123", acceptTerms: true, acceptPrivacy: true };
   let r = await request("/auth/register", { method: "POST", body: memberInput, state: member });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   assert.ok(r.data.csrfToken);
   const memberId = r.data.id;
+  const consentAccount = await mongoose.connection.collection("accounts").findOne({ _id: new mongoose.Types.ObjectId(memberId) });
+  assert.equal(consentAccount.termsVersion, "2026-09-19");
+  assert.equal(consentAccount.privacyVersion, "2026-09-19");
+  assert.ok(consentAccount.termsAcceptedAt);
+  assert.ok(consentAccount.privacyAcceptedAt);
+  assert.equal((await request("/auth/register", { method: "POST", body: { ...memberInput, email: "no-consent@example.test", acceptTerms: false } })).status, 400);
   assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /HttpOnly/);
   assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /SameSite=Lax/);
   assert.equal(r.data.passwordHash, undefined);

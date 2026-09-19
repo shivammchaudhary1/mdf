@@ -14,6 +14,10 @@ export interface Account {
   suspended: boolean;
   lastLoginAt?: Date;
   loginCount: number;
+  termsAcceptedAt?: Date;
+  termsVersion?: string;
+  privacyAcceptedAt?: Date;
+  privacyVersion?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +34,10 @@ export const AccountSchema = new Schema<Account>(
     suspended: { type: Boolean, default: false, required: true },
     lastLoginAt: Date,
     loginCount: { type: Number, default: 0, min: 0 },
+    termsAcceptedAt: Date,
+    termsVersion: { type: String, maxlength: 32 },
+    privacyAcceptedAt: Date,
+    privacyVersion: { type: String, maxlength: 32 },
   },
   { timestamps: true, versionKey: false, minimize: true },
 );

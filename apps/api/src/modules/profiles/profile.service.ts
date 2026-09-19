@@ -123,6 +123,10 @@ export class ProfileService {
     };
     const unset: Record<string, 1> = {};
 
+    if (input.publicVisible === true && previous?.publicVisible !== true) {
+      update.publicVisibleConsentAt = new Date();
+    }
+
     if (input.skills !== undefined) {
       update.skills = cleanList(input.skills);
     }
@@ -231,7 +235,10 @@ export class ProfileService {
         userId: objectId(userId),
       },
       {
-        $set: input,
+        $set: {
+          ...input,
+          ...(input.publicVisible === true ? { publicVisibleConsentAt: new Date() } : {}),
+        },
         $setOnInsert: {
           userId: objectId(userId),
         },

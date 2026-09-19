@@ -44,7 +44,7 @@ export function HomePageView() {
             <div className="relative min-h-[360px] lg:min-h-[500px]">
               <div className="absolute inset-0 translate-x-[8%] overflow-hidden rounded-[24px] lg:translate-x-[10%]">
                 <SiteMedia
-                  alt="Film production placeholder"
+                  alt="M. Dadu Films film production"
                   kind="project"
                   className="h-full min-h-[360px] lg:min-h-[500px]"
                   imageClassName="opacity-80"
@@ -103,7 +103,7 @@ export function HomePageView() {
         <section className="site-shell pb-8 lg:pb-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-6 py-10 text-white sm:px-10 lg:px-12 lg:py-12">
             <div className="absolute inset-y-0 right-0 w-[48%] opacity-42">
-              <SiteMedia alt="Creative community placeholder" kind="team" className="h-full" imageClassName="opacity-85" />
+              <SiteMedia alt="M. Dadu Films creative community" kind="team" className="h-full" imageClassName="opacity-85" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0b] via-[#0b0b0b]/60 to-transparent" />
             </div>
 

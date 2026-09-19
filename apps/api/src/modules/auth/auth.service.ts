@@ -34,6 +34,7 @@ type AccountLike = Account & { _id: unknown };
 @Injectable()
 export class AuthService {
   private readonly google?: OAuth2Client;
+  private readonly legalVersion = "2026-09-19";
   constructor(
     @InjectModel("Account") private readonly accounts: Model<Account>,
     @InjectModel("Session") private readonly sessions: Model<Session>,
@@ -112,12 +113,17 @@ export class AuthService {
     if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
     await this.rateLimits.consume("register-email", input.email, 5, 60 * 60 * 1000);
     try {
+      const acceptedAt = new Date();
       const account = await this.accounts.create({
         name: input.name.trim(),
         email: input.email,
         mobile: input.mobile.trim(),
         passwordHash: await hashPassword(input.password),
         authProvider: "local",
+        termsAcceptedAt: acceptedAt,
+        termsVersion: this.legalVersion,
+        privacyAcceptedAt: acceptedAt,
+        privacyVersion: this.legalVersion,
       });
       await this.mail
         .send(account.email, "Welcome to M. Dadu Films", `Welcome ${account.name}. Your community account is ready.`)
@@ -156,12 +162,20 @@ export class AuthService {
     let account = await this.accounts.findOne({ $or: [{ googleSub: payload.sub }, { email }] }).select("+googleSub +passwordHash");
     if (!account) {
       if (!input.mobile) throw new BadRequestException("Mobile number is required to complete your first Google sign-in.");
+      if (input.acceptTerms !== true || input.acceptPrivacy !== true) {
+        throw new BadRequestException("Accept the Terms & Conditions and acknowledge the Privacy Policy to create an account.");
+      }
+      const acceptedAt = new Date();
       account = await this.accounts.create({
         name: (input.name || payload.name || email.split("@")[0]).slice(0, 100),
         email,
         mobile: input.mobile.trim(),
         authProvider: "google",
         googleSub: payload.sub,
+        termsAcceptedAt: acceptedAt,
+        termsVersion: this.legalVersion,
+        privacyAcceptedAt: acceptedAt,
+        privacyVersion: this.legalVersion,
       });
     } else {
       if (account.suspended) throw new UnauthorizedException("Login failed. Check your account status.");

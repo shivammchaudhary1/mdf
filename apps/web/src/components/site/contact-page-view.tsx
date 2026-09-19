@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { PageIntro } from "@/components/site/page-intro";
@@ -55,7 +56,7 @@ export function ContactPageView() {
           eyebrow="Let's Talk"
           title="We’d Love to Hear From You"
           description="Whether you’re a creator, a brand or a collaborator — we’re always open to new conversations."
-          mediaAlt="Contact production placeholder"
+          mediaAlt="M. Dadu Films production contact"
           mediaKind="project"
         />
 
@@ -111,6 +112,13 @@ export function ContactPageView() {
               <button type="submit" disabled={sending} className="site-button site-button-primary justify-center">
                 {sending ? "Sending..." : "Send Message"}
               </button>
+              <p className="text-xs leading-5 text-[#777]">
+                By sending this message, you provide your contact details so M. Dadu Films can review and respond to your enquiry. See our{" "}
+                <Link href="/privacy" className="font-semibold underline">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
             </form>
           </div>
 

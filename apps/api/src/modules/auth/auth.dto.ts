@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsBoolean, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { Equals, IsBoolean, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 const normalizeEmail = ({ value }: { value: unknown }) => (typeof value === "string" ? value.trim().toLowerCase() : value);
 export class EmailDto {
   @ApiProperty() @IsEmail() @MaxLength(254) @Transform(normalizeEmail) email!: string;
@@ -18,12 +18,16 @@ export class RegisterDto extends EmailDto {
   @ApiProperty() @IsString() @Matches(/^\+?[\d ()-]{7,20}$/) mobile!: string;
   @ApiProperty() @IsString() @MinLength(10) @MaxLength(128) password!: string;
   @ApiProperty() @IsString() @MinLength(10) @MaxLength(128) confirmPassword!: string;
+  @ApiProperty() @IsBoolean() @Equals(true) acceptTerms!: boolean;
+  @ApiProperty() @IsBoolean() @Equals(true) acceptPrivacy!: boolean;
 }
 export class GoogleAuthDto {
   @ApiProperty() @IsString() @MinLength(100) @MaxLength(5000) credential!: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Matches(/^\+?[\d ()-]{7,20}$/) mobile?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @MinLength(2) @MaxLength(100) name?: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() remember?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() acceptTerms?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() acceptPrivacy?: boolean;
 }
 export class ResetPasswordDto {
   @ApiProperty() @IsString() @Matches(/^[A-Za-z0-9_-]{40,128}$/) token!: string;
