@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
+import { PUBLIC_COMPANY } from "@/config/company";
 import template from "@/data/public-site.json";
 import { type ContentRecord, dateLabel, fetchPage, mediaUrl, type PageMeta } from "@/services/workspace";
 type PublicTalentRecord = {
@@ -24,8 +25,21 @@ type PublicRecord = ContentRecord & {
 };
 const empty = {
   ...template,
-  stats: template.stats.map((stat) => ({ ...stat, value: "—" })),
-  brand: { ...template.brand, email: "ADD_OFFICIAL_EMAIL", phone: "ADD_REAL_PHONE", location: "ADD_REAL_ADDRESS" },
+  stats: [
+    { value: "Films", label: "Production" },
+    { value: "Ads", label: "Brand Films" },
+    { value: "Music", label: "Videos" },
+    { value: "Talent", label: "Community" },
+  ],
+  brand: {
+    ...template.brand,
+    name: String(PUBLIC_COMPANY.name),
+    headline: String(PUBLIC_COMPANY.tagline),
+    description: String(PUBLIC_COMPANY.description),
+    email: String(PUBLIC_COMPANY.email),
+    phone: String(PUBLIC_COMPANY.phone),
+    location: String(PUBLIC_COMPANY.location),
+  },
   projects: [] as typeof template.projects,
   blogs: [] as typeof template.blogs,
   team: [] as typeof template.team,
@@ -186,6 +200,8 @@ export function usePublicData(
         updates.brand = {
           ...empty.brand,
           name: company.companyName || empty.brand.name,
+          headline: company.tagline || empty.brand.headline,
+          description: company.description || empty.brand.description,
           email: company.email || empty.brand.email,
           phone: company.phone || empty.brand.phone,
           location: company.location || empty.brand.location,

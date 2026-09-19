@@ -6,7 +6,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { runtimeConfig } from "@/config/runtime";
 import data from "@/data/public-site.json";
 
-type Socials = { linkedin?: string; instagram?: string; youtube?: string; facebook?: string };
+type Socials = { companyName?: string; tagline?: string; linkedin?: string; instagram?: string; youtube?: string; facebook?: string };
 const safe = (v?: string) => (v && /^https:\/\//i.test(v) ? v : "");
 function Icon({ name }: { name: keyof Socials }) {
   const common = { viewBox: "0 0 24 24", width: 16, height: 16, "aria-hidden": true };
@@ -53,6 +53,8 @@ export function SiteFooter() {
       active = false;
     };
   }, []);
+  const companyName = socials.companyName || "M. Dadu Films";
+  const tagline = socials.tagline || "Transforming Visions into Cinematic Reality";
   const entries = (["linkedin", "instagram", "youtube", "facebook"] as const)
     .map((name) => [name, safe(socials[name])] as const)
     .filter(([, href]) => Boolean(href));
@@ -61,7 +63,7 @@ export function SiteFooter() {
       <div className="site-shell grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.25fr_.75fr_.75fr_1fr] lg:py-14">
         <div>
           <BrandLogo darkInk className="!w-[116px]" />
-          <p className="mt-4 max-w-xs text-sm leading-6 text-[#777]">Stories. People. Possibilities.</p>
+          <p className="mt-4 max-w-xs text-sm leading-6 text-[#777]">{tagline}</p>
         </div>
         <div>
           <p className="site-footer-title">Quick Links</p>
@@ -108,7 +110,9 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="site-shell flex flex-wrap items-center justify-between gap-3 border-t border-black/5 py-5 text-[11px] text-[#888]">
-        <span>© {new Date().getFullYear()} M. Dadu Films. All rights reserved.</span>
+        <span>
+          © {new Date().getFullYear()} {companyName}. All rights reserved.
+        </span>
         <div className="flex flex-wrap gap-5">
           <Link href="/privacy" className="hover:text-black">
             Privacy

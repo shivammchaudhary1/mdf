@@ -571,7 +571,7 @@ function Settings() {
   const toast = useToast();
   const cast = profile.emailCastingAlerts ?? true,
     mail = profile.emailUpdates ?? true,
-    visible = profile.publicVisible ?? true;
+    visible = profile.publicVisible ?? false;
   const Toggle = ({ title, desc, value, set }: { title: string; desc: string; value: boolean; set: (v: boolean) => void }) => (
     <div className="md-toggle-row">
       <div>
@@ -648,7 +648,7 @@ function Settings() {
             </div>
             <Toggle
               title="Public talent profile"
-              desc="Allow casting teams and visitors to discover your profile."
+              desc="When enabled, approved profile fields, your profile photo and portfolio can be visible to website visitors and casting teams. Email, mobile, date of birth and private documents stay private."
               value={visible}
               set={(v) => void preference("publicVisible", v)}
             />

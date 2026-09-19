@@ -63,7 +63,7 @@ const fields: Record<Mode, Field[]> = {
       placeholder: "Create a password",
       type: "password",
       autoComplete: "new-password",
-      minLength: 8,
+      minLength: 10,
     },
     {
       name: "confirmPassword",
@@ -71,7 +71,7 @@ const fields: Record<Mode, Field[]> = {
       placeholder: "Confirm your password",
       type: "password",
       autoComplete: "new-password",
-      minLength: 8,
+      minLength: 10,
     },
   ],
 
@@ -92,7 +92,7 @@ const fields: Record<Mode, Field[]> = {
       placeholder: "Create a new password",
       type: "password",
       autoComplete: "new-password",
-      minLength: 8,
+      minLength: 10,
     },
     {
       name: "confirmPassword",
@@ -100,7 +100,7 @@ const fields: Record<Mode, Field[]> = {
       placeholder: "Confirm your new password",
       type: "password",
       autoComplete: "new-password",
-      minLength: 8,
+      minLength: 10,
     },
   ],
 
@@ -258,6 +258,14 @@ export function AccountForm({ mode }: { mode: Mode }) {
       nextErrors.confirmPassword = "Passwords must match.";
     }
 
+    if (mode === "signup" && data.get("acceptTerms") !== "on") {
+      nextErrors.acceptTerms = "You must accept the Terms & Conditions.";
+    }
+
+    if (mode === "signup" && data.get("acceptPrivacy") !== "on") {
+      nextErrors.acceptPrivacy = "You must acknowledge the Privacy Policy.";
+    }
+
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length) {
@@ -282,6 +290,11 @@ export function AccountForm({ mode }: { mode: Mode }) {
 
       if (mode === "login") {
         body.remember = data.get("remember") === "on";
+      }
+
+      if (mode === "signup") {
+        body.acceptTerms = data.get("acceptTerms") === "on";
+        body.acceptPrivacy = data.get("acceptPrivacy") === "on";
       }
 
       if (mode === "reset-password") {
@@ -404,6 +417,37 @@ export function AccountForm({ mode }: { mode: Mode }) {
           <Link href="/forgot-password" className="auth-forgot-link">
             Forgot password?
           </Link>
+        </div>
+      )}
+
+      {mode === "signup" && (
+        <div className="grid gap-3 text-xs leading-5 text-[#666]">
+          <label className="flex items-start gap-2">
+            <input className="mt-1" type="checkbox" name="acceptTerms" required />
+            <span>
+              I agree to the{" "}
+              <Link className="font-semibold underline" href="/terms" target="_blank">
+                Terms & Conditions
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.acceptTerms && <p className="auth-field-error">{errors.acceptTerms}</p>}
+          <label className="flex items-start gap-2">
+            <input className="mt-1" type="checkbox" name="acceptPrivacy" required />
+            <span>
+              I acknowledge the{" "}
+              <Link className="font-semibold underline" href="/privacy" target="_blank">
+                Privacy Policy
+              </Link>
+              , including how profile, application and account information is handled.
+            </span>
+          </label>
+          {errors.acceptPrivacy && <p className="auth-field-error">{errors.acceptPrivacy}</p>}
+          <p>
+            Public talent visibility is off by default for newly created profiles. You can enable it later in Member Settings; when enabled,
+            approved profile fields and portfolio media may be visible to website visitors and casting teams.
+          </p>
         </div>
       )}
 

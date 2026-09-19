@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { type FormEvent, useState } from "react";
 
 import { PageIntro } from "@/components/site/page-intro";
@@ -101,6 +102,14 @@ export default function CareersPage() {
               <button disabled={saving} className="site-button site-button-primary justify-self-start" type="submit">
                 {saving ? "Submitting…" : "Submit Application"}
               </button>
+              <p className="text-xs leading-5 text-[#777]">
+                By submitting, you provide these details for recruitment and opportunity review. Please only share links you are authorised
+                to provide. See our{" "}
+                <Link href="/privacy" className="font-semibold underline">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
             </form>
           </div>
         </section>

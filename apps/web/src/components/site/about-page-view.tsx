@@ -21,8 +21,8 @@ export function AboutPageView() {
         <PageIntro
           eyebrow="Our Story"
           title="Stories That Create Opportunities"
-          description="M. Dadu Films is more than a production house. It is a creative platform built to discover, support and collaborate with real talent. We believe stories thrive when people are seen, trusted and given room to grow."
-          mediaAlt="M. Dadu Films team placeholder"
+          description="M. Dadu Films is a film production house based in Lucknow and Noida, working across films, short films, music videos, advertisement and brand films, corporate shoots and creative content development. We support projects from planning and production through post-production and final delivery."
+          mediaAlt="M. Dadu Films production team"
           mediaKind="team"
         />
 

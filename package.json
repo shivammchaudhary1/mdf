@@ -32,8 +32,8 @@
     "test:integration": "npm run build -w @mdadu/api && node scripts/integration-test.mjs",
     "db:seed:our-work": "node --env-file=apps/api/.env.dev scripts/seed-our-work.mjs",
     "db:indexes:dev": "node --env-file=apps/api/.env.dev -r ts-node/register apps/api/src/scripts/create-indexes.ts",
-    "db:seed:dev": "node --env-file=apps/api/.env.dev scripts/seed-dev.mjs && npm run db:indexes:dev",
-    "db:reset:dev": "node --env-file=apps/api/.env.dev scripts/seed-dev.mjs --reset && npm run db:indexes:dev",
+    "db:seed:dev": "node --env-file=apps/api/.env.dev scripts/seed-dev.mjs && npm run db:content:dev:apply && npm run db:indexes:dev",
+    "db:reset:dev": "node --env-file=apps/api/.env.dev scripts/seed-dev.mjs --reset && npm run db:content:dev:apply && npm run db:indexes:dev",
     "env:check:dev": "node scripts/check-env-files.mjs dev all",
     "env:check:prod": "node scripts/check-env-files.mjs prod all",
     "start:prod": "concurrently -n WEB,API -c cyan,magenta \"npm run start -w @mdadu/web\" \"npm run start -w @mdadu/api\"",
@@ -45,7 +45,11 @@
     "db:migrate:media:dev": "node --env-file=apps/api/.env.dev scripts/migrate-media-storage.mjs",
     "db:migrate:media:dev:apply": "node --env-file=apps/api/.env.dev scripts/migrate-media-storage.mjs --apply",
     "db:migrate:media:prod": "node --env-file=apps/api/.env.prod scripts/migrate-media-storage.mjs",
-    "db:migrate:media:prod:apply": "node --env-file=apps/api/.env.prod scripts/migrate-media-storage.mjs --apply"
+    "db:migrate:media:prod:apply": "node --env-file=apps/api/.env.prod scripts/migrate-media-storage.mjs --apply",
+    "db:content:dev": "node --env-file=apps/api/.env.dev scripts/upsert-group11-content.mjs",
+    "db:content:dev:apply": "node --env-file=apps/api/.env.dev scripts/upsert-group11-content.mjs --apply",
+    "db:content:prod": "node --env-file=apps/api/.env.prod scripts/upsert-group11-content.mjs",
+    "db:content:prod:apply": "node --env-file=apps/api/.env.prod scripts/upsert-group11-content.mjs --apply --confirm-production"
   },
   "devDependencies": {
     "concurrently": "9.2.4",

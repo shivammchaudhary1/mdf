@@ -20,6 +20,10 @@ export type ApiContent = ContentItem & {
   galleryImages?: string[];
   trailerUrl?: string;
   tags?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  updatedAt?: string;
+  publishedAt?: string;
   status?: string;
   location?: string;
   startDate?: string;

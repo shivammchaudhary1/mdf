@@ -19,6 +19,7 @@ export interface Profile {
   socialLinks?: string[];
   resumeMediaId?: Types.ObjectId;
   publicVisible: boolean;
+  publicVisibleConsentAt?: Date;
   savedOpportunityIds?: Types.ObjectId[];
   emailCastingAlerts: boolean;
   emailUpdates: boolean;
@@ -52,7 +53,8 @@ export const ProfileSchema = new Schema<Profile>(
     previousWork: { type: String, maxlength: 5000 },
     socialLinks: { type: [String], default: undefined },
     resumeMediaId: { type: Schema.Types.ObjectId, ref: "Media" },
-    publicVisible: { type: Boolean, default: true, required: true, index: true },
+    publicVisible: { type: Boolean, default: false, required: true, index: true },
+    publicVisibleConsentAt: Date,
     savedOpportunityIds: { type: [Schema.Types.ObjectId], default: undefined },
     emailCastingAlerts: { type: Boolean, default: true, required: true },
     emailUpdates: { type: Boolean, default: true, required: true },

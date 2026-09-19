@@ -2,6 +2,7 @@
 
 import { type FormEvent, useRef, useState } from "react";
 
+import { PUBLIC_COMPANY } from "@/config/company";
 import { api } from "@/services/api";
 import type { ContentRecord } from "@/services/workspace";
 
@@ -20,11 +21,15 @@ export function AdminSettingsView({ legal = false }: { legal?: boolean }) {
   const registration = records.find((x) => x.slug === "registration")?.data ?? {};
   const data = {
     settings: {
-      companyName: "",
-      tagline: "",
-      email: "",
-      phone: "",
-      location: "",
+      companyName: PUBLIC_COMPANY.name,
+      legalName: PUBLIC_COMPANY.legalName,
+      tagline: PUBLIC_COMPANY.tagline,
+      description: PUBLIC_COMPANY.description,
+      email: PUBLIC_COMPANY.email,
+      phone: PUBLIC_COMPANY.phone,
+      phoneAlt: PUBLIC_COMPANY.phoneAlt,
+      location: PUBLIC_COMPANY.location,
+      website: PUBLIC_COMPANY.website,
       instagram: "",
       youtube: "",
       linkedin: "",
@@ -74,11 +79,41 @@ export function AdminSettingsView({ legal = false }: { legal?: boolean }) {
     const inputs = Array.from(fields.current?.querySelectorAll("input") ?? []).map((input) => input.value);
     const keys = legal
       ? ["gst", "registration", "copyright"]
-      : ["companyName", "tagline", "email", "phone", "location", "instagram", "youtube", "linkedin", "facebook"];
+      : [
+          "companyName",
+          "legalName",
+          "tagline",
+          "description",
+          "email",
+          "phone",
+          "phoneAlt",
+          "website",
+          "location",
+          "instagram",
+          "youtube",
+          "linkedin",
+          "facebook",
+        ];
+    const values = Object.fromEntries(keys.map((key, i) => [key, (inputs[i] ?? "").trim()]));
+    if (!legal) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+        toast.error("Enter a valid public email address.");
+        setSaving(false);
+        return;
+      }
+      const urls = ["website", "instagram", "youtube", "linkedin", "facebook"];
+      for (const key of urls) {
+        if (values[key] && !/^https:\/\//i.test(values[key])) {
+          toast.error(`${key} must use a full https:// URL.`);
+          setSaving(false);
+          return;
+        }
+      }
+    }
     try {
       await persist(legal ? "registration" : "company", legal ? "Company registration" : "Company settings", {
         published: true,
-        data: Object.fromEntries(keys.map((key, i) => [key, inputs[i] ?? ""])),
+        data: values,
       });
       toast.success("Settings saved.");
     } catch (error) {
@@ -223,12 +258,20 @@ export function AdminSettingsView({ legal = false }: { legal?: boolean }) {
             </div>
             <div className="ad-form-grid">
               <label className="ad-field">
-                <span>Company Name</span>
+                <span>Public Company Name</span>
                 <input defaultValue={data.settings.companyName} />
               </label>
               <label className="ad-field">
+                <span>Legal / Registered Name</span>
+                <input defaultValue={data.settings.legalName} />
+              </label>
+              <label className="ad-field ad-field-wide">
                 <span>Tagline</span>
                 <input defaultValue={data.settings.tagline} />
+              </label>
+              <label className="ad-field ad-field-wide">
+                <span>Company Description</span>
+                <input defaultValue={data.settings.description} />
               </label>
             </div>
           </article>
@@ -242,11 +285,19 @@ export function AdminSettingsView({ legal = false }: { legal?: boolean }) {
             <div className="ad-form-grid">
               <label className="ad-field">
                 <span>Email</span>
-                <input defaultValue={data.settings.email} />
+                <input type="email" defaultValue={data.settings.email} />
               </label>
               <label className="ad-field">
-                <span>Phone</span>
+                <span>Primary Phone</span>
                 <input defaultValue={data.settings.phone} />
+              </label>
+              <label className="ad-field">
+                <span>Alternate Phone</span>
+                <input defaultValue={data.settings.phoneAlt} />
+              </label>
+              <label className="ad-field">
+                <span>Website</span>
+                <input type="url" defaultValue={data.settings.website} />
               </label>
               <label className="ad-field ad-field-wide">
                 <span>Location</span>
