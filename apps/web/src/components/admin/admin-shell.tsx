@@ -1,15 +1,18 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 
 import { AdminIcon } from "@/components/admin/admin-icons";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { BrandLogo } from "@/components/brand-logo";
 import { LoadingState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toast-provider";
-import { api, type CurrentUser } from "@/services/api";
+import { ensureSession, signOut } from "@/services/auth-session";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
+import { useAppStore } from "@/store/app-store";
+
 export const adminNav = [
   ["dashboard", "Overview", "/admin"],
   ["users", "Members & Talent", "/admin/users"],
@@ -28,40 +31,53 @@ export const adminNav = [
   ["settings", "Company Settings", "/admin/settings"],
   ["legal", "Legal Content", "/admin/legal"],
 ] as const;
+
 export function AdminShell({ section, children }: { section: string; children: ReactNode }) {
-  const pathname = usePathname(),
-    router = useRouter(),
-    toast = useToast();
-  const open = useAdminDashboardStore((s) => s.mobileOpen),
-    setOpen = useAdminDashboardStore((s) => s.setMobileOpen);
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  const data = {
-    admin: {
-      name: user?.name ?? "",
-      initials: (user?.name ?? "")
-        .split(" ")
-        .map((x) => x[0])
-        .join("")
-        .slice(0, 2),
-    },
+  const pathname = usePathname();
+  const router = useRouter();
+  const toast = useToast();
+  const open = useAdminDashboardStore((state) => state.mobileOpen);
+  const setOpen = useAdminDashboardStore((state) => state.setMobileOpen);
+  const status = useAppStore((state) => state.authStatus);
+  const user = useAppStore((state) => state.user);
+
+  const admin = {
+    name: user?.name ?? "",
+    initials: (user?.name ?? "")
+      .split(" ")
+      .map((value) => value[0])
+      .join("")
+      .slice(0, 2),
   };
+
   useEffect(() => {
-    void api<CurrentUser>("/auth/me")
-      .then((account) => {
-        if (account.role !== "SUPER_ADMIN") router.replace("/member");
-        else setUser(account);
-      })
-      .catch(() => router.replace("/login"));
+    void ensureSession().then((account) => {
+      if (!account) {
+        router.replace("/login");
+        return;
+      }
+
+      if (account.role !== "SUPER_ADMIN") router.replace("/member");
+    });
   }, [router]);
+
   async function logout() {
     try {
-      await api("/auth/logout", { method: "POST" });
+      await signOut();
       router.replace("/login");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to sign out.");
     }
   }
-  if (!user) return <LoadingState label="Verifying administrator access…" />;
+
+  if (status === "unknown" || status === "loading" || !user) {
+    return <LoadingState label="Verifying administrator access…" />;
+  }
+
+  if (user.role !== "SUPER_ADMIN") {
+    return <LoadingState label="Redirecting to your workspace…" />;
+  }
+
   return (
     <div className="ad-shell">
       <aside className={`ad-sidebar ${open ? "is-open" : ""}`}>
@@ -69,18 +85,20 @@ export function AdminShell({ section, children }: { section: string; children: R
           <Link href="/" onClick={() => setOpen(false)}>
             <BrandLogo className="!w-[108px]" />
           </Link>
-          <button className="ad-close" onClick={() => setOpen(false)}>
+          <button className="ad-close" onClick={() => setOpen(false)} aria-label="Close admin navigation">
             ×
           </button>
         </div>
+
         <div className="ad-admin-chip">
-          <div className="ad-avatar">{data.admin.initials}</div>
+          <div className="ad-avatar">{admin.initials}</div>
           <div>
-            <strong>{data.admin.name}</strong>
+            <strong>{admin.name}</strong>
             <span>Super Admin</span>
           </div>
         </div>
-        <nav className="ad-nav">
+
+        <nav className="ad-nav" aria-label="Administrator">
           {adminNav.map(([key, label, href]) => {
             const active = key === "dashboard" ? pathname === "/admin" : pathname.startsWith(href);
             return (
@@ -91,20 +109,23 @@ export function AdminShell({ section, children }: { section: string; children: R
             );
           })}
         </nav>
+
         <div className="ad-sidebar-bottom">
           <Link href="/">← Public Website</Link>
           <Link href="/member">Member Dashboard</Link>
-          <button onClick={logout}>
+          <button onClick={() => void logout()}>
             <AdminIcon name="logout" />
             Sign Out
           </button>
         </div>
       </aside>
+
       {open && <button className="ad-backdrop" aria-label="Close admin navigation" onClick={() => setOpen(false)} />}
+
       <div className="ad-main">
         <header className="ad-topbar">
           <div className="ad-topbar-left">
-            <button className="ad-menu" onClick={() => setOpen(true)}>
+            <button className="ad-menu" onClick={() => setOpen(true)} aria-label="Open admin navigation">
               ☰
             </button>
             <div>
@@ -114,7 +135,9 @@ export function AdminShell({ section, children }: { section: string; children: R
           </div>
           <div className="ad-topbar-right">
             <AdminNotifications />
-            <div className="ad-avatar ad-avatar-top">{data.admin.initials}</div>
+            <div className="ad-avatar ad-avatar-top" aria-label={`${admin.name} account`}>
+              {admin.initials}
+            </div>
           </div>
         </header>
         <main className="ad-content">{children}</main>

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
-import { runtimeConfig } from "@/config/runtime";
 import data from "@/data/public-site.json";
+import { cachedApi } from "@/services/api";
 
 type Socials = { companyName?: string; tagline?: string; linkedin?: string; instagram?: string; youtube?: string; facebook?: string };
 const safe = (v?: string) => (v && /^https:\/\//i.test(v) ? v : "");
@@ -41,14 +41,14 @@ export function SiteFooter() {
   const [socials, setSocials] = useState<Socials>({});
   useEffect(() => {
     let active = true;
-    fetch(`${runtimeConfig.apiUrl}/content/settings?limit=100&page=1`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
+    void cachedApi<{ items: Array<{ slug?: string; data?: Socials }> }>("/content/settings?page=1&limit=100", { ttl: 300_000 })
       .then((page) => {
-        if (!active || !page?.items) return;
-        const company = page.items.find((item: { slug?: string }) => item.slug === "company");
+        if (!active) return;
+        const company = page.items.find((item) => item.slug === "company");
         setSocials(company?.data ?? {});
       })
       .catch(() => undefined);
+
     return () => {
       active = false;
     };

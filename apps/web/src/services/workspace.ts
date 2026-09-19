@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api, cachedApi } from "./api";
 
 export type PageMeta = { page: number; limit: number; total: number; pages: number; hasNext?: boolean; hasPrevious?: boolean };
 export type Page<T> = { items: T[]; meta: PageMeta };
@@ -112,16 +112,16 @@ export const slugFor = (title: string) =>
       .replace(/^-|-$/g, "")
       .slice(0, 130) || "entry"
   }-${crypto.randomUUID().slice(0, 8)}`;
-export async function fetchPage<T>(path: string, page = 1, limit = 20): Promise<Page<T>> {
+export async function fetchPage<T>(path: string, page = 1, limit = 20, force = false): Promise<Page<T>> {
   const separator = path.includes("?") ? "&" : "?";
-  return api<Page<T>>(`${path}${separator}page=${page}&limit=${limit}`);
+  return cachedApi<Page<T>>(`${path}${separator}page=${page}&limit=${limit}`, { ttl: 30_000, force });
 }
-export async function allPages<T>(path: string): Promise<T[]> {
+export async function allPages<T>(path: string, force = false): Promise<T[]> {
   const separator = path.includes("?") ? "&" : "?";
-  const first = await api<Page<T>>(`${path}${separator}limit=100&page=1`);
+  const first = await cachedApi<Page<T>>(`${path}${separator}limit=100&page=1`, { ttl: 30_000, force });
   const items = [...first.items];
   for (let page = 2; page <= first.meta.pages; page++)
-    items.push(...(await api<Page<T>>(`${path}${separator}limit=100&page=${page}`)).items);
+    items.push(...(await cachedApi<Page<T>>(`${path}${separator}limit=100&page=${page}`, { ttl: 30_000, force })).items);
   return items;
 }
 export async function uploadMedia(file: File, purpose: MediaPurpose): Promise<UploadedMediaResult> {
