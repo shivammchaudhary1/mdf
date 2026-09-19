@@ -27,7 +27,7 @@ describe("backend v2 foundation", () => {
     expect(() => validateEnvironment({ ...env, STORAGE_DRIVER: "s3" })).toThrow("AWS_REGION");
   });
 
-  it("calculates profile completion from ten bounded signals", () => {
-    expect(profileCompletion({ bio: "Bio", city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"] })).toBe(50);
+  it("calculates profile completion from twelve bounded signals", () => {
+    expect(profileCompletion({ bio: "Bio", city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"] })).toBe(42);
   });
 });

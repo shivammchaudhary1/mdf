@@ -10,8 +10,10 @@ import { useMemberDashboardStore } from "@/store/member-dashboard-store";
 import { MemberData, useMemberData } from "@/components/member-data";
 import { api } from "@/services/api";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { dateLabel, fetchPage, mediaUrl, uploadMedia, type ApplicationRecord, type OpportunityRecord, type PageMeta } from "@/services/workspace";
+import { dateLabel, fetchPage, mediaUrl, type ApplicationRecord, type OpportunityRecord, type PageMeta } from "@/services/workspace";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { MemberProfileSection } from "@/components/member/member-profile-section";
+import { MemberPortfolioSection } from "@/components/member/member-portfolio-section";
 
 const nav = [
   ["dashboard", "Dashboard", "/member"],
@@ -176,69 +178,11 @@ function Dashboard() {
 }
 
 function Profile() {
-  const { data, refresh } = useMemberData();
-  const fields = useRef<HTMLDivElement>(null);
-  const [saving, setSaving] = useState(false);
-  function choosePhoto() {
-    if(saving)return;const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";
-    input.onchange=async()=>{const file=input.files?.[0];if(!file)return;setSaving(true);try{const result=await uploadMedia(file);await api("/member/profile",{method:"PUT",body:JSON.stringify({photoMediaId:result.id})});await refresh();toast.success("Profile photo saved.");}catch(error){toast.error(error instanceof Error?error.message:"Unable to save photo.");}finally{setSaving(false);}};input.click();
-  }
-  async function save() {
-    if (saving) return;
-    const values = Array.from(fields.current?.querySelectorAll("input, textarea") ?? []).map(field => (field as HTMLInputElement).value);
-    const [bio, profession, city, gender, birthDate, experience, availability] = values;
-    setSaving(true);
-    try { await api("/member/profile", { method: "PUT", body: JSON.stringify({bio,profession,city,gender,...(birthDate?{birthDate}:{}),experience,availability}) }); await refresh(); setEditing(false); toast.success("Profile saved."); }
-    catch(error) { toast.error(error instanceof Error?error.message:"Unable to save profile."); }
-    finally { setSaving(false); }
-  }
-  const toast = useToast();
-  const [editing,setEditing]=useState(false);
-  const p=data.profile;
-  return <div className="md-stack">
-    <Header kicker="Your identity" title="My Profile" description="Keep your public profile current so casting teams see the right version of you." action={<button className="md-secondary" onClick={()=>setEditing(v=>!v)}><Icon name="edit"/>{editing?"Cancel":"Edit Profile"}</button>}/>
-    <section className="md-profile-grid">
-      <aside className="md-card md-profile-summary">
-        <div className="md-profile-photo"><SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full"/><button onClick={choosePhoto} disabled={saving}><Icon name="edit"/></button></div>
-        <h2>{data.member.name}</h2><p>{data.member.profession}</p>
-        <div className="md-badges"><span>{data.member.verified?"✓ Verified Member":"Not verified"}</span><span>{data.member.availability}</span></div>
-        <div className="md-mini-details"><div><span>Location</span><strong>{data.member.location}</strong></div><div><span>Experience</span><strong>{p.experience}</strong></div><div><span>Member since</span><strong>{data.member.memberSince}</strong></div></div>
-        <button className="md-primary full">Preview Public Profile</button>
-      </aside>
-      <div className="md-form-stack" ref={fields} key={`${JSON.stringify(data.profile)}-${editing}`}>
-        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Introduction</p><h2>About You</h2></div></div><label className="md-field"><span>Bio</span><textarea rows={5} defaultValue={p.bio} disabled={!editing}/></label></article>
-        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Basic details</p><h2>Personal & Professional</h2></div></div><div className="md-form-grid">{[["Profession",p.profession],["City",p.city],["Gender",p.gender],["Date of Birth",p.birthDate],["Experience",p.experience],["Availability",p.availability]].map(([l,v])=><label className="md-field" key={l}><span>{l}</span><input defaultValue={v} disabled={!editing}/></label>)}</div></article>
-        <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Skills</p><h2>Skills & Languages</h2></div></div><div className="md-tag-block"><span>Skills</span><div>{p.skills.map(x=><i key={x}>{x}</i>)}</div><span>Languages</span><div>{p.languages.map(x=><i key={x}>{x}</i>)}</div></div></article>
-        {editing&&<div className="md-save-row"><button className="md-secondary" onClick={()=>setEditing(false)}>Cancel</button><button className="md-primary" disabled={saving} onClick={save}>Save Changes</button></div>}
-      </div>
-    </section>
-  </div>;
+  return <MemberProfileSection />;
 }
 
 function Portfolio() {
-  const { data, profile, refresh } = useMemberData();
-  const [busy, setBusy] = useState(false);
-  const [removing,setRemoving]=useState<string|null>(null);
-  async function remove(){if(!removing||busy)return;setBusy(true);try{await api("/member/profile",{method:"PUT",body:JSON.stringify({portfolioMediaIds:(profile.portfolioMediaIds??[]).filter(id=>id!==removing)})});await refresh();setRemoving(null);toast.success("Photograph removed from portfolio.");}catch(error){toast.error(error instanceof Error?error.message:"Unable to remove photograph.");}finally{setBusy(false);}}
-  function chooseFile(resume = false) {
-    if (busy) return;
-    if (!resume && (profile.portfolioMediaIds?.length ?? 0) >= 8) { toast.info("Your portfolio can contain a maximum of 8 photographs."); return; }
-    const input = document.createElement("input"); input.type="file"; input.accept=resume?"application/pdf":"image/jpeg,image/png,image/webp";
-    input.onchange = async () => {
-      const file = input.files?.[0]; if (!file) return;
-      setBusy(true);
-      try { const result = await uploadMedia(file); const nextPortfolio=[...new Set([...(profile.portfolioMediaIds??[]),result.id])].slice(0,8); await api("/member/profile",{method:"PUT",body:JSON.stringify(resume?{resumeMediaId:result.id}:{portfolioMediaIds:nextPortfolio})}); await refresh(); toast.success("Upload saved."); }
-      catch(error){toast.error(error instanceof Error?error.message:"Upload failed.");} finally {setBusy(false);}
-    }; input.click();
-  }
-  const toast=useToast();
-  return <div className="md-stack">
-    <Header kicker="Your work" title="My Portfolio" description="Curate the photographs, showreel and material that represent your creative identity." action={<button className="md-primary" disabled={busy||(profile.portfolioMediaIds?.length??0)>=8} onClick={()=>chooseFile()}><Icon name="upload"/>Add Photos</button>}/>
-    <section className="md-portfolio-hero"><div><p className="md-kicker">Portfolio health</p><h2>Your portfolio is almost casting-ready.</h2><span>Add 2–4 strong photographs and one current showreel for a stronger profile.</span></div><div><strong>{data.portfolio.length}</strong><span>photos</span></div></section>
-    <article className="md-card"><div className="md-card-head"><div><p className="md-kicker">Photographs</p><h2>Portfolio Gallery</h2></div><span>{data.portfolio.length} photographs</span></div><div className="md-portfolio-grid">{data.portfolio.map(i=><div key={i.id} className="md-portfolio-item"><SiteMedia src={i.image} alt={i.title} kind="gallery" className="aspect-[4/5] rounded-xl"/><p>{i.title}<span>{i.category}</span></p><button onClick={()=>setRemoving(i.id)}><Icon name="edit"/></button></div>)}<button className="md-add-photo" disabled={busy||(profile.portfolioMediaIds?.length??0)>=8} onClick={()=>chooseFile()}><Icon name="upload"/><strong>{(profile.portfolioMediaIds?.length??0)>=8?"Maximum 8 photos":"Add Photograph"}</strong><span>JPG / PNG / WebP · max 8</span></button></div></article>
-    <section className="md-media-grid"><article className="md-card"><p className="md-kicker">Video</p><h2>Showreel</h2><div className="md-empty-media">▶<strong>No showreel added yet</strong><button onClick={()=>toast.info("Showreel editing is not available yet.")}>Add showreel link</button></div></article><article className="md-card"><p className="md-kicker">Document</p><h2>Resume / CV</h2><div className="md-empty-media">PDF<strong>{profile.resume?"Resume uploaded":"Resume ready for upload"}</strong><button disabled={busy} onClick={()=>chooseFile(true)}>Upload resume</button></div></article></section>
-    <ConfirmDialog open={!!removing} title="Remove this photograph?" description="It will be removed from your portfolio. Other published uses are preserved." confirmLabel="Remove" destructive loading={busy} onConfirm={()=>void remove()} onCancel={()=>setRemoving(null)}/>
-  </div>;
+  return <MemberPortfolioSection />;
 }
 
 function Applications() {

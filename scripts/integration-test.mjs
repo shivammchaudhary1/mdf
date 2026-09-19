@@ -195,7 +195,39 @@ try {
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [portfolioId] } })).status, 200);
   assert.equal((await request(`/media/${portfolioId}/medium`)).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
-  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 401);
+  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 404);
+
+  r = await request("/member/profile", { method: "PUT", state: member, body: {
+    skills: ["Acting", "Voice", "Acting"],
+    languages: ["Hindi", "English", "Hindi"],
+    gender: "Male",
+    previousWork: "Short films and theatre",
+    socialLinks: ["https://example.com/member"],
+    showreel: "https://example.com/showreel"
+  } });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.deepEqual(r.data.profile.skills, ["Acting", "Voice"]);
+  assert.deepEqual(r.data.profile.languages, ["Hindi", "English"]);
+  assert.equal(r.data.profile.previousWork, "Short films and theatre");
+  assert.equal(r.data.profile.showreel, "https://example.com/showreel");
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: "http://example.com/not-secure" } })).status, 400);
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: null } })).status, 200);
+  assert.equal((await request("/member/profile", { state: member })).data.profile.showreel, undefined);
+
+  const duplicatePortfolioUpload = new FormData();
+  duplicatePortfolioUpload.append("file", new Blob([await sharp(image).resize(480).png().toBuffer()], { type: "image/png" }), "duplicate-portfolio.png");
+  r = await request("/media", { method: "POST", state: member, body: duplicatePortfolioUpload });
+  assert.equal(r.status, 201);
+  const duplicatePortfolioId = r.data.id;
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [duplicatePortfolioId, duplicatePortfolioId] } })).status, 400);
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [duplicatePortfolioId] } })).status, 200);
+  assert.equal((await request(`/media/${duplicatePortfolioId}`, { method: "DELETE", state: member })).status, 409);
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
+  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`, { state: member })).status, 404);
+
+  assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { resumeMediaId: null } })).status, 200);
+  assert.equal((await request("/member/profile", { state: member })).data.profile.resumeMediaId, undefined);
+  assert.equal((await request(`/media/${documentId}/document`, { state: member })).status, 404);
 
   const other = jar();
   assert.equal((await request("/auth/register", { method: "POST", state: other, body: { ...memberInput, email: "other@example.test" } })).status, 201);

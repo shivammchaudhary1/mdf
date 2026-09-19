@@ -1,12 +1,10 @@
 "use client";
 import { useState } from "react";
-import { uploadMedia } from "@/services/workspace";
+import { uploadMedia, type UploadedMediaResult } from "@/services/workspace";
 import { useToast } from "@/components/ui/toast-provider";
-export type UploadedMedia = {
-  id: string;
-  kind: "image" | "document";
-  urls: Record<string, string>;
-};
+
+export type UploadedMedia = UploadedMediaResult;
+
 export function MediaUpload({
   onUploaded,
   document = false,
@@ -41,9 +39,9 @@ export function MediaUpload({
           }
           setPending(true);
           try {
-            const media = await uploadMedia(file) as UploadedMedia;
+            const media = await uploadMedia(file);
             onUploaded(media);
-            toast.success("Upload complete.");
+            toast.success(media.duplicate ? "This file was already uploaded." : "Upload complete.");
           } catch (error) {
             toast.error(
               error instanceof Error ? error.message : "Upload failed.",
