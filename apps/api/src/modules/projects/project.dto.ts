@@ -96,17 +96,17 @@ export class CreateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  startDate?: string;
+  startDate?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  endDate?: string;
+  endDate?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsMongoId()
-  coverMediaId?: string;
+  coverMediaId?: string | null;
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
@@ -130,7 +130,7 @@ export class CreateProjectDto {
     require_protocol: true,
   })
   @MaxLength(500)
-  trailerUrl?: string;
+  trailerUrl?: string | null;
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()

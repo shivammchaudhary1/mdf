@@ -214,55 +214,52 @@ export class CastingService {
   async update(id: string, input: UpdateCastingDto, actorId: string) {
     const existing = await this.castings.findOne({ _id: objectId(id), archived: false }).lean();
     if (!existing) throw new NotFoundException("Casting call not found.");
+
     await this.validate({
-      ageMin: existing.ageMin,
-      ageMax: existing.ageMax,
-      deadline: existing.deadline?.toISOString(),
-      shootDate: existing.shootDate?.toISOString(),
-      ...input,
+      ageMin: input.ageMin ?? existing.ageMin,
+      ageMax: input.ageMax ?? existing.ageMax,
+      deadline: input.deadline === null ? undefined : (input.deadline ?? existing.deadline?.toISOString()),
+      shootDate: input.shootDate === null ? undefined : (input.shootDate ?? existing.shootDate?.toISOString()),
+      projectId: input.projectId === null ? undefined : input.projectId,
     });
     await this.media.assertOwnedBy(actorId, [input.coverMediaId]);
 
-    const update: Record<string, unknown> = {
-      ...input,
-      updatedBy: new Types.ObjectId(actorId),
-    };
+    const oldCover = existing.coverMediaId ? String(existing.coverMediaId) : undefined;
+    const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };
+    const unset: Record<string, 1> = {};
 
-    if (input.projectId) {
-      update.projectId = new Types.ObjectId(input.projectId);
-    }
+    if (input.projectId === null) {
+      delete update.projectId;
+      unset.projectId = 1;
+    } else if (input.projectId) update.projectId = new Types.ObjectId(input.projectId);
 
-    if (input.coverMediaId) {
-      update.coverMediaId = new Types.ObjectId(input.coverMediaId);
-    }
+    if (input.coverMediaId === null) {
+      delete update.coverMediaId;
+      unset.coverMediaId = 1;
+    } else if (input.coverMediaId) update.coverMediaId = new Types.ObjectId(input.coverMediaId);
 
-    if (input.shootDate !== undefined) {
-      update.shootDate = new Date(input.shootDate);
-    }
+    if (input.shootDate === null) {
+      delete update.shootDate;
+      unset.shootDate = 1;
+    } else if (input.shootDate !== undefined) update.shootDate = new Date(input.shootDate);
 
-    if (input.deadline !== undefined) {
-      update.deadline = new Date(input.deadline);
-    }
+    if (input.deadline === null) {
+      delete update.deadline;
+      unset.deadline = 1;
+    } else if (input.deadline !== undefined) update.deadline = new Date(input.deadline);
 
     const casting = await this.castings.findOneAndUpdate(
-      {
-        _id: objectId(id),
-        archived: false,
-      },
-      { $set: update },
-      {
-        new: true,
-        runValidators: true,
-      },
+      { _id: objectId(id), archived: false },
+      { $set: update, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
+      { new: true, runValidators: true },
     );
+    if (!casting) throw new NotFoundException("Casting call not found.");
 
-    if (!casting) {
-      throw new NotFoundException("Casting call not found.");
-    }
-
-    if (casting.published && casting.coverMediaId) {
-      await this.media.makePublic([String(casting.coverMediaId)]);
-    }
+    const currentCover = casting.coverMediaId ? String(casting.coverMediaId) : undefined;
+    if (casting.published) await this.media.makePublic([currentCover]);
+    else await this.media.makePrivate([currentCover]);
+    await this.media.makePrivate([oldCover]);
+    if (oldCover && oldCover !== currentCover) await this.media.removeIfUnreferencedOwned(oldCover, actorId);
 
     await this.audit.record({
       actorId,

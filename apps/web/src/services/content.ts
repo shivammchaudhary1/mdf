@@ -13,8 +13,25 @@ export type ApiContent = ContentItem & {
   videoUrl?: string;
   requirements?: string;
   compensation?: string;
-  credits?: string;
+  details?: string[];
+  credits?: Array<{ name: string; role: string }> | string;
+  creditsText?: string;
   acceptingApplications?: boolean;
+  galleryImages?: string[];
+  trailerUrl?: string;
+  tags?: string[];
+  status?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  shootDate?: string;
+  deadline?: string;
+  ageMin?: number;
+  ageMax?: number;
+  gender?: string;
+  experience?: string;
+  role?: string;
+  projectTitle?: string;
 };
 
 async function publicFetch<T>(path: string): Promise<T> {
