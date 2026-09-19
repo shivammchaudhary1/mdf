@@ -1,22 +1,14 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Types, type Model } from "mongoose";
+import { type Model, Types } from "mongoose";
+
 import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
 import { objectId } from "../../common/utils/object-id";
 import { escapeSearch } from "../../common/utils/search";
 import { MediaService } from "../media/media.service";
+import { CreateProjectDto, ProjectQueryDto, UpdateProjectDto } from "./project.dto";
 import { Project } from "./project.model";
-import {
-  CreateProjectDto,
-  ProjectQueryDto,
-  UpdateProjectDto,
-} from "./project.dto";
 
 @Injectable()
 export class ProjectService {
@@ -27,13 +19,9 @@ export class ProjectService {
     private readonly audit: AuditService,
   ) {}
 
-  private serialize(
-    project: Project | Record<string, unknown>,
-  ) {
+  private serialize(project: Project | Record<string, unknown>) {
     const item = project as Project;
-    const coverId = item.coverMediaId
-      ? String(item.coverMediaId)
-      : undefined;
+    const coverId = item.coverMediaId ? String(item.coverMediaId) : undefined;
     const galleryIds = (item.galleryMediaIds ?? []).map(String);
 
     return {
@@ -41,12 +29,8 @@ export class ProjectService {
       _id: String((project as { _id: unknown })._id),
       coverMediaId: coverId,
       galleryMediaIds: galleryIds,
-      coverImage: coverId
-        ? this.media.urlsFor(coverId).large
-        : undefined,
-      galleryImages: galleryIds.map(
-        (id) => this.media.urlsFor(id).medium,
-      ),
+      coverImage: coverId ? this.media.urlsFor(coverId).large : undefined,
+      galleryImages: galleryIds.map((id) => this.media.urlsFor(id).medium),
     };
   }
 
@@ -58,10 +42,7 @@ export class ProjectService {
     return this.list(query, true);
   }
 
-  private async list(
-    query: ProjectQueryDto,
-    admin: boolean,
-  ) {
+  private async list(query: ProjectQueryDto, admin: boolean) {
     const filter: Record<string, unknown> = {
       archived: false,
       ...(admin ? {} : { published: true }),
@@ -71,19 +52,12 @@ export class ProjectService {
     };
 
     if (query.search) {
-      const search = new RegExp(
-        escapeSearch(query.search.trim()),
-        "i",
-      );
+      const search = new RegExp(escapeSearch(query.search.trim()), "i");
 
-      filter.$or = [
-        { title: search },
-        { summary: search },
-        { location: search },
-      ];
+      filter.$or = [{ title: search }, { summary: search }, { location: search }];
     }
 
-    const [result] = await this.projects.aggregate<{items: Project[]; total: {count: number}[]}>([
+    const [result] = await this.projects.aggregate<{ items: Project[]; total: { count: number }[] }>([
       { $match: filter },
       { $sort: { order: 1, createdAt: -1, _id: -1 } },
       { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
@@ -91,10 +65,18 @@ export class ProjectService {
     const items = result?.items ?? [];
     const total = Number(result?.total?.[0]?.count ?? 0);
 
-    const counts = admin ? await this.projects.db.collection("applications").aggregate<{_id: Types.ObjectId; count: number}>([{$match: {projectId: {$in: items.map(item=>item._id)}}},{$group: {_id: "$projectId", count: {$sum: 1}}}]).toArray() : [];
-    const totals = new Map(counts.map(item=>[String(item._id),item.count]));
+    const counts = admin
+      ? await this.projects.db
+          .collection("applications")
+          .aggregate<{ _id: Types.ObjectId; count: number }>([
+            { $match: { projectId: { $in: items.map((item) => item._id) } } },
+            { $group: { _id: "$projectId", count: { $sum: 1 } } },
+          ])
+          .toArray()
+      : [];
+    const totals = new Map(counts.map((item) => [String(item._id), item.count]));
     return {
-      items: items.map((item) => ({...this.serialize(item),...(admin?{applications:totals.get(String(item._id))??0}:{})})),
+      items: items.map((item) => ({ ...this.serialize(item), ...(admin ? { applications: totals.get(String(item._id)) ?? 0 } : {}) })),
       meta: pageMeta(query.page, query.limit, total),
     };
   }
@@ -116,9 +98,7 @@ export class ProjectService {
   }
 
   async byId(id: string) {
-    const project = await this.projects
-      .findById(objectId(id))
-      .lean();
+    const project = await this.projects.findById(objectId(id)).lean();
 
     if (!project) {
       throw new NotFoundException("Project not found.");
@@ -127,44 +107,22 @@ export class ProjectService {
     return this.serialize(project);
   }
 
-  async create(
-    input: CreateProjectDto,
-    actorId: string,
-  ) {
-    if (
-      input.startDate &&
-      input.endDate &&
-      new Date(input.startDate) > new Date(input.endDate)
-    ) {
-      throw new BadRequestException(
-        "Project end date must follow start date.",
-      );
+  async create(input: CreateProjectDto, actorId: string) {
+    if (input.startDate && input.endDate && new Date(input.startDate) > new Date(input.endDate)) {
+      throw new BadRequestException("Project end date must follow start date.");
     }
 
-    await this.media.assertOwnedBy(actorId, [
-      input.coverMediaId,
-      ...(input.galleryMediaIds ?? []),
-    ]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])]);
 
-    const {
-      startDate,
-      endDate,
-      coverMediaId,
-      galleryMediaIds,
-      ...rest
-    } = input;
+    const { startDate, endDate, coverMediaId, galleryMediaIds, ...rest } = input;
 
     try {
       const project = new this.projects({
         ...rest,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
-        coverMediaId: coverMediaId
-          ? new Types.ObjectId(coverMediaId)
-          : undefined,
-        galleryMediaIds: galleryMediaIds?.map(
-          (id) => new Types.ObjectId(id),
-        ),
+        coverMediaId: coverMediaId ? new Types.ObjectId(coverMediaId) : undefined,
+        galleryMediaIds: galleryMediaIds?.map((id) => new Types.ObjectId(id)),
         createdBy: new Types.ObjectId(actorId),
         updatedBy: new Types.ObjectId(actorId),
       });
@@ -172,10 +130,7 @@ export class ProjectService {
       await project.save();
 
       if (project.published) {
-        await this.media.makePublic([
-          coverMediaId,
-          ...(galleryMediaIds ?? []),
-        ]);
+        await this.media.makePublic([coverMediaId, ...(galleryMediaIds ?? [])]);
       }
 
       await this.audit.record({
@@ -188,30 +143,16 @@ export class ProjectService {
 
       return this.serialize(project.toObject());
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === 11000
-      ) {
-        throw new ConflictException(
-          "This project slug is already in use.",
-        );
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
+        throw new ConflictException("This project slug is already in use.");
       }
 
       throw error;
     }
   }
 
-  async update(
-    id: string,
-    input: UpdateProjectDto,
-    actorId: string,
-  ) {
-    await this.media.assertOwnedBy(actorId, [
-      input.coverMediaId,
-      ...(input.galleryMediaIds ?? []),
-    ]);
+  async update(id: string, input: UpdateProjectDto, actorId: string) {
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])]);
 
     const update: Record<string, unknown> = {
       ...input,
@@ -231,9 +172,7 @@ export class ProjectService {
     }
 
     if (input.galleryMediaIds) {
-      update.galleryMediaIds = input.galleryMediaIds.map(
-        (value) => new Types.ObjectId(value),
-      );
+      update.galleryMediaIds = input.galleryMediaIds.map((value) => new Types.ObjectId(value));
     }
 
     const project = await this.projects.findOneAndUpdate(
@@ -254,9 +193,7 @@ export class ProjectService {
 
     if (project.published) {
       await this.media.makePublic([
-        project.coverMediaId
-          ? String(project.coverMediaId)
-          : undefined,
+        project.coverMediaId ? String(project.coverMediaId) : undefined,
         ...(project.galleryMediaIds ?? []).map(String),
       ]);
     }

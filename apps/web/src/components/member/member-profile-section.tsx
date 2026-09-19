@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SiteMedia } from "@/components/site/site-media";
+
 import { useMemberData } from "@/components/member-data";
+import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
 import { uploadMedia } from "@/services/workspace";
@@ -182,8 +183,10 @@ export function MemberProfileSection() {
       <section className="md-profile-grid">
         <aside className="md-card md-profile-summary">
           <div className="md-profile-photo">
-            <SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full"/>
-            <button type="button" onClick={choosePhoto} disabled={saving} aria-label="Replace profile photograph">✎</button>
+            <SiteMedia src={data.member.photo} alt={data.member.name} kind="team" className="aspect-square rounded-full" />
+            <button type="button" onClick={choosePhoto} disabled={saving} aria-label="Replace profile photograph">
+              ✎
+            </button>
           </div>
           <h2>{data.member.name}</h2>
           <p>{data.member.profession}</p>
@@ -192,9 +195,18 @@ export function MemberProfileSection() {
             <span>{data.member.availability || "Availability not set"}</span>
           </div>
           <div className="md-mini-details">
-            <div><span>Location</span><strong>{data.member.location || "—"}</strong></div>
-            <div><span>Experience</span><strong>{profile.experience || "—"}</strong></div>
-            <div><span>Member since</span><strong>{data.member.memberSince}</strong></div>
+            <div>
+              <span>Location</span>
+              <strong>{data.member.location || "—"}</strong>
+            </div>
+            <div>
+              <span>Experience</span>
+              <strong>{profile.experience || "—"}</strong>
+            </div>
+            <div>
+              <span>Member since</span>
+              <strong>{data.member.memberSince}</strong>
+            </div>
           </div>
           <button className="md-primary full" type="button" onClick={choosePhoto} disabled={saving}>
             {profile.photoMediaId ? "Replace Profile Photo" : "Upload Profile Photo"}
@@ -208,47 +220,131 @@ export function MemberProfileSection() {
 
         <div className="md-form-stack">
           <article className="md-card">
-            <div className="md-card-head"><div><p className="md-kicker">Introduction</p><h2>About You</h2></div></div>
-            <label className="md-field"><span>Bio</span><textarea rows={5} value={form.bio} onChange={(event) => field("bio", event.target.value)} disabled={!editing}/></label>
+            <div className="md-card-head">
+              <div>
+                <p className="md-kicker">Introduction</p>
+                <h2>About You</h2>
+              </div>
+            </div>
+            <label className="md-field">
+              <span>Bio</span>
+              <textarea rows={5} value={form.bio} onChange={(event) => field("bio", event.target.value)} disabled={!editing} />
+            </label>
           </article>
 
           <article className="md-card">
-            <div className="md-card-head"><div><p className="md-kicker">Basic details</p><h2>Personal & Professional</h2></div></div>
+            <div className="md-card-head">
+              <div>
+                <p className="md-kicker">Basic details</p>
+                <h2>Personal & Professional</h2>
+              </div>
+            </div>
             <div className="md-form-grid">
-              <label className="md-field"><span>Profession</span><input value={form.profession} onChange={(event) => field("profession", event.target.value)} disabled={!editing}/></label>
-              <label className="md-field"><span>City</span><input value={form.city} onChange={(event) => field("city", event.target.value)} disabled={!editing}/></label>
-              <label className="md-field"><span>Gender</span><select value={form.gender} onChange={(event) => field("gender", event.target.value)} disabled={!editing}><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Non-binary">Non-binary</option><option value="Prefer not to say">Prefer not to say</option></select></label>
-              <label className="md-field"><span>Date of Birth</span><input type="date" value={form.birthDate} onChange={(event) => field("birthDate", event.target.value)} disabled={!editing}/></label>
-              <label className="md-field"><span>Experience</span><input value={form.experience} onChange={(event) => field("experience", event.target.value)} disabled={!editing}/></label>
-              <label className="md-field"><span>Availability</span><input value={form.availability} onChange={(event) => field("availability", event.target.value)} disabled={!editing}/></label>
+              <label className="md-field">
+                <span>Profession</span>
+                <input value={form.profession} onChange={(event) => field("profession", event.target.value)} disabled={!editing} />
+              </label>
+              <label className="md-field">
+                <span>City</span>
+                <input value={form.city} onChange={(event) => field("city", event.target.value)} disabled={!editing} />
+              </label>
+              <label className="md-field">
+                <span>Gender</span>
+                <select value={form.gender} onChange={(event) => field("gender", event.target.value)} disabled={!editing}>
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-binary">Non-binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </label>
+              <label className="md-field">
+                <span>Date of Birth</span>
+                <input
+                  type="date"
+                  value={form.birthDate}
+                  onChange={(event) => field("birthDate", event.target.value)}
+                  disabled={!editing}
+                />
+              </label>
+              <label className="md-field">
+                <span>Experience</span>
+                <input value={form.experience} onChange={(event) => field("experience", event.target.value)} disabled={!editing} />
+              </label>
+              <label className="md-field">
+                <span>Availability</span>
+                <input value={form.availability} onChange={(event) => field("availability", event.target.value)} disabled={!editing} />
+              </label>
             </div>
           </article>
 
           <article className="md-card">
-            <div className="md-card-head"><div><p className="md-kicker">Skills</p><h2>Skills & Languages</h2></div></div>
+            <div className="md-card-head">
+              <div>
+                <p className="md-kicker">Skills</p>
+                <h2>Skills & Languages</h2>
+              </div>
+            </div>
             {editing ? (
               <div className="md-form-grid">
-                <label className="md-field"><span>Skills — comma separated</span><textarea rows={4} value={form.skills} onChange={(event) => field("skills", event.target.value)}/></label>
-                <label className="md-field"><span>Languages — comma separated</span><textarea rows={4} value={form.languages} onChange={(event) => field("languages", event.target.value)}/></label>
+                <label className="md-field">
+                  <span>Skills — comma separated</span>
+                  <textarea rows={4} value={form.skills} onChange={(event) => field("skills", event.target.value)} />
+                </label>
+                <label className="md-field">
+                  <span>Languages — comma separated</span>
+                  <textarea rows={4} value={form.languages} onChange={(event) => field("languages", event.target.value)} />
+                </label>
               </div>
             ) : (
               <div className="md-tag-block">
-                <span>Skills</span><div>{(profile.skills ?? []).length ? profile.skills?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
-                <span>Languages</span><div>{(profile.languages ?? []).length ? profile.languages?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
+                <span>Skills</span>
+                <div>{(profile.skills ?? []).length ? profile.skills?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
+                <span>Languages</span>
+                <div>
+                  {(profile.languages ?? []).length ? profile.languages?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}
+                </div>
               </div>
             )}
           </article>
 
           <article className="md-card">
-            <div className="md-card-head"><div><p className="md-kicker">Experience</p><h2>Previous Work & Social Links</h2></div></div>
-            <label className="md-field"><span>Previous Work</span><textarea rows={5} value={form.previousWork} onChange={(event) => field("previousWork", event.target.value)} disabled={!editing} placeholder="Selected projects, productions, credits or relevant work."/></label>
-            <label className="md-field"><span>Social Links — one HTTPS URL per line</span><textarea rows={5} value={form.socialLinks} onChange={(event) => field("socialLinks", event.target.value)} disabled={!editing} placeholder={"https://instagram.com/...\nhttps://youtube.com/..."}/></label>
+            <div className="md-card-head">
+              <div>
+                <p className="md-kicker">Experience</p>
+                <h2>Previous Work & Social Links</h2>
+              </div>
+            </div>
+            <label className="md-field">
+              <span>Previous Work</span>
+              <textarea
+                rows={5}
+                value={form.previousWork}
+                onChange={(event) => field("previousWork", event.target.value)}
+                disabled={!editing}
+                placeholder="Selected projects, productions, credits or relevant work."
+              />
+            </label>
+            <label className="md-field">
+              <span>Social Links — one HTTPS URL per line</span>
+              <textarea
+                rows={5}
+                value={form.socialLinks}
+                onChange={(event) => field("socialLinks", event.target.value)}
+                disabled={!editing}
+                placeholder={"https://instagram.com/...\nhttps://youtube.com/..."}
+              />
+            </label>
           </article>
 
           {editing && (
             <div className="md-save-row">
-              <button className="md-secondary" type="button" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
-              <button className="md-primary" type="button" disabled={saving} onClick={() => void save()}>{saving ? "Saving…" : "Save Changes"}</button>
+              <button className="md-secondary" type="button" onClick={() => setEditing(false)} disabled={saving}>
+                Cancel
+              </button>
+              <button className="md-primary" type="button" disabled={saving} onClick={() => void save()}>
+                {saving ? "Saving…" : "Save Changes"}
+              </button>
             </div>
           )}
         </div>

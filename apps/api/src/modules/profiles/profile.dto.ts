@@ -1,15 +1,5 @@
-import {
-  ArrayMaxSize,
-  IsArray,
-  IsBoolean,
-  IsDateString,
-  IsMongoId,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-} from "class-validator";
 import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ArrayMaxSize, IsArray, IsBoolean, IsDateString, IsMongoId, IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
 
 export class ProfileDto {
   @ApiPropertyOptional()
@@ -85,10 +75,7 @@ export class ProfileDto {
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(15)
-  @IsUrl(
-    { protocols: ["https"], require_protocol: true },
-    { each: true },
-  )
+  @IsUrl({ protocols: ["https"], require_protocol: true }, { each: true })
   videos?: string[];
 
   @ApiPropertyOptional({ nullable: true })
@@ -110,10 +97,7 @@ export class ProfileDto {
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(10)
-  @IsUrl(
-    { protocols: ["https"], require_protocol: true },
-    { each: true },
-  )
+  @IsUrl({ protocols: ["https"], require_protocol: true }, { each: true })
   socialLinks?: string[];
 
   @ApiPropertyOptional({ nullable: true })

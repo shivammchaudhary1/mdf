@@ -1,30 +1,18 @@
-import { ApplyForm } from "@/components/apply-form";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
+import { ApplyForm } from "@/components/apply-form";
 import { PageShell } from "@/components/page-shell";
 import { SmartImage } from "@/components/ui/smart-image";
 import { getContentItem } from "@/services/content";
 import type { CollectionKind } from "@/types/content";
-export async function ContentDetail({
-  kind,
-  slug,
-}: {
-  kind: CollectionKind;
-  slug: string;
-}) {
+export async function ContentDetail({ kind, slug }: { kind: CollectionKind; slug: string }) {
   const item = await getContentItem(kind, slug);
   if (!item) notFound();
   return (
-    <PageShell
-      eyebrow={item.category}
-      title={item.title}
-      description={item.description}
-    >
+    <PageShell eyebrow={item.category} title={item.title} description={item.description}>
       <div className="mt-10">
-        <Link
-          href={`/${kind}`}
-          className="text-sm font-semibold text-[var(--brand-red)]"
-        >
+        <Link href={`/${kind}`} className="text-sm font-semibold text-[var(--brand-red)]">
           ← Back to {kind}
         </Link>
         <div className="mt-8 grid gap-10 lg:grid-cols-[1.5fr_1fr]">
@@ -40,18 +28,13 @@ export async function ContentDetail({
               />
             )}
             {item.body.map((paragraph) => (
-              <p
-                key={paragraph}
-                className="mb-5 text-lg leading-8 text-slate-600"
-              >
+              <p key={paragraph} className="mb-5 text-lg leading-8 text-slate-600">
                 {paragraph}
               </p>
             ))}
           </article>
           <aside className="card h-fit p-7">
-            <h2 className="font-display text-2xl font-semibold">
-              {kind === "blog" ? "Stay connected" : "At a glance"}
-            </h2>
+            <h2 className="font-display text-2xl font-semibold">{kind === "blog" ? "Stay connected" : "At a glance"}</h2>
             <dl className="mt-6 grid gap-5">
               {[
                 ["Category", item.category],
@@ -72,16 +55,10 @@ export async function ContentDetail({
               <ApplyForm
                 opportunityId={item._id}
                 opportunityType={kind === "casting" ? "CASTING" : "PROJECT"}
-                closed={
-                  ["Closed", "Completed"].includes(item.status ?? "") ||
-                  !!(item.deadline && new Date(item.deadline) <= new Date())
-                }
+                closed={["Closed", "Completed"].includes(item.status ?? "") || !!(item.deadline && new Date(item.deadline) <= new Date())}
               />
             ) : kind === "blog" ? (
-              <Link
-                href="/blog"
-                className="brand-button brand-button-primary mt-8"
-              >
+              <Link href="/blog" className="brand-button brand-button-primary mt-8">
                 More from the journal →
               </Link>
             ) : null}

@@ -1,8 +1,5 @@
-import {
-  randomBytes,
-  scrypt,
-  timingSafeEqual,
-} from "node:crypto";
+import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+
 import { sha256 } from "../../common/utils/crypto";
 
 const VERSION = "s1";
@@ -53,14 +50,7 @@ export async function hashPassword(password: string) {
   const salt = randomBytes(16);
   const key = await deriveKey(password, salt);
 
-  return [
-    VERSION,
-    String(N),
-    String(R),
-    String(P),
-    salt.toString("base64url"),
-    key.toString("base64url"),
-  ].join("$");
+  return [VERSION, String(N), String(R), String(P), salt.toString("base64url"), key.toString("base64url")].join("$");
 }
 
 async function verifyLegacy(password: string, stored: string) {
@@ -71,36 +61,22 @@ async function verifyLegacy(password: string, stored: string) {
     const key = await deriveLegacyKey(password, saltHex);
     const expected = Buffer.from(hashHex, "hex");
 
-    return (
-      key.length === expected.length &&
-      timingSafeEqual(key, expected)
-    );
+    return key.length === expected.length && timingSafeEqual(key, expected);
   } catch {
     return false;
   }
 }
 
-export async function verifyPassword(
-  password: string,
-  stored?: string,
-) {
+export async function verifyPassword(password: string, stored?: string) {
   if (!stored) return false;
 
   if (!stored.startsWith(`${VERSION}$`)) {
     return verifyLegacy(password, stored);
   }
 
-  const [version, n, r, p, saltValue, hashValue] =
-    stored.split("$");
+  const [version, n, r, p, saltValue, hashValue] = stored.split("$");
 
-  if (
-    version !== VERSION ||
-    Number(n) !== N ||
-    Number(r) !== R ||
-    Number(p) !== P ||
-    !saltValue ||
-    !hashValue
-  ) {
+  if (version !== VERSION || Number(n) !== N || Number(r) !== R || Number(p) !== P || !saltValue || !hashValue) {
     return false;
   }
 
@@ -109,10 +85,7 @@ export async function verifyPassword(
     const expected = Buffer.from(hashValue, "base64url");
     const key = await deriveKey(password, salt);
 
-    return (
-      key.length === expected.length &&
-      timingSafeEqual(key, expected)
-    );
+    return key.length === expected.length && timingSafeEqual(key, expected);
   } catch {
     return false;
   }

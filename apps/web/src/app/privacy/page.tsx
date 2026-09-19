@@ -1,1 +1,5 @@
-import { LegalPageView } from "@/components/legal-page-view";export const metadata={title:"Privacy Policy"};export default function Page(){return <LegalPageView slug="privacy" fallbackTitle="Privacy Policy"/>}
+import { LegalPageView } from "@/components/legal-page-view";
+export const metadata = { title: "Privacy Policy" };
+export default function Page() {
+  return <LegalPageView slug="privacy" fallbackTitle="Privacy Policy" />;
+}

@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useAdminDashboard } from "./use-admin-dashboard";
+import { useState } from "react";
+
 import { AdminIcon } from "@/components/admin/admin-icons";
 
+import { useAdminDashboard } from "./use-admin-dashboard";
+
 export function AdminNotifications() {
- const dashboard=useAdminDashboard();
- const notifications=dashboard.recentActivity.map((x,i)=>({id:`${x.title}-${x.time}-${i}`,title:x.title,meta:x.meta,time:x.time,href:"/admin",unread:true}));
+  const dashboard = useAdminDashboard();
+  const notifications = dashboard.recentActivity.map((x, i) => ({
+    id: `${x.title}-${x.time}-${i}`,
+    title: x.title,
+    meta: x.meta,
+    time: x.time,
+    href: "/admin",
+    unread: true,
+  }));
   const [open, setOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
 
-  const unreadCount = notifications.filter(
-    (item) => item.unread && !readIds.includes(item.id),
-  ).length;
+  const unreadCount = notifications.filter((item) => item.unread && !readIds.includes(item.id)).length;
 
   function markAllRead() {
     setReadIds(notifications.map((item) => item.id));
@@ -34,12 +41,7 @@ export function AdminNotifications() {
 
       {open && (
         <>
-          <button
-            type="button"
-            className="ad-notification-dismiss"
-            aria-label="Close notifications"
-            onClick={() => setOpen(false)}
-          />
+          <button type="button" className="ad-notification-dismiss" aria-label="Close notifications" onClick={() => setOpen(false)} />
           <div className="ad-notification-popover">
             <div className="ad-notification-head">
               <div>
@@ -60,9 +62,7 @@ export function AdminNotifications() {
                     href={item.href}
                     className={unread ? "unread" : ""}
                     onClick={() => {
-                      setReadIds((ids) =>
-                        ids.includes(item.id) ? ids : [...ids, item.id],
-                      );
+                      setReadIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
                       setOpen(false);
                     }}
                   >
@@ -77,11 +77,7 @@ export function AdminNotifications() {
               })}
             </div>
 
-            <Link
-              href="/admin"
-              className="ad-notification-footer"
-              onClick={() => setOpen(false)}
-            >
+            <Link href="/admin" className="ad-notification-footer" onClick={() => setOpen(false)}>
               View admin overview
             </Link>
           </div>

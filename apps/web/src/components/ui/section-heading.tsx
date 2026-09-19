@@ -26,28 +26,15 @@ export function SectionHeading({
         >
           {title}
         </h2>
-        {description && (
-          <p
-            className={`mt-4 max-w-2xl leading-7 ${
-              inverted ? "text-white/60" : "text-[var(--muted)]"
-            }`}
-          >
-            {description}
-          </p>
-        )}
+        {description && <p className={`mt-4 max-w-2xl leading-7 ${inverted ? "text-white/60" : "text-[var(--muted)]"}`}>{description}</p>}
       </div>
       {href && (
         <Link
-          className={`group inline-flex items-center gap-2 text-sm font-bold ${
-            inverted ? "text-white" : "text-[var(--brand-red)]"
-          }`}
+          className={`group inline-flex items-center gap-2 text-sm font-bold ${inverted ? "text-white" : "text-[var(--brand-red)]"}`}
           href={href}
         >
           {linkLabel}
-          <span
-            aria-hidden="true"
-            className="transition-transform group-hover:translate-x-1"
-          >
+          <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
             →
           </span>
         </Link>

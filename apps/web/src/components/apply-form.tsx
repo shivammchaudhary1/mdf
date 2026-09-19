@@ -1,8 +1,9 @@
 "use client";
-import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { api, ApiError } from "@/services/api";
+import { type FormEvent, useState } from "react";
+
 import { useToast } from "@/components/ui/toast-provider";
+import { api, ApiError } from "@/services/api";
 export function ApplyForm({
   opportunityId,
   closed,
@@ -36,8 +37,7 @@ export function ApplyForm({
       setDone(true);
       toast.success("Application submitted successfully.");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to apply.";
+      const message = error instanceof Error ? error.message : "Unable to apply.";
       setError(message);
       setLogin(error instanceof ApiError && error.status === 401);
       toast.error(message);
@@ -45,18 +45,10 @@ export function ApplyForm({
       setPending(false);
     }
   }
-  if (closed)
-    return (
-      <p className="mt-6 rounded-xl bg-amber-50 p-4 text-amber-900">
-        Applications for this opportunity are closed.
-      </p>
-    );
+  if (closed) return <p className="mt-6 rounded-xl bg-amber-50 p-4 text-amber-900">Applications for this opportunity are closed.</p>;
   if (done)
     return (
-      <p
-        role="status"
-        className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-900"
-      >
+      <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-900">
         Application submitted.{" "}
         <Link href="/member/applications" className="underline">
           Track your application
@@ -68,23 +60,11 @@ export function ApplyForm({
     <form onSubmit={submit} className="mt-8 grid gap-4">
       <label className="grid gap-2 text-sm font-semibold">
         Tell us about yourself
-        <textarea
-          name="coverNote"
-          required
-          minLength={20}
-          maxLength={5000}
-          rows={5}
-          className="field"
-        />
+        <textarea name="coverNote" required minLength={20} maxLength={5000} rows={5} className="field" />
       </label>
       <label className="grid gap-2 text-sm font-semibold">
         Showreel link (optional)
-        <input
-          name="showreel"
-          type="url"
-          placeholder="https://"
-          className="field"
-        />
+        <input name="showreel" type="url" placeholder="https://" className="field" />
       </label>
       {error && (
         <p role="alert" className="text-sm text-red-700">

@@ -1,34 +1,17 @@
 "use client";
 import { useState } from "react";
-import type { CollectionKind, ContentItem } from "@/types/content";
+
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/feedback";
-export function CollectionBrowser({
-  items,
-  kind,
-}: {
-  items: ContentItem[];
-  kind: CollectionKind;
-}) {
+import type { CollectionKind, ContentItem } from "@/types/content";
+export function CollectionBrowser({ items, kind }: { items: ContentItem[]; kind: CollectionKind }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
-  const categories = [
-    "All",
-    ...new Set(
-      items.map((item) =>
-        kind === "projects" ? (item.status ?? item.category) : item.category,
-      ),
-    ),
-  ];
+  const categories = ["All", ...new Set(items.map((item) => (kind === "projects" ? (item.status ?? item.category) : item.category)))];
   const results = items.filter(
     (item) =>
-      (category === "All" ||
-        (kind === "projects"
-          ? (item.status ?? item.category)
-          : item.category) === category) &&
-      `${item.title} ${item.description} ${item.category} ${item.location ?? ""}`
-        .toLowerCase()
-        .includes(query.toLowerCase().trim()),
+      (category === "All" || (kind === "projects" ? (item.status ?? item.category) : item.category) === category) &&
+      `${item.title} ${item.description} ${item.category} ${item.location ?? ""}`.toLowerCase().includes(query.toLowerCase().trim()),
   );
   return (
     <div>
@@ -68,11 +51,7 @@ export function CollectionBrowser({
       ) : (
         <EmptyState
           title={items.length ? "No matching results." : undefined}
-          description={
-            items.length
-              ? "Try another search or select a different category."
-              : undefined
-          }
+          description={items.length ? "Try another search or select a different category." : undefined}
         />
       )}
     </div>

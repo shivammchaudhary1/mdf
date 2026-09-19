@@ -1,4 +1,34 @@
 "use client";
 import { create } from "zustand";
-type AdminState={mobileOpen:boolean;memberFilter:string;applicationFilter:string;projectFilter:string;castingFilter:string;contentFilter:string;query:string;setMobileOpen:(v:boolean)=>void;setMemberFilter:(v:string)=>void;setApplicationFilter:(v:string)=>void;setProjectFilter:(v:string)=>void;setCastingFilter:(v:string)=>void;setContentFilter:(v:string)=>void;setQuery:(v:string)=>void};
-export const useAdminDashboardStore=create<AdminState>((set)=>({mobileOpen:false,memberFilter:"All",applicationFilter:"All",projectFilter:"All",castingFilter:"All",contentFilter:"All",query:"",setMobileOpen:(mobileOpen)=>set({mobileOpen}),setMemberFilter:(memberFilter)=>set({memberFilter}),setApplicationFilter:(applicationFilter)=>set({applicationFilter}),setProjectFilter:(projectFilter)=>set({projectFilter}),setCastingFilter:(castingFilter)=>set({castingFilter}),setContentFilter:(contentFilter)=>set({contentFilter}),setQuery:(query)=>set({query})}));
+type AdminState = {
+  mobileOpen: boolean;
+  memberFilter: string;
+  applicationFilter: string;
+  projectFilter: string;
+  castingFilter: string;
+  contentFilter: string;
+  query: string;
+  setMobileOpen: (v: boolean) => void;
+  setMemberFilter: (v: string) => void;
+  setApplicationFilter: (v: string) => void;
+  setProjectFilter: (v: string) => void;
+  setCastingFilter: (v: string) => void;
+  setContentFilter: (v: string) => void;
+  setQuery: (v: string) => void;
+};
+export const useAdminDashboardStore = create<AdminState>((set) => ({
+  mobileOpen: false,
+  memberFilter: "All",
+  applicationFilter: "All",
+  projectFilter: "All",
+  castingFilter: "All",
+  contentFilter: "All",
+  query: "",
+  setMobileOpen: (mobileOpen) => set({ mobileOpen }),
+  setMemberFilter: (memberFilter) => set({ memberFilter }),
+  setApplicationFilter: (applicationFilter) => set({ applicationFilter }),
+  setProjectFilter: (projectFilter) => set({ projectFilter }),
+  setCastingFilter: (castingFilter) => set({ castingFilter }),
+  setContentFilter: (contentFilter) => set({ contentFilter }),
+  setQuery: (query) => set({ query }),
+}));

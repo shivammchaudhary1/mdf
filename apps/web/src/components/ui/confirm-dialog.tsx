@@ -49,13 +49,7 @@ export function ConfirmDialog({
         </p>
       )}
       <div className="mt-7 flex justify-end gap-3">
-        <button
-          autoFocus
-          type="button"
-          disabled={loading}
-          onClick={onCancel}
-          className="brand-button border border-slate-200"
-        >
+        <button autoFocus type="button" disabled={loading} onClick={onCancel} className="brand-button border border-slate-200">
           {cancelLabel}
         </button>
         <button

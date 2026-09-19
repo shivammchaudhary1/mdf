@@ -11,11 +11,4 @@ export type ContentItem = {
   role?: string;
   deadline?: string;
 };
-export type CollectionKind =
-  | "projects"
-  | "casting"
-  | "blog"
-  | "team"
-  | "gallery"
-  | "behind-the-scenes"
-  | "shows";
+export type CollectionKind = "projects" | "casting" | "blog" | "team" | "gallery" | "behind-the-scenes" | "shows";

@@ -1,15 +1,26 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
-import { Types, type Model } from "mongoose";
+import { type Model, Types } from "mongoose";
+
 import type { AuditLog } from "./audit.model";
 
 @Injectable()
 export class AuditService {
   private readonly logger = new Logger(AuditService.name);
-  constructor(@InjectModel("AuditLog") private readonly logs: Model<AuditLog>, private readonly config: ConfigService) {}
+  constructor(
+    @InjectModel("AuditLog") private readonly logs: Model<AuditLog>,
+    private readonly config: ConfigService,
+  ) {}
 
-  async record(input: { actorId?: string; action: string; entityType: string; entityId?: string; summary?: string; metadata?: Record<string, string | number | boolean | null> }) {
+  async record(input: {
+    actorId?: string;
+    action: string;
+    entityType: string;
+    entityId?: string;
+    summary?: string;
+    metadata?: Record<string, string | number | boolean | null>;
+  }) {
     try {
       const retentionDays = Math.max(30, Number(this.config.get("AUDIT_RETENTION_DAYS") ?? 180));
       await this.logs.create({
@@ -27,6 +38,10 @@ export class AuditService {
   }
 
   async recent(limit = 50) {
-    return this.logs.find().sort({ createdAt: -1 }).limit(Math.min(Math.max(limit, 1), 100)).lean();
+    return this.logs
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(Math.min(Math.max(limit, 1), 100))
+      .lean();
   }
 }

@@ -1,2 +1,23 @@
-import{Module}from"@nestjs/common";import{MongooseModule}from"@nestjs/mongoose";import{ApplicationSchema}from"../applications/application.model";import{AuthModule}from"../auth/auth.module";import{MediaModule}from"../media/media.module";import{ProfileController}from"./profile.controller";import{ProfileSchema}from"./profile.model";import{ProfileService}from"./profile.service";
-@Module({imports:[AuthModule,MediaModule,MongooseModule.forFeature([{name:"Profile",schema:ProfileSchema},{name:"Application",schema:ApplicationSchema}])],controllers:[ProfileController],providers:[ProfileService],exports:[ProfileService,MongooseModule]})export class ProfileModule{}
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+
+import { ApplicationSchema } from "../applications/application.model";
+import { AuthModule } from "../auth/auth.module";
+import { MediaModule } from "../media/media.module";
+import { ProfileController } from "./profile.controller";
+import { ProfileSchema } from "./profile.model";
+import { ProfileService } from "./profile.service";
+@Module({
+  imports: [
+    AuthModule,
+    MediaModule,
+    MongooseModule.forFeature([
+      { name: "Profile", schema: ProfileSchema },
+      { name: "Application", schema: ApplicationSchema },
+    ]),
+  ],
+  controllers: [ProfileController],
+  providers: [ProfileService],
+  exports: [ProfileService, MongooseModule],
+})
+export class ProfileModule {}

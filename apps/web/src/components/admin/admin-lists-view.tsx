@@ -1,48 +1,435 @@
 "use client";
-import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
-import {useAdminRecords} from "./use-admin-records";
-import {listView,type ListView,type ProjectRecord,type TalentRecord} from "@/services/admin-workspace";
-import {allPages,fetchPage,type PageMeta} from "@/services/workspace";
-import {api} from "@/services/api";
-import {SiteMedia} from "@/components/site/site-media";
-import {useToast} from "@/components/ui/toast-provider";
-import {PaginationControls} from "@/components/ui/pagination-controls";
-import {ConfirmDialog} from "@/components/ui/confirm-dialog";
-import {AdminCollectionState,AdminPageHeader,AdminPrimaryButton,AdminSearch} from "@/components/admin/admin-shared";
-import {AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField} from "@/components/admin/admin-dialog";
-type ListMember=TalentRecord;
-type ListDetail={_id:string;name:string;purpose?:string;projectId?:string;memberIds:string[];members:ListMember[]};
-type ProjectOption={id:string;title:string};
-export function AdminListsView(){
- const toast=useToast(),[query,setQuery]=useState(""),path=useMemo(()=>`/admin/lists${query.trim()?`?search=${encodeURIComponent(query.trim())}`:""}`,[query]);
- const[lists,,refresh,meta,setPage,,loading,error]=useAdminRecords(path,listView,true,1,20);
- const[projects,setProjects]=useState<ProjectOption[]>([]),[creating,setCreating]=useState(false),[selected,setSelected]=useState<ListView|null>(null),[detail,setDetail]=useState<ListDetail|null>(null),[detailLoading,setDetailLoading]=useState(false),[detailError,setDetailError]=useState(""),[editing,setEditing]=useState(false),[deleteTarget,setDeleteTarget]=useState<ListView|null>(null),[deleting,setDeleting]=useState(false),[pickerOpen,setPickerOpen]=useState(false),[pickerQuery,setPickerQuery]=useState(""),[pickerPage,setPickerPage]=useState(1),[picker,setPicker]=useState<TalentRecord[]>([]),[pickerMeta,setPickerMeta]=useState<PageMeta>(),[pickerLoading,setPickerLoading]=useState(false),[memberBusy,setMemberBusy]=useState<string|null>(null);
- useEffect(()=>{let active=true;void allPages<ProjectRecord>("/admin/projects").then(rows=>{if(active)setProjects(rows.map(x=>({id:x._id,title:x.title})).sort((a,b)=>a.title.localeCompare(b.title)))}).catch(e=>toast.error(e instanceof Error?e.message:"Unable to load projects."));return()=>{active=false}},[toast]);
- const loadDetail=useCallback(async(id:string)=>{setDetailLoading(true);setDetailError("");try{setDetail(await api<ListDetail>(`/admin/lists/${id}`))}catch(e){setDetail(null);setDetailError(e instanceof Error?e.message:"Unable to load talent list.")}finally{setDetailLoading(false)}},[]);
- useEffect(()=>{if(!selected){setDetail(null);setEditing(false);setPickerOpen(false);return}void loadDetail(selected.id)},[selected,loadDetail]);
- useEffect(()=>{if(!pickerOpen)return;let active=true;setPickerLoading(true);const qs=pickerQuery.trim()?`?search=${encodeURIComponent(pickerQuery.trim())}`:"";void fetchPage<TalentRecord>(`/admin/users${qs}`,pickerPage,8).then(r=>{if(active){setPicker(r.items);setPickerMeta(r.meta)}}).catch(e=>{if(active)toast.error(e instanceof Error?e.message:"Unable to load talent.")}).finally(()=>{if(active)setPickerLoading(false)});return()=>{active=false}},[pickerOpen,pickerQuery,pickerPage,toast]);
- async function createList(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get("name")??"").trim(),purpose=String(f.get("purpose")??"").trim(),projectId=String(f.get("projectId")??"").trim();try{await api("/admin/lists",{method:"POST",body:JSON.stringify({name,purpose,projectId:projectId||undefined})});await refresh();setCreating(false);toast.success("Talent list created.")}catch(err){toast.error(err instanceof Error?err.message:"Unable to create list.");throw err}}
- async function updateList(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected)return;const f=new FormData(e.currentTarget),name=String(f.get("name")??"").trim(),purpose=String(f.get("purpose")??"").trim(),projectId=String(f.get("projectId")??"").trim();try{await api(`/admin/lists/${selected.id}`,{method:"PUT",body:JSON.stringify({name,purpose,projectId:projectId||null})});await Promise.all([refresh(),loadDetail(selected.id)]);setSelected(v=>v?{...v,name,purpose,projectId:projectId||undefined}:v);setEditing(false);toast.success("Talent list updated.")}catch(err){toast.error(err instanceof Error?err.message:"Unable to update list.");throw err}}
- async function removeMember(id:string){if(!selected||memberBusy)return;setMemberBusy(id);try{await api(`/admin/lists/${selected.id}/members/${id}`,{method:"DELETE"});await Promise.all([loadDetail(selected.id),refresh()]);toast.success("Talent removed.")}catch(e){toast.error(e instanceof Error?e.message:"Unable to remove talent.")}finally{setMemberBusy(null)}}
- async function addMember(id:string){if(!selected||memberBusy)return;setMemberBusy(id);try{await api(`/admin/lists/${selected.id}/members`,{method:"POST",body:JSON.stringify({memberId:id})});await Promise.all([loadDetail(selected.id),refresh()]);toast.success("Talent added.")}catch(e){toast.error(e instanceof Error?e.message:"Unable to add talent.")}finally{setMemberBusy(null)}}
- async function deleteList(){if(!deleteTarget||deleting)return;setDeleting(true);try{await api(`/admin/lists/${deleteTarget.id}`,{method:"DELETE"});if(selected?.id===deleteTarget.id)setSelected(null);setDeleteTarget(null);await refresh();toast.success("Talent list deleted.")}catch(e){toast.error(e instanceof Error?e.message:"Unable to delete list.")}finally{setDeleting(false)}}
- const saved=new Set(detail?.memberIds??[]),projectTitle=(id?:string)=>projects.find(x=>x.id===id)?.title??(id?"Linked project":"No linked project");
- return <div className="ad-stack">
-  <AdminPageHeader eyebrow="Talent organization" title="Saved Talent Lists" description="Build reusable shortlists, link them to projects and manage saved talent." action={<AdminPrimaryButton onClick={()=>setCreating(true)}>New Talent List</AdminPrimaryButton>}/>
-  <section className="ad-toolbar"><AdminSearch value={query} onChange={setQuery} placeholder="Search saved lists"/></section>
-  <AdminCollectionState loading={loading} error={error} empty={!lists.length} emptyText={query?"No saved lists match your search.":"No saved talent lists yet."} onRetry={()=>void refresh()}/>
-  <section className="ad-list-grid">{lists.map(list=><article className="ad-list-card" key={list.id}><div className="ad-list-stack"><i>{list.members}</i><i/><i/></div><div><p className="ad-kicker">Saved list</p><h2>{list.name}</h2><span>{list.members} members · Updated {list.updated}</span><small>{list.purpose||projectTitle(list.projectId)}</small></div><div className="ad-list-actions"><button type="button" onClick={()=>setSelected(list)}>Manage List</button><button type="button" onClick={()=>setDeleteTarget(list)}>Delete</button></div></article>)}</section>
-  <PaginationControls meta={meta} onPage={setPage}/>
-  <AdminDialog open={creating} onClose={()=>setCreating(false)} eyebrow="Talent organization" title="New Talent List" description="Create a reusable shortlist." width="wide"><AdminDialogForm onSubmit={createList}><AdminDialogGrid><AdminFormField label="List Name" wide><input name="name" required maxLength={100} autoFocus/></AdminFormField><AdminFormField label="Purpose"><input name="purpose" maxLength={200}/></AdminFormField><AdminFormField label="Linked Project"><select name="projectId"><option value="">No linked project</option>{projects.map(x=><option key={x.id} value={x.id}>{x.title}</option>)}</select></AdminFormField></AdminDialogGrid><AdminDialogActions onCancel={()=>setCreating(false)} primaryLabel="Create List"/></AdminDialogForm></AdminDialog>
-  <AdminDialog open={!!selected} onClose={()=>setSelected(null)} eyebrow="Saved talent list" title={selected?.name??"Talent List"} description={detail?.purpose||"Manage list details and members."} width="wide">{selected&&<div className="grid gap-5">
-   {detailLoading?<div className="ad-empty">Loading saved list…</div>:detailError?<div className="ad-empty"><span>{detailError}</span><button type="button" className="ad-dialog-secondary" onClick={()=>void loadDetail(selected.id)}>Try Again</button></div>:detail&&<>
-    <div className="grid gap-3 md:grid-cols-3">{[["Members",String(detail.memberIds.length)],["Project",projectTitle(detail.projectId)],["Purpose",detail.purpose||"—"]].map(([a,b])=><div key={a} className="rounded-2xl border border-black/10 bg-[#fafafa] p-4"><span className="text-xs text-[#777]">{a}</span><strong className="mt-1 block text-sm">{b}</strong></div>)}</div>
-    {editing?<AdminDialogForm onSubmit={updateList}><AdminDialogGrid><AdminFormField label="List Name" wide><input name="name" defaultValue={detail.name} required maxLength={100}/></AdminFormField><AdminFormField label="Purpose"><input name="purpose" defaultValue={detail.purpose??""} maxLength={200}/></AdminFormField><AdminFormField label="Linked Project"><select name="projectId" defaultValue={detail.projectId??""}><option value="">No linked project</option>{projects.map(x=><option key={x.id} value={x.id}>{x.title}</option>)}</select></AdminFormField></AdminDialogGrid><AdminDialogActions onCancel={()=>setEditing(false)} primaryLabel="Save Changes"/></AdminDialogForm>:<div className="flex flex-wrap justify-end gap-2"><button type="button" className="ad-dialog-secondary" onClick={()=>setEditing(true)}>Edit Details</button><button type="button" className="ad-dialog-primary" onClick={()=>{setPickerOpen(v=>!v);setPickerPage(1)}}>{pickerOpen?"Close Talent Picker":"Add Talent"}</button></div>}
-    {pickerOpen&&<section className="grid gap-4 border-t border-black/10 pt-5"><div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><p className="ad-kicker">Talent picker</p><h3 className="text-xl font-semibold">Add people</h3></div><AdminSearch value={pickerQuery} onChange={v=>{setPickerQuery(v);setPickerPage(1)}} placeholder="Search talent"/></div>{pickerLoading?<div className="ad-empty">Loading talent…</div>:!picker.length?<div className="ad-empty">No talent found.</div>:<div className="grid gap-2 md:grid-cols-2">{picker.map(m=><article key={m.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-black/10 p-3"><SiteMedia src={m.profile?.photo} alt={m.name} kind="team" className="h-12 w-12 rounded-full"/><div><strong className="block text-sm">{m.name}</strong><span className="text-xs text-[#777]">{m.profile?.profession||"Member"} · {m.profile?.city||"—"}</span></div><button type="button" className="rounded-full border border-black/10 px-3 py-2 text-xs font-semibold" disabled={saved.has(m.id)||memberBusy===m.id} onClick={()=>void addMember(m.id)}>{saved.has(m.id)?"Added":memberBusy===m.id?"Adding…":"Add"}</button></article>)}</div>}<PaginationControls meta={pickerMeta} onPage={setPickerPage}/></section>}
-    <section className="grid gap-4 border-t border-black/10 pt-5"><div><p className="ad-kicker">Saved talent</p><h3 className="text-xl font-semibold">{detail.members.length?`${detail.members.length} member${detail.members.length===1?"":"s"}`:"No members yet"}</h3></div>{!detail.members.length?<div className="ad-dialog-empty"><strong>This list is empty.</strong><span>Use Add Talent to build your shortlist.</span></div>:<div className="grid gap-2 md:grid-cols-2">{detail.members.map(m=><article key={m.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-black/10 p-3"><SiteMedia src={m.profile?.photo} alt={m.name} kind="team" className="h-12 w-12 rounded-full"/><div><strong className="block text-sm">{m.name}</strong><span className="text-xs text-[#777]">{m.profile?.profession||"Member"} · {m.profile?.city||"—"}</span></div><button type="button" className="rounded-full border border-red-200 px-3 py-2 text-xs font-semibold text-red-700" disabled={memberBusy===m.id} onClick={()=>void removeMember(m.id)}>{memberBusy===m.id?"Removing…":"Remove"}</button></article>)}</div>}</section>
-    <div className="flex flex-wrap justify-end gap-2"><button type="button" className="ad-dialog-cancel" onClick={()=>setSelected(null)}>Close</button><button type="button" className="ad-dialog-secondary" onClick={()=>setDeleteTarget(selected)}>Delete List</button></div>
-   </>}
-  </div>}</AdminDialog>
-  <ConfirmDialog open={!!deleteTarget} title="Delete this talent list?" description={deleteTarget?`"${deleteTarget.name}" will be permanently deleted. Member accounts are not affected.`:undefined} confirmLabel="Delete List" destructive loading={deleting} onCancel={()=>setDeleteTarget(null)} onConfirm={()=>void deleteList()}/>
- </div>
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+
+import { AdminDialog, AdminDialogActions, AdminDialogForm, AdminDialogGrid, AdminFormField } from "@/components/admin/admin-dialog";
+import { AdminCollectionState, AdminPageHeader, AdminPrimaryButton, AdminSearch } from "@/components/admin/admin-shared";
+import { SiteMedia } from "@/components/site/site-media";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { useToast } from "@/components/ui/toast-provider";
+import { type ListView, listView, type ProjectRecord, type TalentRecord } from "@/services/admin-workspace";
+import { api } from "@/services/api";
+import { allPages, fetchPage, type PageMeta } from "@/services/workspace";
+
+import { useAdminRecords } from "./use-admin-records";
+type ListMember = TalentRecord;
+type ListDetail = { _id: string; name: string; purpose?: string; projectId?: string; memberIds: string[]; members: ListMember[] };
+type ProjectOption = { id: string; title: string };
+export function AdminListsView() {
+  const toast = useToast(),
+    [query, setQuery] = useState(""),
+    path = useMemo(() => `/admin/lists${query.trim() ? `?search=${encodeURIComponent(query.trim())}` : ""}`, [query]);
+  const [lists, , refresh, meta, setPage, , loading, error] = useAdminRecords(path, listView, true, 1, 20);
+  const [projects, setProjects] = useState<ProjectOption[]>([]),
+    [creating, setCreating] = useState(false),
+    [selected, setSelected] = useState<ListView | null>(null),
+    [detail, setDetail] = useState<ListDetail | null>(null),
+    [detailLoading, setDetailLoading] = useState(false),
+    [detailError, setDetailError] = useState(""),
+    [editing, setEditing] = useState(false),
+    [deleteTarget, setDeleteTarget] = useState<ListView | null>(null),
+    [deleting, setDeleting] = useState(false),
+    [pickerOpen, setPickerOpen] = useState(false),
+    [pickerQuery, setPickerQuery] = useState(""),
+    [pickerPage, setPickerPage] = useState(1),
+    [picker, setPicker] = useState<TalentRecord[]>([]),
+    [pickerMeta, setPickerMeta] = useState<PageMeta>(),
+    [pickerLoading, setPickerLoading] = useState(false),
+    [memberBusy, setMemberBusy] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    void allPages<ProjectRecord>("/admin/projects")
+      .then((rows) => {
+        if (active) setProjects(rows.map((x) => ({ id: x._id, title: x.title })).sort((a, b) => a.title.localeCompare(b.title)));
+      })
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Unable to load projects."));
+    return () => {
+      active = false;
+    };
+  }, [toast]);
+  const loadDetail = useCallback(async (id: string) => {
+    setDetailLoading(true);
+    setDetailError("");
+    try {
+      setDetail(await api<ListDetail>(`/admin/lists/${id}`));
+    } catch (e) {
+      setDetail(null);
+      setDetailError(e instanceof Error ? e.message : "Unable to load talent list.");
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    if (!selected) {
+      setDetail(null);
+      setEditing(false);
+      setPickerOpen(false);
+      return;
+    }
+    void loadDetail(selected.id);
+  }, [selected, loadDetail]);
+  useEffect(() => {
+    if (!pickerOpen) return;
+    let active = true;
+    setPickerLoading(true);
+    const qs = pickerQuery.trim() ? `?search=${encodeURIComponent(pickerQuery.trim())}` : "";
+    void fetchPage<TalentRecord>(`/admin/users${qs}`, pickerPage, 8)
+      .then((r) => {
+        if (active) {
+          setPicker(r.items);
+          setPickerMeta(r.meta);
+        }
+      })
+      .catch((e) => {
+        if (active) toast.error(e instanceof Error ? e.message : "Unable to load talent.");
+      })
+      .finally(() => {
+        if (active) setPickerLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [pickerOpen, pickerQuery, pickerPage, toast]);
+  async function createList(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget),
+      name = String(f.get("name") ?? "").trim(),
+      purpose = String(f.get("purpose") ?? "").trim(),
+      projectId = String(f.get("projectId") ?? "").trim();
+    try {
+      await api("/admin/lists", { method: "POST", body: JSON.stringify({ name, purpose, projectId: projectId || undefined }) });
+      await refresh();
+      setCreating(false);
+      toast.success("Talent list created.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to create list.");
+      throw err;
+    }
+  }
+  async function updateList(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!selected) return;
+    const f = new FormData(e.currentTarget),
+      name = String(f.get("name") ?? "").trim(),
+      purpose = String(f.get("purpose") ?? "").trim(),
+      projectId = String(f.get("projectId") ?? "").trim();
+    try {
+      await api(`/admin/lists/${selected.id}`, { method: "PUT", body: JSON.stringify({ name, purpose, projectId: projectId || null }) });
+      await Promise.all([refresh(), loadDetail(selected.id)]);
+      setSelected((v) => (v ? { ...v, name, purpose, projectId: projectId || undefined } : v));
+      setEditing(false);
+      toast.success("Talent list updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to update list.");
+      throw err;
+    }
+  }
+  async function removeMember(id: string) {
+    if (!selected || memberBusy) return;
+    setMemberBusy(id);
+    try {
+      await api(`/admin/lists/${selected.id}/members/${id}`, { method: "DELETE" });
+      await Promise.all([loadDetail(selected.id), refresh()]);
+      toast.success("Talent removed.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unable to remove talent.");
+    } finally {
+      setMemberBusy(null);
+    }
+  }
+  async function addMember(id: string) {
+    if (!selected || memberBusy) return;
+    setMemberBusy(id);
+    try {
+      await api(`/admin/lists/${selected.id}/members`, { method: "POST", body: JSON.stringify({ memberId: id }) });
+      await Promise.all([loadDetail(selected.id), refresh()]);
+      toast.success("Talent added.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unable to add talent.");
+    } finally {
+      setMemberBusy(null);
+    }
+  }
+  async function deleteList() {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    try {
+      await api(`/admin/lists/${deleteTarget.id}`, { method: "DELETE" });
+      if (selected?.id === deleteTarget.id) setSelected(null);
+      setDeleteTarget(null);
+      await refresh();
+      toast.success("Talent list deleted.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unable to delete list.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+  const saved = new Set(detail?.memberIds ?? []),
+    projectTitle = (id?: string) => projects.find((x) => x.id === id)?.title ?? (id ? "Linked project" : "No linked project");
+  return (
+    <div className="ad-stack">
+      <AdminPageHeader
+        eyebrow="Talent organization"
+        title="Saved Talent Lists"
+        description="Build reusable shortlists, link them to projects and manage saved talent."
+        action={<AdminPrimaryButton onClick={() => setCreating(true)}>New Talent List</AdminPrimaryButton>}
+      />
+      <section className="ad-toolbar">
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search saved lists" />
+      </section>
+      <AdminCollectionState
+        loading={loading}
+        error={error}
+        empty={!lists.length}
+        emptyText={query ? "No saved lists match your search." : "No saved talent lists yet."}
+        onRetry={() => void refresh()}
+      />
+      <section className="ad-list-grid">
+        {lists.map((list) => (
+          <article className="ad-list-card" key={list.id}>
+            <div className="ad-list-stack">
+              <i>{list.members}</i>
+              <i />
+              <i />
+            </div>
+            <div>
+              <p className="ad-kicker">Saved list</p>
+              <h2>{list.name}</h2>
+              <span>
+                {list.members} members · Updated {list.updated}
+              </span>
+              <small>{list.purpose || projectTitle(list.projectId)}</small>
+            </div>
+            <div className="ad-list-actions">
+              <button type="button" onClick={() => setSelected(list)}>
+                Manage List
+              </button>
+              <button type="button" onClick={() => setDeleteTarget(list)}>
+                Delete
+              </button>
+            </div>
+          </article>
+        ))}
+      </section>
+      <PaginationControls meta={meta} onPage={setPage} />
+      <AdminDialog
+        open={creating}
+        onClose={() => setCreating(false)}
+        eyebrow="Talent organization"
+        title="New Talent List"
+        description="Create a reusable shortlist."
+        width="wide"
+      >
+        <AdminDialogForm onSubmit={createList}>
+          <AdminDialogGrid>
+            <AdminFormField label="List Name" wide>
+              <input name="name" required maxLength={100} autoFocus />
+            </AdminFormField>
+            <AdminFormField label="Purpose">
+              <input name="purpose" maxLength={200} />
+            </AdminFormField>
+            <AdminFormField label="Linked Project">
+              <select name="projectId">
+                <option value="">No linked project</option>
+                {projects.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.title}
+                  </option>
+                ))}
+              </select>
+            </AdminFormField>
+          </AdminDialogGrid>
+          <AdminDialogActions onCancel={() => setCreating(false)} primaryLabel="Create List" />
+        </AdminDialogForm>
+      </AdminDialog>
+      <AdminDialog
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        eyebrow="Saved talent list"
+        title={selected?.name ?? "Talent List"}
+        description={detail?.purpose || "Manage list details and members."}
+        width="wide"
+      >
+        {selected && (
+          <div className="grid gap-5">
+            {detailLoading ? (
+              <div className="ad-empty">Loading saved list…</div>
+            ) : detailError ? (
+              <div className="ad-empty">
+                <span>{detailError}</span>
+                <button type="button" className="ad-dialog-secondary" onClick={() => void loadDetail(selected.id)}>
+                  Try Again
+                </button>
+              </div>
+            ) : (
+              detail && (
+                <>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {[
+                      ["Members", String(detail.memberIds.length)],
+                      ["Project", projectTitle(detail.projectId)],
+                      ["Purpose", detail.purpose || "—"],
+                    ].map(([a, b]) => (
+                      <div key={a} className="rounded-2xl border border-black/10 bg-[#fafafa] p-4">
+                        <span className="text-xs text-[#777]">{a}</span>
+                        <strong className="mt-1 block text-sm">{b}</strong>
+                      </div>
+                    ))}
+                  </div>
+                  {editing ? (
+                    <AdminDialogForm onSubmit={updateList}>
+                      <AdminDialogGrid>
+                        <AdminFormField label="List Name" wide>
+                          <input name="name" defaultValue={detail.name} required maxLength={100} />
+                        </AdminFormField>
+                        <AdminFormField label="Purpose">
+                          <input name="purpose" defaultValue={detail.purpose ?? ""} maxLength={200} />
+                        </AdminFormField>
+                        <AdminFormField label="Linked Project">
+                          <select name="projectId" defaultValue={detail.projectId ?? ""}>
+                            <option value="">No linked project</option>
+                            {projects.map((x) => (
+                              <option key={x.id} value={x.id}>
+                                {x.title}
+                              </option>
+                            ))}
+                          </select>
+                        </AdminFormField>
+                      </AdminDialogGrid>
+                      <AdminDialogActions onCancel={() => setEditing(false)} primaryLabel="Save Changes" />
+                    </AdminDialogForm>
+                  ) : (
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <button type="button" className="ad-dialog-secondary" onClick={() => setEditing(true)}>
+                        Edit Details
+                      </button>
+                      <button
+                        type="button"
+                        className="ad-dialog-primary"
+                        onClick={() => {
+                          setPickerOpen((v) => !v);
+                          setPickerPage(1);
+                        }}
+                      >
+                        {pickerOpen ? "Close Talent Picker" : "Add Talent"}
+                      </button>
+                    </div>
+                  )}
+                  {pickerOpen && (
+                    <section className="grid gap-4 border-t border-black/10 pt-5">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div>
+                          <p className="ad-kicker">Talent picker</p>
+                          <h3 className="text-xl font-semibold">Add people</h3>
+                        </div>
+                        <AdminSearch
+                          value={pickerQuery}
+                          onChange={(v) => {
+                            setPickerQuery(v);
+                            setPickerPage(1);
+                          }}
+                          placeholder="Search talent"
+                        />
+                      </div>
+                      {pickerLoading ? (
+                        <div className="ad-empty">Loading talent…</div>
+                      ) : !picker.length ? (
+                        <div className="ad-empty">No talent found.</div>
+                      ) : (
+                        <div className="grid gap-2 md:grid-cols-2">
+                          {picker.map((m) => (
+                            <article
+                              key={m.id}
+                              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-black/10 p-3"
+                            >
+                              <SiteMedia src={m.profile?.photo} alt={m.name} kind="team" className="h-12 w-12 rounded-full" />
+                              <div>
+                                <strong className="block text-sm">{m.name}</strong>
+                                <span className="text-xs text-[#777]">
+                                  {m.profile?.profession || "Member"} · {m.profile?.city || "—"}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="rounded-full border border-black/10 px-3 py-2 text-xs font-semibold"
+                                disabled={saved.has(m.id) || memberBusy === m.id}
+                                onClick={() => void addMember(m.id)}
+                              >
+                                {saved.has(m.id) ? "Added" : memberBusy === m.id ? "Adding…" : "Add"}
+                              </button>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                      <PaginationControls meta={pickerMeta} onPage={setPickerPage} />
+                    </section>
+                  )}
+                  <section className="grid gap-4 border-t border-black/10 pt-5">
+                    <div>
+                      <p className="ad-kicker">Saved talent</p>
+                      <h3 className="text-xl font-semibold">
+                        {detail.members.length
+                          ? `${detail.members.length} member${detail.members.length === 1 ? "" : "s"}`
+                          : "No members yet"}
+                      </h3>
+                    </div>
+                    {!detail.members.length ? (
+                      <div className="ad-dialog-empty">
+                        <strong>This list is empty.</strong>
+                        <span>Use Add Talent to build your shortlist.</span>
+                      </div>
+                    ) : (
+                      <div className="grid gap-2 md:grid-cols-2">
+                        {detail.members.map((m) => (
+                          <article
+                            key={m.id}
+                            className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-black/10 p-3"
+                          >
+                            <SiteMedia src={m.profile?.photo} alt={m.name} kind="team" className="h-12 w-12 rounded-full" />
+                            <div>
+                              <strong className="block text-sm">{m.name}</strong>
+                              <span className="text-xs text-[#777]">
+                                {m.profile?.profession || "Member"} · {m.profile?.city || "—"}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              className="rounded-full border border-red-200 px-3 py-2 text-xs font-semibold text-red-700"
+                              disabled={memberBusy === m.id}
+                              onClick={() => void removeMember(m.id)}
+                            >
+                              {memberBusy === m.id ? "Removing…" : "Remove"}
+                            </button>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button type="button" className="ad-dialog-cancel" onClick={() => setSelected(null)}>
+                      Close
+                    </button>
+                    <button type="button" className="ad-dialog-secondary" onClick={() => setDeleteTarget(selected)}>
+                      Delete List
+                    </button>
+                  </div>
+                </>
+              )
+            )}
+          </div>
+        )}
+      </AdminDialog>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete this talent list?"
+        description={deleteTarget ? `"${deleteTarget.name}" will be permanently deleted. Member accounts are not affected.` : undefined}
+        confirmLabel="Delete List"
+        destructive
+        loading={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void deleteList()}
+      />
+    </div>
+  );
 }

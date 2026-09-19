@@ -1,2 +1,23 @@
-import { Module } from "@nestjs/common"; import { MongooseModule } from "@nestjs/mongoose"; import { AuthModule } from "../auth/auth.module"; import { MediaModule } from "../media/media.module"; import { ProjectSchema } from "../projects/project.model"; import { CastingSchema } from "./casting.model"; import { CastingService } from "./casting.service"; import { AdminCastingController,PublicCastingController } from "./casting.controller";
-@Module({imports:[AuthModule,MediaModule,MongooseModule.forFeature([{name:"Casting",schema:CastingSchema},{name:"Project",schema:ProjectSchema}])],controllers:[PublicCastingController,AdminCastingController],providers:[CastingService],exports:[CastingService,MongooseModule]}) export class CastingModule{}
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+
+import { AuthModule } from "../auth/auth.module";
+import { MediaModule } from "../media/media.module";
+import { ProjectSchema } from "../projects/project.model";
+import { AdminCastingController, PublicCastingController } from "./casting.controller";
+import { CastingSchema } from "./casting.model";
+import { CastingService } from "./casting.service";
+@Module({
+  imports: [
+    AuthModule,
+    MediaModule,
+    MongooseModule.forFeature([
+      { name: "Casting", schema: CastingSchema },
+      { name: "Project", schema: ProjectSchema },
+    ]),
+  ],
+  controllers: [PublicCastingController, AdminCastingController],
+  providers: [CastingService],
+  exports: [CastingService, MongooseModule],
+})
+export class CastingModule {}

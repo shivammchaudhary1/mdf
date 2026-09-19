@@ -1,28 +1,11 @@
-import {
-  ArrayMaxSize,
-  IsArray,
-  IsIn,
-  IsMongoId,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from "class-validator";
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-} from "@nestjs/swagger";
-import { PageQueryDto } from "../../common/dto/pagination.dto";
-import {
-  applicationStatuses,
-  opportunityTypes,
-} from "./application.model";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ArrayMaxSize, IsArray, IsIn, IsMongoId, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
 
-type ApplicationStatus =
-  (typeof applicationStatuses)[number];
-type OpportunityType =
-  (typeof opportunityTypes)[number];
+import { PageQueryDto } from "../../common/dto/pagination.dto";
+import { applicationStatuses, opportunityTypes } from "./application.model";
+
+type ApplicationStatus = (typeof applicationStatuses)[number];
+type OpportunityType = (typeof opportunityTypes)[number];
 
 export class CreateApplicationDto {
   @ApiProperty()

@@ -1,18 +1,19 @@
 "use client";
-import { usePublicData } from "./use-public-data";
-import { SiteHeader } from "@/components/site/site-header";
-import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
+
+import { usePublicData } from "./use-public-data";
 
 const values = [
   ["Creativity", "In everything we do"],
   ["People", "Before projects"],
   ["Collaboration", "Over competition"],
-  ["Impact", "Through stories"]
+  ["Impact", "Through stories"],
 ];
 
 export function AboutPageView() {
- const data=usePublicData("brand");
+  const data = usePublicData("brand");
   return (
     <>
       <SiteHeader />
@@ -30,9 +31,7 @@ export function AboutPageView() {
             {data.stats.map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="font-display text-2xl font-semibold sm:text-3xl">{stat.value}</p>
-                <p className="mt-1 text-[10px] uppercase tracking-[.12em] text-[#8a8a8a]">
-                  {stat.label}
-                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-[.12em] text-[#8a8a8a]">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -61,9 +60,7 @@ export function AboutPageView() {
         <section className="site-shell pb-8 lg:pb-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-7 py-14 text-white sm:px-10 lg:px-12">
             <div className="max-w-2xl">
-              <p className="font-display text-3xl leading-tight sm:text-4xl">
-                “Good Stories Create a Better Tomorrow”
-              </p>
+              <p className="font-display text-3xl leading-tight sm:text-4xl">“Good Stories Create a Better Tomorrow”</p>
               <p className="mt-5 text-sm text-white/55">— M. Dadu Films</p>
             </div>
           </div>
@@ -76,9 +73,7 @@ export function AboutPageView() {
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {values.map(([title, description]) => (
                 <article key={title} className="site-card p-6 text-center">
-                  <span className="mx-auto grid h-11 w-11 place-items-center rounded-full border border-black/8 bg-white">
-                    ◇
-                  </span>
+                  <span className="mx-auto grid h-11 w-11 place-items-center rounded-full border border-black/8 bg-white">◇</span>
                   <h3 className="mt-4 font-display text-lg font-semibold">{title}</h3>
                   <p className="mt-1 text-xs text-[#777]">{description}</p>
                 </article>

@@ -1,4 +1,198 @@
 "use client";
-import { useState,type FormEvent } from "react";import { useAdminRecords } from "./use-admin-records";import { api } from "@/services/api";import { useToast } from "@/components/ui/toast-provider";import { AdminCollectionState,AdminFilters,AdminPageHeader,AdminSearch,AdminStatus } from "@/components/admin/admin-shared";import { AdminDialog,AdminDialogActions,AdminDialogForm,AdminDialogGrid,AdminFormField } from "@/components/admin/admin-dialog";import { PaginationControls } from "@/components/ui/pagination-controls";
-type R={_id:string;name:string;email:string;mobile:string;role:string;city?:string;coverNote:string;resumeUrl?:string;portfolioUrl?:string;linkedinUrl?:string;status:string;adminNotes?:string;createdAt:string};type V={id:string;name:string;email:string;mobile:string;role:string;city:string;coverNote:string;resumeUrl:string;portfolioUrl:string;linkedinUrl:string;status:string;adminNotes:string;applied:string};const view=(r:R):V=>({id:r._id,name:r.name,email:r.email,mobile:r.mobile,role:r.role,city:r.city??"—",coverNote:r.coverNote,resumeUrl:r.resumeUrl??"",portfolioUrl:r.portfolioUrl??"",linkedinUrl:r.linkedinUrl??"",status:r.status,adminNotes:r.adminNotes??"",applied:new Date(r.createdAt).toLocaleDateString("en-US",{month:"short",day:"2-digit",year:"numeric"})});
-export function AdminCareersView(){const toast=useToast();const[status,setStatus]=useState("All"),[query,setQuery]=useState(""),[selected,setSelected]=useState<V|null>(null);const path=`/admin/careers?search=${encodeURIComponent(query)}${status!=="All"?`&status=${encodeURIComponent(status)}`:""}`;const[records,,refresh,meta,setPage,,loading,error]=useAdminRecords(path,view,true,1,20);async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected)return;const f=new FormData(e.currentTarget);try{await api(`/admin/careers/${selected.id}`,{method:"PATCH",body:JSON.stringify({status:String(f.get("status")??selected.status),adminNotes:String(f.get("notes")??"")})});await refresh();setSelected(null);toast.success("Career application updated.")}catch(error){toast.error(error instanceof Error?error.message:"Unable to update application.")}}return <div className="ad-stack"><AdminPageHeader eyebrow="Hiring pipeline" title="Career Applications" description="Review public career applications and track the hiring conversation."/><section className="ad-toolbar"><AdminFilters values={["All","Submitted","In Review","Shortlisted","Closed","Rejected"]} active={status} onChange={setStatus}/><AdminSearch value={query} onChange={setQuery} placeholder="Search candidate or role"/></section><AdminCollectionState loading={loading} error={error} empty={!records.length} emptyText="No career applications match this filter." onRetry={()=>void refresh()}/><article className="ad-card ad-table-card"><div className="ad-table ad-applications-table"><div className="ad-table-head"><span>Candidate</span><span>Role</span><span>Applied</span><span>City</span><span>Status</span><span></span></div>{records.map(item=><div key={item.id} className="ad-table-row"><div><strong>{item.name}</strong><span>{item.email}</span></div><div><strong>{item.role}</strong><span>{item.mobile}</span></div><span>{item.applied}</span><span>{item.city}</span><AdminStatus value={item.status}/><div className="ad-row-actions"><button onClick={()=>setSelected(item)}>Review</button></div></div>)}</div></article><PaginationControls meta={meta} onPage={setPage}/><AdminDialog open={!!selected} onClose={()=>setSelected(null)} eyebrow="Career review" title={selected?.name??"Candidate"} description={selected?`${selected.role} · ${selected.city}`:""} width="wide">{selected&&<AdminDialogForm onSubmit={save}><div className="ad-review-summary"><div><span>Email</span><strong>{selected.email}</strong></div><div><span>Mobile</span><strong>{selected.mobile}</strong></div><div><span>Applied</span><strong>{selected.applied}</strong></div><div><span>Status</span><strong>{selected.status}</strong></div></div><div className="rounded-2xl bg-slate-50 p-5 text-sm leading-6 text-slate-700">{selected.coverNote}</div><div className="flex flex-wrap gap-3">{selected.resumeUrl&&<a target="_blank" rel="noreferrer" href={selected.resumeUrl}>Resume ↗</a>}{selected.portfolioUrl&&<a target="_blank" rel="noreferrer" href={selected.portfolioUrl}>Portfolio ↗</a>}{selected.linkedinUrl&&<a target="_blank" rel="noreferrer" href={selected.linkedinUrl}>LinkedIn ↗</a>}</div><AdminDialogGrid><AdminFormField label="Status"><select name="status" defaultValue={selected.status}><option>Submitted</option><option>In Review</option><option>Shortlisted</option><option>Closed</option><option>Rejected</option></select></AdminFormField><AdminFormField label="Internal Notes" wide><textarea name="notes" rows={5} defaultValue={selected.adminNotes}/></AdminFormField></AdminDialogGrid><AdminDialogActions onCancel={()=>setSelected(null)} primaryLabel="Save Review"/></AdminDialogForm>}</AdminDialog></div>}
+import { type FormEvent, useState } from "react";
+
+import { AdminDialog, AdminDialogActions, AdminDialogForm, AdminDialogGrid, AdminFormField } from "@/components/admin/admin-dialog";
+import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch, AdminStatus } from "@/components/admin/admin-shared";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { useToast } from "@/components/ui/toast-provider";
+import { api } from "@/services/api";
+
+import { useAdminRecords } from "./use-admin-records";
+type R = {
+  _id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  role: string;
+  city?: string;
+  coverNote: string;
+  resumeUrl?: string;
+  portfolioUrl?: string;
+  linkedinUrl?: string;
+  status: string;
+  adminNotes?: string;
+  createdAt: string;
+};
+type V = {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  role: string;
+  city: string;
+  coverNote: string;
+  resumeUrl: string;
+  portfolioUrl: string;
+  linkedinUrl: string;
+  status: string;
+  adminNotes: string;
+  applied: string;
+};
+const view = (r: R): V => ({
+  id: r._id,
+  name: r.name,
+  email: r.email,
+  mobile: r.mobile,
+  role: r.role,
+  city: r.city ?? "—",
+  coverNote: r.coverNote,
+  resumeUrl: r.resumeUrl ?? "",
+  portfolioUrl: r.portfolioUrl ?? "",
+  linkedinUrl: r.linkedinUrl ?? "",
+  status: r.status,
+  adminNotes: r.adminNotes ?? "",
+  applied: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+});
+export function AdminCareersView() {
+  const toast = useToast();
+  const [status, setStatus] = useState("All"),
+    [query, setQuery] = useState(""),
+    [selected, setSelected] = useState<V | null>(null);
+  const path = `/admin/careers?search=${encodeURIComponent(query)}${status !== "All" ? `&status=${encodeURIComponent(status)}` : ""}`;
+  const [records, , refresh, meta, setPage, , loading, error] = useAdminRecords(path, view, true, 1, 20);
+  async function save(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!selected) return;
+    const f = new FormData(e.currentTarget);
+    try {
+      await api(`/admin/careers/${selected.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: String(f.get("status") ?? selected.status), adminNotes: String(f.get("notes") ?? "") }),
+      });
+      await refresh();
+      setSelected(null);
+      toast.success("Career application updated.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update application.");
+    }
+  }
+  return (
+    <div className="ad-stack">
+      <AdminPageHeader
+        eyebrow="Hiring pipeline"
+        title="Career Applications"
+        description="Review public career applications and track the hiring conversation."
+      />
+      <section className="ad-toolbar">
+        <AdminFilters
+          values={["All", "Submitted", "In Review", "Shortlisted", "Closed", "Rejected"]}
+          active={status}
+          onChange={setStatus}
+        />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search candidate or role" />
+      </section>
+      <AdminCollectionState
+        loading={loading}
+        error={error}
+        empty={!records.length}
+        emptyText="No career applications match this filter."
+        onRetry={() => void refresh()}
+      />
+      <article className="ad-card ad-table-card">
+        <div className="ad-table ad-applications-table">
+          <div className="ad-table-head">
+            <span>Candidate</span>
+            <span>Role</span>
+            <span>Applied</span>
+            <span>City</span>
+            <span>Status</span>
+            <span></span>
+          </div>
+          {records.map((item) => (
+            <div key={item.id} className="ad-table-row">
+              <div>
+                <strong>{item.name}</strong>
+                <span>{item.email}</span>
+              </div>
+              <div>
+                <strong>{item.role}</strong>
+                <span>{item.mobile}</span>
+              </div>
+              <span>{item.applied}</span>
+              <span>{item.city}</span>
+              <AdminStatus value={item.status} />
+              <div className="ad-row-actions">
+                <button onClick={() => setSelected(item)}>Review</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </article>
+      <PaginationControls meta={meta} onPage={setPage} />
+      <AdminDialog
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        eyebrow="Career review"
+        title={selected?.name ?? "Candidate"}
+        description={selected ? `${selected.role} · ${selected.city}` : ""}
+        width="wide"
+      >
+        {selected && (
+          <AdminDialogForm onSubmit={save}>
+            <div className="ad-review-summary">
+              <div>
+                <span>Email</span>
+                <strong>{selected.email}</strong>
+              </div>
+              <div>
+                <span>Mobile</span>
+                <strong>{selected.mobile}</strong>
+              </div>
+              <div>
+                <span>Applied</span>
+                <strong>{selected.applied}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{selected.status}</strong>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 p-5 text-sm leading-6 text-slate-700">{selected.coverNote}</div>
+            <div className="flex flex-wrap gap-3">
+              {selected.resumeUrl && (
+                <a target="_blank" rel="noreferrer" href={selected.resumeUrl}>
+                  Resume ↗
+                </a>
+              )}
+              {selected.portfolioUrl && (
+                <a target="_blank" rel="noreferrer" href={selected.portfolioUrl}>
+                  Portfolio ↗
+                </a>
+              )}
+              {selected.linkedinUrl && (
+                <a target="_blank" rel="noreferrer" href={selected.linkedinUrl}>
+                  LinkedIn ↗
+                </a>
+              )}
+            </div>
+            <AdminDialogGrid>
+              <AdminFormField label="Status">
+                <select name="status" defaultValue={selected.status}>
+                  <option>Submitted</option>
+                  <option>In Review</option>
+                  <option>Shortlisted</option>
+                  <option>Closed</option>
+                  <option>Rejected</option>
+                </select>
+              </AdminFormField>
+              <AdminFormField label="Internal Notes" wide>
+                <textarea name="notes" rows={5} defaultValue={selected.adminNotes} />
+              </AdminFormField>
+            </AdminDialogGrid>
+            <AdminDialogActions onCancel={() => setSelected(null)} primaryLabel="Save Review" />
+          </AdminDialogForm>
+        )}
+      </AdminDialog>
+    </div>
+  );
+}

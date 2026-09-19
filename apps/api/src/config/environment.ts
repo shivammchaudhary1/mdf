@@ -1,2 +1,64 @@
-function integer(input:Record<string,unknown>,key:string,fallback:number,min:number,max:number){const value=Number(input[key]??fallback);if(!Number.isInteger(value)||value<min||value>max)throw new Error(`${key} must be an integer between ${min} and ${max}.`);return value}function bool(input:Record<string,unknown>,key:string,fallback:boolean){const raw=input[key];if(raw===undefined||raw==="")return fallback;const value=String(raw).toLowerCase();if(!["true","false"].includes(value))throw new Error(`${key} must be true or false.`);return value==="true"}function origins(value:string){const items=value.split(",").map(v=>v.trim()).filter(Boolean);if(!items.length)throw new Error("FRONTEND_URL must contain at least one origin.");for(const origin of items){const url=new URL(origin);if(!["http:","https:"].includes(url.protocol)||url.origin!==origin)throw new Error("FRONTEND_URL must contain HTTP(S) origins without paths.")}return items.join(",")}
-export function validateEnvironment(input:Record<string,unknown>){const nodeEnv=String(input.NODE_ENV??"development");if(!["development","test","production"].includes(nodeEnv))throw new Error("NODE_ENV must be development, test, or production.");const port=integer(input,"PORT",8888,1,65535);const uri=String(input.MONGODB_URI??"");if(!uri.startsWith("mongodb://")&&!uri.startsWith("mongodb+srv://"))throw new Error("MONGODB_URI must be a MongoDB connection URI.");const frontend=origins(String(input.FRONTEND_URL??"http://localhost:3333"));const cookieSecret=String(input.COOKIE_SECRET??"");if(cookieSecret.length<32)throw new Error("COOKIE_SECRET must contain at least 32 characters of random data.");const storage=String(input.STORAGE_DRIVER??"local").toLowerCase();if(!["local","s3"].includes(storage))throw new Error("STORAGE_DRIVER must be local or s3.");if(storage==="s3"&&(!input.AWS_REGION||!input.S3_BUCKET))throw new Error("AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.");const cookieDomain=String(input.COOKIE_DOMAIN??"").trim();if(cookieDomain&&/[/\s:]/.test(cookieDomain))throw new Error("COOKIE_DOMAIN must be a hostname/domain without scheme or path.");return{...input,NODE_ENV:nodeEnv,PORT:port,MONGODB_URI:uri,FRONTEND_URL:frontend,COOKIE_SECRET:cookieSecret,COOKIE_DOMAIN:cookieDomain,STORAGE_DRIVER:storage,SMTP_PORT:integer(input,"SMTP_PORT",465,1,65535),MONGODB_MAX_POOL_SIZE:integer(input,"MONGODB_MAX_POOL_SIZE",20,1,200),MONGODB_MIN_POOL_SIZE:integer(input,"MONGODB_MIN_POOL_SIZE",0,0,50),MONGODB_MAX_IDLE_MS:integer(input,"MONGODB_MAX_IDLE_MS",60000,1000,600000),MONGODB_SERVER_SELECTION_TIMEOUT_MS:integer(input,"MONGODB_SERVER_SELECTION_TIMEOUT_MS",10000,1000,120000),SESSION_SHORT_HOURS:integer(input,"SESSION_SHORT_HOURS",12,1,168),SESSION_REMEMBER_DAYS:integer(input,"SESSION_REMEMBER_DAYS",30,1,365),SESSION_MAX_PER_USER:integer(input,"SESSION_MAX_PER_USER",10,1,25),GENERAL_RATE_LIMIT_PER_MINUTE:integer(input,"GENERAL_RATE_LIMIT_PER_MINUTE",300,60,10000),AUDIT_RETENTION_DAYS:integer(input,"AUDIT_RETENTION_DAYS",180,30,3650),TRUST_PROXY:bool(input,"TRUST_PROXY",nodeEnv==="production"),SWAGGER_ENABLED:bool(input,"SWAGGER_ENABLED",nodeEnv!=="production"),MONGODB_AUTO_INDEX:bool(input,"MONGODB_AUTO_INDEX",nodeEnv!=="production")}}
+function integer(input: Record<string, unknown>, key: string, fallback: number, min: number, max: number) {
+  const value = Number(input[key] ?? fallback);
+  if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${key} must be an integer between ${min} and ${max}.`);
+  return value;
+}
+function bool(input: Record<string, unknown>, key: string, fallback: boolean) {
+  const raw = input[key];
+  if (raw === undefined || raw === "") return fallback;
+  const value = String(raw).toLowerCase();
+  if (!["true", "false"].includes(value)) throw new Error(`${key} must be true or false.`);
+  return value === "true";
+}
+function origins(value: string) {
+  const items = value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+  if (!items.length) throw new Error("FRONTEND_URL must contain at least one origin.");
+  for (const origin of items) {
+    const url = new URL(origin);
+    if (!["http:", "https:"].includes(url.protocol) || url.origin !== origin)
+      throw new Error("FRONTEND_URL must contain HTTP(S) origins without paths.");
+  }
+  return items.join(",");
+}
+export function validateEnvironment(input: Record<string, unknown>) {
+  const nodeEnv = String(input.NODE_ENV ?? "development");
+  if (!["development", "test", "production"].includes(nodeEnv)) throw new Error("NODE_ENV must be development, test, or production.");
+  const port = integer(input, "PORT", 8888, 1, 65535);
+  const uri = String(input.MONGODB_URI ?? "");
+  if (!uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) throw new Error("MONGODB_URI must be a MongoDB connection URI.");
+  const frontend = origins(String(input.FRONTEND_URL ?? "http://localhost:3333"));
+  const cookieSecret = String(input.COOKIE_SECRET ?? "");
+  if (cookieSecret.length < 32) throw new Error("COOKIE_SECRET must contain at least 32 characters of random data.");
+  const storage = String(input.STORAGE_DRIVER ?? "local").toLowerCase();
+  if (!["local", "s3"].includes(storage)) throw new Error("STORAGE_DRIVER must be local or s3.");
+  if (storage === "s3" && (!input.AWS_REGION || !input.S3_BUCKET))
+    throw new Error("AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.");
+  const cookieDomain = String(input.COOKIE_DOMAIN ?? "").trim();
+  if (cookieDomain && /[/\s:]/.test(cookieDomain)) throw new Error("COOKIE_DOMAIN must be a hostname/domain without scheme or path.");
+  return {
+    ...input,
+    NODE_ENV: nodeEnv,
+    PORT: port,
+    MONGODB_URI: uri,
+    FRONTEND_URL: frontend,
+    COOKIE_SECRET: cookieSecret,
+    COOKIE_DOMAIN: cookieDomain,
+    STORAGE_DRIVER: storage,
+    SMTP_PORT: integer(input, "SMTP_PORT", 465, 1, 65535),
+    MONGODB_MAX_POOL_SIZE: integer(input, "MONGODB_MAX_POOL_SIZE", 20, 1, 200),
+    MONGODB_MIN_POOL_SIZE: integer(input, "MONGODB_MIN_POOL_SIZE", 0, 0, 50),
+    MONGODB_MAX_IDLE_MS: integer(input, "MONGODB_MAX_IDLE_MS", 60000, 1000, 600000),
+    MONGODB_SERVER_SELECTION_TIMEOUT_MS: integer(input, "MONGODB_SERVER_SELECTION_TIMEOUT_MS", 10000, 1000, 120000),
+    SESSION_SHORT_HOURS: integer(input, "SESSION_SHORT_HOURS", 12, 1, 168),
+    SESSION_REMEMBER_DAYS: integer(input, "SESSION_REMEMBER_DAYS", 30, 1, 365),
+    SESSION_MAX_PER_USER: integer(input, "SESSION_MAX_PER_USER", 10, 1, 25),
+    GENERAL_RATE_LIMIT_PER_MINUTE: integer(input, "GENERAL_RATE_LIMIT_PER_MINUTE", 300, 60, 10000),
+    AUDIT_RETENTION_DAYS: integer(input, "AUDIT_RETENTION_DAYS", 180, 30, 3650),
+    TRUST_PROXY: bool(input, "TRUST_PROXY", nodeEnv === "production"),
+    SWAGGER_ENABLED: bool(input, "SWAGGER_ENABLED", nodeEnv !== "production"),
+    MONGODB_AUTO_INDEX: bool(input, "MONGODB_AUTO_INDEX", nodeEnv !== "production"),
+  };
+}

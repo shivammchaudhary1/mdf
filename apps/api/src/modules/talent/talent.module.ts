@@ -1,2 +1,25 @@
-import{Module}from"@nestjs/common";import{MongooseModule}from"@nestjs/mongoose";import{AuthModule}from"../auth/auth.module";import{MediaModule}from"../media/media.module";import{ProfileSchema}from"../profiles/profile.model";import{ProjectSchema}from"../projects/project.model";import{AdminTalentController,PublicTalentController}from"./talent.controller";import{SavedTalentListSchema}from"./saved-list.model";import{TalentService}from"./talent.service";
-@Module({imports:[AuthModule,MediaModule,MongooseModule.forFeature([{name:"Profile",schema:ProfileSchema},{name:"SavedTalentList",schema:SavedTalentListSchema},{name:"Project",schema:ProjectSchema}])],controllers:[PublicTalentController,AdminTalentController],providers:[TalentService],exports:[TalentService,MongooseModule]})export class TalentModule{}
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+
+import { AuthModule } from "../auth/auth.module";
+import { MediaModule } from "../media/media.module";
+import { ProfileSchema } from "../profiles/profile.model";
+import { ProjectSchema } from "../projects/project.model";
+import { SavedTalentListSchema } from "./saved-list.model";
+import { AdminTalentController, PublicTalentController } from "./talent.controller";
+import { TalentService } from "./talent.service";
+@Module({
+  imports: [
+    AuthModule,
+    MediaModule,
+    MongooseModule.forFeature([
+      { name: "Profile", schema: ProfileSchema },
+      { name: "SavedTalentList", schema: SavedTalentListSchema },
+      { name: "Project", schema: ProjectSchema },
+    ]),
+  ],
+  controllers: [PublicTalentController, AdminTalentController],
+  providers: [TalentService],
+  exports: [TalentService, MongooseModule],
+})
+export class TalentModule {}

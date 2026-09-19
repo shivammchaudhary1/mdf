@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
+
 import { BrandLogo } from "@/components/brand-logo";
 import { siteConfig } from "@/config/site";
 
@@ -34,14 +35,9 @@ export function PublicHeader({ light = false }: { light?: boolean }) {
           <BrandLogo darkInk={light} />
         </Link>
 
-        <nav
-          aria-label="Main navigation"
-          className="hidden items-center gap-1 lg:flex"
-        >
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
           {siteConfig.navigation.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+            const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
 
             return (
               <Link
@@ -67,16 +63,11 @@ export function PublicHeader({ light = false }: { light?: boolean }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/login"
-            className={`hidden rounded-lg px-2 py-2 text-sm font-semibold sm:block ${
-              light ? "text-slate-700" : "text-white/85"
-            }`}
+            className={`hidden rounded-lg px-2 py-2 text-sm font-semibold sm:block ${light ? "text-slate-700" : "text-white/85"}`}
           >
             Login
           </Link>
-          <Link
-            href="/signup"
-            className="brand-button brand-button-primary min-h-11 px-4 text-sm"
-          >
+          <Link href="/signup" className="brand-button brand-button-primary min-h-11 px-4 text-sm">
             Join Now
           </Link>
           <button
@@ -87,9 +78,7 @@ export function PublicHeader({ light = false }: { light?: boolean }) {
             aria-label={open ? "Close navigation" : "Open navigation"}
             onClick={() => setOpen((value) => !value)}
             className={`flex h-11 w-11 items-center justify-center rounded-xl border lg:hidden ${
-              light
-                ? "border-slate-200 bg-white text-slate-950"
-                : "border-white/25 bg-white/5 text-white"
+              light ? "border-slate-200 bg-white text-slate-950" : "border-white/25 bg-white/5 text-white"
             }`}
           >
             <span aria-hidden="true" className="text-xl">

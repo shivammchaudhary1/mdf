@@ -1,16 +1,149 @@
 import type data from "@/data/admin-dashboard.json";
-import { dateLabel, mediaUrl, type ProfileRecord, type ApplicationRecord, type ContentRecord } from "./workspace";
-export type TalentRecord={id:string;name:string;email:string;verified:boolean;suspended:boolean;createdAt:string;profile:ProfileRecord|null};
-export type MemberView=(typeof data.members)[number]&{suspended:boolean};
-export const memberView=(x:TalentRecord):MemberView=>({id:x.id,name:x.name,email:x.email,verified:x.verified,status:x.suspended?"Suspended":x.verified?"Active":"Needs Review",role:x.profile?.profession??"",city:x.profile?.city??"",joined:dateLabel(x.createdAt),completion:x.profile?.completion??0,image:mediaUrl(x.profile?.photo),suspended:x.suspended});
-export const applicationView=(x:ApplicationRecord)=>({id:x._id,applicant:x.applicant.name,role:x.roleSnapshot??x.opportunityTitle,project:x.opportunityTitle,city:x.applicant.city??"—",applied:dateLabel(x.createdAt),status:x.status,notes:x.adminNotes??""});
-export type ProjectRecord={_id:string;title:string;type?:string;status:string;updatedAt:string;coverImage?:string;location?:string;summary?:string;credits?:unknown[];applications?:number;published?:boolean};
-export const projectView=(x:ProjectRecord)=>({id:x._id,title:x.title,type:x.type??"",status:x.status,applications:x.applications??0,team:x.credits?.length??0,updated:dateLabel(x.updatedAt),image:mediaUrl(x.coverImage),location:x.location??"",summary:x.summary??"",published:!!x.published});
-export type CastingRecord={_id:string;title:string;projectId?:string;projectTitle?:string;category?:string;location?:string;deadline?:string;status:string;closingSoon:boolean;published:boolean;applications?:number;ageMin?:number;ageMax?:number;gender?:string;compensation?:string;description?:string;coverImage?:string};
-export const castingView=(x:CastingRecord)=>({id:x._id,title:x.title,project:x.projectTitle??"—",category:x.category??"",location:x.location??"",deadline:x.deadline?.slice(0,10)??"",status:!x.published?"Draft":x.closingSoon?"Closing Soon":x.status,applications:x.applications??0,age:x.ageMin!==undefined||x.ageMax!==undefined?`${x.ageMin??0}–${x.ageMax??120}`:"",gender:x.gender??"",compensation:x.compensation??"",description:x.description??"",published:x.published,coverImage:x.coverImage??""});
-export const contentView=(x:ContentRecord):Record<string,string>=>({id:x._id,title:x.title,name:x.title,category:x.category??"",role:x.role??"",status:x.status??(x.published?"Published":"Draft"),date:x.publishedAt?.slice(0,10)??"",url:x.videoUrl??"",summary:x.description??"",image:mediaUrl(x.coverImage),author:x.data?.author??"",platform:x.data?.platform??"",group:x.data?.group??""});
-export type ContactRecord={_id:string;name:string;email:string;subject:string;message:string;status:string;createdAt:string};
-export const contactView=(x:ContactRecord)=>({id:x._id,name:x.name,email:x.email,subject:x.subject,message:x.message,status:x.status,received:dateLabel(x.createdAt)});
-export type ListRecord={_id:string;name:string;purpose?:string;memberCount:number;ownerId:string;projectId?:string;updatedAt:string};
-export type ListView={id:string;name:string;purpose:string;members:number;owner:string;projectId?:string;updated:string};
-export const listView=(x:ListRecord):ListView=>({id:x._id,name:x.name,purpose:x.purpose??"",members:x.memberCount,owner:"Current account",projectId:x.projectId,updated:dateLabel(x.updatedAt)});
+
+import { type ApplicationRecord, type ContentRecord, dateLabel, mediaUrl, type ProfileRecord } from "./workspace";
+export type TalentRecord = {
+  id: string;
+  name: string;
+  email: string;
+  verified: boolean;
+  suspended: boolean;
+  createdAt: string;
+  profile: ProfileRecord | null;
+};
+export type MemberView = (typeof data.members)[number] & { suspended: boolean };
+export const memberView = (x: TalentRecord): MemberView => ({
+  id: x.id,
+  name: x.name,
+  email: x.email,
+  verified: x.verified,
+  status: x.suspended ? "Suspended" : x.verified ? "Active" : "Needs Review",
+  role: x.profile?.profession ?? "",
+  city: x.profile?.city ?? "",
+  joined: dateLabel(x.createdAt),
+  completion: x.profile?.completion ?? 0,
+  image: mediaUrl(x.profile?.photo),
+  suspended: x.suspended,
+});
+export const applicationView = (x: ApplicationRecord) => ({
+  id: x._id,
+  applicant: x.applicant.name,
+  role: x.roleSnapshot ?? x.opportunityTitle,
+  project: x.opportunityTitle,
+  city: x.applicant.city ?? "—",
+  applied: dateLabel(x.createdAt),
+  status: x.status,
+  notes: x.adminNotes ?? "",
+});
+export type ProjectRecord = {
+  _id: string;
+  title: string;
+  type?: string;
+  status: string;
+  updatedAt: string;
+  coverImage?: string;
+  location?: string;
+  summary?: string;
+  credits?: unknown[];
+  applications?: number;
+  published?: boolean;
+};
+export const projectView = (x: ProjectRecord) => ({
+  id: x._id,
+  title: x.title,
+  type: x.type ?? "",
+  status: x.status,
+  applications: x.applications ?? 0,
+  team: x.credits?.length ?? 0,
+  updated: dateLabel(x.updatedAt),
+  image: mediaUrl(x.coverImage),
+  location: x.location ?? "",
+  summary: x.summary ?? "",
+  published: !!x.published,
+});
+export type CastingRecord = {
+  _id: string;
+  title: string;
+  projectId?: string;
+  projectTitle?: string;
+  category?: string;
+  location?: string;
+  deadline?: string;
+  status: string;
+  closingSoon: boolean;
+  published: boolean;
+  applications?: number;
+  ageMin?: number;
+  ageMax?: number;
+  gender?: string;
+  compensation?: string;
+  description?: string;
+  coverImage?: string;
+};
+export const castingView = (x: CastingRecord) => ({
+  id: x._id,
+  title: x.title,
+  project: x.projectTitle ?? "—",
+  category: x.category ?? "",
+  location: x.location ?? "",
+  deadline: x.deadline?.slice(0, 10) ?? "",
+  status: !x.published ? "Draft" : x.closingSoon ? "Closing Soon" : x.status,
+  applications: x.applications ?? 0,
+  age: x.ageMin !== undefined || x.ageMax !== undefined ? `${x.ageMin ?? 0}–${x.ageMax ?? 120}` : "",
+  gender: x.gender ?? "",
+  compensation: x.compensation ?? "",
+  description: x.description ?? "",
+  published: x.published,
+  coverImage: x.coverImage ?? "",
+});
+export const contentView = (x: ContentRecord): Record<string, string> => ({
+  id: x._id,
+  title: x.title,
+  name: x.title,
+  category: x.category ?? "",
+  role: x.role ?? "",
+  status: x.status ?? (x.published ? "Published" : "Draft"),
+  date: x.publishedAt?.slice(0, 10) ?? "",
+  url: x.videoUrl ?? "",
+  summary: x.description ?? "",
+  image: mediaUrl(x.coverImage),
+  author: x.data?.author ?? "",
+  platform: x.data?.platform ?? "",
+  group: x.data?.group ?? "",
+});
+export type ContactRecord = {
+  _id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: string;
+  createdAt: string;
+};
+export const contactView = (x: ContactRecord) => ({
+  id: x._id,
+  name: x.name,
+  email: x.email,
+  subject: x.subject,
+  message: x.message,
+  status: x.status,
+  received: dateLabel(x.createdAt),
+});
+export type ListRecord = {
+  _id: string;
+  name: string;
+  purpose?: string;
+  memberCount: number;
+  ownerId: string;
+  projectId?: string;
+  updatedAt: string;
+};
+export type ListView = { id: string; name: string; purpose: string; members: number; owner: string; projectId?: string; updated: string };
+export const listView = (x: ListRecord): ListView => ({
+  id: x._id,
+  name: x.name,
+  purpose: x.purpose ?? "",
+  members: x.memberCount,
+  owner: "Current account",
+  projectId: x.projectId,
+  updated: dateLabel(x.updatedAt),
+});

@@ -1,1 +1,26 @@
-import{Schema,Types}from"mongoose";export const contactStatuses=["New","Open","Replied","Resolved","Spam"]as const;export interface ContactMessage{_id:Types.ObjectId;name:string;email:string;subject:string;message:string;status:(typeof contactStatuses)[number];ipHash?:Buffer;createdAt:Date;updatedAt:Date}export const ContactSchema=new Schema<ContactMessage>({name:{type:String,required:true,trim:true,maxlength:100},email:{type:String,required:true,trim:true,lowercase:true,maxlength:254},subject:{type:String,required:true,trim:true,maxlength:200},message:{type:String,required:true,maxlength:5000},status:{type:String,enum:contactStatuses,default:"New",required:true,index:true},ipHash:{type:Buffer,select:false}},{timestamps:true,versionKey:false,minimize:true});ContactSchema.index({status:1,createdAt:-1});ContactSchema.index({email:1,createdAt:-1});
+import { Schema, Types } from "mongoose";
+export const contactStatuses = ["New", "Open", "Replied", "Resolved", "Spam"] as const;
+export interface ContactMessage {
+  _id: Types.ObjectId;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: (typeof contactStatuses)[number];
+  ipHash?: Buffer;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export const ContactSchema = new Schema<ContactMessage>(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
+    subject: { type: String, required: true, trim: true, maxlength: 200 },
+    message: { type: String, required: true, maxlength: 5000 },
+    status: { type: String, enum: contactStatuses, default: "New", required: true, index: true },
+    ipHash: { type: Buffer, select: false },
+  },
+  { timestamps: true, versionKey: false, minimize: true },
+);
+ContactSchema.index({ status: 1, createdAt: -1 });
+ContactSchema.index({ email: 1, createdAt: -1 });

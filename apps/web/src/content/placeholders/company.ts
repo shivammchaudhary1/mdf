@@ -4,8 +4,7 @@ import { routes } from "@/config/routes";
 export const placeholderCompany = {
   name: "M. Dadu Films",
   tagline: "Good People. Great Stories.",
-  description:
-    "A creative home for filmmakers, actors, storytellers and dreamers — where talent meets opportunity.",
+  description: "A creative home for filmmakers, actors, storytellers and dreamers — where talent meets opportunity.",
   navigation: [
     { label: "Home", href: routes.home },
     { label: "Projects", href: routes.projects },

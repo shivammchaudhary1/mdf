@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
 import { useToast } from "@/components/ui/toast-provider";
 import { api, ApiError } from "@/services/api";
 import { fetchPage, type PageMeta } from "@/services/workspace";
@@ -10,13 +11,7 @@ function messageOf(error: unknown) {
   return error instanceof Error ? error.message : "Unable to load records.";
 }
 
-export function useAdminRecords<Source, View>(
-  path: string,
-  map: (x: Source) => View,
-  paginated = true,
-  initialPage = 1,
-  limit = 20,
-) {
+export function useAdminRecords<Source, View>(path: string, map: (x: Source) => View, paginated = true, initialPage = 1, limit = 20) {
   const [records, setRecords] = useState<View[]>([]);
   const [meta, setMeta] = useState<PageMeta | undefined>();
   const [page, setPage] = useState(initialPage);
@@ -80,14 +75,5 @@ export function useAdminRecords<Source, View>(
     };
   }, [load, toast, router]);
 
-  return [
-    records,
-    setRecords,
-    refresh,
-    meta,
-    setPage,
-    page,
-    loading,
-    error,
-  ] as const;
+  return [records, setRecords, refresh, meta, setPage, page, loading, error] as const;
 }

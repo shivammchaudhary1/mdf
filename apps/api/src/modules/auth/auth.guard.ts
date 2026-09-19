@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import type { Request } from "express";
+
 import { AuthPrincipal, AuthService } from "./auth.service";
 export type AuthRequest = Request & { user: AuthPrincipal };
 export function sessionToken(request: Request) {

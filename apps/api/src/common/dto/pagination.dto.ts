@@ -1,6 +1,6 @@
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
-import { ApiPropertyOptional } from "@nestjs/swagger";
 
 function toInteger(value: unknown, fallback: number) {
   const parsed = Number(value);

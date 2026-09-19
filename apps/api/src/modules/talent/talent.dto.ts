@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import {
   ArrayMaxSize,
@@ -13,10 +14,9 @@ import {
   Min,
   MinLength,
 } from "class-validator";
-import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+
 import { PageQueryDto } from "../../common/dto/pagination.dto";
-const booleanValue = ({ value }: { value: unknown }) =>
-  value === "true" ? true : value === "false" ? false : value;
+const booleanValue = ({ value }: { value: unknown }) => (value === "true" ? true : value === "false" ? false : value);
 export class TalentQueryDto extends PageQueryDto {
   @ApiPropertyOptional({ enum: ["actor", "writer", "crew"] })
   @IsOptional()

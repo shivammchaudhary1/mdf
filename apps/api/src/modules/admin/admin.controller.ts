@@ -1,1 +1,26 @@
-import{Controller,Get,Query,UseGuards}from"@nestjs/common";import{ApiCookieAuth,ApiTags}from"@nestjs/swagger";import{Transform}from"class-transformer";import{IsInt,IsOptional,Max,Min}from"class-validator";import{AdminGuard,SessionGuard}from"../auth/auth.guard";import{AdminService}from"./admin.service";class ActivityQueryDto{@IsOptional()@Transform(({value})=>Number(value))@IsInt()@Min(1)@Max(100)limit=30}@ApiTags("super admin")@ApiCookieAuth()@UseGuards(SessionGuard,AdminGuard)@Controller("admin")export class AdminController{constructor(private readonly admin:AdminService){}@Get("metrics")metrics(){return this.admin.metrics()}@Get("activity")activity(@Query()q:ActivityQueryDto){return this.admin.activity(q.limit)}@Get("dashboard")dashboard(){return this.admin.dashboard()}}
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
+import { IsInt, IsOptional, Max, Min } from "class-validator";
+
+import { AdminGuard, SessionGuard } from "../auth/auth.guard";
+import { AdminService } from "./admin.service";
+class ActivityQueryDto {
+  @IsOptional() @Transform(({ value }) => Number(value)) @IsInt() @Min(1) @Max(100) limit = 30;
+}
+@ApiTags("super admin")
+@ApiCookieAuth()
+@UseGuards(SessionGuard, AdminGuard)
+@Controller("admin")
+export class AdminController {
+  constructor(private readonly admin: AdminService) {}
+  @Get("metrics") metrics() {
+    return this.admin.metrics();
+  }
+  @Get("activity") activity(@Query() q: ActivityQueryDto) {
+    return this.admin.activity(q.limit);
+  }
+  @Get("dashboard") dashboard() {
+    return this.admin.dashboard();
+  }
+}

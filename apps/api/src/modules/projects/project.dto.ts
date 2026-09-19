@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
@@ -17,11 +18,7 @@ import {
   MinLength,
   ValidateNested,
 } from "class-validator";
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-  PartialType,
-} from "@nestjs/swagger";
+
 import { PageQueryDto } from "../../common/dto/pagination.dto";
 import { projectStatuses } from "./project.model";
 
@@ -156,9 +153,7 @@ export class CreateProjectDto {
   order?: number;
 }
 
-export class UpdateProjectDto extends PartialType(
-  CreateProjectDto,
-) {}
+export class UpdateProjectDto extends PartialType(CreateProjectDto) {}
 
 export class ProjectQueryDto extends PageQueryDto {
   @ApiPropertyOptional({ enum: projectStatuses })

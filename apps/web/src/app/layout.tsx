@@ -1,6 +1,8 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
+
 import { AppProviders } from "@/providers/app-providers";
 
 const inter = Inter({
@@ -20,8 +22,7 @@ export const metadata: Metadata = {
     default: "M. Dadu Films",
     template: "%s | M. Dadu Films",
   },
-  description:
-    "M. Dadu Films — films, people and possibilities. A creative platform for projects, talent and storytelling.",
+  description: "M. Dadu Films — films, people and possibilities. A creative platform for projects, talent and storytelling.",
 };
 
 export default function RootLayout({

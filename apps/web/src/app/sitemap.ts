@@ -1,1 +1,23 @@
-import type { MetadataRoute } from "next";import { runtimeConfig } from "@/config/runtime";export default function sitemap():MetadataRoute.Sitemap{const base=runtimeConfig.siteUrl.replace(/\/$/,"");return ["","/projects","/our-work","/talent","/casting","/about","/blog","/gallery","/behind-the-scenes","/shows","/team","/contact","/careers","/privacy","/terms"].map(route=>({url:`${base}${route}`,lastModified:new Date()}))}
+import type { MetadataRoute } from "next";
+
+import { runtimeConfig } from "@/config/runtime";
+export default function sitemap(): MetadataRoute.Sitemap {
+  const base = runtimeConfig.siteUrl.replace(/\/$/, "");
+  return [
+    "",
+    "/projects",
+    "/our-work",
+    "/talent",
+    "/casting",
+    "/about",
+    "/blog",
+    "/gallery",
+    "/behind-the-scenes",
+    "/shows",
+    "/team",
+    "/contact",
+    "/careers",
+    "/privacy",
+    "/terms",
+  ].map((route) => ({ url: `${base}${route}`, lastModified: new Date() }));
+}
