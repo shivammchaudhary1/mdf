@@ -152,9 +152,16 @@ try {
   assert.equal(r.data.projectId, projectId);
   assert.equal(r.data.members[0].id, memberId);
   assert.equal((await request(`/admin/lists/${listId}`, { method: "PUT", state: admin, body: { name: "Renamed shortlist", purpose: "Integration review" } })).status, 200);
+  assert.equal((await request("/admin/lists?search=Renamed", { state: admin })).data.meta.total, 1);
+  assert.equal((await request("/admin/lists?search=Integration%20review", { state: admin })).data.meta.total, 1);
+  assert.equal((await request(`/admin/lists/${listId}`, { method: "PUT", state: admin, body: { projectId: null } })).status, 200);
+  assert.equal((await request(`/admin/lists/${listId}`, { state: admin })).data.projectId, undefined);
   assert.equal((await request(`/admin/lists/${listId}/members/${memberId}`, { method: "DELETE", state: admin })).data.members.length, 0);
   assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
+  assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
+  assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId: "000000000000000000000000" } })).status, 404);
   assert.equal((await request(`/admin/lists/${listId}`, { state: admin })).data.purpose, "Integration review");
+  assert.equal((await request(`/admin/lists/${listId}`, { state: member })).status, 403);
 
   r = await request("/contact", { method: "POST", body: { name: "Test Contact", email: "contact@example.test", subject: "Integration inquiry", message: "Please verify contact persistence." } });
   assert.equal(r.status, 201);
