@@ -22,11 +22,10 @@ export const usePublicUiStore = create<PublicUiState>((set) => ({
   teamFilter: "Core Team",
   castingFilter: "All",
   talentFilter: "All",
-  toggleMobileMenu: () =>
-    set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
+  toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
   closeMobileMenu: () => set({ mobileMenuOpen: false }),
   setGalleryFilter: (galleryFilter) => set({ galleryFilter }),
   setTeamFilter: (teamFilter) => set({ teamFilter }),
   setCastingFilter: (castingFilter) => set({ castingFilter }),
-  setTalentFilter: (talentFilter) => set({ talentFilter })
+  setTalentFilter: (talentFilter) => set({ talentFilter }),
 }));

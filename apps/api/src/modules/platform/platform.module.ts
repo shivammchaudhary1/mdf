@@ -1,1 +1,23 @@
-import{Module}from"@nestjs/common";import{MongooseModule}from"@nestjs/mongoose";import{AuthModule}from"../auth/auth.module";import{MediaModule}from"../media/media.module";import{ProjectSchema}from"../projects/project.model";import{AdminContentController,PublicContentController}from"./platform.controller";import{ContentSchema}from"./platform.models";import{PlatformService}from"./platform.service";@Module({imports:[AuthModule,MediaModule,MongooseModule.forFeature([{name:"Content",schema:ContentSchema},{name:"Project",schema:ProjectSchema}])],controllers:[PublicContentController,AdminContentController],providers:[PlatformService],exports:[PlatformService,MongooseModule]})export class PlatformModule{}
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+
+import { AuthModule } from "../auth/auth.module";
+import { MediaModule } from "../media/media.module";
+import { ProjectSchema } from "../projects/project.model";
+import { AdminContentController, PublicContentController } from "./platform.controller";
+import { ContentSchema } from "./platform.models";
+import { PlatformService } from "./platform.service";
+@Module({
+  imports: [
+    AuthModule,
+    MediaModule,
+    MongooseModule.forFeature([
+      { name: "Content", schema: ContentSchema },
+      { name: "Project", schema: ProjectSchema },
+    ]),
+  ],
+  controllers: [PublicContentController, AdminContentController],
+  providers: [PlatformService],
+  exports: [PlatformService, MongooseModule],
+})
+export class PlatformModule {}

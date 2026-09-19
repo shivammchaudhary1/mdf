@@ -8,8 +8,7 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
       title: "New Beginnings",
       category: "Short Film",
       status: "Running",
-      description:
-        "A small town. An unexpected encounter. A chance to start again.",
+      description: "A small town. An unexpected encounter. A chance to start again.",
       body: [
         "This is a sample project for previewing the platform, not an announced M. Dadu Films production.",
         "Project synopsis, credits, production updates and a trailer will appear here when supplied.",
@@ -20,8 +19,7 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
       title: "City Stories",
       category: "Web Series",
       status: "Upcoming",
-      description:
-        "Interconnected lives, told through the rhythm of a changing city.",
+      description: "Interconnected lives, told through the rhythm of a changing city.",
       body: [
         "This sample series demonstrates an upcoming project.",
         "The final production details and creative team are awaiting confirmation.",
@@ -60,12 +58,8 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
       status: "Open",
       location: "Location to be confirmed",
       role: "Production crew",
-      description:
-        "Bring your organisation and storytelling skills to a collaborative set.",
-      body: [
-        "Sample crew notice only.",
-        "Final requirements, dates and compensation will be published with the confirmed opportunity.",
-      ],
+      description: "Bring your organisation and storytelling skills to a collaborative set.",
+      body: ["Sample crew notice only.", "Final requirements, dates and compensation will be published with the confirmed opportunity."],
     },
   ],
   blog: [
@@ -73,8 +67,7 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
       slug: "demo-audition-preparation",
       title: "Preparing for your next audition",
       category: "Acting",
-      description:
-        "Make room for preparation, curiosity and your own interpretation.",
+      description: "Make room for preparation, curiosity and your own interpretation.",
       body: [
         "Read the brief carefully and understand what is being requested. Prepare your material and check the format before the audition.",
         "Give yourself time to warm up and arrive prepared. Listen, take direction and stay open to trying a scene differently.",
@@ -85,8 +78,7 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
       slug: "demo-creative-collaboration",
       title: "The people behind a great story",
       category: "Filmmaking",
-      description:
-        "A film grows through many perspectives and a shared purpose.",
+      description: "A film grows through many perspectives and a shared purpose.",
       body: [
         "Every production brings together different disciplines. Good communication lets those perspectives strengthen the story.",
         "This article is sample content for previewing the blog. Approved editorial content will be managed through the CMS.",
@@ -129,10 +121,7 @@ export const demoContent: Record<CollectionKind, ContentItem[]> = {
   shows: [],
 };
 
-export const collectionCopy: Record<
-  CollectionKind,
-  { eyebrow: string; title: string; description: string }
-> = {
+export const collectionCopy: Record<CollectionKind, { eyebrow: string; title: string; description: string }> = {
   projects: {
     eyebrow: "Our work",
     title: "Stories in the making.",
@@ -141,8 +130,7 @@ export const collectionCopy: Record<
   casting: {
     eyebrow: "Opportunities",
     title: "Your next chapter starts here.",
-    description:
-      "Find acting and crew opportunities, and the people to create with.",
+    description: "Find acting and crew opportunities, and the people to create with.",
   },
   blog: {
     eyebrow: "Journal",

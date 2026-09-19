@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { SiteMedia } from "@/components/site/site-media";
+
 import { useMemberData } from "@/components/member-data";
+import { SiteMedia } from "@/components/site/site-media";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast-provider";
 import { runtimeConfig } from "@/config/runtime";
 import { api } from "@/services/api";
-import { uploadMedia, type UploadedMediaResult } from "@/services/workspace";
+import { type UploadedMediaResult, uploadMedia } from "@/services/workspace";
 
 function absoluteMediaUrl(value?: string) {
   if (!value) return "";
@@ -33,11 +34,7 @@ export function MemberPortfolioSection() {
 
   async function cleanupUploads(items: UploadedMediaResult[]) {
     await Promise.all(
-      items
-        .filter((item) => !item.duplicate)
-        .map((item) =>
-          api(`/media/${item.id}`, { method: "DELETE" }).catch(() => undefined),
-        ),
+      items.filter((item) => !item.duplicate).map((item) => api(`/media/${item.id}`, { method: "DELETE" }).catch(() => undefined)),
     );
   }
 
@@ -48,9 +45,7 @@ export function MemberPortfolioSection() {
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({
-          portfolioMediaIds: (profile.portfolioMediaIds ?? []).filter(
-            (id) => id !== removing,
-          ),
+          portfolioMediaIds: (profile.portfolioMediaIds ?? []).filter((id) => id !== removing),
         }),
       });
       await refresh();
@@ -93,12 +88,7 @@ export function MemberPortfolioSection() {
           uploaded.push(await uploadMedia(file));
         }
 
-        const next = [
-          ...new Set([
-            ...current,
-            ...uploaded.map((item) => item.id),
-          ]),
-        ];
+        const next = [...new Set([...current, ...uploaded.map((item) => item.id)])];
 
         if (next.length > 8) {
           throw new Error("Your portfolio can contain a maximum of 8 photographs.");
@@ -211,20 +201,31 @@ export function MemberPortfolioSection() {
           <h2>Keep your casting material current.</h2>
           <span>Use strong recent photographs, a current showreel and an updated PDF resume.</span>
         </div>
-        <div><strong>{data.portfolio.length}</strong><span>photos</span></div>
+        <div>
+          <strong>{data.portfolio.length}</strong>
+          <span>photos</span>
+        </div>
       </section>
 
       <article className="md-card">
         <div className="md-card-head">
-          <div><p className="md-kicker">Photographs</p><h2>Portfolio Gallery</h2></div>
+          <div>
+            <p className="md-kicker">Photographs</p>
+            <h2>Portfolio Gallery</h2>
+          </div>
           <span>{data.portfolio.length}/8 photographs</span>
         </div>
         <div className="md-portfolio-grid">
           {data.portfolio.map((item) => (
             <div key={item.id} className="md-portfolio-item">
-              <SiteMedia src={item.image} alt={item.title} kind="gallery" className="aspect-[4/5] rounded-xl"/>
-              <p>{item.title}<span>{item.category}</span></p>
-              <button type="button" onClick={() => setRemoving(item.id)} disabled={busy} aria-label={`Remove ${item.title}`}>×</button>
+              <SiteMedia src={item.image} alt={item.title} kind="gallery" className="aspect-[4/5] rounded-xl" />
+              <p>
+                {item.title}
+                <span>{item.category}</span>
+              </p>
+              <button type="button" onClick={() => setRemoving(item.id)} disabled={busy} aria-label={`Remove ${item.title}`}>
+                ×
+              </button>
             </div>
           ))}
           <button className="md-add-photo" disabled={busy || (profile.portfolioMediaIds?.length ?? 0) >= 8} onClick={choosePhotos}>
@@ -248,9 +249,27 @@ export function MemberPortfolioSection() {
               disabled={busy}
             />
             <div className="md-save-row">
-              {profile.showreel && <a className="md-secondary" href={profile.showreel} target="_blank" rel="noreferrer">Open Showreel</a>}
-              {profile.showreel && <button className="md-secondary" type="button" disabled={busy} onClick={() => { setShowreel(""); void saveShowreel(); }}>Remove</button>}
-              <button className="md-primary" type="button" disabled={busy} onClick={() => void saveShowreel()}>{profile.showreel ? "Update Link" : "Save Link"}</button>
+              {profile.showreel && (
+                <a className="md-secondary" href={profile.showreel} target="_blank" rel="noreferrer">
+                  Open Showreel
+                </a>
+              )}
+              {profile.showreel && (
+                <button
+                  className="md-secondary"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setShowreel("");
+                    void saveShowreel();
+                  }}
+                >
+                  Remove
+                </button>
+              )}
+              <button className="md-primary" type="button" disabled={busy} onClick={() => void saveShowreel()}>
+                {profile.showreel ? "Update Link" : "Save Link"}
+              </button>
             </div>
           </div>
         </article>
@@ -262,9 +281,19 @@ export function MemberPortfolioSection() {
             <strong>{profile.resume ? "Resume uploaded" : "No resume uploaded"}</strong>
             <span>PDF · up to 10 MB</span>
             <div className="md-save-row">
-              {profile.resume && <a className="md-secondary" href={absoluteMediaUrl(profile.resume)} target="_blank" rel="noreferrer">Download Resume</a>}
-              <button className="md-primary" type="button" disabled={busy} onClick={chooseResume}>{profile.resume ? "Replace Resume" : "Upload Resume"}</button>
-              {profile.resume && <button className="md-secondary" type="button" disabled={busy} onClick={() => void removeResume()}>Remove</button>}
+              {profile.resume && (
+                <a className="md-secondary" href={absoluteMediaUrl(profile.resume)} target="_blank" rel="noreferrer">
+                  Download Resume
+                </a>
+              )}
+              <button className="md-primary" type="button" disabled={busy} onClick={chooseResume}>
+                {profile.resume ? "Replace Resume" : "Upload Resume"}
+              </button>
+              {profile.resume && (
+                <button className="md-secondary" type="button" disabled={busy} onClick={() => void removeResume()}>
+                  Remove
+                </button>
+              )}
             </div>
           </div>
         </article>

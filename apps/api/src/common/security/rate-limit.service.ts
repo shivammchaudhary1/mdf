@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import type { Model } from "mongoose";
+
 import { sha256Hex } from "../utils/crypto";
 import type { RateLimitBucket } from "./rate-limit.model";
 
@@ -12,28 +13,22 @@ export type RateLimitResult = {
 
 @Injectable()
 export class RateLimitService {
-  constructor(
-    @InjectModel("RateLimitBucket") private readonly buckets: Model<RateLimitBucket>,
-  ) {}
+  constructor(@InjectModel("RateLimitBucket") private readonly buckets: Model<RateLimitBucket>) {}
 
   async consume(scope: string, key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
     const now = new Date();
     const keyHash = sha256Hex(`${scope}:${key}`);
     const resetAt = new Date(Date.now() + windowMs);
 
-    let bucket = await this.buckets.findOneAndUpdate(
-      { scope, keyHash, resetAt: { $gt: now } },
-      { $inc: { count: 1 } },
-      { new: true },
-    ).lean();
+    let bucket = await this.buckets
+      .findOneAndUpdate({ scope, keyHash, resetAt: { $gt: now } }, { $inc: { count: 1 } }, { new: true })
+      .lean();
 
     if (!bucket) {
       try {
-        bucket = await this.buckets.findOneAndUpdate(
-          { scope, keyHash },
-          { $set: { count: 1, resetAt } },
-          { new: true, upsert: true, setDefaultsOnInsert: true },
-        ).lean();
+        bucket = await this.buckets
+          .findOneAndUpdate({ scope, keyHash }, { $set: { count: 1, resetAt } }, { new: true, upsert: true, setDefaultsOnInsert: true })
+          .lean();
       } catch (error: unknown) {
         if (error && typeof error === "object" && "code" in error && error.code === 11000) {
           return this.consume(scope, key, limit, windowMs);

@@ -22,8 +22,6 @@ export const useMemberDashboardStore = create<State>((set) => ({
   setOpportunityFilter: (opportunityFilter) => set({ opportunityFilter }),
   toggleSaved: (id) =>
     set((state) => ({
-      saved: state.saved.includes(id)
-        ? state.saved.filter((value) => value !== id)
-        : [...state.saved, id]
-    }))
+      saved: state.saved.includes(id) ? state.saved.filter((value) => value !== id) : [...state.saved, id],
+    })),
 }));

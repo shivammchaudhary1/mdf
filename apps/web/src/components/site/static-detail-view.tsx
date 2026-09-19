@@ -1,21 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getContentItem } from "@/services/content";
-import { SiteHeader } from "@/components/site/site-header";
-import { SiteFooter } from "@/components/site/site-footer";
-import { SiteMedia } from "@/components/site/site-media";
+
 import { ApplyForm } from "@/components/apply-form";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
+import { SiteMedia } from "@/components/site/site-media";
+import { getContentItem } from "@/services/content";
 
 type DetailKind = "projects" | "blogs" | "castings";
 
-export async function StaticDetailView({
-  kind,
-  slug
-}: {
-  kind: DetailKind;
-  slug: string;
-}) {
-  const item = await getContentItem(kind==="blogs"?"blog":kind==="castings"?"casting":"projects",slug);
+export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug: string }) {
+  const item = await getContentItem(kind === "blogs" ? "blog" : kind === "castings" ? "casting" : "projects", slug);
 
   if (!item) notFound();
 
@@ -30,7 +25,7 @@ export async function StaticDetailView({
       <main id="main-content">
         <section className="site-shell py-9 lg:py-14">
           <Link
-            href={kind === "blogs" ? "/blog" : `/${kind==="castings"?"casting":kind}`}
+            href={kind === "blogs" ? "/blog" : `/${kind === "castings" ? "casting" : kind}`}
             className="text-xs font-semibold text-[#777] hover:text-black"
           >
             ← Back
@@ -38,12 +33,8 @@ export async function StaticDetailView({
 
           <div className="mx-auto mt-10 max-w-4xl text-center">
             <p className="site-kicker">{category}</p>
-            <h1 className="font-display mt-3 text-4xl font-semibold leading-tight sm:text-6xl">
-              {title}
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">
-              {summary}
-            </p>
+            <h1 className="font-display mt-3 text-4xl font-semibold leading-tight sm:text-6xl">{title}</h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">{summary}</p>
           </div>
 
           <SiteMedia
@@ -54,14 +45,20 @@ export async function StaticDetailView({
           />
 
           <article className="mx-auto max-w-3xl py-10 text-[15px] leading-8 text-[#555]">
-            <p>
-              {item.body?.[0]??item.description??""}
-            </p>
-            <p className="mt-5">
-              {item.body?.slice(1).join("\n\n")??""}
-            </p>
+            <p>{item.body?.[0] ?? item.description ?? ""}</p>
+            <p className="mt-5">{item.body?.slice(1).join("\n\n") ?? ""}</p>
           </article>
-          {kind!=="blogs"&&<div className="mx-auto max-w-3xl pb-12"><ApplyForm opportunityId={String(item._id)} opportunityType={kind==="castings"?"CASTING":"PROJECT"} closed={kind==="castings"?item.acceptingApplications===false:["Completed","Archived"].includes(String(item.status??""))}/></div>}
+          {kind !== "blogs" && (
+            <div className="mx-auto max-w-3xl pb-12">
+              <ApplyForm
+                opportunityId={String(item._id)}
+                opportunityType={kind === "castings" ? "CASTING" : "PROJECT"}
+                closed={
+                  kind === "castings" ? item.acceptingApplications === false : ["Completed", "Archived"].includes(String(item.status ?? ""))
+                }
+              />
+            </div>
+          )}
         </section>
       </main>
       <SiteFooter />

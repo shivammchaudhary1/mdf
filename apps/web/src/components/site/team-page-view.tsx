@@ -1,21 +1,21 @@
 "use client";
 
-import { usePublicData } from "./use-public-data";
-import { SiteHeader } from "@/components/site/site-header";
-import { SiteFooter } from "@/components/site/site-footer";
 import { PageIntro } from "@/components/site/page-intro";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
 import { usePublicUiStore } from "@/store/public-ui-store";
+
+import { usePublicData } from "./use-public-data";
 
 const tabs = ["Core Team", "Creative Team", "Advisors"];
 
 export function TeamPageView() {
-  const data=usePublicData("team");
+  const data = usePublicData("team");
   const active = usePublicUiStore((state) => state.teamFilter);
   const setActive = usePublicUiStore((state) => state.setTeamFilter);
 
-  const visible =
-    data.team.filter((member) => member.group === active);
+  const visible = data.team.filter((member) => member.group === active);
 
   return (
     <>
@@ -38,9 +38,7 @@ export function TeamPageView() {
                   type="button"
                   onClick={() => setActive(tab)}
                   className={`border-b-2 px-5 py-3 text-sm font-semibold transition ${
-                    active === tab
-                      ? "border-[var(--brand-red)] text-[#111]"
-                      : "border-transparent text-[#888]"
+                    active === tab ? "border-[var(--brand-red)] text-[#111]" : "border-transparent text-[#888]"
                   }`}
                 >
                   {tab}
@@ -52,16 +50,9 @@ export function TeamPageView() {
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((member) => (
                   <article key={member.name} className="site-card overflow-hidden">
-                    <SiteMedia
-                      src={member.image}
-                      alt={member.name}
-                      kind="team"
-                      className="aspect-[4/4.5]"
-                    />
+                    <SiteMedia src={member.image} alt={member.name} kind="team" className="aspect-[4/4.5]" />
                     <div className="p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[.12em] text-[var(--brand-red)]">
-                        {member.role}
-                      </p>
+                      <p className="text-[11px] font-bold uppercase tracking-[.12em] text-[var(--brand-red)]">{member.role}</p>
                       <h2 className="font-display mt-2 text-xl font-semibold">{member.name}</h2>
                       <p className="mt-3 text-sm leading-6 text-[#777]">{member.bio}</p>
                       <div className="mt-4 flex gap-2">
@@ -75,9 +66,7 @@ export function TeamPageView() {
             ) : (
               <div className="site-card p-10 text-center">
                 <p className="font-display text-2xl font-semibold">Advisors will be announced soon.</p>
-                <p className="mt-2 text-sm text-[#777]">
-                  This section is intentionally ready for real team data.
-                </p>
+                <p className="mt-2 text-sm text-[#777]">This section is intentionally ready for real team data.</p>
               </div>
             )}
           </div>

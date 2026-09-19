@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import {
   ArrayMaxSize,
@@ -15,11 +16,7 @@ import {
   Min,
   MinLength,
 } from "class-validator";
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-  PartialType,
-} from "@nestjs/swagger";
+
 import { PageQueryDto } from "../../common/dto/pagination.dto";
 import { castingStatuses } from "./casting.model";
 
@@ -152,14 +149,12 @@ export class CreateCastingDto {
   tags?: string[];
 }
 
-export class UpdateCastingDto extends PartialType(
-  CreateCastingDto,
-) {}
+export class UpdateCastingDto extends PartialType(CreateCastingDto) {}
 
 export class CastingQueryDto extends PageQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value === "true" ? true : value === "false" ? false : value)
+  @Transform(({ value }) => (value === "true" ? true : value === "false" ? false : value))
   @IsBoolean()
   closingSoon?: boolean;
 

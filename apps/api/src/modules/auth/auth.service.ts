@@ -1,17 +1,34 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import { OAuth2Client } from "google-auth-library";
-import { Types, type Model } from "mongoose";
-import { randomToken, sha256 } from "../../common/utils/crypto";
+import { type Model, Types } from "mongoose";
+
 import { RateLimitService } from "../../common/security/rate-limit.service";
-import { Account, PasswordReset, Session, type AuthProvider } from "./auth.models";
-import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
-import { hashPassword, tokenDigest, verifyPassword } from "./password";
+import { randomToken, sha256 } from "../../common/utils/crypto";
 import { MailService } from "../mail/mail.service";
+import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
+import { Account, type AuthProvider, PasswordReset, Session } from "./auth.models";
+import { hashPassword, tokenDigest, verifyPassword } from "./password";
 
 export type SessionContext = { ip?: string; userAgent?: string };
-export type AuthPrincipal = { id: string; name: string; email: string; mobile: string; role: "USER" | "SUPER_ADMIN"; verified: boolean; sessionId: string; sessionExpiresAt: Date };
+export type AuthPrincipal = {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  role: "USER" | "SUPER_ADMIN";
+  verified: boolean;
+  sessionId: string;
+  sessionExpiresAt: Date;
+};
 type AccountLike = Account & { _id: unknown };
 
 @Injectable()
@@ -30,27 +47,52 @@ export class AuthService {
   }
 
   publicAccount(account: AccountLike) {
-    return { id: String(account._id), name: account.name, email: account.email, mobile: account.mobile, role: account.role, verified: account.verified };
+    return {
+      id: String(account._id),
+      name: account.name,
+      email: account.email,
+      mobile: account.mobile,
+      role: account.role,
+      verified: account.verified,
+    };
   }
   publicPrincipal(principal: AuthPrincipal) {
-    return { id: principal.id, name: principal.name, email: principal.email, mobile: principal.mobile, role: principal.role, verified: principal.verified };
+    return {
+      id: principal.id,
+      name: principal.name,
+      email: principal.email,
+      mobile: principal.mobile,
+      role: principal.role,
+      verified: principal.verified,
+    };
   }
   private contextHash(value?: string) {
     if (!value) return undefined;
     const pepper = String(this.config.get("COOKIE_SECRET") ?? "development");
     return sha256(`${pepper}:${value.slice(0, 1000)}`);
   }
-  private accountId(account: AccountLike) { return new Types.ObjectId(String(account._id)); }
+  private accountId(account: AccountLike) {
+    return new Types.ObjectId(String(account._id));
+  }
 
   async register(input: RegisterDto, context: SessionContext) {
     if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
     await this.rateLimits.consume("register-email", input.email, 5, 60 * 60 * 1000);
     try {
-      const account = await this.accounts.create({ name: input.name.trim(), email: input.email, mobile: input.mobile.trim(), passwordHash: await hashPassword(input.password), authProvider: "local" });
-      await this.mail.send(account.email, "Welcome to M. Dadu Films", `Welcome ${account.name}. Your community account is ready.`).catch(() => undefined);
+      const account = await this.accounts.create({
+        name: input.name.trim(),
+        email: input.email,
+        mobile: input.mobile.trim(),
+        passwordHash: await hashPassword(input.password),
+        authProvider: "local",
+      });
+      await this.mail
+        .send(account.email, "Welcome to M. Dadu Films", `Welcome ${account.name}. Your community account is ready.`)
+        .catch(() => undefined);
       return this.createSession(account, false, context);
     } catch (error: unknown) {
-      if (typeof error === "object" && error && "code" in error && error.code === 11000) throw new ConflictException("An account with this email already exists.");
+      if (typeof error === "object" && error && "code" in error && error.code === 11000)
+        throw new ConflictException("An account with this email already exists.");
       throw error;
     }
   }
@@ -72,16 +114,28 @@ export class AuthService {
     try {
       const ticket = await this.google.verifyIdToken({ idToken: input.credential, audience: clientId });
       payload = ticket.getPayload();
-    } catch { throw new UnauthorizedException("Google sign-in could not be verified."); }
-    if (!payload?.sub || !payload.email || !payload.email_verified) throw new UnauthorizedException("Google did not return a verified email address.");
+    } catch {
+      throw new UnauthorizedException("Google sign-in could not be verified.");
+    }
+    if (!payload?.sub || !payload.email || !payload.email_verified)
+      throw new UnauthorizedException("Google did not return a verified email address.");
     const email = payload.email.trim().toLowerCase();
     let account = await this.accounts.findOne({ $or: [{ googleSub: payload.sub }, { email }] }).select("+googleSub +passwordHash");
     if (!account) {
       if (!input.mobile) throw new BadRequestException("Mobile number is required to complete your first Google sign-in.");
-      account = await this.accounts.create({ name: (input.name || payload.name || email.split("@")[0]).slice(0, 100), email, mobile: input.mobile.trim(), authProvider: "google", googleSub: payload.sub });
+      account = await this.accounts.create({
+        name: (input.name || payload.name || email.split("@")[0]).slice(0, 100),
+        email,
+        mobile: input.mobile.trim(),
+        authProvider: "google",
+        googleSub: payload.sub,
+      });
     } else {
       if (account.suspended) throw new UnauthorizedException("Login failed. Check your account status.");
-      if (!account.googleSub) { account.googleSub = payload.sub; account.authProvider = account.passwordHash ? "both" : "google"; }
+      if (!account.googleSub) {
+        account.googleSub = payload.sub;
+        account.authProvider = account.passwordHash ? "both" : "google";
+      }
       account.lastLoginAt = new Date();
       account.loginCount = Number(account.loginCount ?? 0) + 1;
       await account.save();
@@ -95,9 +149,22 @@ export class AuthService {
     const rememberDays = Math.max(1, Number(this.config.get("SESSION_REMEMBER_DAYS") ?? 30));
     const duration = remember ? rememberDays * 86_400_000 : shortHours * 3_600_000;
     const now = new Date();
-    const session = await this.sessions.create({ userId: this.accountId(account), tokenHash: tokenDigest(token), remember, ipHash: this.contextHash(context.ip), userAgentHash: this.contextHash(context.userAgent), lastSeenAt: now, expiresAt: new Date(now.getTime() + duration) });
+    const session = await this.sessions.create({
+      userId: this.accountId(account),
+      tokenHash: tokenDigest(token),
+      remember,
+      ipHash: this.contextHash(context.ip),
+      userAgentHash: this.contextHash(context.userAgent),
+      lastSeenAt: now,
+      expiresAt: new Date(now.getTime() + duration),
+    });
     const maxSessions = Math.max(1, Math.min(25, Number(this.config.get("SESSION_MAX_PER_USER") ?? 10)));
-    const stale = await this.sessions.find({ userId: this.accountId(account) }).sort({ createdAt: -1 }).skip(maxSessions).select("_id").lean();
+    const stale = await this.sessions
+      .find({ userId: this.accountId(account) })
+      .sort({ createdAt: -1 })
+      .skip(maxSessions)
+      .select("_id")
+      .lean();
     if (stale.length) await this.sessions.deleteMany({ _id: { $in: stale.map((item) => item._id) } });
     return { token, duration, remember, sessionId: String(session._id), user: this.publicAccount(account) };
   }
@@ -108,7 +175,9 @@ export class AuthService {
     const account = session ? await this.accounts.findById(session.userId).lean() : null;
     if (!session || !account || account.suspended) throw new UnauthorizedException("Your session has expired. Please sign in.");
     if (!session.lastSeenAt || session.lastSeenAt.getTime() < Date.now() - 15 * 60 * 1000) {
-      void this.sessions.updateOne({ _id: session._id, lastSeenAt: { $lt: new Date(Date.now() - 15 * 60 * 1000) } }, { $set: { lastSeenAt: new Date() } }).catch(() => undefined);
+      void this.sessions
+        .updateOne({ _id: session._id, lastSeenAt: { $lt: new Date(Date.now() - 15 * 60 * 1000) } }, { $set: { lastSeenAt: new Date() } })
+        .catch(() => undefined);
     }
     return { ...this.publicAccount(account as AccountLike), sessionId: String(session._id), sessionExpiresAt: session.expiresAt };
   }
@@ -122,7 +191,9 @@ export class AuthService {
     if (!account) throw new NotFoundException("Account not found.");
     // Changing an identity used by Google requires a separate verified linking flow.
     if (input.email && input.email !== account.email && account.verified) {
-      throw new BadRequestException("Verified account email cannot be changed here. Contact support if your verified email must be updated.");
+      throw new BadRequestException(
+        "Verified account email cannot be changed here. Contact support if your verified email must be updated.",
+      );
     }
     if (input.email && input.email !== account.email && account.authProvider !== "local") {
       throw new BadRequestException("The email linked to Google sign-in cannot be changed here.");
@@ -132,7 +203,8 @@ export class AuthService {
       if (input.mobile !== undefined) account.mobile = input.mobile;
       await account.save();
     } catch (error: unknown) {
-      if (error && typeof error === "object" && "code" in error && error.code === 11000) throw new ConflictException("This email is already registered.");
+      if (error && typeof error === "object" && "code" in error && error.code === 11000)
+        throw new ConflictException("This email is already registered.");
       throw error;
     }
     return this.publicAccount(account);
@@ -142,14 +214,29 @@ export class AuthService {
     return { message: "All sessions have been signed out." };
   }
   async deactivate(userId: string) {
-    const account = await this.accounts.findOneAndUpdate({ _id: new Types.ObjectId(userId), role: "USER" }, { $set: { suspended: true } }, { new: true });
+    const account = await this.accounts.findOneAndUpdate(
+      { _id: new Types.ObjectId(userId), role: "USER" },
+      { $set: { suspended: true } },
+      { new: true },
+    );
     if (!account) throw new BadRequestException("An administrator account cannot be deactivated here.");
     await this.sessions.deleteMany({ userId: account._id });
     return { message: "Account deactivated. Contact the team to reactivate it." };
   }
   async listSessions(userId: string, currentSessionId: string) {
-    const sessions = await this.sessions.find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } }).select("_id remember createdAt lastSeenAt expiresAt").sort({ createdAt: -1 }).lean();
-    return sessions.map((session) => ({ id: String(session._id), remember: session.remember, createdAt: session.createdAt, lastSeenAt: session.lastSeenAt, expiresAt: session.expiresAt, current: String(session._id) === currentSessionId }));
+    const sessions = await this.sessions
+      .find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } })
+      .select("_id remember createdAt lastSeenAt expiresAt")
+      .sort({ createdAt: -1 })
+      .lean();
+    return sessions.map((session) => ({
+      id: String(session._id),
+      remember: session.remember,
+      createdAt: session.createdAt,
+      lastSeenAt: session.lastSeenAt,
+      expiresAt: session.expiresAt,
+      current: String(session._id) === currentSessionId,
+    }));
   }
   async revokeSession(userId: string, sessionId: string, currentSessionId: string) {
     if (!Types.ObjectId.isValid(sessionId)) throw new NotFoundException("Session not found.");
@@ -166,7 +253,9 @@ export class AuthService {
       await this.resets.deleteMany({ userId: account._id });
       await this.resets.create({ userId: account._id, tokenHash: tokenDigest(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) });
       const origin = String(this.config.get("FRONTEND_URL") ?? "http://localhost:3333").split(",")[0];
-      await this.mail.send(account.email, "Reset your password", `Reset your password within one hour: ${origin}/reset-password#token=${token}`).catch(() => undefined);
+      await this.mail
+        .send(account.email, "Reset your password", `Reset your password within one hour: ${origin}/reset-password#token=${token}`)
+        .catch(() => undefined);
     }
     return { message: "If that email is registered, a reset link will be sent." };
   }

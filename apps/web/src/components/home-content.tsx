@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { PublicHeader } from "@/components/public-header";
+
 import { PublicFooter } from "@/components/public-footer";
-import { SectionHeading } from "@/components/ui/section-heading";
+import { PublicHeader } from "@/components/public-header";
 import { ContentCard } from "@/components/ui/content-card";
 import { DemoNotice, EmptyState } from "@/components/ui/feedback";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { SmartImage } from "@/components/ui/smart-image";
 import { placeholderHomeContent as hero } from "@/content/placeholders/home";
 import { placeholderPages } from "@/content/placeholders/pages";
@@ -31,32 +32,12 @@ async function HomeCollection({
   const dark = tone === "dark";
 
   return (
-    <section
-      className={
-        dark
-          ? "bg-[var(--surface-dark)] text-white"
-          : tone === "soft"
-            ? "bg-[var(--surface)]"
-            : "bg-white"
-      }
-    >
+    <section className={dark ? "bg-[var(--surface-dark)] text-white" : tone === "soft" ? "bg-[var(--surface)]" : "bg-white"}>
       <div className="container-shell section-pad">
-        <SectionHeading
-          title={title}
-          eyebrow={eyebrow}
-          description={description}
-          href={`/${kind}`}
-          inverted={dark}
-        />
+        <SectionHeading title={title} eyebrow={eyebrow} description={description} href={`/${kind}`} inverted={dark} />
 
         {items.length ? (
-          <div
-            className={`grid gap-6 ${
-              columns === "two"
-                ? "md:grid-cols-2"
-                : "sm:grid-cols-2 lg:grid-cols-3"
-            }`}
-          >
+          <div className={`grid gap-6 ${columns === "two" ? "md:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
             {items.slice(0, columns === "two" ? 4 : 3).map((item) => (
               <ContentCard key={item.slug} item={item} kind={kind} />
             ))}
@@ -88,30 +69,18 @@ export function HomeContent() {
 
           <div className="container-shell relative grid min-h-[720px] items-center gap-12 pb-20 pt-32 lg:grid-cols-[1.05fr_.95fr] lg:pb-24 lg:pt-28">
             <div className="max-w-3xl">
-              <p className="mb-6 text-sm font-bold uppercase tracking-[.24em] text-[var(--brand-gold)]">
-                {hero.eyebrow}
-              </p>
+              <p className="mb-6 text-sm font-bold uppercase tracking-[.24em] text-[var(--brand-gold)]">{hero.eyebrow}</p>
               <h1 className="font-display text-[clamp(3.5rem,8vw,7rem)] font-semibold leading-[.93] tracking-[-.04em]">
                 {hero.titleLineOne}
-                <span className="mt-2 block text-[var(--brand-red)]">
-                  {hero.titleLineTwo}
-                </span>
+                <span className="mt-2 block text-[var(--brand-red)]">{hero.titleLineTwo}</span>
               </h1>
-              <p className="mt-8 max-w-2xl text-lg leading-8 text-white/70 sm:text-xl">
-                {hero.description}
-              </p>
+              <p className="mt-8 max-w-2xl text-lg leading-8 text-white/70 sm:text-xl">{hero.description}</p>
 
               <div className="mt-9 flex flex-wrap gap-3">
-                <Link
-                  href="/projects"
-                  className="brand-button brand-button-primary"
-                >
+                <Link href="/projects" className="brand-button brand-button-primary">
                   {hero.primaryCta} <span aria-hidden="true">→</span>
                 </Link>
-                <Link
-                  href="/signup"
-                  className="brand-button brand-button-secondary"
-                >
+                <Link href="/signup" className="brand-button brand-button-secondary">
                   {hero.secondaryCta}
                 </Link>
               </div>
@@ -135,27 +104,17 @@ export function HomeContent() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-7">
-                    <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--brand-gold)]">
-                      {hero.heroFrame.eyebrow}
-                    </p>
-                    <p className="font-display mt-2 text-3xl font-semibold">
-                      {hero.heroFrame.title}
-                    </p>
+                    <p className="text-xs font-bold uppercase tracking-[.18em] text-[var(--brand-gold)]">{hero.heroFrame.eyebrow}</p>
+                    <p className="font-display mt-2 text-3xl font-semibold">{hero.heroFrame.title}</p>
                   </div>
                 </div>
               </div>
 
               <div className="absolute bottom-[3%] right-[2%] w-[42%] rotate-[5deg] rounded-[22px] border border-white/10 bg-[#161a22] p-5 shadow-2xl">
-                <p className="text-xs font-bold uppercase tracking-[.18em] text-white/40">
-                  {hero.heroFrame.networkEyebrow}
-                </p>
-                <p className="font-display mt-3 text-2xl leading-tight">
-                  {hero.heroFrame.networkTitle}
-                </p>
+                <p className="text-xs font-bold uppercase tracking-[.18em] text-white/40">{hero.heroFrame.networkEyebrow}</p>
+                <p className="font-display mt-3 text-2xl leading-tight">{hero.heroFrame.networkTitle}</p>
                 <div className="mt-5 h-px bg-white/10" />
-                <p className="mt-4 text-sm leading-6 text-white/60">
-                  {hero.heroFrame.networkDescription}
-                </p>
+                <p className="mt-4 text-sm leading-6 text-white/60">{hero.heroFrame.networkDescription}</p>
               </div>
 
               <div className="absolute right-[1%] top-[7%] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-xs font-bold uppercase tracking-[.15em] text-white/60 backdrop-blur">
@@ -172,13 +131,9 @@ export function HomeContent() {
           <div className="container-shell grid gap-8 border-y border-slate-100 py-10 md:grid-cols-[1.25fr_.75fr] md:items-end">
             <div>
               <p className="eyebrow mb-4">{hero.manifesto.eyebrow}</p>
-              <h2 className="font-display max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">
-                {content.brandMessage}
-              </h2>
+              <h2 className="font-display max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">{content.brandMessage}</h2>
             </div>
-            <p className="max-w-xl leading-7 text-[var(--muted)] md:justify-self-end">
-              {hero.manifesto.description}
-            </p>
+            <p className="max-w-xl leading-7 text-[var(--muted)] md:justify-self-end">{hero.manifesto.description}</p>
           </div>
         </section>
 
@@ -193,20 +148,11 @@ export function HomeContent() {
           <div className="container-shell section-pad">
             <div className="cinematic-panel grid gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
-                <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[var(--brand-gold)]">
-                  {hero.communityEyebrow}
-                </p>
-                <h2 className="font-display max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">
-                  {content.communityTitle}
-                </h2>
-                <p className="mt-5 max-w-2xl leading-7 text-white/60">
-                  {content.communityDescription}
-                </p>
+                <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[var(--brand-gold)]">{hero.communityEyebrow}</p>
+                <h2 className="font-display max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">{content.communityTitle}</h2>
+                <p className="mt-5 max-w-2xl leading-7 text-white/60">{content.communityDescription}</p>
               </div>
-              <Link
-                href="/signup"
-                className="brand-button brand-button-primary justify-self-start lg:justify-self-end"
-              >
+              <Link href="/signup" className="brand-button brand-button-primary justify-self-start lg:justify-self-end">
                 {hero.secondaryCta} <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -229,12 +175,7 @@ export function HomeContent() {
           tone="dark"
         />
 
-        <HomeCollection
-          kind="shows"
-          title={hero.sections.shows.title}
-          eyebrow={hero.sections.shows.eyebrow}
-          tone="soft"
-        />
+        <HomeCollection kind="shows" title={hero.sections.shows.title} eyebrow={hero.sections.shows.eyebrow} tone="soft" />
 
         <HomeCollection
           kind="blog"
@@ -245,26 +186,13 @@ export function HomeContent() {
 
         <section className="bg-[var(--surface)]">
           <div className="container-shell section-pad">
-            <SectionHeading
-              eyebrow={hero.whyEyebrow}
-              title={content.sectionTitle}
-              description={hero.whyDescription}
-            />
+            <SectionHeading eyebrow={hero.whyEyebrow} title={content.sectionTitle} description={hero.whyDescription} />
             <div className="grid gap-5 md:grid-cols-3">
               {content.values.map((value, index) => (
-                <article
-                  key={value.title}
-                  className="editorial-panel p-7 sm:p-8"
-                >
-                  <span className="text-xs font-extrabold tracking-[.16em] text-[var(--brand-red)]">
-                    0{index + 1}
-                  </span>
-                  <h3 className="font-display mt-6 text-2xl font-semibold">
-                    {value.title}
-                  </h3>
-                  <p className="mt-4 leading-7 text-[var(--muted)]">
-                    {value.description}
-                  </p>
+                <article key={value.title} className="editorial-panel p-7 sm:p-8">
+                  <span className="text-xs font-extrabold tracking-[.16em] text-[var(--brand-red)]">0{index + 1}</span>
+                  <h3 className="font-display mt-6 text-2xl font-semibold">{value.title}</h3>
+                  <p className="mt-4 leading-7 text-[var(--muted)]">{value.description}</p>
                 </article>
               ))}
             </div>

@@ -1,32 +1,21 @@
 "use client";
 import { useState } from "react";
-import { uploadMedia, type UploadedMediaResult } from "@/services/workspace";
+
 import { useToast } from "@/components/ui/toast-provider";
+import { type UploadedMediaResult, uploadMedia } from "@/services/workspace";
 
 export type UploadedMedia = UploadedMediaResult;
 
-export function MediaUpload({
-  onUploaded,
-  document = false,
-}: {
-  onUploaded: (media: UploadedMedia) => void;
-  document?: boolean;
-}) {
+export function MediaUpload({ onUploaded, document = false }: { onUploaded: (media: UploadedMedia) => void; document?: boolean }) {
   const [pending, setPending] = useState(false);
   const toast = useToast();
   return (
     <label className="grid gap-2 text-sm font-semibold">
-      {pending
-        ? "Uploading and optimising…"
-        : document
-          ? "Upload a PDF (up to 10 MB)"
-          : "Upload a photo (JPEG, PNG or WebP, up to 10 MB)"}
+      {pending ? "Uploading and optimising…" : document ? "Upload a PDF (up to 10 MB)" : "Upload a photo (JPEG, PNG or WebP, up to 10 MB)"}
       <input
         className="field text-sm"
         type="file"
-        accept={
-          document ? "application/pdf" : "image/jpeg,image/png,image/webp"
-        }
+        accept={document ? "application/pdf" : "image/jpeg,image/png,image/webp"}
         disabled={pending}
         onChange={async (event) => {
           const file = event.target.files?.[0];
@@ -43,9 +32,7 @@ export function MediaUpload({
             onUploaded(media);
             toast.success(media.duplicate ? "This file was already uploaded." : "Upload complete.");
           } catch (error) {
-            toast.error(
-              error instanceof Error ? error.message : "Upload failed.",
-            );
+            toast.error(error instanceof Error ? error.message : "Upload failed.");
           } finally {
             setPending(false);
             input.value = "";

@@ -2,25 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
-
-import {
-  api,
-  type CurrentUser,
-} from "@/services/api";
+import { type FormEvent, type ReactNode, useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
+import { api, type CurrentUser } from "@/services/api";
 
-type Mode =
-  | "login"
-  | "signup"
-  | "contact"
-  | "forgot-password"
-  | "reset-password";
+type Mode = "login" | "signup" | "contact" | "forgot-password" | "reset-password";
 
 type Field = {
   name: string;
@@ -208,22 +195,10 @@ function EyeIcon({ open }: { open: boolean }) {
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 2.9-4.4 2.9-7.5Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2H2.9v2.7A10 10 0 0 0 12 22Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M6.3 13.9A6 6 0 0 1 6 12c0-.7.1-1.3.3-1.9V7.4H2.9A10 10 0 0 0 2 12c0 1.6.4 3.2 1 4.6l3.3-2.7Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.9c1.5 0 2.8.5 3.9 1.5l2.9-2.9A9.7 9.7 0 0 0 12 2 10 10 0 0 0 2.9 7.4l3.4 2.7C7.1 7.7 9.4 5.9 12 5.9Z"
-      />
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 2.9-4.4 2.9-7.5Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2H2.9v2.7A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.3 13.9A6 6 0 0 1 6 12c0-.7.1-1.3.3-1.9V7.4H2.9A10 10 0 0 0 2 12c0 1.6.4 3.2 1 4.6l3.3-2.7Z" />
+      <path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.9 1.5l2.9-2.9A9.7 9.7 0 0 0 12 2 10 10 0 0 0 2.9 7.4l3.4 2.7C7.1 7.7 9.4 5.9 12 5.9Z" />
     </svg>
   );
 }
@@ -264,32 +239,22 @@ export function AccountForm({ mode }: { mode: Mode }) {
         continue;
       }
 
-      if (
-        field.type === "email" &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-      ) {
+      if (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         nextErrors[field.name] = "Enter a valid email address.";
         continue;
       }
 
-      if (
-        field.type === "tel" &&
-        !/^\+?[\d\s()-]{7,20}$/.test(value)
-      ) {
+      if (field.type === "tel" && !/^\+?[\d\s()-]{7,20}$/.test(value)) {
         nextErrors[field.name] = "Enter a valid mobile number.";
         continue;
       }
 
       if (field.minLength && value.length < field.minLength) {
-        nextErrors[field.name] =
-          `Use at least ${field.minLength} characters.`;
+        nextErrors[field.name] = `Use at least ${field.minLength} characters.`;
       }
     }
 
-    if (
-      ["signup", "reset-password"].includes(mode) &&
-      data.get("password") !== data.get("confirmPassword")
-    ) {
+    if (["signup", "reset-password"].includes(mode) && data.get("password") !== data.get("confirmPassword")) {
       nextErrors.confirmPassword = "Passwords must match.";
     }
 
@@ -298,9 +263,7 @@ export function AccountForm({ mode }: { mode: Mode }) {
     if (Object.keys(nextErrors).length) {
       toast.error("Please check the highlighted fields.");
 
-      const firstInvalid = form.elements.namedItem(
-        Object.keys(nextErrors)[0],
-      );
+      const firstInvalid = form.elements.namedItem(Object.keys(nextErrors)[0]);
 
       if (firstInvalid instanceof HTMLElement) {
         firstInvalid.focus();
@@ -313,35 +276,21 @@ export function AccountForm({ mode }: { mode: Mode }) {
     setServerError("");
 
     try {
-      const body: Record<string, string | boolean> =
-        Object.fromEntries(
-          fields[mode].map((field) => [
-            field.name,
-            String(data.get(field.name) ?? ""),
-          ]),
-        );
+      const body: Record<string, string | boolean> = Object.fromEntries(
+        fields[mode].map((field) => [field.name, String(data.get(field.name) ?? "")]),
+      );
 
       if (mode === "login") {
         body.remember = data.get("remember") === "on";
       }
 
       if (mode === "reset-password") {
-        body.token =
-          new URLSearchParams(window.location.hash.slice(1)).get(
-            "token",
-          ) ?? "";
+        body.token = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "";
       }
 
-      const path =
-        mode === "contact"
-          ? "/contact"
-          : `/auth/${
-              mode === "signup" ? "register" : mode
-            }`;
+      const path = mode === "contact" ? "/contact" : `/auth/${mode === "signup" ? "register" : mode}`;
 
-      const result = await api<
-        CurrentUser & { message?: string }
-      >(path, {
+      const result = await api<CurrentUser & { message?: string }>(path, {
         method: "POST",
         body: JSON.stringify(body),
       });
@@ -351,33 +300,22 @@ export function AccountForm({ mode }: { mode: Mode }) {
       } else if (mode === "signup") {
         toast.success("Account created successfully.");
       } else {
-        toast.success(
-          result.message ?? "Request completed successfully.",
-        );
+        toast.success(result.message ?? "Request completed successfully.");
       }
 
       form.reset();
 
       if (mode === "login" || mode === "signup") {
-        router.push(
-          result.role === "SUPER_ADMIN" ? "/admin" : "/member",
-        );
+        router.push(result.role === "SUPER_ADMIN" ? "/admin" : "/member");
       }
 
       if (mode === "reset-password") {
-        window.history.replaceState(
-          null,
-          "",
-          "/reset-password",
-        );
+        window.history.replaceState(null, "", "/reset-password");
 
         router.push("/login");
       }
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Please try again.";
+      const message = error instanceof Error ? error.message : "Please try again.";
 
       setServerError(message);
       toast.error(message);
@@ -387,20 +325,13 @@ export function AccountForm({ mode }: { mode: Mode }) {
   }
 
   function googleSignIn() {
-    toast.success(
-      "Google sign-in UI is ready. Backend OAuth connection will be added in the authentication integration stage.",
-    );
+    toast.success("Google sign-in UI is ready. Backend OAuth connection will be added in the authentication integration stage.");
   }
 
-  const showGoogle =
-    mode === "login" || mode === "signup";
+  const showGoogle = mode === "login" || mode === "signup";
 
   return (
-    <form
-      noValidate
-      onSubmit={submit}
-      className="auth-account-form"
-    >
+    <form noValidate onSubmit={submit} className="auth-account-form">
       {serverError && (
         <div className="auth-server-error" role="alert">
           {serverError}
@@ -409,31 +340,16 @@ export function AccountForm({ mode }: { mode: Mode }) {
 
       <div className="auth-fields">
         {fields[mode].map((field) => {
-          const isPassword =
-            field.type === "password";
+          const isPassword = field.type === "password";
 
           return (
-            <div
-              key={field.name}
-              className="auth-field-block"
-            >
-              <label
-                htmlFor={`${mode}-${field.name}`}
-                className="sr-only"
-              >
+            <div key={field.name} className="auth-field-block">
+              <label htmlFor={`${mode}-${field.name}`} className="sr-only">
                 {field.label}
               </label>
 
-              <div
-                className={`auth-field-shell ${
-                  errors[field.name]
-                    ? "auth-field-shell-error"
-                    : ""
-                }`}
-              >
-                <span className="auth-field-icon">
-                  {iconFor(field.name)}
-                </span>
+              <div className={`auth-field-shell ${errors[field.name] ? "auth-field-shell-error" : ""}`}>
+                <span className="auth-field-icon">{iconFor(field.name)}</span>
 
                 {field.name === "message" ? (
                   <textarea
@@ -443,27 +359,19 @@ export function AccountForm({ mode }: { mode: Mode }) {
                     rows={5}
                     required
                     className="auth-field-input resize-y"
-                    aria-invalid={
-                      !!errors[field.name]
-                    }
+                    aria-invalid={!!errors[field.name]}
                   />
                 ) : (
                   <input
                     id={`${mode}-${field.name}`}
                     name={field.name}
-                    type={
-                      isPassword && showPassword
-                        ? "text"
-                        : field.type ?? "text"
-                    }
+                    type={isPassword && showPassword ? "text" : (field.type ?? "text")}
                     placeholder={field.placeholder}
                     autoComplete={field.autoComplete}
                     required
                     minLength={field.minLength}
                     className="auth-field-input"
-                    aria-invalid={
-                      !!errors[field.name]
-                    }
+                    aria-invalid={!!errors[field.name]}
                   />
                 )}
 
@@ -471,25 +379,15 @@ export function AccountForm({ mode }: { mode: Mode }) {
                   <button
                     type="button"
                     className="auth-password-toggle"
-                    onClick={() =>
-                      setShowPassword((value) => !value)
-                    }
-                    aria-label={
-                      showPassword
-                        ? "Hide password"
-                        : "Show password"
-                    }
+                    onClick={() => setShowPassword((value) => !value)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     <EyeIcon open={showPassword} />
                   </button>
                 )}
               </div>
 
-              {errors[field.name] && (
-                <p className="auth-field-error">
-                  {errors[field.name]}
-                </p>
-              )}
+              {errors[field.name] && <p className="auth-field-error">{errors[field.name]}</p>}
             </div>
           );
         })}
@@ -498,40 +396,22 @@ export function AccountForm({ mode }: { mode: Mode }) {
       {mode === "login" && (
         <div className="auth-login-options">
           <label className="auth-remember">
-            <input
-              type="checkbox"
-              name="remember"
-              defaultChecked
-            />
+            <input type="checkbox" name="remember" defaultChecked />
 
             <span>Remember me</span>
           </label>
 
-          <Link
-            href="/forgot-password"
-            className="auth-forgot-link"
-          >
+          <Link href="/forgot-password" className="auth-forgot-link">
             Forgot password?
           </Link>
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="auth-submit"
-      >
-        <span>
-          {pending
-            ? "Please wait..."
-            : buttonLabels[mode]}
-        </span>
+      <button type="submit" disabled={pending} className="auth-submit">
+        <span>{pending ? "Please wait..." : buttonLabels[mode]}</span>
 
         {!pending && (
-          <span
-            aria-hidden="true"
-            className="auth-submit-arrow"
-          >
+          <span aria-hidden="true" className="auth-submit-arrow">
             →
           </span>
         )}
@@ -542,20 +422,12 @@ export function AccountForm({ mode }: { mode: Mode }) {
           <div className="auth-divider">
             <span />
 
-            <p>
-              {mode === "login"
-                ? "or continue with"
-                : "or sign up with"}
-            </p>
+            <p>{mode === "login" ? "or continue with" : "or sign up with"}</p>
 
             <span />
           </div>
 
-          <button
-            type="button"
-            onClick={googleSignIn}
-            className="auth-google-button"
-          >
+          <button type="button" onClick={googleSignIn} className="auth-google-button">
             <span className="auth-google-icon">
               <GoogleIcon />
             </span>

@@ -4,11 +4,7 @@ import { AccountForm } from "@/components/account-form";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 
-type AuthMode =
-  | "login"
-  | "signup"
-  | "forgot-password"
-  | "reset-password";
+type AuthMode = "login" | "signup" | "forgot-password" | "reset-password";
 
 const copy: Record<
   AuthMode,
@@ -23,8 +19,7 @@ const copy: Record<
   login: {
     eyebrow: "Member Access",
     title: "Welcome Back",
-    description:
-      "Sign in to continue your creative journey with M. Dadu Films.",
+    description: "Sign in to continue your creative journey with M. Dadu Films.",
     visualTitle: "Good People.\nGreat Stories.",
     visualFooter: "Stories that move people.",
   },
@@ -32,8 +27,7 @@ const copy: Record<
   signup: {
     eyebrow: "Join The Community",
     title: "Create Your Account",
-    description:
-      "Join M. Dadu Films and be part of a community that brings powerful stories to life.",
+    description: "Join M. Dadu Films and be part of a community that brings powerful stories to life.",
     visualTitle: "Creative\nPeople.\nBrighter\nTomorrows.",
     visualFooter: "Good People. Great Stories.",
   },
@@ -41,8 +35,7 @@ const copy: Record<
   "forgot-password": {
     eyebrow: "Account Recovery",
     title: "Forgot Password?",
-    description:
-      "Enter your account email and we’ll help you continue your journey.",
+    description: "Enter your account email and we’ll help you continue your journey.",
     visualTitle: "Every Story\nFinds Its Way\nBack.",
     visualFooter: "Good People. Great Stories.",
   },
@@ -50,8 +43,7 @@ const copy: Record<
   "reset-password": {
     eyebrow: "Secure Your Account",
     title: "Create New Password",
-    description:
-      "Choose a secure password to regain access to your creative profile.",
+    description: "Choose a secure password to regain access to your creative profile.",
     visualTitle: "Back To\nCreating.",
     visualFooter: "Good People. Great Stories.",
   },
@@ -127,29 +119,25 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           <div className="auth-bottom-link">
             {mode === "login" && (
               <>
-                <span>Don&apos;t have an account?</span>{" "}
-                <Link href="/signup">Create one</Link>
+                <span>Don&apos;t have an account?</span> <Link href="/signup">Create one</Link>
               </>
             )}
 
             {mode === "signup" && (
               <>
-                <span>Already have an account?</span>{" "}
-                <Link href="/login">Sign in</Link>
+                <span>Already have an account?</span> <Link href="/login">Sign in</Link>
               </>
             )}
 
             {mode === "forgot-password" && (
               <>
-                <span>Remember your password?</span>{" "}
-                <Link href="/login">Back to sign in</Link>
+                <span>Remember your password?</span> <Link href="/login">Back to sign in</Link>
               </>
             )}
 
             {mode === "reset-password" && (
               <>
-                <span>Ready to continue?</span>{" "}
-                <Link href="/login">Sign in</Link>
+                <span>Ready to continue?</span> <Link href="/login">Sign in</Link>
               </>
             )}
           </div>

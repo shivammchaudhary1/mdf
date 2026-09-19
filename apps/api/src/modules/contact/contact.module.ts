@@ -1,1 +1,14 @@
-import{Module}from"@nestjs/common";import{MongooseModule}from"@nestjs/mongoose";import{AuthModule}from"../auth/auth.module";import{AdminContactController,ContactController}from"./contact.controller";import{ContactSchema}from"./contact.model";import{ContactService}from"./contact.service";@Module({imports:[AuthModule,MongooseModule.forFeature([{name:"Contact",schema:ContactSchema}])],controllers:[ContactController,AdminContactController],providers:[ContactService],exports:[ContactService,MongooseModule]})export class ContactModule{}
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+
+import { AuthModule } from "../auth/auth.module";
+import { AdminContactController, ContactController } from "./contact.controller";
+import { ContactSchema } from "./contact.model";
+import { ContactService } from "./contact.service";
+@Module({
+  imports: [AuthModule, MongooseModule.forFeature([{ name: "Contact", schema: ContactSchema }])],
+  controllers: [ContactController, AdminContactController],
+  providers: [ContactService],
+  exports: [ContactService, MongooseModule],
+})
+export class ContactModule {}

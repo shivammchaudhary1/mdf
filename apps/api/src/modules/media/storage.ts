@@ -1,24 +1,11 @@
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
-import { ConfigService } from "@nestjs/config";
-import {
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ConfigService } from "@nestjs/config";
+
 export abstract class StorageAdapter {
-  abstract write(
-    key: string,
-    data: Buffer,
-    contentType?: string,
-  ): Promise<void>;
+  abstract write(key: string, data: Buffer, contentType?: string): Promise<void>;
 
   abstract read(key: string): Promise<Buffer>;
 
@@ -26,12 +13,7 @@ export abstract class StorageAdapter {
 }
 
 export function validateStorageKey(key: string) {
-  if (
-    !/^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/.test(
-      key,
-    ) &&
-    !/^media\/[a-f0-9]{24}\/document\.pdf$/.test(key)
-  ) {
+  if (!/^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/.test(key) && !/^media\/[a-f0-9]{24}\/document\.pdf$/.test(key)) {
     throw new Error("Invalid storage key.");
   }
 
@@ -39,36 +21,21 @@ export function validateStorageKey(key: string) {
 }
 
 export class LocalStorageAdapter extends StorageAdapter {
-  private readonly root = resolve(
-    process.cwd(),
-    ".local",
-    "uploads",
-  );
+  private readonly root = resolve(process.cwd(), ".local", "uploads");
 
   private filePath(key: string) {
-    const file = resolve(
-      this.root,
-      validateStorageKey(key),
-    );
+    const file = resolve(this.root, validateStorageKey(key));
 
-    const separator =
-      process.platform === "win32" ? "\\" : "/";
+    const separator = process.platform === "win32" ? "\\" : "/";
 
-    if (
-      !file.startsWith(
-        `${this.root}${separator}`,
-      )
-    ) {
+    if (!file.startsWith(`${this.root}${separator}`)) {
       throw new Error("Invalid storage path.");
     }
 
     return file;
   }
 
-  async write(
-    key: string,
-    data: Buffer,
-  ) {
+  async write(key: string, data: Buffer) {
     const file = this.filePath(key);
 
     await mkdir(dirname(file), {
@@ -99,25 +66,17 @@ export class S3StorageAdapter extends StorageAdapter {
   constructor(config: ConfigService) {
     super();
 
-    const region =
-      config.get<string>("AWS_REGION");
-    const bucket =
-      config.get<string>("S3_BUCKET");
+    const region = config.get<string>("AWS_REGION");
+    const bucket = config.get<string>("S3_BUCKET");
 
     if (!region || !bucket) {
-      throw new Error(
-        "AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.",
-      );
+      throw new Error("AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.");
     }
 
     this.bucket = bucket;
 
-    const accessKeyId =
-      config.get<string>("AWS_ACCESS_KEY_ID");
-    const secretAccessKey =
-      config.get<string>(
-        "AWS_SECRET_ACCESS_KEY",
-      );
+    const accessKeyId = config.get<string>("AWS_ACCESS_KEY_ID");
+    const secretAccessKey = config.get<string>("AWS_SECRET_ACCESS_KEY");
 
     this.client = new S3Client({
       region,
@@ -132,11 +91,7 @@ export class S3StorageAdapter extends StorageAdapter {
     });
   }
 
-  async write(
-    key: string,
-    data: Buffer,
-    contentType?: string,
-  ) {
+  async write(key: string, data: Buffer, contentType?: string) {
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -158,14 +113,10 @@ export class S3StorageAdapter extends StorageAdapter {
     );
 
     if (!response.Body) {
-      throw new Error(
-        "Stored object is empty.",
-      );
+      throw new Error("Stored object is empty.");
     }
 
-    return Buffer.from(
-      await response.Body.transformToByteArray(),
-    );
+    return Buffer.from(await response.Body.transformToByteArray());
   }
 
   async delete(key: string) {

@@ -1,4 +1,4 @@
-import { SmartImage, type PlaceholderKind } from "@/components/ui/smart-image";
+import { type PlaceholderKind, SmartImage } from "@/components/ui/smart-image";
 
 type SiteMediaProps = {
   src?: string;
@@ -15,7 +15,7 @@ export function SiteMedia({
   kind = "generic",
   className = "aspect-[4/3]",
   imageClassName = "",
-  priority = false
+  priority = false,
 }: SiteMediaProps) {
   return (
     <div className={`relative overflow-hidden bg-[#ecebe8] ${className}`}>

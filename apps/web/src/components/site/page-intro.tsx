@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { SiteMedia } from "@/components/site/site-media";
 
 type PageIntroProps = {
@@ -10,14 +11,7 @@ type PageIntroProps = {
   image?: string;
 };
 
-export function PageIntro({
-  eyebrow,
-  title,
-  description,
-  mediaKind = "generic",
-  mediaAlt,
-  image
-}: PageIntroProps) {
+export function PageIntro({ eyebrow, title, description, mediaKind = "generic", mediaAlt, image }: PageIntroProps) {
   return (
     <section className="site-shell py-8 sm:py-10 lg:py-12">
       <div className="mb-7 text-[11px] text-[#8a8a8a]">
@@ -35,12 +29,7 @@ export function PageIntro({
           <p className="site-lead mt-5">{description}</p>
         </div>
 
-        <SiteMedia
-          src={image}
-          alt={mediaAlt}
-          kind={mediaKind}
-          className="aspect-[16/8.2] rounded-[18px]"
-        />
+        <SiteMedia src={image} alt={mediaAlt} kind={mediaKind} className="aspect-[16/8.2] rounded-[18px]" />
       </div>
     </section>
   );

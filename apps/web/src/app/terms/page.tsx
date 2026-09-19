@@ -1,1 +1,5 @@
-import { LegalPageView } from "@/components/legal-page-view";export const metadata={title:"Terms & Conditions"};export default function Page(){return <LegalPageView slug="terms" fallbackTitle="Terms & Conditions"/>}
+import { LegalPageView } from "@/components/legal-page-view";
+export const metadata = { title: "Terms & Conditions" };
+export default function Page() {
+  return <LegalPageView slug="terms" fallbackTitle="Terms & Conditions" />;
+}

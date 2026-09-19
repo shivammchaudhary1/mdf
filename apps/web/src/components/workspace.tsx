@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { api, ApiError, type CurrentUser } from "@/services/api";
+import { type ReactNode, useEffect, useState } from "react";
+
 import { BrandLogo } from "@/components/brand-logo";
-import { useToast } from "@/components/ui/toast-provider";
 import { LoadingState } from "@/components/ui/feedback";
+import { useToast } from "@/components/ui/toast-provider";
+import { api, ApiError, type CurrentUser } from "@/services/api";
 
 export const memberNavigation = [
   ["dashboard", "Dashboard"],
@@ -67,13 +68,7 @@ export function useApiData<T>(path: string) {
   };
 }
 
-export function LoadError({
-  message,
-  retry,
-}: {
-  message: string;
-  retry: () => void;
-}) {
+export function LoadError({ message, retry }: { message: string; retry: () => void }) {
   return (
     <div role="alert" className="card p-8">
       <p className="text-red-700">{message}</p>
@@ -120,9 +115,7 @@ export function Workspace({
       toast.success("Logged out.");
       router.replace("/login");
     } catch (caught) {
-      toast.error(
-        caught instanceof Error ? caught.message : "Unable to sign out.",
-      );
+      toast.error(caught instanceof Error ? caught.message : "Unable to sign out.");
       setLeaving(false);
     }
   }
@@ -131,10 +124,7 @@ export function Workspace({
     return (
       <main className="container-shell py-16">
         <LoadError message={error} retry={reload} />
-        <Link
-          href="/login"
-          className="mt-6 inline-block font-semibold text-[var(--brand-red)]"
-        >
+        <Link href="/login" className="mt-6 inline-block font-semibold text-[var(--brand-red)]">
           Sign in →
         </Link>
       </main>
@@ -186,10 +176,7 @@ export function Workspace({
         </nav>
 
         <div className="mt-6 hidden border-t border-slate-100 pt-5 lg:block">
-          <Link
-            href="/projects"
-            className="text-sm font-semibold text-slate-500 transition hover:text-slate-950"
-          >
+          <Link href="/projects" className="text-sm font-semibold text-slate-500 transition hover:text-slate-950">
             ← Public website
           </Link>
         </div>
@@ -198,22 +185,16 @@ export function Workspace({
       <div className="min-w-0">
         <header className="sticky top-0 z-20 flex min-h-[76px] flex-wrap items-center justify-between gap-4 border-b border-slate-200/75 bg-white/95 px-5 py-4 backdrop-blur-xl sm:px-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-400">
-              {admin ? "Administration" : "Creative community"}
-            </p>
+            <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-400">{admin ? "Administration" : "Creative community"}</p>
             <p className="mt-1 text-sm text-slate-500">
-              {admin
-                ? "Manage the platform from one place."
-                : "Profile, portfolio and opportunities."}
+              {admin ? "Manage the platform from one place." : "Profile, portfolio and opportunities."}
             </p>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-slate-900">{user.name}</p>
-              <p className="text-xs text-slate-500">
-                {user.verified ? "Verified member" : "Member"}
-              </p>
+              <p className="text-xs text-slate-500">{user.verified ? "Verified member" : "Member"}</p>
             </div>
             <div
               aria-hidden="true"
@@ -221,20 +202,13 @@ export function Workspace({
             >
               {user.name.trim().charAt(0).toUpperCase() || "M"}
             </div>
-            <button
-              disabled={leaving}
-              onClick={logout}
-              className="text-sm font-bold text-[var(--brand-red)]"
-            >
+            <button disabled={leaving} onClick={logout} className="text-sm font-bold text-[var(--brand-red)]">
               {leaving ? "Signing out…" : "Sign out"}
             </button>
           </div>
         </header>
 
-        <main
-          id="main-content"
-          className="mx-auto max-w-7xl p-5 pb-28 sm:p-8 sm:pb-28 lg:p-10 lg:pb-12 xl:p-12"
-        >
+        <main id="main-content" className="mx-auto max-w-7xl p-5 pb-28 sm:p-8 sm:pb-28 lg:p-10 lg:pb-12 xl:p-12">
           {children(user)}
         </main>
       </div>
@@ -249,11 +223,7 @@ export function Workspace({
               key={key}
               href={key === "dashboard" ? base : `${base}/${key}`}
               aria-current={section === key ? "page" : undefined}
-              className={`px-1 py-4 text-center text-[11px] font-bold ${
-                section === key
-                  ? "text-[var(--brand-red)]"
-                  : "text-slate-500"
-              }`}
+              className={`px-1 py-4 text-center text-[11px] font-bold ${section === key ? "text-[var(--brand-red)]" : "text-slate-500"}`}
             >
               {label}
             </Link>

@@ -1,1 +1,19 @@
-import { NestFactory } from "@nestjs/core";import { getConnectionToken } from "@nestjs/mongoose";import type { Connection,Model } from "mongoose";import { AppModule } from "../app.module";async function main(){const app=await NestFactory.createApplicationContext(AppModule,{logger:["error","warn","log"]});try{const connection=app.get<Connection>(getConnectionToken());const models=Object.values(connection.models)as Model<unknown>[];for(const model of models){await model.createIndexes();console.log(`Indexes ensured: ${model.modelName}`)}}finally{await app.close()}}void main();
+import { NestFactory } from "@nestjs/core";
+import { getConnectionToken } from "@nestjs/mongoose";
+import type { Connection, Model } from "mongoose";
+
+import { AppModule } from "../app.module";
+async function main() {
+  const app = await NestFactory.createApplicationContext(AppModule, { logger: ["error", "warn", "log"] });
+  try {
+    const connection = app.get<Connection>(getConnectionToken());
+    const models = Object.values(connection.models) as Model<unknown>[];
+    for (const model of models) {
+      await model.createIndexes();
+      console.log(`Indexes ensured: ${model.modelName}`);
+    }
+  } finally {
+    await app.close();
+  }
+}
+void main();

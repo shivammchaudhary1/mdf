@@ -1,16 +1,7 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import {
-  Types,
-  type QueryFilter,
-  type Model,
-  type PipelineStage,
-} from "mongoose";
+import { type Model, type PipelineStage, type QueryFilter, Types } from "mongoose";
+
 import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
 import { RateLimitService } from "../../common/security/rate-limit.service";
@@ -21,7 +12,6 @@ import { Casting } from "../castings/casting.model";
 import { MailService } from "../mail/mail.service";
 import { MediaService } from "../media/media.service";
 import { Project } from "../projects/project.model";
-import { Application } from "./application.model";
 import {
   AdminApplicationQueryDto,
   CreateApplicationDto,
@@ -29,6 +19,7 @@ import {
   OpportunityQueryDto,
   UpdateApplicationDto,
 } from "./application.dto";
+import { Application } from "./application.model";
 
 type ResolvedOpportunity = {
   type: "PROJECT" | "CASTING";
@@ -56,14 +47,10 @@ export class ApplicationService {
     private readonly rateLimits: RateLimitService,
   ) {}
 
-  private serialize(
-    application: Application | Record<string, unknown>,
-  ) {
+  private serialize(application: Application | Record<string, unknown>) {
     const item = application as Application;
     const portfolio = (item.portfolioMediaIds ?? []).map(String);
-    const documentId = item.documentMediaId
-      ? String(item.documentMediaId)
-      : undefined;
+    const documentId = item.documentMediaId ? String(item.documentMediaId) : undefined;
 
     return {
       ...application,
@@ -72,23 +59,14 @@ export class ApplicationService {
       opportunityId: String(item.opportunityId),
       projectId: item.projectId ? String(item.projectId) : undefined,
       portfolioMediaIds: portfolio,
-      portfolioImages: portfolio.map(
-        (id) => this.media.urlsFor(id).medium,
-      ),
+      portfolioImages: portfolio.map((id) => this.media.urlsFor(id).medium),
       documentMediaId: documentId,
-      documentUrl: documentId
-        ? this.media.urlsFor(documentId, "document").document
-        : undefined,
+      documentUrl: documentId ? this.media.urlsFor(documentId, "document").document : undefined,
     };
   }
 
-  private async resolveOpportunity(
-    input: CreateApplicationDto,
-  ): Promise<ResolvedOpportunity> {
-    const id = objectId(
-      input.opportunityId,
-      "Opportunity not found.",
-    );
+  private async resolveOpportunity(input: CreateApplicationDto): Promise<ResolvedOpportunity> {
+    const id = objectId(input.opportunityId, "Opportunity not found.");
 
     if (!input.opportunityType || input.opportunityType === "CASTING") {
       const casting = await this.castings
@@ -97,11 +75,7 @@ export class ApplicationService {
           published: true,
           archived: false,
           status: "Open",
-          $or: [
-            { deadline: { $exists: false } },
-            { deadline: null },
-            { deadline: { $gt: new Date() } },
-          ],
+          $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
         })
         .lean();
 
@@ -138,32 +112,25 @@ export class ApplicationService {
       }
     }
 
-    throw new BadRequestException(
-      "This opportunity is no longer accepting applications.",
-    );
+    throw new BadRequestException("This opportunity is no longer accepting applications.");
   }
 
   async apply(userId: string, input: CreateApplicationDto) {
-    await this.rateLimits.consume(
-      "member-application",
-      userId,
-      30,
-      86_400_000,
-    );
+    await this.rateLimits.consume("member-application", userId, 30, 86_400_000);
 
     const opportunity = await this.resolveOpportunity(input);
 
-    await this.media.assertOwnedBy(userId, [
-      ...(input.portfolioMediaIds ?? []),
-    ], "image");
+    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image");
     await this.media.assertOwnedBy(userId, [input.documentMediaId], "document");
 
-    const account = await this.accounts
-      .findById(objectId(userId))
-      .lean();
+    const account = await this.accounts.findById(objectId(userId)).lean();
 
-    if (!account || account.suspended) { throw new BadRequestException("Account is not available."); }
-    const applicantProfile=await this.applications.db.collection("profiles").findOne({userId:account._id},{projection:{city:1}});
+    if (!account || account.suspended) {
+      throw new BadRequestException("Account is not available.");
+    }
+    const applicantProfile = await this.applications.db
+      .collection("profiles")
+      .findOne({ userId: account._id }, { projection: { city: 1 } });
 
     try {
       const application = await this.applications.create({
@@ -181,46 +148,28 @@ export class ApplicationService {
           city: typeof applicantProfile?.city === "string" ? applicantProfile.city : undefined,
         },
         coverNote: input.coverNote,
-        portfolioMediaIds: input.portfolioMediaIds?.map(
-          (id) => new Types.ObjectId(id),
-        ),
+        portfolioMediaIds: input.portfolioMediaIds?.map((id) => new Types.ObjectId(id)),
         showreelUrl: input.showreelUrl,
         pitch: input.pitch,
-        documentMediaId: input.documentMediaId
-          ? new Types.ObjectId(input.documentMediaId)
-          : undefined,
+        documentMediaId: input.documentMediaId ? new Types.ObjectId(input.documentMediaId) : undefined,
         status: "Submitted",
       });
 
       await this.mail
-        .send(
-          account.email,
-          "Application received",
-          `Your application for ${opportunity.title} has been received.`,
-        )
+        .send(account.email, "Application received", `Your application for ${opportunity.title} has been received.`)
         .catch(() => undefined);
 
       return this.serialize(application.toObject());
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === 11000
-      ) {
-        throw new ConflictException(
-          "You have already applied to this opportunity.",
-        );
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
+        throw new ConflictException("You have already applied to this opportunity.");
       }
 
       throw error;
     }
   }
 
-  async mine(
-    userId: string,
-    query: MemberApplicationQueryDto,
-  ) {
+  async mine(userId: string, query: MemberApplicationQueryDto) {
     const filter: QueryFilter<Application> = {
       userId: objectId(userId),
     };
@@ -229,7 +178,7 @@ export class ApplicationService {
       filter.status = query.status;
     }
 
-    const [result] = await this.applications.aggregate<{items: Application[]; total: {count: number}[]}>([
+    const [result] = await this.applications.aggregate<{ items: Application[]; total: { count: number }[] }>([
       { $match: filter },
       { $project: { adminNotes: 0, reviewedBy: 0, reviewedAt: 0 } },
       { $sort: { createdAt: -1, _id: -1 } },
@@ -274,20 +223,12 @@ export class ApplicationService {
     }
 
     if (query.search) {
-      const search = new RegExp(
-        escapeSearch(query.search.trim()),
-        "i",
-      );
+      const search = new RegExp(escapeSearch(query.search.trim()), "i");
 
-      filter.$or = [
-        { "applicant.name": search },
-        { "applicant.email": search },
-        { opportunityTitle: search },
-        { roleSnapshot: search },
-      ];
+      filter.$or = [{ "applicant.name": search }, { "applicant.email": search }, { opportunityTitle: search }, { roleSnapshot: search }];
     }
 
-    const [result] = await this.applications.aggregate<{items: Application[]; total: {count: number}[]}>([
+    const [result] = await this.applications.aggregate<{ items: Application[]; total: { count: number }[] }>([
       { $match: filter },
       { $sort: { createdAt: -1, _id: -1 } },
       { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
@@ -302,10 +243,7 @@ export class ApplicationService {
   }
 
   async adminById(id: string) {
-    const application = await this.applications
-      .findById(objectId(id))
-      .select("+adminNotes")
-      .lean();
+    const application = await this.applications.findById(objectId(id)).select("+adminNotes").lean();
 
     if (!application) {
       throw new NotFoundException("Application not found.");
@@ -314,20 +252,14 @@ export class ApplicationService {
     return this.serialize(application);
   }
 
-  async update(
-    id: string,
-    input: UpdateApplicationDto,
-    actorId: string,
-  ) {
+  async update(id: string, input: UpdateApplicationDto, actorId: string) {
     const application = await this.applications
       .findByIdAndUpdate(
         objectId(id),
         {
           $set: {
             status: input.status,
-            ...(input.adminNotes !== undefined
-              ? { adminNotes: input.adminNotes }
-              : {}),
+            ...(input.adminNotes !== undefined ? { adminNotes: input.adminNotes } : {}),
             reviewedBy: objectId(actorId),
             reviewedAt: new Date(),
           },
@@ -371,11 +303,7 @@ export class ApplicationService {
       published: true,
       archived: false,
       status: "Open",
-      $or: [
-        { deadline: { $exists: false } },
-        { deadline: null },
-        { deadline: { $gt: new Date() } },
-      ],
+      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
     };
 
     const projectMatch: Record<string, unknown> = {
@@ -390,32 +318,19 @@ export class ApplicationService {
     }
 
     if (query.location) {
-      const location = new RegExp(
-        escapeSearch(query.location.trim()),
-        "i",
-      );
+      const location = new RegExp(escapeSearch(query.location.trim()), "i");
       castingMatch.location = location;
       projectMatch.location = location;
     }
 
     if (query.search) {
-      const search = new RegExp(
-        escapeSearch(query.search.trim()),
-        "i",
-      );
+      const search = new RegExp(escapeSearch(query.search.trim()), "i");
       castingMatch.$and = [
         {
-          $or: [
-            { title: search },
-            { role: search },
-            { summary: search },
-          ],
+          $or: [{ title: search }, { role: search }, { summary: search }],
         },
       ];
-      projectMatch.$or = [
-        { title: search },
-        { summary: search },
-      ];
+      projectMatch.$or = [{ title: search }, { summary: search }];
     }
 
     const pipeline: PipelineStage[] = [
@@ -459,7 +374,7 @@ export class ApplicationService {
       },
     ];
 
-    const [result] = await this.castings.aggregate<{items: Array<Record<string, unknown>>; total: {count: number}[]}>([
+    const [result] = await this.castings.aggregate<{ items: Array<Record<string, unknown>>; total: { count: number }[] }>([
       ...pipeline,
       { $sort: { createdAt: -1, _id: -1 } },
       { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
@@ -469,17 +384,13 @@ export class ApplicationService {
 
     return {
       items: items.map((item) => {
-        const coverId = item.coverMediaId
-          ? String(item.coverMediaId)
-          : undefined;
+        const coverId = item.coverMediaId ? String(item.coverMediaId) : undefined;
 
         return {
           ...item,
           _id: String(item._id),
           coverMediaId: coverId,
-          coverImage: coverId
-            ? this.media.urlsFor(coverId).medium
-            : undefined,
+          coverImage: coverId ? this.media.urlsFor(coverId).medium : undefined,
         };
       }),
       meta: pageMeta(query.page, query.limit, total),

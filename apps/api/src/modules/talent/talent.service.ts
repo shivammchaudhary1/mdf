@@ -1,11 +1,7 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Types, type Model, type PipelineStage } from "mongoose";
+import { type Model, type PipelineStage, Types } from "mongoose";
+
 import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
 import { objectId } from "../../common/utils/object-id";
@@ -16,17 +12,10 @@ import { Profile } from "../profiles/profile.model";
 import { profileCompletion } from "../profiles/profile.service";
 import { Project } from "../projects/project.model";
 import { SavedTalentList } from "./saved-list.model";
-import {
-  CreateListDto,
-  TalentListQueryDto,
-  TalentQueryDto,
-  UpdateListDto,
-  UserUpdateDto,
-} from "./talent.dto";
-type TalentRecord = Pick<
-  Account,
-  "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"
-> & { profile?: Profile | null };
+import { CreateListDto, TalentListQueryDto, TalentQueryDto, UpdateListDto, UserUpdateDto } from "./talent.dto";
+type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
+  profile?: Profile | null;
+};
 interface TalentPage {
   items: TalentRecord[];
   total: { count: number }[];
@@ -67,19 +56,14 @@ export class TalentService {
     };
     if (q.group === "actor") p["profile.profession"] = /actor/i;
     else if (q.group === "writer") p["profile.profession"] = /writer/i;
-    else if (q.group === "crew")
-      p["profile.profession"] = { $not: /actor|writer/i };
+    else if (q.group === "crew") p["profile.profession"] = { $not: /actor|writer/i };
     if (q.city) p["profile.city"] = exact(q.city);
     if (q.profession)
       p["profile.profession"] = q.group
         ? { $regex: escapeSearch(q.profession.trim()), $options: "i" }
         : new RegExp(escapeSearch(q.profession.trim()), "i");
     if (q.availability) p["profile.availability"] = exact(q.availability);
-    if (q.experience)
-      p["profile.experience"] = new RegExp(
-        escapeSearch(q.experience.trim()),
-        "i",
-      );
+    if (q.experience) p["profile.experience"] = new RegExp(escapeSearch(q.experience.trim()), "i");
     if (q.skills) p["profile.skills"] = exact(q.skills);
     if (q.languages) p["profile.languages"] = exact(q.languages);
     if (q.gender) p["profile.gender"] = exact(q.gender);
@@ -139,9 +123,7 @@ export class TalentService {
           photoMediaId: photo,
           photo: photo ? this.media.urlsFor(photo).profile : undefined,
           portfolioMediaIds: (p.portfolioMediaIds ?? []).map(String),
-          portfolio: (p.portfolioMediaIds ?? []).map(
-            (id: unknown) => this.media.urlsFor(String(id)).medium,
-          ),
+          portfolio: (p.portfolioMediaIds ?? []).map((id: unknown) => this.media.urlsFor(String(id)).medium),
           videos: p.videos,
           showreel: p.showreel,
           previousWork: p.previousWork,
@@ -209,33 +191,25 @@ export class TalentService {
         suspended: false,
       })
       .lean();
-    const p = a
-      ? await this.profiles
-          .findOne({ userId: a._id, publicVisible: true })
-          .lean()
-      : null;
+    const p = a ? await this.profiles.findOne({ userId: a._id, publicVisible: true }).lean() : null;
     if (!a || !p) throw new NotFoundException("Talent profile not found.");
     return this.serialize({ ...a, profile: p }, true);
   }
   async adminDetail(id: string) {
-    const a = await this.accounts
-      .findOne({ _id: objectId(id), role: "USER" })
-      .lean();
+    const a = await this.accounts.findOne({ _id: objectId(id), role: "USER" }).lean();
     if (!a) throw new NotFoundException("Member not found.");
     const p = await this.profiles.findOne({ userId: a._id }).lean();
     return this.serialize({ ...a, profile: p }, false);
   }
   async updateUser(id: string, input: UserUpdateDto, actorId: string) {
-    if (id === actorId && input.suspended === true)
-      throw new ForbiddenException("You cannot suspend your own account.");
+    if (id === actorId && input.suspended === true) throw new ForbiddenException("You cannot suspend your own account.");
     const a = await this.accounts.findOneAndUpdate(
       { _id: objectId(id), role: "USER" },
       { $set: input },
       { new: true, runValidators: true },
     );
     if (!a) throw new NotFoundException("Member not found.");
-    if (input.suspended === true)
-      await this.sessions.deleteMany({ userId: a._id });
+    if (input.suspended === true) await this.sessions.deleteMany({ userId: a._id });
     await this.audit.record({
       actorId,
       action: "member.update",
@@ -244,9 +218,7 @@ export class TalentService {
       summary: a.name,
       metadata: {
         ...(input.verified !== undefined ? { verified: input.verified } : {}),
-        ...(input.suspended !== undefined
-          ? { suspended: input.suspended }
-          : {}),
+        ...(input.suspended !== undefined ? { suspended: input.suspended } : {}),
       },
     });
     return this.adminDetail(id);
@@ -287,18 +259,14 @@ export class TalentService {
       meta: pageMeta(q.page, q.limit, total),
     };
   }
-  private async validateList(
-    ownerId: string,
-    input: CreateListDto | UpdateListDto,
-  ) {
+  private async validateList(ownerId: string, input: CreateListDto | UpdateListDto) {
     if (input.memberIds) {
       const u = [...new Set(input.memberIds)];
       const count = await this.accounts.countDocuments({
         _id: { $in: u.map((id) => objectId(id)) },
         role: "USER",
       });
-      if (count !== u.length)
-        throw new BadRequestException("One or more members no longer exist.");
+      if (count !== u.length) throw new BadRequestException("One or more members no longer exist.");
     }
     if (
       input.projectId &&
@@ -313,14 +281,10 @@ export class TalentService {
       ...(input.name !== undefined ? { name: input.name.trim() } : {}),
       ...(input.memberIds !== undefined
         ? {
-            memberIds: [...new Set(input.memberIds)].map(
-              (id) => new Types.ObjectId(id),
-            ),
+            memberIds: [...new Set(input.memberIds)].map((id) => new Types.ObjectId(id)),
           }
         : {}),
-      ...(input.projectId
-        ? { projectId: new Types.ObjectId(input.projectId) }
-        : {}),
+      ...(input.projectId ? { projectId: new Types.ObjectId(input.projectId) } : {}),
       ownerId: objectId(ownerId),
     };
   }
@@ -347,11 +311,10 @@ export class TalentService {
     delete (v as Record<string, unknown>).ownerId;
     const update: Record<string, unknown> = { $set: v };
     if (input.projectId === null) update.$unset = { projectId: 1 };
-    const l = await this.lists.findOneAndUpdate(
-      { _id: objectId(id), ownerId: objectId(ownerId) },
-      update,
-      { new: true, runValidators: true },
-    );
+    const l = await this.lists.findOneAndUpdate({ _id: objectId(id), ownerId: objectId(ownerId) }, update, {
+      new: true,
+      runValidators: true,
+    });
     if (!l) throw new NotFoundException("Talent list not found.");
     await this.audit.record({
       actorId: ownerId,
@@ -369,9 +332,7 @@ export class TalentService {
     };
   }
   async listDetail(ownerId: string, id: string) {
-    const l = await this.lists
-      .findOne({ _id: objectId(id), ownerId: objectId(ownerId) })
-      .lean();
+    const l = await this.lists.findOne({ _id: objectId(id), ownerId: objectId(ownerId) }).lean();
     if (!l) throw new NotFoundException("Talent list not found.");
     const members = l.memberIds?.length
       ? (
@@ -391,18 +352,12 @@ export class TalentService {
     };
   }
   async addMember(ownerId: string, id: string, memberId: string) {
-    if (
-      !(await this.accounts.exists({ _id: objectId(memberId), role: "USER" }))
-    )
-      throw new NotFoundException("Member not found.");
+    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "USER" }))) throw new NotFoundException("Member not found.");
     const l = await this.lists.findOneAndUpdate(
       {
         _id: objectId(id),
         ownerId: objectId(ownerId),
-        $or: [
-          { memberIds: objectId(memberId) },
-          { "memberIds.499": { $exists: false } },
-        ],
+        $or: [{ memberIds: objectId(memberId) }, { "memberIds.499": { $exists: false } }],
       },
       { $addToSet: { memberIds: objectId(memberId) } },
       { new: true },
@@ -414,9 +369,7 @@ export class TalentService {
           ownerId: objectId(ownerId),
         })
       )
-        throw new BadRequestException(
-          "A talent list can contain up to 500 members.",
-        );
+        throw new BadRequestException("A talent list can contain up to 500 members.");
       throw new NotFoundException("Talent list not found.");
     }
     await this.audit.record({

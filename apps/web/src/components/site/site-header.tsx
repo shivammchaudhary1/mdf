@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { BrandLogo } from "@/components/brand-logo";
 import data from "@/data/public-site.json";
 import { usePublicUiStore } from "@/store/public-ui-store";
@@ -27,9 +28,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {data.navigation.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+            const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
 
             return (
               <Link
@@ -52,12 +51,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className={`hidden px-2 py-2 text-sm font-semibold sm:block ${
-              dark ? "text-white/78" : "text-[#333]"
-            }`}
-          >
+          <Link href="/login" className={`hidden px-2 py-2 text-sm font-semibold sm:block ${dark ? "text-white/78" : "text-[#333]"}`}>
             Login
           </Link>
           <Link href="/signup" className="site-button site-button-primary hidden sm:inline-flex">
@@ -69,9 +63,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
             aria-expanded={open}
             aria-label={open ? "Close navigation" : "Open navigation"}
             className={`grid h-10 w-10 place-items-center rounded-full border lg:hidden ${
-              dark
-                ? "border-white/20 bg-white/5 text-white"
-                : "border-black/10 bg-white text-[#111]"
+              dark ? "border-white/20 bg-white/5 text-white" : "border-black/10 bg-white text-[#111]"
             }`}
           >
             <span className="text-xl leading-none">{open ? "×" : "☰"}</span>

@@ -1,4 +1,57 @@
 "use client";
-import { useEffect,useState } from "react";import { usePublicData } from "./use-public-data";import { SiteHeader } from "@/components/site/site-header";import { SiteFooter } from "@/components/site/site-footer";import { PageIntro } from "@/components/site/page-intro";import { SiteMedia } from "@/components/site/site-media";import { usePublicUiStore } from "@/store/public-ui-store";import { PaginationControls } from "@/components/ui/pagination-controls";
-const filters=["All","BTS","Projects","Events","Talent"];
-export function GalleryPageView(){const active=usePublicUiStore(s=>s.galleryFilter),setActive=usePublicUiStore(s=>s.setGalleryFilter);const[page,setPage]=useState(1);const data=usePublicData("gallery",{page,limit:12,filter:active});useEffect(()=>setPage(1),[active]);return <><SiteHeader/><main id="main-content"><PageIntro eyebrow="Our Gallery" title="Moments From Our Journey" description="A glimpse into our projects, people and the stories we bring to life." mediaAlt="Production gallery placeholder" mediaKind="gallery"/><section className="site-section bg-[#fafafa]"><div className="site-shell"><div className="mb-7 flex flex-wrap gap-2">{filters.map(f=><button key={f} onClick={()=>setActive(f)} className={`rounded-full px-4 py-2 text-xs font-semibold ${active===f?"bg-[#111] text-white":"border border-black/8 bg-white text-[#666]"}`}>{f}</button>)}</div><div className="grid grid-cols-2 gap-3 md:grid-cols-3">{data.gallery.map((item,i)=><figure key={`${item.title}-${i}`} className="overflow-hidden rounded-[14px]"><SiteMedia src={item.image} alt={item.title} kind="gallery" className="aspect-[4/3]"/></figure>)}</div><PaginationControls meta={data.meta} onPage={setPage}/></div></section></main><SiteFooter/></>}
+import { useEffect, useState } from "react";
+
+import { PageIntro } from "@/components/site/page-intro";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
+import { SiteMedia } from "@/components/site/site-media";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { usePublicUiStore } from "@/store/public-ui-store";
+
+import { usePublicData } from "./use-public-data";
+const filters = ["All", "BTS", "Projects", "Events", "Talent"];
+export function GalleryPageView() {
+  const active = usePublicUiStore((s) => s.galleryFilter),
+    setActive = usePublicUiStore((s) => s.setGalleryFilter);
+  const [page, setPage] = useState(1);
+  const data = usePublicData("gallery", { page, limit: 12, filter: active });
+  useEffect(() => setPage(1), [active]);
+  return (
+    <>
+      <SiteHeader />
+      <main id="main-content">
+        <PageIntro
+          eyebrow="Our Gallery"
+          title="Moments From Our Journey"
+          description="A glimpse into our projects, people and the stories we bring to life."
+          mediaAlt="Production gallery placeholder"
+          mediaKind="gallery"
+        />
+        <section className="site-section bg-[#fafafa]">
+          <div className="site-shell">
+            <div className="mb-7 flex flex-wrap gap-2">
+              {filters.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setActive(f)}
+                  className={`rounded-full px-4 py-2 text-xs font-semibold ${active === f ? "bg-[#111] text-white" : "border border-black/8 bg-white text-[#666]"}`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {data.gallery.map((item, i) => (
+                <figure key={`${item.title}-${i}`} className="overflow-hidden rounded-[14px]">
+                  <SiteMedia src={item.image} alt={item.title} kind="gallery" className="aspect-[4/3]" />
+                </figure>
+              ))}
+            </div>
+            <PaginationControls meta={data.meta} onPage={setPage} />
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
