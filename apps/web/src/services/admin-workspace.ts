@@ -1,6 +1,7 @@
 import type data from "@/data/admin-dashboard.json";
 
 import { type ApplicationRecord, type ContentRecord, dateLabel, mediaUrl, type ProfileRecord } from "./workspace";
+
 export type TalentRecord = {
   id: string;
   name: string;
@@ -10,7 +11,9 @@ export type TalentRecord = {
   createdAt: string;
   profile: ProfileRecord | null;
 };
+
 export type MemberView = (typeof data.members)[number] & { suspended: boolean };
+
 export const memberView = (x: TalentRecord): MemberView => ({
   id: x.id,
   name: x.name,
@@ -24,6 +27,7 @@ export const memberView = (x: TalentRecord): MemberView => ({
   image: mediaUrl(x.profile?.photo),
   suspended: x.suspended,
 });
+
 export const applicationView = (x: ApplicationRecord) => ({
   id: x._id,
   applicant: x.applicant.name,
@@ -34,21 +38,65 @@ export const applicationView = (x: ApplicationRecord) => ({
   status: x.status,
   notes: x.adminNotes ?? "",
 });
+
+export type ProjectCredit = { name: string; role: string };
+
 export type ProjectRecord = {
   _id: string;
+  slug: string;
   title: string;
   type?: string;
-  status: string;
-  updatedAt: string;
-  coverImage?: string;
-  location?: string;
   summary?: string;
-  credits?: unknown[];
+  description?: string;
+  body?: string[];
+  creditsText?: string;
+  status: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  coverMediaId?: string;
+  coverImage?: string;
+  galleryMediaIds?: string[];
+  galleryImages?: string[];
+  credits?: ProjectCredit[];
+  trailerUrl?: string;
+  tags?: string[];
+  published: boolean;
+  order?: number;
+  updatedAt: string;
   applications?: number;
-  published?: boolean;
 };
-export const projectView = (x: ProjectRecord) => ({
+
+export type ProjectView = {
+  id: string;
+  slug: string;
+  title: string;
+  type: string;
+  status: string;
+  applications: number;
+  team: number;
+  updated: string;
+  image: string;
+  location: string;
+  summary: string;
+  description: string;
+  body: string[];
+  creditsText: string;
+  startDate: string;
+  endDate: string;
+  coverMediaId?: string;
+  galleryMediaIds: string[];
+  galleryImages: string[];
+  credits: ProjectCredit[];
+  trailerUrl: string;
+  tags: string[];
+  published: boolean;
+  order: number;
+};
+
+export const projectView = (x: ProjectRecord): ProjectView => ({
   id: x._id,
+  slug: x.slug,
   title: x.title,
   type: x.type ?? "",
   status: x.status,
@@ -58,43 +106,109 @@ export const projectView = (x: ProjectRecord) => ({
   image: mediaUrl(x.coverImage),
   location: x.location ?? "",
   summary: x.summary ?? "",
+  description: x.description ?? "",
+  body: x.body ?? [],
+  creditsText: x.creditsText ?? "",
+  startDate: x.startDate?.slice(0, 10) ?? "",
+  endDate: x.endDate?.slice(0, 10) ?? "",
+  coverMediaId: x.coverMediaId,
+  galleryMediaIds: x.galleryMediaIds ?? [],
+  galleryImages: x.galleryImages ?? [],
+  credits: x.credits ?? [],
+  trailerUrl: x.trailerUrl ?? "",
+  tags: x.tags ?? [],
   published: !!x.published,
+  order: x.order ?? 0,
 });
+
 export type CastingRecord = {
   _id: string;
+  slug: string;
   title: string;
   projectId?: string;
   projectTitle?: string;
+  role?: string;
   category?: string;
+  summary?: string;
+  description?: string;
+  details?: string[];
   location?: string;
+  shootDate?: string;
   deadline?: string;
   status: string;
   closingSoon: boolean;
+  acceptingApplications?: boolean;
   published: boolean;
   applications?: number;
   ageMin?: number;
   ageMax?: number;
   gender?: string;
+  experience?: string;
   compensation?: string;
-  description?: string;
+  requirements?: string;
+  coverMediaId?: string;
   coverImage?: string;
+  tags?: string[];
 };
-export const castingView = (x: CastingRecord) => ({
+
+export type CastingView = {
+  id: string;
+  slug: string;
+  title: string;
+  projectId?: string;
+  project: string;
+  role: string;
+  category: string;
+  summary: string;
+  description: string;
+  details: string[];
+  location: string;
+  shootDate: string;
+  deadline: string;
+  status: string;
+  applications: number;
+  ageMin?: number;
+  ageMax?: number;
+  age: string;
+  gender: string;
+  experience: string;
+  compensation: string;
+  requirements: string;
+  coverMediaId?: string;
+  coverImage: string;
+  tags: string[];
+  published: boolean;
+};
+
+export const castingView = (x: CastingRecord): CastingView => ({
   id: x._id,
+  slug: x.slug,
   title: x.title,
+  projectId: x.projectId,
   project: x.projectTitle ?? "—",
+  role: x.role ?? "",
   category: x.category ?? "",
+  summary: x.summary ?? "",
+  description: x.description ?? "",
+  details: x.details ?? [],
   location: x.location ?? "",
+  shootDate: x.shootDate?.slice(0, 10) ?? "",
   deadline: x.deadline?.slice(0, 10) ?? "",
   status: !x.published ? "Draft" : x.closingSoon ? "Closing Soon" : x.status,
   applications: x.applications ?? 0,
+  ageMin: x.ageMin,
+  ageMax: x.ageMax,
   age: x.ageMin !== undefined || x.ageMax !== undefined ? `${x.ageMin ?? 0}–${x.ageMax ?? 120}` : "",
   gender: x.gender ?? "",
+  experience: x.experience ?? "",
   compensation: x.compensation ?? "",
-  description: x.description ?? "",
-  published: x.published,
+  requirements: x.requirements ?? "",
+  coverMediaId: x.coverMediaId,
   coverImage: x.coverImage ?? "",
+  tags: x.tags ?? [],
+  published: x.published,
 });
+
 export const contentView = (x: ContentRecord): Record<string, string> => ({
   id: x._id,
   title: x.title,
@@ -110,6 +224,7 @@ export const contentView = (x: ContentRecord): Record<string, string> => ({
   platform: x.data?.platform ?? "",
   group: x.data?.group ?? "",
 });
+
 export type ContactRecord = {
   _id: string;
   name: string;
@@ -119,6 +234,7 @@ export type ContactRecord = {
   status: string;
   createdAt: string;
 };
+
 export const contactView = (x: ContactRecord) => ({
   id: x._id,
   name: x.name,
@@ -128,6 +244,7 @@ export const contactView = (x: ContactRecord) => ({
   status: x.status,
   received: dateLabel(x.createdAt),
 });
+
 export type ListRecord = {
   _id: string;
   name: string;
@@ -137,7 +254,9 @@ export type ListRecord = {
   projectId?: string;
   updatedAt: string;
 };
+
 export type ListView = { id: string; name: string; purpose: string; members: number; owner: string; projectId?: string; updated: string };
+
 export const listView = (x: ListRecord): ListView => ({
   id: x._id,
   name: x.name,

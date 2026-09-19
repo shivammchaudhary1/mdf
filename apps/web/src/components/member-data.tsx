@@ -139,14 +139,12 @@ export function MemberData({ children }: { children: ReactNode }) {
           image: mediaUrl(p.portfolio?.[i]),
         })),
         activity: applications.slice(0, 5).map((x) => ({ title: `${x.status} — ${x.opportunityTitle}`, time: dateLabel(x.createdAt) })),
-        posts: posts
-          .slice(0, 2)
-          .map((x) => ({
-            title: x.title,
-            category: x.category ?? "",
-            date: dateLabel(x.publishedAt ?? x.createdAt),
-            image: mediaUrl(x.coverImage),
-          })),
+        posts: posts.slice(0, 2).map((x) => ({
+          title: x.title,
+          category: x.category ?? "",
+          date: dateLabel(x.publishedAt ?? x.createdAt),
+          image: mediaUrl(x.coverImage),
+        })),
       },
     });
     setReady(true);

@@ -37,7 +37,7 @@ export class CreateCastingDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsMongoId()
-  projectId?: string;
+  projectId?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -90,12 +90,12 @@ export class CreateCastingDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  shootDate?: string;
+  shootDate?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  deadline?: string;
+  deadline?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -138,7 +138,7 @@ export class CreateCastingDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsMongoId()
-  coverMediaId?: string;
+  coverMediaId?: string | null;
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()

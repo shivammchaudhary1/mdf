@@ -152,50 +152,59 @@ export class ProjectService {
   }
 
   async update(id: string, input: UpdateProjectDto, actorId: string) {
+    const existing = await this.projects.findOne({ _id: objectId(id), archived: false }).lean();
+    if (!existing) throw new NotFoundException("Project not found.");
+
+    const mergedStart =
+      input.startDate === null ? undefined : input.startDate !== undefined ? new Date(input.startDate) : existing.startDate;
+    const mergedEnd = input.endDate === null ? undefined : input.endDate !== undefined ? new Date(input.endDate) : existing.endDate;
+    if (mergedStart && mergedEnd && mergedStart > mergedEnd) {
+      throw new BadRequestException("Project end date must follow start date.");
+    }
+
     await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])]);
 
-    const update: Record<string, unknown> = {
-      ...input,
-      updatedBy: new Types.ObjectId(actorId),
-    };
+    const oldMedia = [existing.coverMediaId ? String(existing.coverMediaId) : undefined, ...(existing.galleryMediaIds ?? []).map(String)];
+    const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };
+    const unset: Record<string, 1> = {};
 
-    if (input.startDate !== undefined) {
-      update.startDate = new Date(input.startDate);
-    }
+    if (input.startDate === null) {
+      delete update.startDate;
+      unset.startDate = 1;
+    } else if (input.startDate !== undefined) update.startDate = new Date(input.startDate);
 
-    if (input.endDate !== undefined) {
-      update.endDate = new Date(input.endDate);
-    }
+    if (input.endDate === null) {
+      delete update.endDate;
+      unset.endDate = 1;
+    } else if (input.endDate !== undefined) update.endDate = new Date(input.endDate);
 
-    if (input.coverMediaId) {
-      update.coverMediaId = new Types.ObjectId(input.coverMediaId);
-    }
+    if (input.coverMediaId === null) {
+      delete update.coverMediaId;
+      unset.coverMediaId = 1;
+    } else if (input.coverMediaId) update.coverMediaId = new Types.ObjectId(input.coverMediaId);
 
-    if (input.galleryMediaIds) {
-      update.galleryMediaIds = input.galleryMediaIds.map((value) => new Types.ObjectId(value));
+    if (input.galleryMediaIds !== undefined) update.galleryMediaIds = input.galleryMediaIds.map((value) => new Types.ObjectId(value));
+
+    if (input.trailerUrl === null) {
+      delete update.trailerUrl;
+      unset.trailerUrl = 1;
     }
 
     const project = await this.projects.findOneAndUpdate(
-      {
-        _id: objectId(id),
-        archived: false,
-      },
-      { $set: update },
-      {
-        new: true,
-        runValidators: true,
-      },
+      { _id: objectId(id), archived: false },
+      { $set: update, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
+      { new: true, runValidators: true },
     );
+    if (!project) throw new NotFoundException("Project not found.");
 
-    if (!project) {
-      throw new NotFoundException("Project not found.");
-    }
+    const currentMedia = [project.coverMediaId ? String(project.coverMediaId) : undefined, ...(project.galleryMediaIds ?? []).map(String)];
+    if (project.published) await this.media.makePublic(currentMedia);
+    else await this.media.makePrivate(currentMedia);
+    await this.media.makePrivate(oldMedia);
 
-    if (project.published) {
-      await this.media.makePublic([
-        project.coverMediaId ? String(project.coverMediaId) : undefined,
-        ...(project.galleryMediaIds ?? []).map(String),
-      ]);
+    const currentIds = new Set(currentMedia.filter((value): value is string => !!value));
+    for (const mediaId of oldMedia.filter((value): value is string => !!value && !currentIds.has(value))) {
+      await this.media.removeIfUnreferencedOwned(mediaId, actorId);
     }
 
     await this.audit.record({

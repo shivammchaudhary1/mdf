@@ -97,9 +97,23 @@ try {
   assert.equal(r.status, 201, JSON.stringify(r.data));
   const projectId = r.data._id;
 
+  r = await request(`/admin/projects/${projectId}`, { method: "PATCH", state: admin, body: { summary: "Integration summary", description: "Integration description", body: ["Section one", "Section two"], creditsText: "Production credits", credits: [{ name: "Integration Person", role: "Director" }], location: "Indore", startDate: "2026-10-01", endDate: "2026-10-10", trailerUrl: "https://example.com/trailer", tags: ["integration", "film"], order: 3 } });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.body.length, 2);
+  assert.equal(r.data.credits[0].role, "Director");
+  assert.equal((await request("/projects/integration-project")).data.trailerUrl, "https://example.com/trailer");
+  assert.equal((await request(`/admin/projects/${projectId}`, { method: "PATCH", state: admin, body: { startDate: "2026-11-01", endDate: "2026-10-01" } })).status, 400);
+
   r = await request("/admin/castings", { method: "POST", state: admin, body: { title: "Lead Actor", slug: "lead-actor", projectId, role: "Lead Actor", category: "Acting", status: "Open", published: true, deadline: new Date(Date.now() + 86400000).toISOString() } });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   const castingId = r.data._id;
+
+  r = await request(`/admin/castings/${castingId}`, { method: "PATCH", state: admin, body: { summary: "Lead role summary", description: "Lead role description", details: ["Audition required", "Hindi dialogue"], experience: "Theatre preferred", compensation: "Paid", requirements: "Bring a current portfolio", tags: ["lead", "actor"], gender: "Any", ageMin: 20, ageMax: 40 } });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.details.length, 2);
+  assert.equal(r.data.requirements, "Bring a current portfolio");
+  assert.equal((await request("/castings/lead-actor")).data.compensation, "Paid");
+  assert.equal((await request(`/admin/castings/${castingId}`, { method: "PATCH", state: admin, body: { ageMin: 50, ageMax: 30 } })).status, 400);
   r = await request("/admin/castings?closingSoon=true&limit=1", { state: admin });
   assert.equal(r.status, 200);
   assert.equal(r.data.meta.total, 1);
