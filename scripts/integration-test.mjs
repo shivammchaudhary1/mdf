@@ -284,6 +284,17 @@ try {
   assert.equal(r.data.meta.total, 1);
   assert.equal(r.data.items[0].slug, "scheduled-story");
   assert.equal((await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Duplicate slug", slug: "scheduled-story" } })).status, 409);
+
+  r = await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Group 7 scheduled", slug: "group-7-scheduled", status: "Scheduled", published: true, publishedAt: new Date(Date.now() + 2 * 86400000).toISOString(), description: "Scheduled CMS content", body: ["First section", "Second section"], tags: ["cms", "scheduled"], seoTitle: "Scheduled CMS", seoDescription: "Scheduled CMS integration coverage" } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const group7ScheduledId = r.data._id;
+  assert.equal((await request("/content/blog/group-7-scheduled")).status, 404);
+  assert.equal((await request("/admin/content/blog?search=Group%207%20scheduled", { state: admin })).data.meta.total, 1);
+  assert.equal((await request(`/admin/content/blog/${group7ScheduledId}`, { method: "PATCH", state: admin, body: { status: "Published", publishedAt: null, videoUrl: null } })).status, 200);
+  assert.equal((await request("/content/blog/group-7-scheduled")).status, 200);
+  assert.equal((await request(`/admin/content/blog/${group7ScheduledId}`, { method: "DELETE", state: admin })).status, 200);
+  assert.equal((await request("/content/blog/group-7-scheduled")).status, 404);
+  assert.equal((await request("/admin/content/blog", { method: "POST", state: admin, body: { title: "Bad schedule", slug: "bad-schedule", status: "Scheduled", published: true } })).status, 400);
   assert.equal((await request(`/admin/projects/${projectId}`, { state: admin })).status, 200);
   assert.equal((await request("/projects/integration-project")).status, 200);
   assert.equal((await request(`/admin/projects/${projectId}`, { method: "DELETE", state: admin })).status, 200);
