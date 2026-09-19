@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { MemberApplicationsSection } from "@/components/member/member-applications-section";
 import { MemberPortfolioSection } from "@/components/member/member-portfolio-section";
 import { MemberProfileSection } from "@/components/member/member-profile-section";
 import { MemberSessions } from "@/components/member/member-sessions";
@@ -14,7 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
-import { type ApplicationRecord, dateLabel, fetchPage, mediaUrl, type OpportunityRecord, type PageMeta } from "@/services/workspace";
+import { dateLabel, fetchPage, mediaUrl, type OpportunityRecord, type PageMeta } from "@/services/workspace";
 import { useMemberDashboardStore } from "@/store/member-dashboard-store";
 
 const nav = [
@@ -407,91 +408,7 @@ function Portfolio() {
 }
 
 function Applications() {
-  const active = useMemberDashboardStore((s) => s.applicationFilter),
-    setActive = useMemberDashboardStore((s) => s.setApplicationFilter),
-    toast = useToast();
-  const [page, setPage] = useState(1),
-    [items, setItems] = useState<ApplicationRecord[]>([]),
-    [meta, setMeta] = useState<PageMeta>();
-  const filters = ["All", "Submitted", "Under Review", "Shortlisted", "Not Selected"];
-  useEffect(() => {
-    let mounted = true;
-    const status = active === "Not Selected" ? "Rejected" : active === "All" ? "" : active;
-    const path = `/member/applications${status ? `?status=${encodeURIComponent(status)}` : ""}`;
-    void fetchPage<ApplicationRecord>(path, page, 10)
-      .then((r) => {
-        if (mounted) {
-          setItems(r.items);
-          setMeta(r.meta);
-        }
-      })
-      .catch((e) => toast.error(e instanceof Error ? e.message : "Unable to load applications."));
-    return () => {
-      mounted = false;
-    };
-  }, [active, page, toast]);
-  const rows = items.map((x) => ({
-    id: x._id,
-    role: x.roleSnapshot ?? x.opportunityTitle,
-    project: x.opportunityTitle,
-    type: x.opportunityType,
-    location: x.applicant.city ?? "—",
-    appliedOn: dateLabel(x.createdAt),
-    status: x.status === "Rejected" ? "Not Selected" : x.status,
-    tone:
-      x.status === "Shortlisted" || x.status === "Selected"
-        ? "success"
-        : x.status === "Under Review"
-          ? "warning"
-          : x.status === "Rejected"
-            ? "danger"
-            : "neutral",
-  }));
-  return (
-    <div className="md-stack">
-      <Header
-        kicker="Track your progress"
-        title="My Applications"
-        description="See every role you applied to and where each application currently stands."
-      />
-      <div className="md-filters">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => {
-              setActive(f);
-              setPage(1);
-            }}
-            className={active === f ? "active" : ""}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-      <article className="md-card md-table-card">
-        <div className="md-table-head">
-          <span>Role / Project</span>
-          <span>Applied</span>
-          <span>Location</span>
-          <span>Status</span>
-        </div>
-        {rows.map((a) => (
-          <div className="md-table-row" key={a.id}>
-            <div>
-              <strong>{a.role}</strong>
-              <span>
-                {a.project} · {a.type}
-              </span>
-            </div>
-            <span>{a.appliedOn}</span>
-            <span>{a.location}</span>
-            <Status status={a.status} tone={a.tone} />
-          </div>
-        ))}
-      </article>
-      <PaginationControls meta={meta} onPage={setPage} />
-    </div>
-  );
+  return <MemberApplicationsSection />;
 }
 
 function Opportunities() {

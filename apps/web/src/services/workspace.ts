@@ -42,7 +42,14 @@ export type ApplicationRecord = {
   opportunitySlug?: string;
   status: string;
   createdAt: string;
-  applicant: { name: string; city?: string };
+  applicant: { name: string; email?: string; mobile?: string; city?: string };
+  coverNote?: string;
+  portfolioMediaIds?: string[];
+  portfolioImages?: string[];
+  showreelUrl?: string;
+  pitch?: string;
+  documentMediaId?: string;
+  documentUrl?: string;
   adminNotes?: string;
 };
 export type OpportunityRecord = {
