@@ -71,6 +71,39 @@ export class AuthService {
     const pepper = String(this.config.get("COOKIE_SECRET") ?? "development");
     return sha256(`${pepper}:${value.slice(0, 1000)}`);
   }
+
+  private deviceLabel(userAgent?: string) {
+    if (!userAgent) return "Browser session";
+
+    const value = userAgent.slice(0, 500);
+    const device = /iPhone/i.test(value)
+      ? "iPhone"
+      : /iPad/i.test(value)
+        ? "iPad"
+        : /Android/i.test(value)
+          ? "Android mobile"
+          : /Windows/i.test(value)
+            ? "Windows PC"
+            : /Macintosh|Mac OS X/i.test(value)
+              ? "Mac"
+              : /Linux/i.test(value)
+                ? "Linux device"
+                : "Device";
+
+    const browser = /Edg\//i.test(value)
+      ? "Edge"
+      : /Chrome\//i.test(value)
+        ? "Chrome"
+        : /Firefox\//i.test(value)
+          ? "Firefox"
+          : /Safari\//i.test(value) && !/Chrome\//i.test(value)
+            ? "Safari"
+            : /undici|node/i.test(value)
+              ? "App browser"
+              : "Browser";
+
+    return `${browser} on ${device}`.slice(0, 80);
+  }
   private accountId(account: AccountLike) {
     return new Types.ObjectId(String(account._id));
   }
@@ -155,6 +188,7 @@ export class AuthService {
       remember,
       ipHash: this.contextHash(context.ip),
       userAgentHash: this.contextHash(context.userAgent),
+      deviceLabel: this.deviceLabel(context.userAgent),
       lastSeenAt: now,
       expiresAt: new Date(now.getTime() + duration),
     });
@@ -226,12 +260,13 @@ export class AuthService {
   async listSessions(userId: string, currentSessionId: string) {
     const sessions = await this.sessions
       .find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } })
-      .select("_id remember createdAt lastSeenAt expiresAt")
+      .select("_id remember deviceLabel createdAt lastSeenAt expiresAt")
       .sort({ createdAt: -1 })
       .lean();
     return sessions.map((session) => ({
       id: String(session._id),
       remember: session.remember,
+      deviceLabel: session.deviceLabel ?? "Existing browser session",
       createdAt: session.createdAt,
       lastSeenAt: session.lastSeenAt,
       expiresAt: session.expiresAt,

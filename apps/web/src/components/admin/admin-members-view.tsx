@@ -1,14 +1,13 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 
-import { AdminDialog, AdminDialogActions, AdminDialogForm, AdminDialogGrid, AdminFormField } from "@/components/admin/admin-dialog";
+import { AdminDialog } from "@/components/admin/admin-dialog";
 import {
   AdminCollectionState,
   AdminFilters,
   AdminMoreButton,
   AdminPageHeader,
-  AdminPrimaryButton,
   AdminSearch,
   AdminStatus,
 } from "@/components/admin/admin-shared";
@@ -26,8 +25,8 @@ type Member = (typeof data.members)[number] & { suspended: boolean };
 
 export function AdminMembersView() {
   const toast = useToast();
-  const active = useAdminDashboardStore((s) => s.memberFilter);
-  const setActive = useAdminDashboardStore((s) => s.setMemberFilter);
+  const active = useAdminDashboardStore((state) => state.memberFilter);
+  const setActive = useAdminDashboardStore((state) => state.setMemberFilter);
   const [query, setQuery] = useState("");
   const [members, , refresh, meta, setPage, , loading, error] = useAdminRecords(
     `/admin/users?search=${encodeURIComponent(query)}${active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""}`,
@@ -36,13 +35,8 @@ export function AdminMembersView() {
     1,
     25,
   );
-  const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<Member | null>(null);
 
-  function addMember(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    toast.error("Members must register through the sign-up page. Admin invitations are not available yet.");
-  }
   async function toggleVerify() {
     if (!selected) return;
     try {
@@ -54,6 +48,7 @@ export function AdminMembersView() {
       toast.error(error instanceof Error ? error.message : "Unable to update member.");
     }
   }
+
   async function toggleSuspended() {
     if (!selected) return;
     try {
@@ -71,9 +66,9 @@ export function AdminMembersView() {
       <AdminPageHeader
         eyebrow="Community management"
         title="Members & Talent"
-        description="Search, verify and review the people who make up the M. Dadu Films community."
-        action={<AdminPrimaryButton onClick={() => setCreating(true)}>Add Member</AdminPrimaryButton>}
+        description="Search, verify, suspend and review registered community members. New members join through the public registration flow."
       />
+
       <section className="ad-toolbar">
         <AdminFilters values={["All", "Verified", "Unverified", "Needs Review"]} active={active} onChange={setActive} />
         <AdminSearch value={query} onChange={setQuery} placeholder="Search members" />
@@ -86,6 +81,7 @@ export function AdminMembersView() {
         emptyText="No members match this filter."
         onRetry={() => void refresh()}
       />
+
       <article className="ad-card ad-table-card">
         <div className="ad-table ad-members-table">
           <div className="ad-table-head">
@@ -96,62 +92,34 @@ export function AdminMembersView() {
             <span>Status</span>
             <span></span>
           </div>
-          {members.map((m) => (
-            <div key={m.id} className="ad-table-row">
+
+          {members.map((member) => (
+            <div key={member.id} className="ad-table-row">
               <div className="ad-person-cell">
-                <SiteMedia src={m.image} alt={m.name} kind="team" className="h-10 w-10 shrink-0 rounded-full" />
+                <SiteMedia src={member.image} alt={member.name} kind="team" className="h-10 w-10 shrink-0 rounded-full" />
                 <div>
-                  <strong>{m.name}</strong>
-                  <span>{m.email}</span>
+                  <strong>{member.name}</strong>
+                  <span>{member.email}</span>
                 </div>
               </div>
-              <span>{m.role}</span>
-              <span>{m.city}</span>
+              <span>{member.role}</span>
+              <span>{member.city}</span>
               <div className="ad-completion">
-                <strong>{m.completion}%</strong>
+                <strong>{member.completion}%</strong>
                 <i>
-                  <b style={{ width: `${m.completion}%` }} />
+                  <b style={{ width: `${member.completion}%` }} />
                 </i>
               </div>
               <div className="ad-member-status">
-                {m.verified ? <span className="verified">✓ Verified</span> : <AdminStatus value={m.status} />}
+                {member.verified ? <span className="verified">✓ Verified</span> : <AdminStatus value={member.status} />}
               </div>
-              <AdminMoreButton onEdit={() => setSelected(m)} />
+              <AdminMoreButton onEdit={() => setSelected(member)} />
             </div>
           ))}
         </div>
       </article>
-      <PaginationControls meta={meta} onPage={setPage} />
 
-      <AdminDialog
-        open={creating}
-        onClose={() => setCreating(false)}
-        eyebrow="Community"
-        title="Add Member"
-        description="Create a temporary member record for UI review."
-        width="wide"
-      >
-        <AdminDialogForm onSubmit={addMember}>
-          <AdminDialogGrid>
-            <AdminFormField label="Full Name" wide>
-              <input name="name" placeholder="Full name" autoFocus required />
-            </AdminFormField>
-            <AdminFormField label="Email">
-              <input name="email" type="email" placeholder="name@example.com" required />
-            </AdminFormField>
-            <AdminFormField label="Mobile">
-              <input name="mobile" placeholder="+91 ..." />
-            </AdminFormField>
-            <AdminFormField label="Talent Category">
-              <input name="role" placeholder="Actor / Writer / Crew" />
-            </AdminFormField>
-            <AdminFormField label="City">
-              <input name="city" placeholder="Indore" />
-            </AdminFormField>
-          </AdminDialogGrid>
-          <AdminDialogActions onCancel={() => setCreating(false)} primaryLabel="Add Member" />
-        </AdminDialogForm>
-      </AdminDialog>
+      <PaginationControls meta={meta} onPage={setPage} />
 
       <AdminDialog
         open={!!selected}
@@ -169,6 +137,7 @@ export function AdminMembersView() {
                 <span>Profile completion {selected.completion}%</span>
               </div>
             </div>
+
             <div className="ad-review-summary">
               <div>
                 <span>Status</span>
@@ -183,6 +152,7 @@ export function AdminMembersView() {
                 <strong>{selected.verified ? "Verified" : "Not verified"}</strong>
               </div>
             </div>
+
             <div className="ad-dialog-actions">
               <button type="button" className="ad-dialog-cancel" onClick={() => setSelected(null)}>
                 Close
