@@ -9,39 +9,86 @@ import {
   AdminMoreButton,
   AdminPageHeader,
   AdminPrimaryButton,
+  AdminSearch,
   AdminStatus,
 } from "@/components/admin/admin-shared";
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
-import { contentView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
-import { slugFor, uploadMedia } from "@/services/workspace";
+import { dateLabel, slugFor, uploadMedia } from "@/services/workspace";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
 
 type Kind = "blog" | "gallery" | "bts" | "shows" | "team" | "work";
-type ContentItem = Record<string, string>;
+type Source = {
+  _id: string;
+  title: string;
+  slug: string;
+  category?: string;
+  description?: string;
+  body?: string[];
+  coverMediaId?: string;
+  coverImage?: string;
+  mediaIds?: string[];
+  media?: string[];
+  status?: string;
+  published: boolean;
+  publishedAt?: string;
+  role?: string;
+  videoUrl?: string;
+  order?: number;
+  tags?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  projectId?: string;
+  data?: Record<string, string>;
+};
+type Item = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  description: string;
+  body: string[];
+  coverMediaId?: string;
+  image: string;
+  mediaIds: string[];
+  media: string[];
+  status: string;
+  published: boolean;
+  publishedAt: string;
+  role: string;
+  videoUrl: string;
+  order: number;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  projectId?: string;
+  author: string;
+  platform: string;
+  group: string;
+};
 
 const cfg = {
   work: {
     eyebrow: "Production services",
     title: "Our Work",
-    description: "Manage production work categories shown on the public website.",
+    description: "Manage production-work categories and service content.",
     action: "Add Work Item",
   },
   blog: {
     eyebrow: "Editorial CMS",
     title: "Blog & News",
-    description: "Draft, publish and manage editorial content for the public journal.",
+    description: "Draft, schedule, publish and manage editorial content.",
     action: "New Post",
   },
   gallery: {
     eyebrow: "Media CMS",
     title: "Gallery",
-    description: "Curate the public image gallery without mixing references with production assets.",
-    action: "Add Media",
+    description: "Curate gallery entries and supporting media.",
+    action: "Add Gallery Item",
   },
   bts: {
     eyebrow: "Media CMS",
@@ -52,234 +99,109 @@ const cfg = {
   shows: {
     eyebrow: "External media",
     title: "Shows & Media",
-    description: "Manage YouTube, Instagram and external media links shown across the site.",
+    description: "Manage external media links and publishing schedules.",
     action: "Add Media Link",
   },
   team: {
     eyebrow: "People CMS",
     title: "Team",
-    description: "Control who appears on the public team page and how their roles are presented.",
+    description: "Control public team profiles and presentation order.",
     action: "Add Team Member",
   },
 } as const;
 
-function CreateFields({ kind }: { kind: Kind }) {
-  if (kind === "work")
-    return (
-      <>
-        <AdminFormField label="Title" wide>
-          <input name="title" placeholder="Feature Films" autoFocus required />
-        </AdminFormField>
-        <AdminFormField label="Category">
-          <input name="category" defaultValue="Production" />
-        </AdminFormField>
-        <AdminFormField label="Status">
-          <select name="status">
-            <option>Published</option>
-            <option>Draft</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Description" wide>
-          <textarea name="summary" rows={5} />
-        </AdminFormField>
-      </>
-    );
-  if (kind === "blog")
-    return (
-      <>
-        <AdminFormField label="Post Title" wide>
-          <input name="title" placeholder="Article title" autoFocus required />
-        </AdminFormField>
-        <AdminFormField label="Category">
-          <select name="category">
-            <option>Casting</option>
-            <option>Production</option>
-            <option>Stories</option>
-            <option>Talent</option>
-            <option>News</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Author">
-          <input name="author" defaultValue="Editorial Team" />
-        </AdminFormField>
-        <AdminFormField label="Status">
-          <select name="status">
-            <option>Draft</option>
-            <option>Published</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Publish Date">
-          <input name="date" type="date" />
-        </AdminFormField>
-        <AdminFormField label="Summary" wide>
-          <textarea name="summary" rows={5} placeholder="Short article summary." />
-        </AdminFormField>
-      </>
-    );
-
-  if (kind === "gallery")
-    return (
-      <>
-        <AdminFormField label="Media Title" wide>
-          <input name="title" placeholder="e.g. Golden Hour Setup" autoFocus required />
-        </AdminFormField>
-        <AdminFormField label="Category">
-          <select name="category">
-            <option>BTS</option>
-            <option>Projects</option>
-            <option>Events</option>
-            <option>Talent</option>
-            <option>Other</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Status">
-          <select name="status">
-            <option>Published</option>
-            <option>Draft</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Date">
-          <input name="date" type="date" />
-        </AdminFormField>
-        <AdminFormField label="Caption" wide>
-          <textarea name="summary" rows={4} placeholder="Optional image caption." />
-        </AdminFormField>
-      </>
-    );
-
-  if (kind === "bts")
-    return (
-      <>
-        <AdminFormField label="BTS Title" wide>
-          <input name="title" placeholder="e.g. Lighting Setup — The Last Frame" autoFocus required />
-        </AdminFormField>
-        <AdminFormField label="Category">
-          <select name="category">
-            <option>Production</option>
-            <option>On Set</option>
-            <option>Team</option>
-            <option>Location</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Status">
-          <select name="status">
-            <option>Published</option>
-            <option>Draft</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Date">
-          <input name="date" type="date" />
-        </AdminFormField>
-        <AdminFormField label="Caption" wide>
-          <textarea name="summary" rows={4} placeholder="What is happening in this moment?" />
-        </AdminFormField>
-      </>
-    );
-
-  if (kind === "shows")
-    return (
-      <>
-        <AdminFormField label="Media Title" wide>
-          <input name="title" placeholder="e.g. Rangmanch — First Look" autoFocus required />
-        </AdminFormField>
-        <AdminFormField label="Platform">
-          <select name="platform">
-            <option>YouTube</option>
-            <option>Instagram</option>
-            <option>Vimeo</option>
-            <option>Other</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Status">
-          <select name="status">
-            <option>Published</option>
-            <option>Scheduled</option>
-            <option>Draft</option>
-          </select>
-        </AdminFormField>
-        <AdminFormField label="Publish Date">
-          <input name="date" type="date" />
-        </AdminFormField>
-        <AdminFormField label="External URL" wide>
-          <input name="url" type="url" placeholder="https://..." required />
-        </AdminFormField>
-      </>
-    );
-
-  return (
-    <>
-      <AdminFormField label="Full Name" wide>
-        <input name="name" placeholder="Team member name" autoFocus required />
-      </AdminFormField>
-      <AdminFormField label="Role">
-        <input name="role" placeholder="Creative Producer" />
-      </AdminFormField>
-      <AdminFormField label="Group">
-        <select name="group">
-          <option>Core Team</option>
-          <option>Creative Team</option>
-          <option>Advisors</option>
-        </select>
-      </AdminFormField>
-      <AdminFormField label="Status">
-        <select name="status">
-          <option>Published</option>
-          <option>Draft</option>
-        </select>
-      </AdminFormField>
-      <AdminFormField label="Bio" wide>
-        <textarea name="summary" rows={5} placeholder="Short public bio." />
-      </AdminFormField>
-    </>
-  );
-}
-
-function UploadBox({ kind }: { kind: Kind }) {
-  if (kind === "shows") return null;
-  return (
-    <div className="ad-dialog-upload">
-      <span>{kind === "team" ? "Profile photo" : "Cover / media image"}</span>
-      <strong>Upload JPEG, PNG or WebP</strong>
-      <small>The media service optimises images and stores them using the configured storage adapter.</small>
-      <input name="cover" type="file" accept="image/jpeg,image/png,image/webp" />
-    </div>
-  );
-}
+const kindPath = (kind: Kind) => (kind === "bts" ? "behind-the-scenes" : kind === "work" ? "our-work" : kind);
+const mapItem = (x: Source): Item => ({
+  id: x._id,
+  title: x.title,
+  slug: x.slug,
+  category: x.category ?? "",
+  description: x.description ?? "",
+  body: x.body ?? [],
+  coverMediaId: x.coverMediaId,
+  image: x.coverImage ?? "",
+  mediaIds: x.mediaIds ?? [],
+  media: x.media ?? [],
+  status: x.status ?? (x.published ? "Published" : "Draft"),
+  published: x.published,
+  publishedAt: x.publishedAt?.slice(0, 10) ?? "",
+  role: x.role ?? "",
+  videoUrl: x.videoUrl ?? "",
+  order: x.order ?? 0,
+  tags: x.tags ?? [],
+  seoTitle: x.seoTitle ?? "",
+  seoDescription: x.seoDescription ?? "",
+  projectId: x.projectId,
+  author: x.data?.author ?? "",
+  platform: x.data?.platform ?? "",
+  group: x.data?.group ?? "",
+});
+const lines = (value: FormDataEntryValue | null) =>
+  String(value ?? "")
+    .split(/\r?\n/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+const csv = (value: FormDataEntryValue | null) =>
+  String(value ?? "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
 
 export function AdminContentView({ kind }: { kind: Kind }) {
   const toast = useToast();
   const active = useAdminDashboardStore((s) => s.contentFilter);
   const setActive = useAdminDashboardStore((s) => s.setContentFilter);
   const config = cfg[kind];
-  const basePath = `/admin/content/${kind === "bts" ? "behind-the-scenes" : kind === "work" ? "our-work" : kind}`;
-  const statuses = kind === "shows" ? ["All", "Published", "Scheduled", "Draft"] : ["All", "Published", "Draft"];
-  const path = `${basePath}${active !== "All" ? `?status=${encodeURIComponent(active)}` : ""}`;
-  const [items, , refresh, meta, setPage, , loading, error] = useAdminRecords(path, contentView, true, 1, 20);
+  const basePath = `/admin/content/${kindPath(kind)}`;
+  const statuses = ["All", "Published", "Scheduled", "Draft"];
+  const [query, setQuery] = useState("");
+  const params = new URLSearchParams();
+  if (active !== "All") params.set("status", active);
+  if (query.trim()) params.set("search", query.trim());
+  const path = `${basePath}${params.toString() ? `?${params}` : ""}`;
+  const [items, , refresh, meta, setPage, , loading, error] = useAdminRecords<Source, Item>(path, mapItem, true, 1, 20);
   const [creating, setCreating] = useState(false);
-  const [editing, setEditing] = useState<ContentItem | null>(null);
+  const [editing, setEditing] = useState<Item | null>(null);
 
   async function persist(event: FormEvent<HTMLFormElement>, id?: string) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const title = String(form.get(kind === "team" ? "name" : "title") ?? "").trim();
+    const title = String(form.get("title") ?? "").trim();
+    const status = String(form.get("status") ?? "Draft");
+    const publishedAt = String(form.get("publishedAt") ?? "").trim();
+    const url = String(form.get("videoUrl") ?? "").trim();
     const cover = form.get("cover");
-    let coverMediaId: string | undefined;
+    const extraFiles = form.getAll("media").filter((value): value is File => value instanceof File && value.size > 0);
+    let coverMediaId: string | null | undefined;
     if (cover instanceof File && cover.size > 0) coverMediaId = (await uploadMedia(cover)).id;
+    else if (id && form.get("removeCover") === "on") coverMediaId = null;
+    let mediaIds: string[] | undefined;
+    if (extraFiles.length) {
+      mediaIds = [];
+      for (const file of extraFiles) mediaIds.push((await uploadMedia(file)).id);
+    } else if (id && form.get("clearMedia") === "on") mediaIds = [];
+
     const body = {
       title,
       ...(!id ? { slug: slugFor(title) } : {}),
-      category: String(form.get("category") ?? ""),
-      role: String(form.get("role") ?? ""),
-      description: String(form.get("summary") ?? ""),
-      published: form.get("status") === "Published",
-      status: String(form.get("status") ?? "Draft"),
-      ...(form.get("date") ? { publishedAt: String(form.get("date")) } : {}),
-      ...(form.get("url") ? { videoUrl: String(form.get("url")) } : {}),
-      ...(coverMediaId ? { coverMediaId } : {}),
+      category: String(form.get("category") ?? "").trim(),
+      description: String(form.get("description") ?? "").trim(),
+      body: lines(form.get("body")),
+      ...(coverMediaId !== undefined ? { coverMediaId } : {}),
+      ...(mediaIds !== undefined ? { mediaIds } : {}),
+      status,
+      published: status === "Published" || status === "Scheduled",
+      publishedAt: publishedAt || null,
+      role: String(form.get("role") ?? "").trim(),
+      videoUrl: url || null,
+      order: Number(form.get("order") ?? 0) || 0,
+      tags: csv(form.get("tags")),
+      seoTitle: String(form.get("seoTitle") ?? "").trim(),
+      seoDescription: String(form.get("seoDescription") ?? "").trim(),
       data: {
-        author: String(form.get("author") ?? ""),
-        platform: String(form.get("platform") ?? ""),
-        group: String(form.get("group") ?? ""),
+        author: String(form.get("author") ?? "").trim(),
+        platform: String(form.get("platform") ?? "").trim(),
+        group: String(form.get("group") ?? "").trim(),
       },
     };
     try {
@@ -288,16 +210,89 @@ export function AdminContentView({ kind }: { kind: Kind }) {
       setCreating(false);
       setEditing(null);
       toast.success("Content saved.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to save content.");
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : "Unable to save content.");
+      throw saveError;
     }
   }
-  function submitNew(event: FormEvent<HTMLFormElement>) {
-    return persist(event);
-  }
-  function saveEdit(event: FormEvent<HTMLFormElement>) {
-    if (editing) return persist(event, editing.id);
-  }
+
+  const Fields = ({ edit }: { edit?: Item }) => (
+    <>
+      <AdminDialogGrid>
+        <AdminFormField label={kind === "team" ? "Full Name" : "Title"} wide>
+          <input name="title" defaultValue={edit?.title} required maxLength={160} />
+        </AdminFormField>
+        <AdminFormField label="Category">
+          <input name="category" defaultValue={edit?.category} maxLength={100} />
+        </AdminFormField>
+        <AdminFormField label="Role">
+          <input name="role" defaultValue={edit?.role} maxLength={160} />
+        </AdminFormField>
+        <AdminFormField label="Status">
+          <select name="status" defaultValue={edit?.status ?? "Draft"}>
+            <option>Draft</option>
+            <option>Published</option>
+            <option>Scheduled</option>
+          </select>
+        </AdminFormField>
+        <AdminFormField label="Publish Date">
+          <input name="publishedAt" type="date" defaultValue={edit?.publishedAt} />
+        </AdminFormField>
+        <AdminFormField label="Display Order">
+          <input name="order" type="number" min="0" max="10000" defaultValue={edit?.order ?? 0} />
+        </AdminFormField>
+        <AdminFormField label="Author">
+          <input name="author" defaultValue={edit?.author} />
+        </AdminFormField>
+        <AdminFormField label="Platform">
+          <input name="platform" defaultValue={edit?.platform} />
+        </AdminFormField>
+        <AdminFormField label="Group">
+          <input name="group" defaultValue={edit?.group} />
+        </AdminFormField>
+        <AdminFormField label="External / Video URL" wide>
+          <input name="videoUrl" type="url" defaultValue={edit?.videoUrl} placeholder="https://..." />
+        </AdminFormField>
+        <AdminFormField label="Summary / Description" wide>
+          <textarea name="description" rows={4} defaultValue={edit?.description} maxLength={1500} />
+        </AdminFormField>
+        <AdminFormField label="Body Sections" wide>
+          <textarea name="body" rows={8} defaultValue={edit?.body.join("\n")} placeholder="One section per line" />
+        </AdminFormField>
+        <AdminFormField label="Tags" wide>
+          <input name="tags" defaultValue={edit?.tags.join(", ")} placeholder="film, casting, news" />
+        </AdminFormField>
+        <AdminFormField label="SEO Title" wide>
+          <input name="seoTitle" defaultValue={edit?.seoTitle} maxLength={160} />
+        </AdminFormField>
+        <AdminFormField label="SEO Description" wide>
+          <textarea name="seoDescription" rows={3} defaultValue={edit?.seoDescription} maxLength={300} />
+        </AdminFormField>
+        {kind !== "shows" && (
+          <AdminFormField label={edit ? "Replace Cover" : "Cover Image"} wide>
+            <input name="cover" type="file" accept="image/jpeg,image/png,image/webp" />
+          </AdminFormField>
+        )}
+        {(kind === "gallery" || kind === "bts") && (
+          <AdminFormField label={edit ? "Replace Supporting Media" : "Supporting Media"} wide>
+            <input name="media" type="file" multiple accept="image/jpeg,image/png,image/webp" />
+          </AdminFormField>
+        )}
+      </AdminDialogGrid>
+      {edit && kind !== "shows" && (
+        <label className="ad-dialog-check">
+          <input name="removeCover" type="checkbox" />
+          <span>Remove current cover image</span>
+        </label>
+      )}
+      {edit && (kind === "gallery" || kind === "bts") && (
+        <label className="ad-dialog-check">
+          <input name="clearMedia" type="checkbox" />
+          <span>Clear current supporting media</span>
+        </label>
+      )}
+    </>
+  );
 
   return (
     <div className="ad-stack">
@@ -307,7 +302,10 @@ export function AdminContentView({ kind }: { kind: Kind }) {
         description={config.description}
         action={<AdminPrimaryButton onClick={() => setCreating(true)}>{config.action}</AdminPrimaryButton>}
       />
-      <AdminFilters values={statuses} active={active} onChange={setActive} />
+      <section className="ad-toolbar">
+        <AdminFilters values={statuses} active={active} onChange={setActive} />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search content" />
+      </section>
       <AdminCollectionState
         loading={loading}
         error={error}
@@ -316,70 +314,38 @@ export function AdminContentView({ kind }: { kind: Kind }) {
         onRetry={() => void refresh()}
       />
 
-      {kind === "gallery" || kind === "bts" || kind === "team" ? (
-        <section className="ad-content-grid">
-          {items.map((item) => (
-            <article className="ad-content-card" key={item.id}>
+      <section className="ad-content-grid">
+        {items.map((item) => (
+          <article className="ad-content-card" key={item.id}>
+            {kind !== "shows" && (
               <SiteMedia
                 src={item.image}
-                alt={item.title ?? item.name ?? "Content"}
+                alt={item.title}
                 kind={kind === "team" ? "team" : "gallery"}
                 className={kind === "team" ? "aspect-[4/4.5]" : "aspect-[4/3]"}
               />
-              <div>
-                <div className="ad-content-meta">
-                  <span>{item.category ?? item.group ?? ""}</span>
-                  <AdminStatus value={item.status} />
-                </div>
-                <h2>{item.title || item.name}</h2>
-                <p>{item.role || item.date || ""}</p>
-                <div className="ad-content-actions">
-                  <button onClick={() => setEditing(item)}>Edit</button>
-                  <AdminMoreButton
-                    onArchive={async () => {
-                      await api(`${basePath}/${item.id}`, { method: "DELETE" });
-                      await refresh();
-                    }}
-                  />
-                </div>
-              </div>
-            </article>
-          ))}
-        </section>
-      ) : (
-        <article className="ad-card ad-table-card">
-          <div className="ad-table ad-content-table">
-            <div className="ad-table-head">
-              <span>Title</span>
-              <span>Category / Platform</span>
-              <span>Date</span>
-              <span>Status</span>
-              <span></span>
-            </div>
-            {items.map((item) => (
-              <div className="ad-table-row" key={item.id}>
-                <div>
-                  <strong>{item.title}</strong>
-                  <span>{item.author ?? ""}</span>
-                </div>
-                <span>{item.category || item.platform}</span>
-                <span>{item.date}</span>
+            )}
+            <div>
+              <div className="ad-content-meta">
+                <span>{item.category || item.platform || item.group}</span>
                 <AdminStatus value={item.status} />
-                <div className="ad-row-actions">
-                  <button onClick={() => setEditing(item)}>Edit</button>
-                  <AdminMoreButton
-                    onArchive={async () => {
-                      await api(`${basePath}/${item.id}`, { method: "DELETE" });
-                      await refresh();
-                    }}
-                  />
-                </div>
               </div>
-            ))}
-          </div>
-        </article>
-      )}
-
+              <h2>{item.title}</h2>
+              <p>{item.role || (item.publishedAt && dateLabel(item.publishedAt)) || item.description}</p>
+              <div className="ad-content-actions">
+                <button onClick={() => setEditing(item)}>Edit</button>
+                <AdminMoreButton
+                  onEdit={() => setEditing(item)}
+                  onArchive={async () => {
+                    await api(`${basePath}/${item.id}`, { method: "DELETE" });
+                    await refresh();
+                  }}
+                />
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
       <PaginationControls meta={meta} onPage={setPage} />
 
       <AdminDialog
@@ -387,92 +353,41 @@ export function AdminContentView({ kind }: { kind: Kind }) {
         onClose={() => setCreating(false)}
         eyebrow={config.eyebrow}
         title={config.action}
-        description={`Create a new ${config.title.toLowerCase()} item without leaving this workspace.`}
+        description="Create and configure this CMS entry."
         width="wide"
       >
-        <AdminDialogForm onSubmit={submitNew}>
-          <AdminDialogGrid>
-            <CreateFields kind={kind} />
-          </AdminDialogGrid>
-          <UploadBox kind={kind} />
+        <AdminDialogForm onSubmit={(event) => persist(event)}>
+          <Fields />
           <AdminDialogActions onCancel={() => setCreating(false)} primaryLabel={config.action} />
         </AdminDialogForm>
       </AdminDialog>
-
       <AdminDialog
         open={!!editing}
         onClose={() => setEditing(null)}
         eyebrow="Edit content"
-        title={editing?.title || editing?.name || config.title}
-        description="Update this CMS item in place. Published changes are reflected on the public website."
+        title={editing?.title ?? config.title}
+        description="Update content, media, publishing and SEO fields."
         width="wide"
       >
         {editing && (
-          <AdminDialogForm onSubmit={saveEdit}>
-            <AdminDialogGrid>
-              <AdminFormField label={kind === "team" ? "Full Name" : "Title"} wide>
-                <input name={kind === "team" ? "name" : "title"} defaultValue={kind === "team" ? editing.name : editing.title} required />
-              </AdminFormField>
-              {kind === "team" && (
-                <>
-                  <AdminFormField label="Role">
-                    <input name="role" defaultValue={editing.role} />
-                  </AdminFormField>
-                  <AdminFormField label="Group">
-                    <select name="group" defaultValue={editing.group}>
-                      <option>Core Team</option>
-                      <option>Creative Team</option>
-                      <option>Advisors</option>
-                    </select>
-                  </AdminFormField>
-                </>
-              )}
-              {(kind === "gallery" || kind === "bts" || kind === "blog" || kind === "work") && (
-                <AdminFormField label="Category">
-                  <input name="category" defaultValue={editing.category} />
-                </AdminFormField>
-              )}
-              {kind === "shows" && (
-                <AdminFormField label="Platform">
-                  <select name="platform" defaultValue={editing.platform}>
-                    <option>YouTube</option>
-                    <option>Instagram</option>
-                    <option>Vimeo</option>
-                    <option>Other</option>
-                  </select>
-                </AdminFormField>
-              )}
-              {kind === "blog" && (
-                <AdminFormField label="Author">
-                  <input name="author" defaultValue={editing.author} />
-                </AdminFormField>
-              )}
-              <AdminFormField label="Status">
-                <select name="status" defaultValue={editing.status}>
-                  <option>Published</option>
-                  <option>Draft</option>
-                  <option>Scheduled</option>
-                </select>
-              </AdminFormField>
-              {kind !== "team" && (
-                <AdminFormField label="Date">
-                  <input name="date" defaultValue={editing.date} />
-                </AdminFormField>
-              )}
-              {kind === "shows" && (
-                <AdminFormField label="External URL" wide>
-                  <input name="url" type="url" defaultValue={editing.url} />
-                </AdminFormField>
-              )}
-              {kind !== "shows" && (
-                <AdminFormField label="Replace Image" wide>
-                  <input name="cover" type="file" accept="image/jpeg,image/png,image/webp" />
-                </AdminFormField>
-              )}
-              <AdminFormField label="Notes / Summary" wide>
-                <textarea name="summary" rows={4} defaultValue={editing.summary} />
-              </AdminFormField>
-            </AdminDialogGrid>
+          <AdminDialogForm onSubmit={(event) => persist(event, editing.id)}>
+            <Fields edit={editing} />
+            {!!editing.media.length && (
+              <div>
+                <p className="ad-kicker">Current supporting media</p>
+                <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {editing.media.map((src, index) => (
+                    <SiteMedia
+                      key={src}
+                      src={src}
+                      alt={`${editing.title} media ${index + 1}`}
+                      kind="gallery"
+                      className="aspect-square rounded-xl"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
             <AdminDialogActions onCancel={() => setEditing(null)} primaryLabel="Save Changes" />
           </AdminDialogForm>
         )}

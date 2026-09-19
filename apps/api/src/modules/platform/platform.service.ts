@@ -96,21 +96,45 @@ export class PlatformService {
       input.data &&
       (Object.keys(input.data).length > 60 ||
         Object.entries(input.data).some(([k, v]) => !/^[a-zA-Z][a-zA-Z0-9_]{0,60}$/.test(k) || typeof v !== "string" || v.length > 10000))
-    )
+    ) {
       throw new BadRequestException("Settings values must be short named text fields.");
+    }
+
+    if (input.status === "Scheduled") {
+      if (!input.publishedAt || new Date(input.publishedAt).getTime() <= Date.now()) {
+        throw new BadRequestException("Scheduled content requires a future publish date.");
+      }
+    }
+
     await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.mediaIds ?? [])]);
-    if (input.projectId && !(await this.projects.exists({ _id: objectId(input.projectId, "Project not found."), archived: false })))
+
+    if (input.projectId && !(await this.projects.exists({ _id: objectId(input.projectId, "Project not found."), archived: false }))) {
       throw new BadRequestException("Project not found.");
+    }
   }
 
   async create(kind: string, input: ContentDto, actorId: string) {
     const k = this.kind(kind);
     await this.validate(input, actorId);
+
+    const status = input.status ?? (input.published ? "Published" : "Draft");
+    const published = status === "Published" || status === "Scheduled" ? true : (input.published ?? false);
+    const publishedAt =
+      input.publishedAt === null
+        ? undefined
+        : input.publishedAt
+          ? new Date(input.publishedAt)
+          : published && status !== "Scheduled"
+            ? new Date()
+            : undefined;
+
     try {
       const item = await this.content.create({
         ...input,
-        status: input.status ?? (input.published ? "Published" : "Draft"),
-        publishedAt: input.publishedAt ?? (input.published ? new Date() : undefined),
+        status,
+        published,
+        publishedAt,
+        videoUrl: input.videoUrl ?? undefined,
         kind: k,
         coverMediaId: input.coverMediaId ? new Types.ObjectId(input.coverMediaId) : undefined,
         mediaIds: input.mediaIds?.map((id) => new Types.ObjectId(id)),
@@ -118,33 +142,100 @@ export class PlatformService {
         createdBy: new Types.ObjectId(actorId),
         updatedBy: new Types.ObjectId(actorId),
       });
-      if (item.published) await this.media.makePublic([input.coverMediaId, ...(input.mediaIds ?? [])]);
+
+      const mediaIds = [input.coverMediaId, ...(input.mediaIds ?? [])];
+      if (item.published) await this.media.makePublic(mediaIds);
+      else await this.media.makePrivate(mediaIds);
+
       await this.audit.record({ actorId, action: "content.create", entityType: k, entityId: String(item._id), summary: item.title });
       return this.serialize(item.toObject());
     } catch (error: unknown) {
-      if (error && typeof error === "object" && "code" in error && error.code === 11000)
+      if (error && typeof error === "object" && "code" in error && error.code === 11000) {
         throw new ConflictException("This content slug is already in use.");
+      }
       throw error;
     }
   }
 
   async update(kind: string, id: string, input: UpdateContentDto, actorId: string) {
     const k = this.kind(kind);
-    await this.validate(input, actorId);
+    const existing = await this.content.findOne({ _id: objectId(id), kind: k, archived: false }).lean();
+    if (!existing) throw new NotFoundException("Content not found.");
+
+    const mergedStatus = input.status ?? existing.status ?? (existing.published ? "Published" : "Draft");
+    const mergedPublishedAt =
+      input.publishedAt === null ? undefined : input.publishedAt !== undefined ? input.publishedAt : existing.publishedAt?.toISOString();
+
+    await this.validate(
+      {
+        ...input,
+        status: mergedStatus,
+        publishedAt: mergedPublishedAt,
+      },
+      actorId,
+    );
+
+    const oldMedia = [existing.coverMediaId ? String(existing.coverMediaId) : undefined, ...(existing.mediaIds ?? []).map(String)];
+
     const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };
-    if (input.status === undefined && input.published !== undefined) update.status = input.published ? "Published" : "Draft";
-    if (input.coverMediaId) update.coverMediaId = new Types.ObjectId(input.coverMediaId);
-    if (input.mediaIds) update.mediaIds = input.mediaIds.map((v) => new Types.ObjectId(v));
-    if (input.projectId) update.projectId = new Types.ObjectId(input.projectId);
-    if (input.published === true && input.publishedAt === undefined) update.publishedAt = new Date();
+    const unset: Record<string, 1> = {};
+
+    if (input.status !== undefined) {
+      update.published = input.status === "Published" || input.status === "Scheduled";
+    } else if (input.published !== undefined) {
+      update.status = input.published ? "Published" : "Draft";
+    }
+
+    if (input.publishedAt === null) {
+      delete update.publishedAt;
+      unset.publishedAt = 1;
+    } else if (input.publishedAt !== undefined) {
+      update.publishedAt = new Date(input.publishedAt);
+    } else if (update.published === true && !existing.publishedAt && mergedStatus !== "Scheduled") {
+      update.publishedAt = new Date();
+    }
+
+    if (input.coverMediaId === null) {
+      delete update.coverMediaId;
+      unset.coverMediaId = 1;
+    } else if (input.coverMediaId) {
+      update.coverMediaId = new Types.ObjectId(input.coverMediaId);
+    }
+
+    if (input.mediaIds !== undefined) {
+      update.mediaIds = input.mediaIds.map((value) => new Types.ObjectId(value));
+    }
+
+    if (input.videoUrl === null) {
+      delete update.videoUrl;
+      unset.videoUrl = 1;
+    }
+
+    if (input.projectId === null) {
+      delete update.projectId;
+      unset.projectId = 1;
+    } else if (input.projectId) {
+      update.projectId = new Types.ObjectId(input.projectId);
+    }
+
     const item = await this.content.findOneAndUpdate(
       { _id: objectId(id), kind: k, archived: false },
-      { $set: update },
+      { $set: update, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
       { new: true, runValidators: true },
     );
     if (!item) throw new NotFoundException("Content not found.");
-    if (item.published)
-      await this.media.makePublic([item.coverMediaId ? String(item.coverMediaId) : undefined, ...(item.mediaIds ?? []).map(String)]);
+
+    const currentMedia = [item.coverMediaId ? String(item.coverMediaId) : undefined, ...(item.mediaIds ?? []).map(String)];
+
+    if (item.published) await this.media.makePublic(currentMedia);
+    else await this.media.makePrivate(currentMedia);
+    await this.media.makePrivate(oldMedia);
+
+    const currentIds = new Set(currentMedia.filter((value): value is string => !!value));
+    for (const mediaId of oldMedia.filter((value): value is string => !!value && !currentIds.has(value))) {
+      await this.media.removeIfUnreferencedOwned(mediaId, actorId);
+    }
+
     await this.audit.record({ actorId, action: "content.update", entityType: k, entityId: id, summary: item.title });
     return this.serialize(item.toObject());
   }
@@ -153,10 +244,13 @@ export class PlatformService {
     const k = this.kind(kind);
     const item = await this.content.findOneAndUpdate(
       { _id: objectId(id), kind: k },
-      { $set: { archived: true, published: false, updatedBy: new Types.ObjectId(actorId) } },
+      { $set: { archived: true, published: false, status: "Draft", updatedBy: new Types.ObjectId(actorId) } },
       { new: true },
     );
     if (!item) throw new NotFoundException("Content not found.");
+
+    await this.media.makePrivate([item.coverMediaId ? String(item.coverMediaId) : undefined, ...(item.mediaIds ?? []).map(String)]);
+
     await this.audit.record({ actorId, action: "content.archive", entityType: k, entityId: id, summary: item.title });
     return { message: "Content archived.", id };
   }
