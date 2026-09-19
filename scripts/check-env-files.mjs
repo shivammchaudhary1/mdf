@@ -136,7 +136,10 @@ function validateApi(values, mode) {
     if (swagger) throw new Error("apps/api/.env.prod must use SWAGGER_ENABLED=false.");
   }
 
-  return { database: databaseName(uri) || "(database name not visible in URI)" };
+  return {
+    database: databaseName(uri) || "(database name not visible in URI)",
+    googleClientId: String(values.GOOGLE_CLIENT_ID ?? "").trim(),
+  };
 }
 
 function validateWeb(values, mode) {
@@ -165,7 +168,11 @@ function validateWeb(values, mode) {
     }
   }
 
-  return { apiOrigin: apiUrl.origin, siteOrigin: siteUrl.origin };
+  return {
+    apiOrigin: apiUrl.origin,
+    siteOrigin: siteUrl.origin,
+    googleClientId: String(values.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "").trim(),
+  };
 }
 
 export function validateEnvironmentFiles(mode = "dev", scope = "all") {
@@ -182,6 +189,16 @@ export function validateEnvironmentFiles(mode = "dev", scope = "all") {
 
   if (scope === "all" || scope === "web") {
     result.web = validateWeb(loadFile(envPath("web", mode)), mode);
+  }
+
+  if (scope === "all" && result.api && result.web) {
+    const apiGoogle = result.api.googleClientId;
+    const webGoogle = result.web.googleClientId;
+    if ((apiGoogle || webGoogle) && apiGoogle !== webGoogle) {
+      throw new Error(
+        "GOOGLE_CLIENT_ID and NEXT_PUBLIC_GOOGLE_CLIENT_ID must both be set to the same OAuth 2.0 Web Client ID.",
+      );
+    }
   }
 
   if (scope === "all" && mode === "prod") {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
 import { applicationView } from "@/services/admin-workspace";
-import { api } from "@/services/api";
+import { cachedApi } from "@/services/api";
 import { allPages, type ApplicationRecord, type ContentRecord, dateLabel } from "@/services/workspace";
 type Dashboard = {
   metrics: Record<string, number>;
@@ -19,7 +19,7 @@ export function useAdminDashboard() {
   useEffect(() => {
     let active = true;
     void Promise.all([
-      api<Dashboard>("/admin/dashboard"),
+      cachedApi<Dashboard>("/admin/dashboard", { ttl: 15_000 }),
       allPages<ApplicationRecord>("/admin/applications"),
       allPages<ContentRecord>("/admin/content/blog"),
     ])

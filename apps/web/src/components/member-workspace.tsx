@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
+import { refreshSession, signOut } from "@/services/auth-session";
 import { dateLabel, fetchPage, mediaUrl, type OpportunityRecord, type PageMeta } from "@/services/workspace";
 import { useMemberDashboardStore } from "@/store/member-dashboard-store";
 
@@ -131,7 +132,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
 
   async function logout() {
     try {
-      await api("/auth/logout", { method: "POST" });
+      await signOut();
       router.replace("/login");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to sign out.");
@@ -145,7 +146,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
           <Link href="/">
             <BrandLogo darkInk className="!w-[108px]" />
           </Link>
-          <button onClick={() => setOpen(false)} className="md-close">
+          <button onClick={() => setOpen(false)} className="md-close" aria-label="Close member navigation">
             ×
           </button>
         </div>
@@ -172,7 +173,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
 
         <div className="md-side-bottom">
           <Link href="/">← Public website</Link>
-          <button onClick={logout}>Sign out</button>
+          <button onClick={() => void logout()}>Sign out</button>
         </div>
       </aside>
 
@@ -181,7 +182,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
       <div className="md-main">
         <header className="md-topbar">
           <div className="md-topbar-left">
-            <button className="md-menu" onClick={() => setOpen(true)}>
+            <button className="md-menu" onClick={() => setOpen(true)} aria-label="Open member navigation">
               ☰
             </button>
             <div>
@@ -551,7 +552,7 @@ function Settings() {
     const mobile = fields.current?.querySelector<HTMLInputElement>('input[name="mobile"]')?.value;
     try {
       await api("/auth/account", { method: "PATCH", body: JSON.stringify({ mobile, ...(data.member.verified ? {} : { email }) }) });
-      await refresh();
+      await Promise.all([refresh(), refreshSession()]);
       toast.success("Account settings saved.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to save settings.");

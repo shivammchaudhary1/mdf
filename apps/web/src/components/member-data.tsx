@@ -5,7 +5,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 import { LoadingState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toast-provider";
 import type demo from "@/data/member-dashboard.json";
-import { api, ApiError } from "@/services/api";
+import { ApiError, cachedApi } from "@/services/api";
 import {
   type ApplicationRecord,
   type ContentRecord,
@@ -16,6 +16,7 @@ import {
   type OpportunityRecord,
   type ProfileRecord,
 } from "@/services/workspace";
+import { useAppStore } from "@/store/app-store";
 type View = Omit<typeof demo, "opportunities"> & { opportunities: Array<(typeof demo.opportunities)[number] & { compensation?: string }> };
 type Dashboard = { applicationSummary: { total: number; shortlisted: number; submitted: number; underReview: number } };
 const empty: View = {
@@ -50,8 +51,8 @@ export function MemberData({ children }: { children: ReactNode }) {
     router = useRouter();
   const refresh = useCallback(async () => {
     const [account, dashboard, appsPage, oppsPage, postsPage] = await Promise.all([
-      api<MemberProfile>("/member/profile"),
-      api<Dashboard>("/member/dashboard"),
+      cachedApi<MemberProfile>("/member/profile", { ttl: 60_000 }),
+      cachedApi<Dashboard>("/member/dashboard", { ttl: 30_000 }),
       fetchPage<ApplicationRecord>("/member/applications", 1, 5),
       fetchPage<OpportunityRecord>("/member/opportunities", 1, 4),
       fetchPage<ContentRecord>("/content/blog", 1, 2),
@@ -62,6 +63,7 @@ export function MemberData({ children }: { children: ReactNode }) {
       p = account.profile ?? {},
       a = account.account,
       counts = dashboard.applicationSummary;
+    useAppStore.getState().setProfilePhoto(mediaUrl(p.photo));
     setValue({
       memberId: a.id,
       profile: p,
