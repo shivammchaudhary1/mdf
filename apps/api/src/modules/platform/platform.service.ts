@@ -6,6 +6,7 @@ import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
 import { objectId } from "../../common/utils/object-id";
 import { escapeSearch } from "../../common/utils/search";
+import type { MediaPurpose } from "../media/media.model";
 import { MediaService } from "../media/media.service";
 import { Project } from "../projects/project.model";
 import { ContentDto, ContentQueryDto, UpdateContentDto } from "./platform.dto";
@@ -23,6 +24,15 @@ export class PlatformService {
   private kind(k: string) {
     if (!(contentKinds as readonly string[]).includes(k)) throw new NotFoundException("Content type not found.");
     return k as ContentKind;
+  }
+
+  private mediaPurpose(kind: ContentKind): MediaPurpose {
+    if (kind === "blog") return "blog";
+    if (kind === "gallery") return "gallery";
+    if (kind === "team") return "team";
+    if (kind === "behind-the-scenes") return "bts";
+    if (kind === "shows") return "show";
+    return "website-image";
   }
 
   private serialize(item: ContentRecord | Record<string, unknown>) {
@@ -91,7 +101,7 @@ export class PlatformService {
     return this.serialize(item);
   }
 
-  private async validate(input: ContentDto | UpdateContentDto, actorId: string) {
+  private async validate(kind: ContentKind, input: ContentDto | UpdateContentDto, actorId: string) {
     if (
       input.data &&
       (Object.keys(input.data).length > 60 ||
@@ -106,7 +116,7 @@ export class PlatformService {
       }
     }
 
-    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.mediaIds ?? [])]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.mediaIds ?? [])], "image", this.mediaPurpose(kind));
 
     if (input.projectId && !(await this.projects.exists({ _id: objectId(input.projectId, "Project not found."), archived: false }))) {
       throw new BadRequestException("Project not found.");
@@ -115,7 +125,7 @@ export class PlatformService {
 
   async create(kind: string, input: ContentDto, actorId: string) {
     const k = this.kind(kind);
-    await this.validate(input, actorId);
+    await this.validate(k, input, actorId);
 
     const status = input.status ?? (input.published ? "Published" : "Draft");
     const published = status === "Published" || status === "Scheduled" ? true : (input.published ?? false);
@@ -167,6 +177,7 @@ export class PlatformService {
       input.publishedAt === null ? undefined : input.publishedAt !== undefined ? input.publishedAt : existing.publishedAt?.toISOString();
 
     await this.validate(
+      k,
       {
         ...input,
         status: mergedStatus,

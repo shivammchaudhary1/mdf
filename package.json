@@ -41,7 +41,11 @@
     "db:migrate:v2:dev": "node --env-file=apps/api/.env.dev scripts/migrate-backend-v2.mjs",
     "db:migrate:v2:dev:apply": "node --env-file=apps/api/.env.dev scripts/migrate-backend-v2.mjs --apply",
     "db:migrate:v2:prod": "node --env-file=apps/api/.env.prod scripts/migrate-backend-v2.mjs",
-    "db:migrate:v2:prod:apply": "node --env-file=apps/api/.env.prod scripts/migrate-backend-v2.mjs --apply"
+    "db:migrate:v2:prod:apply": "node --env-file=apps/api/.env.prod scripts/migrate-backend-v2.mjs --apply",
+    "db:migrate:media:dev": "node --env-file=apps/api/.env.dev scripts/migrate-media-storage.mjs",
+    "db:migrate:media:dev:apply": "node --env-file=apps/api/.env.dev scripts/migrate-media-storage.mjs --apply",
+    "db:migrate:media:prod": "node --env-file=apps/api/.env.prod scripts/migrate-media-storage.mjs",
+    "db:migrate:media:prod:apply": "node --env-file=apps/api/.env.prod scripts/migrate-media-storage.mjs --apply"
   },
   "devDependencies": {
     "concurrently": "9.2.4",

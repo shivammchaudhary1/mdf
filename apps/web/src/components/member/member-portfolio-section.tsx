@@ -85,7 +85,7 @@ export function MemberPortfolioSection() {
       const uploaded: UploadedMediaResult[] = [];
       try {
         for (const file of files) {
-          uploaded.push(await uploadMedia(file));
+          uploaded.push(await uploadMedia(file, "user-portfolio"));
         }
 
         const next = [...new Set([...current, ...uploaded.map((item) => item.id)])];
@@ -122,7 +122,7 @@ export function MemberPortfolioSection() {
       setBusy(true);
       let uploaded: UploadedMediaResult | undefined;
       try {
-        uploaded = await uploadMedia(file);
+        uploaded = await uploadMedia(file, "user-resume");
         if (uploaded.kind !== "document") {
           throw new Error("Resume must be a PDF document.");
         }

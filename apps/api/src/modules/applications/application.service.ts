@@ -120,8 +120,8 @@ export class ApplicationService {
 
     const opportunity = await this.resolveOpportunity(input);
 
-    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image");
-    await this.media.assertOwnedBy(userId, [input.documentMediaId], "document");
+    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image", "user-portfolio");
+    await this.media.assertOwnedBy(userId, [input.documentMediaId], "document", "user-resume");
 
     const account = await this.accounts.findById(objectId(userId)).lean();
 

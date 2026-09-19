@@ -114,8 +114,9 @@ export class ProfileService {
       }
     }
 
-    await this.media.assertOwnedBy(userId, [input.photoMediaId, ...(input.portfolioMediaIds ?? [])], "image");
-    await this.media.assertOwnedBy(userId, [input.resumeMediaId], "document");
+    await this.media.assertOwnedBy(userId, [input.photoMediaId], "image", "user-profile");
+    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image", "user-portfolio");
+    await this.media.assertOwnedBy(userId, [input.resumeMediaId], "document", "user-resume");
 
     const update: Record<string, unknown> = {
       ...input,

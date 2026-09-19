@@ -172,7 +172,7 @@ export class CastingService {
 
   async create(input: CreateCastingDto, actorId: string) {
     await this.validate(input);
-    await this.media.assertOwnedBy(actorId, [input.coverMediaId]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId], "image", "casting");
 
     const { projectId, coverMediaId, shootDate, deadline, ...rest } = input;
 
@@ -222,7 +222,7 @@ export class CastingService {
       shootDate: input.shootDate === null ? undefined : (input.shootDate ?? existing.shootDate?.toISOString()),
       projectId: input.projectId === null ? undefined : input.projectId,
     });
-    await this.media.assertOwnedBy(actorId, [input.coverMediaId]);
+    await this.media.assertOwnedBy(actorId, [input.coverMediaId], "image", "casting");
 
     const oldCover = existing.coverMediaId ? String(existing.coverMediaId) : undefined;
     const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };

@@ -71,7 +71,7 @@ export function ApplyForm({
       let documentMediaId: string | undefined;
       if (document instanceof File && document.size > 0) {
         if (document.type !== "application/pdf") throw new Error("Optional document must be a PDF.");
-        documentMediaId = (await uploadMedia(document)).id;
+        documentMediaId = (await uploadMedia(document, "user-resume")).id;
       }
 
       await api("/member/applications", {
