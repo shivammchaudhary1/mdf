@@ -126,6 +126,17 @@ try {
   const applicationId = r.data._id;
   assert.equal((await request("/member/applications", { method: "POST", state: member, body: { opportunityId: castingId, opportunityType: "CASTING", coverNote: "Duplicate application must be rejected." } })).status, 409);
 
+  r = await request("/member/applications", { method: "POST", state: member, body: { opportunityId: projectId, opportunityType: "PROJECT", coverNote: "I would also like to apply to this project opportunity.", showreelUrl: "https://example.com/showreel", pitch: "Integration pitch for the project application." } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const projectApplicationId = r.data._id;
+  r = await request(`/member/applications/${projectApplicationId}`, { state: member });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.pitch, "Integration pitch for the project application.");
+  assert.equal(r.data.adminNotes, undefined);
+  r = await request(`/admin/applications/${projectApplicationId}`, { state: admin });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.showreelUrl, "https://example.com/showreel");
+
   r = await request(`/admin/applications/${applicationId}`, { method: "PATCH", state: admin, body: { status: "Shortlisted", adminNotes: "Private note" } });
   assert.equal(r.status, 200);
   r = await request("/member/applications", { state: member });
@@ -182,6 +193,19 @@ try {
   r = await request("/admin/contacts", { state: admin });
   assert.equal(r.data.items.length, 1);
   assert.equal((await request(`/admin/contacts/${r.data.items[0]._id}`, { method: "PATCH", state: admin, body: { status: "Open" } })).status, 200);
+
+  assert.equal((await request("/admin/contacts?search=Integration%20inquiry", { state: admin })).data.meta.total, 1);
+  assert.equal((await request("/admin/contacts?status=Open", { state: admin })).data.meta.total, 1);
+
+  r = await request("/careers", { method: "POST", body: { name: "Career Candidate", email: "career@example.test", mobile: "+919111111111", role: "Assistant Director", city: "Indore", coverNote: "I am applying with relevant production coordination experience.", resumeUrl: "https://example.com/resume", portfolioUrl: "https://example.com/portfolio", linkedinUrl: "https://example.com/linkedin" } });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const careerId = r.data._id;
+  r = await request("/admin/careers?search=Career%20Candidate", { state: admin });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.meta.total, 1);
+  assert.equal((await request(`/admin/careers/${careerId}`, { state: admin })).status, 200);
+  assert.equal((await request(`/admin/careers/${careerId}`, { method: "PATCH", state: admin, body: { status: "In Review", adminNotes: "Reviewing candidate" } })).status, 200);
+  assert.equal((await request("/admin/careers?status=In%20Review", { state: admin })).data.meta.total, 1);
 
   const image = await sharp({ create: { width: 2400, height: 1600, channels: 3, background: "#555555" } }).png().toBuffer();
   const upload = new FormData();

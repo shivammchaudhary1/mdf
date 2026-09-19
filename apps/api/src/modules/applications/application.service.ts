@@ -253,13 +253,18 @@ export class ApplicationService {
   }
 
   async update(id: string, input: UpdateApplicationDto, actorId: string) {
+    const existing = await this.applications.findById(objectId(id)).select("+adminNotes").lean();
+    if (!existing) {
+      throw new NotFoundException("Application not found.");
+    }
+
     const application = await this.applications
       .findByIdAndUpdate(
         objectId(id),
         {
           $set: {
             status: input.status,
-            ...(input.adminNotes !== undefined ? { adminNotes: input.adminNotes } : {}),
+            ...(input.adminNotes !== undefined ? { adminNotes: input.adminNotes.trim() } : {}),
             reviewedBy: objectId(actorId),
             reviewedAt: new Date(),
           },
@@ -275,13 +280,15 @@ export class ApplicationService {
       throw new NotFoundException("Application not found.");
     }
 
-    await this.mail
-      .send(
-        application.applicant.email,
-        "Application status updated",
-        `Your application for ${application.opportunityTitle} is now ${application.status}.`,
-      )
-      .catch(() => undefined);
+    if (existing.status !== application.status) {
+      await this.mail
+        .send(
+          application.applicant.email,
+          "Application status updated",
+          `Your application for ${application.opportunityTitle} is now ${application.status}.`,
+        )
+        .catch(() => undefined);
+    }
 
     await this.audit.record({
       actorId,
