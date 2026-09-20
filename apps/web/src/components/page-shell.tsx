@@ -1,5 +1,5 @@
-import { PublicHeader } from "@/components/public-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
 
 type PageShellProps = {
   eyebrow: string;
@@ -11,7 +11,7 @@ type PageShellProps = {
 export function PageShell({ eyebrow, title, description, children }: PageShellProps) {
   return (
     <>
-      <PublicHeader light />
+      <SiteHeader />
       <main id="main-content" className="min-h-[70vh] bg-white">
         <section className="relative overflow-hidden border-b border-slate-100">
           <div aria-hidden="true" className="absolute -right-20 top-0 h-72 w-72 rounded-full bg-red-50 blur-3xl" />

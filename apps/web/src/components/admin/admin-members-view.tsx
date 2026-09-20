@@ -14,14 +14,11 @@ import {
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
-import type data from "@/data/admin-dashboard.json";
-import { memberView } from "@/services/admin-workspace";
+import { type MemberView, memberView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
-
-type Member = (typeof data.members)[number] & { suspended: boolean };
 
 export function AdminMembersView() {
   const toast = useToast();
@@ -35,7 +32,7 @@ export function AdminMembersView() {
     1,
     25,
   );
-  const [selected, setSelected] = useState<Member | null>(null);
+  const [selected, setSelected] = useState<MemberView | null>(null);
 
   async function toggleVerify() {
     if (!selected) return;

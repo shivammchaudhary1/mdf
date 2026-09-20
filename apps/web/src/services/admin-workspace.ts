@@ -1,5 +1,3 @@
-import type data from "@/data/admin-dashboard.json";
-
 import { type ApplicationRecord, type ContentRecord, dateLabel, mediaUrl, type ProfileRecord } from "./workspace";
 
 export type TalentRecord = {
@@ -12,7 +10,19 @@ export type TalentRecord = {
   profile: ProfileRecord | null;
 };
 
-export type MemberView = (typeof data.members)[number] & { suspended: boolean };
+export type MemberView = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  city: string;
+  joined: string;
+  completion: number;
+  verified: boolean;
+  status: string;
+  image: string;
+  suspended: boolean;
+};
 
 export const memberView = (x: TalentRecord): MemberView => ({
   id: x.id,

@@ -49,7 +49,7 @@ export async function getCollection(kind: CollectionKind, page = 1, limit = 20) 
     `/content/${kind}?page=${page}&limit=${limit}`,
   );
   const items = result.items.map((item) => ({ ...item, image: mediaUrl(item.coverImage ?? item.image) }));
-  return { ...collectionCopy[kind], items, meta: result.meta, isDemo: false };
+  return { ...collectionCopy[kind], items, meta: result.meta };
 }
 
 export async function getContentItem(kind: CollectionKind, slug: string) {

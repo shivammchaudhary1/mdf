@@ -1,30 +1,9 @@
 import mongoose from "mongoose";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)), "..");
 const apply = process.argv.includes("--apply");
 const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 
-async function loadEnv() {
-  try {
-    const text = await readFile(join(repoRoot, "apps", "api", ".env"), "utf8");
-    for (const raw of text.split(/\r?\n/)) {
-      const line = raw.trim();
-      if (!line || line.startsWith("#")) continue;
-      const i = line.indexOf("=");
-      if (i < 1) continue;
-      const key = line.slice(0, i).trim();
-      let value = line.slice(i + 1).trim();
-      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-      if (process.env[key] === undefined) process.env[key] = value;
-    }
-  } catch {}
-}
-
-await loadEnv();
-if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI is missing. Configure apps/api/.env first.");
+if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI is missing. Run this script through the repository migration commands.");
 await mongoose.connect(process.env.MONGODB_URI, { appName: "mdadu-backend-v2-migration", serverSelectionTimeoutMS: 10000 });
 const db = mongoose.connection.db;
 if (!db) throw new Error("MongoDB connection is not ready.");
@@ -94,7 +73,7 @@ for await (const p of db.collection("profiles").find()) {
   const userId = oid(p.userId); if (!userId) continue;
   await db.collection("profiles").updateOne({ _id: p._id }, { $set: {
     userId, photoMediaId: mediaId(p.photo), portfolioMediaIds: mediaIds(p.portfolio), resumeMediaId: mediaId(p.resume),
-    publicVisible: p.publicVisible ?? true, emailCastingAlerts: p.emailCastingAlerts ?? true, emailUpdates: p.emailUpdates ?? true
+    publicVisible: p.publicVisible ?? false, emailCastingAlerts: p.emailCastingAlerts ?? true, emailUpdates: p.emailUpdates ?? true
   }, $unset: { photo: "", portfolio: "", resume: "" } });
 }
 
