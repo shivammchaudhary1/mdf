@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { AdminWorkspace } from "@/components/admin-workspace";
+import { AdminWorkspace } from "@/components/admin/admin-workspace";
 const sections = [
   "users",
   "applications",

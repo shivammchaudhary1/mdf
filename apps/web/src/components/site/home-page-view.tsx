@@ -14,6 +14,65 @@ export function HomePageView() {
     <>
       <SiteHeader dark />
 
+      <section className="relative isolate min-h-[620px] overflow-hidden bg-[#070707] text-white lg:min-h-[720px]">
+        {/* Full hero background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/video/hero-video.mp4" type="video/mp4" />
+        </video>
+
+        {/* Video overlays for text readability */}
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
+
+        <div className="site-shell relative z-10 flex min-h-[620px] items-center pb-16 pt-28 lg:min-h-[720px] lg:pb-20 lg:pt-24">
+          <div className="max-w-[680px]">
+            <p className="mb-5 text-[11px] font-bold uppercase tracking-[.18em] text-white/60">{data.brand.eyebrow}</p>
+
+            <h1 className="font-display text-[clamp(3.1rem,7vw,6.8rem)] font-semibold leading-[.91] tracking-[-.045em]">
+              Real People
+              <br />
+              Real Stories
+              <br />
+              <span className="text-[var(--brand-red)]">Bigger Possibilities</span>
+            </h1>
+
+            <p className="mt-6 max-w-lg text-[15px] leading-7 text-white/75 sm:text-base">{data.brand.description}</p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/casting" className="site-button site-button-primary">
+                Explore Opportunities
+              </Link>
+
+              <Link href="/projects" className="site-button site-button-dark-outline">
+                <span className="grid h-5 w-5 place-items-center rounded-full border border-white/35 text-[9px]">▶</span>
+                Watch Showreel
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Existing stats */}
+        <div className="relative z-10 border-t border-white/10 bg-black/45 backdrop-blur-[2px]">
+          <div className="site-shell grid grid-cols-2 divide-x divide-white/8 py-5 sm:grid-cols-4">
+            {data.stats.map((stat) => (
+              <div key={stat.label} className="px-4 text-center sm:px-6">
+                <p className="font-display text-2xl font-semibold sm:text-3xl">{stat.value}</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[.12em] text-white/46">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <main id="main-content">
         <section className="relative overflow-hidden bg-[#070707] text-white">
           <div className="site-shell relative grid min-h-[620px] items-center gap-10 pb-16 pt-28 lg:grid-cols-[1.02fr_.98fr] lg:pb-20 lg:pt-24">

@@ -27,11 +27,3 @@ export function LoadingState({ label = "Loading your experience…" }: { label?:
     </div>
   );
 }
-
-export function DemoNotice() {
-  return (
-    <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      Development preview · Company copy and original photographs are pending. Published content will appear as it is added.
-    </p>
-  );
-}

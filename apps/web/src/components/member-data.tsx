@@ -4,7 +4,6 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 
 import { LoadingState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toast-provider";
-import type demo from "@/data/member-dashboard.json";
 import { ApiError, cachedApi } from "@/services/api";
 import {
   type ApplicationRecord,
@@ -17,7 +16,59 @@ import {
   type ProfileRecord,
 } from "@/services/workspace";
 import { useAppStore } from "@/store/app-store";
-type View = Omit<typeof demo, "opportunities"> & { opportunities: Array<(typeof demo.opportunities)[number] & { compensation?: string }> };
+type View = {
+  member: {
+    name: string;
+    firstName: string;
+    email: string;
+    mobile: string;
+    location: string;
+    profession: string;
+    verified: boolean;
+    profileCompletion: number;
+    availability: string;
+    memberSince: string;
+    photo: string;
+  };
+  stats: Array<{ label: string; value: string; helper: string }>;
+  profileChecklist: Array<{ label: string; done: boolean }>;
+  applications: Array<{
+    id: string;
+    role: string;
+    project: string;
+    type: string;
+    location: string;
+    appliedOn: string;
+    status: string;
+    tone: string;
+  }>;
+  opportunities: Array<{
+    id: string;
+    title: string;
+    project: string;
+    category: string;
+    location: string;
+    deadline: string;
+    match: string;
+    paid: boolean;
+    compensation?: string;
+    image: string;
+  }>;
+  portfolio: Array<{ id: string; title: string; category: string; image: string }>;
+  profile: {
+    bio: string;
+    city: string;
+    profession: string;
+    gender: string;
+    birthDate: string;
+    experience: string;
+    availability: string;
+    skills: string[];
+    languages: string[];
+  };
+  activity: Array<{ title: string; time: string }>;
+  posts: Array<{ title: string; category: string; date: string; image: string }>;
+};
 type Dashboard = { applicationSummary: { total: number; shortlisted: number; submitted: number; underReview: number } };
 const empty: View = {
   member: {

@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { CollectionBrowser } from "@/components/collection-browser";
 import { PageShell } from "@/components/page-shell";
-import { DemoNotice } from "@/components/ui/feedback";
 import { getCollection } from "@/services/content";
 import type { CollectionKind } from "@/types/content";
 
@@ -13,7 +12,6 @@ export async function CollectionPage({ kind, page = 1, limit = 12 }: { kind: Col
   return (
     <PageShell eyebrow={collection.eyebrow} title={collection.title} description={collection.description}>
       <div className="mt-12">
-        {collection.isDemo && <DemoNotice />}
         <CollectionBrowser items={collection.items} kind={kind} />
         {meta.pages > 1 ? (
           <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2">

@@ -1,440 +1,193 @@
 # M. Dadu Films Digital Platform
 
-M. Dadu Films V1 combines:
+M. Dadu Films V1 includes the public production-house website, member/talent community, project and casting applications, and the Super Admin dashboard/CMS.
 
-- public production-house website,
-- member/talent community,
-- casting/project applications,
-- Super Admin management/CMS.
+## Current stage
 
-## Current development checkpoint
+Groups 0–12 are merged. The project is in **pre-UAT cleanup and verification**.
 
-The approved UI is frozen while the remaining V1 functionality is completed.
+`pendingTask.md` is the canonical roadmap/checklist and must not be replaced by another progress file.
 
-Current technical focus:
+Production deployment remains frozen until UAT is explicitly approved.
 
-1. make CI/quality checks green,
-2. re-run backend integration tests,
-3. finish backend requirement gaps,
-4. connect member/admin screens to real APIs without changing appearance,
-5. finish security/testing/UAT,
-6. deploy only at Stage 18.
+## Stack
 
-Read:
-
-```text
-CODEX_START_HERE.md
-docs/CODEX_COMPLETION_PLAN.md
-docs/progress.md
-```
-
-## Technology
-
-### Frontend
-
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- Zustand
-
-### Backend
-
-- NestJS
-- Node.js `24.11.1`
+- Next.js 16 / React 19 / TypeScript / Tailwind CSS / Zustand
+- NestJS 12 / Node.js 24.11.1
 - MongoDB + Mongoose
-- REST + Swagger
-- opaque server-side sessions in signed `httpOnly` cookies
-- CSRF protection
-- Nodemailer
-- Sharp
-- local/S3 storage abstraction
-
-## Local URLs
-
-| Service | URL |
-|---|---|
-| Frontend | `http://localhost:3333` |
-| API | `http://localhost:8888/api/v1` |
-| Health | `http://localhost:8888/api/v1/health` |
-| Swagger | `http://localhost:8888/docs` |
-| MongoDB | `mongodb://localhost:27017/mdadu_films` |
-
-## Requirements
-
-Use Node:
-
-```bash
-node -v
-# v24.11.1
-```
-
-Install dependencies:
-
-```bash
-npm ci
-```
-
-For normal development after the lockfile is already installed, `npm install` is also acceptable.
-
-Create local environment files:
-
-### Git Bash / macOS / Linux
-
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
-```
-
-Do not commit `.env` files.
-
-## Start MongoDB
-
-Default Docker MongoDB:
-
-```bash
-npm run db:up
-```
-
-Stop:
-
-```bash
-npm run db:down
-```
-
-Logs:
-
-```bash
-npm run db:logs
-```
-
-### MongoDB 7 fallback
-
-If MongoDB 8 Docker cannot start on the current host/kernel:
-
-```bash
-npm run db:local
-```
-
-This uses the isolated `docker-compose.local.yml` development setup.
-
-Do not point MongoDB 7 at an existing MongoDB 8 data volume.
-
-## Run the application
-
-Run frontend + backend together:
-
-```bash
-npm run dev
-```
-
-Run only frontend:
-
-```bash
-npm run dev:web
-```
-
-Run only backend:
-
-```bash
-npm run dev:api
-```
-
-## Build
-
-Build both frontend and backend:
-
-```bash
-npm run build
-```
-
-Build only frontend:
-
-```bash
-npm run build -w @mdadu/web
-```
-
-Build only backend:
-
-```bash
-npm run build -w @mdadu/api
-```
-
-## Type checking
-
-Both applications:
-
-```bash
-npm run typecheck
-```
-
-API only:
-
-```bash
-npm run typecheck -w @mdadu/api
-```
-
-Web only:
-
-```bash
-npm run typecheck -w @mdadu/web
-```
-
-## Tests
-
-API unit tests:
-
-```bash
-npm run test
-```
-
-Integration tests require MongoDB:
-
-```bash
-npm run test:integration
-```
-
-## Lint
-
-```bash
-npm run lint
-```
-
-## One-command code quality gate
-
-This runs:
-
-1. lint,
-2. TypeScript checks,
-3. unit tests,
-4. frontend build,
-5. backend build.
-
-Command:
-
-```bash
-npm run check
-```
-
-Equivalent sequence:
-
-```bash
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-```
-
-## One-command full local verification
-
-When MongoDB is already running:
-
-```bash
-npm run verify
-```
-
-This runs:
-
-```text
-npm run check
-+
-npm run test:integration
-```
-
-Using default Docker MongoDB in one command:
-
-```bash
-npm run verify:local
-```
-
-If the default MongoDB container is not compatible with the host:
-
-```bash
-npm run db:local
-npm run verify
-```
-
-## Recommended verification before a merge
-
-```bash
-npm ci
-npm run verify:local
-git diff --check
-git status
-```
-
-If using the MongoDB 7 fallback:
-
-```bash
-npm ci
-npm run db:local
-npm run verify
-git diff --check
-git status
-```
-
-## Backend database/index utilities
-
-Create/update indexes:
-
-```bash
-npm run db:indexes -w @mdadu/api
-```
-
-Backend V2 migration script:
-
-```bash
-node scripts/migrate-backend-v2.mjs
-```
-
-The migration command above is dry-run unless the script explicitly receives its apply flag.
-
-Review migration output and backups before applying database changes.
-
-## Authentication model
-
-V1 does not use browser JWT access/refresh tokens.
-
-Flow:
-
-```text
-login
-  -> secure random opaque session token
-  -> signed httpOnly browser cookie
-  -> only token digest stored in MongoDB
-  -> server validates session on requests
-```
-
-Benefits for this product:
-
-- immediate session revocation,
-- logout all devices,
-- individual session removal,
-- account suspension can invalidate sessions,
-- raw bearer token is not stored in MongoDB.
-
-## UI freeze during functional completion
-
-Until the user explicitly asks for visual changes:
-
-- do not redesign public pages,
-- do not redesign auth pages,
-- do not redesign member/admin dashboards,
-- do not change CSS/design tokens,
-- do not change colors/spacing/typography/layout,
-- preserve existing visual class names where possible.
-
-Current work should replace demo behavior/data with real API behavior while preserving appearance.
-
-## Codex workflow
-
-Codex should start with:
-
-```text
-CODEX_START_HERE.md
-```
-
-The active execution plan is:
-
-```text
-docs/CODEX_COMPLETION_PLAN.md
-```
-
-The canonical stage/checklist status is:
-
-```text
-docs/progress.md
-```
-
-Codex must work on a new branch from `master`.
-
-Recommended:
-
-```bash
-git checkout master
-git pull --ff-only origin master
-git checkout -b feature/complete-v1-functional-integration
-```
-
-Do not deploy as part of completion work.
-
-## Dependency license policy
-
-For new third-party dependencies, prefer permissive licenses such as:
-
-- MIT
-- Apache-2.0
-- BSD-2-Clause
-- BSD-3-Clause
-
-Read:
-
-```text
-docs/THIRD_PARTY_LICENSE_POLICY.md
-```
-
-The application repository itself remains `UNLICENSED` unless the owner explicitly chooses a different source-code license.
-
-## Deployment
-
-### Completion verification on a host with MongoDB port conflicts
-
-The integration runner defaults to local port `27017`. If that port belongs to another project, use an isolated test MongoDB and set its port (PowerShell):
-
-```powershell
-docker run -d --name mdadu-v1-integration -p 127.0.0.1:27018:27017 mongo:8
-$env:INTEGRATION_MONGO_PORT='27018'
-npm run verify
-node scripts/verify-ui-freeze.mjs
-```
-
-If that test container already exists, use `docker start mdadu-v1-integration` instead of `docker run`. Each integration run creates and removes its own test database. The UI source check compares existing classes/styles with approved checkpoint `ab9d8ff`; it does not replace human visual UAT.
-
-See [the completion verification report](docs/V1_COMPLETION_VERIFICATION.md) for current results and remaining blockers. Stage 17 is not complete.
-
-Production deployment is intentionally the final stage.
-
-Planned V1 production direction:
-
-- AWS Amplify — frontend
-- AWS Lightsail — backend
-- MongoDB Atlas — database
-- Amazon S3 — media
-- Hostinger — DNS/email
-- GitHub Actions — CI/CD
-
-Do not deploy before Stage 17 testing/UAT is approved.
-
+- REST API
+- signed opaque `httpOnly` sessions + CSRF/origin protection
+- local/S3 media abstraction
+- Nodemailer + Hostinger SMTP direction
 
 ## Environment convention
 
-Create the development environment files:
+Exactly three environment files are used per app:
 
-### Git Bash / macOS / Linux
+```text
+apps/api/.env.dev
+apps/api/.env.prod
+apps/api/.env.example
+
+apps/web/.env.dev
+apps/web/.env.prod
+apps/web/.env.example
+```
+
+Create local development files:
 
 ```bash
 cp apps/api/.env.example apps/api/.env.dev
 cp apps/web/.env.example apps/web/.env.dev
-```
-
-For production configuration later, copy the same safe templates and then replace values:
-
-```bash
-cp apps/api/.env.example apps/api/.env.prod
-cp apps/web/.env.example apps/web/.env.prod```
-
-The project intentionally uses only `.env.dev` and `.env.prod` for application environments. Do not use `.env`, `.env.local`, `.env.development` or `.env.production` as alternate sources of truth.
-
-Validate development configuration without printing secrets:
-
-```bash
 npm run env:check:dev
 ```
 
-Validate production structure later:
+Do not create `.env`, `.env.local`, `.env.development`, or `.env.production`.
+
+## Development
 
 ```bash
-npm run env:check:prod
+npm ci
+npm run db:up
+npm run dev
 ```
 
-Read `docs/ENVIRONMENTS.md` for the full convention.
+Individual apps:
+
+```bash
+npm run dev:web
+npm run dev:api
+```
+
+Web: `http://localhost:3333`  
+API: `http://localhost:8888/api/v1`
+
+## Quality and verification
+
+Repository structure/auth-route audit:
+
+```bash
+npm run audit:repo
+```
+
+Quality gate:
+
+```bash
+npm run check
+```
+
+Integration tests:
+
+```bash
+npm run test:integration
+```
+
+Full verification:
+
+```bash
+npm run verify
+```
+
+With local Docker MongoDB:
+
+```bash
+npm run verify:local
+```
+
+Before merge:
+
+```bash
+npm run audit:repo
+npm run typecheck
+npm run lint
+npm run format:check
+npm run test
+npm run build
+npm run test:integration
+git diff --check
+git status
+```
+
+## Dashboard routes
+
+Canonical dashboards are:
+
+```text
+/member   -> USER dashboard
+/admin    -> SUPER_ADMIN dashboard
+```
+
+`/dashboard` is kept as a compatibility route and redirects according to the active session. Anonymous visitors are redirected to `/login`.
+
+Authentication pages remain:
+
+```text
+/login
+/signup
+/forgot-password
+/reset-password
+```
+
+When a user/admin is already authenticated, those guest pages intentionally redirect to the appropriate dashboard.
+
+## Google sign-in
+
+Use the same Google OAuth 2.0 Web Client ID in:
+
+```text
+apps/api/.env.dev  -> GOOGLE_CLIENT_ID
+apps/web/.env.dev  -> NEXT_PUBLIC_GOOGLE_CLIENT_ID
+```
+
+The browser never receives a Google client secret.
+
+## Database utilities
+
+Development:
+
+```bash
+npm run db:seed:dev
+npm run db:reset:dev
+npm run db:indexes:dev
+npm run db:content:dev
+npm run db:content:dev:apply
+```
+
+Migration scripts:
+
+```bash
+npm run db:migrate:v2:dev
+npm run db:migrate:v2:dev:apply
+npm run db:migrate:media:dev
+npm run db:migrate:media:dev:apply
+```
+
+Production variants exist for the deployment stage only.
+
+## Stable documentation
+
+Keep operational/current documentation such as:
+
+```text
+docs/ARCHITECTURE.md
+docs/DESIGN_SYSTEM.md
+docs/ENVIRONMENTS.md
+docs/DYNAMIC_CONTENT_RULES.md
+docs/GROUP10_MEDIA_ARCHITECTURE.md
+docs/GROUP11_SETTINGS_LEGAL_SEO.md
+docs/GROUP12_HARDENING_STATE_OAUTH.md
+docs/THIRD_PARTY_LICENSE_POLICY.md
+docs/references/ui/
+```
+
+## Planned production direction
+
+- AWS Amplify — web
+- AWS Lightsail — API
+- MongoDB Atlas — database
+- Amazon S3 — media
+- Hostinger SMTP — email
+- Hostinger — DNS/domain
+- GitHub Actions — CI
+
+Do not deploy before final UAT approval.
