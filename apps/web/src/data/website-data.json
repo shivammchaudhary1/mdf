@@ -167,14 +167,14 @@
       "role": "Producer / Actor",
       "group": "Core Team",
       "bio": "Contributes both on screen and behind the scenes, supporting production coordination and performance requirements.",
-      "image": ""
+      "image": "/team/mdf-team-devendra-singh.webp"
     },
     {
       "name": "Ravinder Singh",
       "role": "Producer",
       "group": "Core Team",
       "bio": "Supports production planning, resources and execution so projects can move smoothly from preparation to delivery.",
-      "image": ""
+      "image": "/team/mdf-team-ravinder-singh.webp"
     },
     {
       "name": "Shivam Chaudhary",
@@ -442,7 +442,7 @@
       "title": "Film & Short Film Production",
       "category": "Production",
       "description": "End-to-end support for films and short films, from planning and shoot execution through final delivery.",
-      "image": "",
+      "image": "/services/mdf-service-film&shortfilms.webp",
       "modal": {
         "eyebrow": "Film Production",
         "title": "Film & Short Film Production",
@@ -463,7 +463,7 @@
       "title": "Advertisement & Brand Films",
       "category": "Commercial",
       "description": "Story-led advertisement and brand films shaped around the audience, message and campaign objective.",
-      "image": "",
+      "image": "/services/mdf-service-advertisements.webp",
       "modal": {
         "eyebrow": "Commercial Production",
         "title": "Advertisement & Brand Films",
@@ -484,7 +484,7 @@
       "title": "Music Videos",
       "category": "Music",
       "description": "Concept, production and visual storytelling for performance-led and narrative music videos.",
-      "image": "",
+      "image": "/services/mdf-service-music-videos.webp",
       "modal": {
         "eyebrow": "Music & Visuals",
         "title": "Music Videos",
@@ -505,7 +505,7 @@
       "title": "Corporate Shoots",
       "category": "Corporate",
       "description": "Professional corporate films, interviews, internal communication and event-focused production.",
-      "image": "",
+      "image": "/services/mdf-service-coorporate-shoot.webp",
       "modal": {
         "eyebrow": "Corporate Content",
         "title": "Corporate Shoots",
@@ -526,7 +526,7 @@
       "title": "Creative Content Development",
       "category": "Creative",
       "description": "Development and production support for digital, social and story-driven creative content.",
-      "image": "",
+      "image": "/services/mdf-service-creative-content-development.webp",
       "modal": {
         "eyebrow": "Creative Development",
         "title": "Creative Content Development",
@@ -547,7 +547,7 @@
       "title": "Production & Post-Production Support",
       "category": "Production",
       "description": "Practical production coordination and post-production support built around the needs of each project.",
-      "image": "",
+      "image": "/services/mdf-service-production.webp",
       "modal": {
         "eyebrow": "Production Support",
         "title": "Production & Post-Production Support",
@@ -799,7 +799,7 @@
           "Performance",
           "Production Support"
         ],
-        "image": "",
+        "image": "/team/mdf-team-devendra-singh.webp",
         "instagram": "",
         "facebook": "",
         "x": "",
@@ -816,7 +816,7 @@
           "Coordination",
           "Production Planning"
         ],
-        "image": "",
+        "image": "/team/mdf-team-ravinder-singh.webp",
         "instagram": "",
         "facebook": "",
         "x": "",
@@ -989,7 +989,13 @@
       "eyebrow": "Our Services",
       "title": "From Idea to Final Delivery",
       "description": "Film production, branded content, music videos, corporate shoots and creative production support built around the needs of each story.",
-      "mediaAlt": "M. Dadu Films production services"
+      "mediaAlt": "M. Dadu Films production crew and filmmaking services",
+      "image": "/services/our-services-hero-image.webp",
+      "tags": [
+        "Film Production",
+        "Brand Content",
+        "Creative Support"
+      ]
     },
     "list": {
       "eyebrow": "What We Do",
