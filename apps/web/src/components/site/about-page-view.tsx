@@ -1,9 +1,9 @@
 "use client";
 
+import { CoreTeamSection } from "@/components/site/core-team-section";
 import { PageIntro } from "@/components/site/page-intro";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
-import { SiteMedia } from "@/components/site/site-media";
 
 import { usePublicData } from "./use-public-data";
 
@@ -16,8 +16,6 @@ const values = [
 
 export function AboutPageView() {
   const brandData = usePublicData("brand");
-  const teamData = usePublicData("team");
-  const coreTeam = teamData.team.filter((member) => member.group === "Core Team").slice(0, 6);
 
   return (
     <>
@@ -61,28 +59,7 @@ export function AboutPageView() {
           </div>
         </section>
 
-        <section id="core-team" className="site-section bg-[#fafafa]">
-          <div className="site-shell">
-            <div className="site-section-heading">
-              <div>
-                <p className="site-kicker">Our People</p>
-                <h2 className="site-heading mt-2">Core Team</h2>
-              </div>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {coreTeam.map((member) => (
-                <article key={member.name} className="site-card overflow-hidden">
-                  <SiteMedia src={member.image} alt={member.name} kind="team" className="aspect-[4/4.5]" />
-                  <div className="p-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[.12em] text-[var(--brand-red)]">{member.role}</p>
-                    <h3 className="font-display mt-2 text-xl font-semibold">{member.name}</h3>
-                    <p className="mt-3 text-sm leading-6 text-[#777]">{member.bio}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <CoreTeamSection />
 
         <section className="site-shell py-8 lg:py-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-7 py-14 text-white sm:px-10 lg:px-12">
