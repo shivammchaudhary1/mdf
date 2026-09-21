@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { ServicesSection } from "@/components/site/services-section";
@@ -111,29 +112,67 @@ export function HomePageView() {
                 Verified partner logos can replace these temporary placeholders as assets are added.
               </p>
             </div>
-            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {data.brands.map((brand) => (
-                <div
-                  key={brand.name}
-                  className="flex min-h-24 items-center justify-center rounded-2xl border border-black/8 bg-white px-4 py-5 text-center shadow-[0_8px_30px_rgba(0,0,0,.03)]"
-                >
-                  {brand.logo ? (
-                    <SiteMedia
-                      src={brand.logo}
-                      alt={`${brand.name} logo`}
-                      kind="generic"
-                      className="h-14 w-full bg-white"
-                      imageClassName="object-contain p-1"
-                    />
-                  ) : (
-                    <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-[.12em] text-[#aaa]">Partner Logo</span>
-                      <strong className="mt-1 block text-sm text-[#444]">{brand.name}</strong>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="brand-marquee relative mt-7 overflow-hidden">
+              <div className="brand-marquee-track flex w-max items-center">
+                {[0, 1].map((copy) => (
+                  <div key={copy} className="flex shrink-0 items-center gap-3 pr-3 sm:gap-4 sm:pr-4" aria-hidden={copy === 1}>
+                    {data.brands.map((brand) => (
+                      <div
+                        key={`${copy}-${brand.name}`}
+                        className="relative flex h-24 w-[190px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_8px_30px_rgba(0,0,0,.03)] sm:w-[220px]"
+                      >
+                        {brand.logo ? (
+                          <Image
+                            src={brand.logo}
+                            alt={copy === 0 ? `${brand.name} logo` : ""}
+                            fill
+                            sizes="220px"
+                            style={{ objectFit: "contain" }}
+                            className="p-2 sm:p-2.5"
+                          />
+                        ) : (
+                          <div className="px-4 text-center">
+                            <span className="block text-[10px] font-bold uppercase tracking-[.12em] text-[#aaa]">Partner Logo</span>
+                            <strong className="mt-1 block text-sm text-[#444]">{brand.name}</strong>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
+
+            <style>{`
+              @keyframes brandMarqueeScroll {
+                from {
+                  transform: translate3d(0, 0, 0);
+                }
+                to {
+                  transform: translate3d(-50%, 0, 0);
+                }
+              }
+
+              .brand-marquee-track {
+                animation: brandMarqueeScroll 34s linear infinite;
+                will-change: transform;
+              }
+
+              .brand-marquee:hover .brand-marquee-track {
+                animation-play-state: paused;
+              }
+
+              @media (prefers-reduced-motion: reduce) {
+                .brand-marquee {
+                  overflow-x: auto;
+                }
+
+                .brand-marquee-track {
+                  animation: none;
+                  transform: none;
+                }
+              }
+            `}</style>
           </div>
         </section>
 
