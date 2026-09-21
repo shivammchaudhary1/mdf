@@ -6,7 +6,7 @@ import { PageIntro } from "@/components/site/page-intro";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
-import template from "@/data/public-site.json";
+import template from "@/data/website-data.json";
 import { api } from "@/services/api";
 import { type ContentRecord, mediaUrl, type Page } from "@/services/workspace";
 

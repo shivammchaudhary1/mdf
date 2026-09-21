@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import { SiteMedia } from "@/components/site/site-media";
-import team from "@/data/core-team.json";
+import websiteData from "@/data/website-data.json";
 
+const team = websiteData.aboutUs.coreTeam;
 type TeamMember = (typeof team)[number];
 type SocialName = "instagram" | "facebook" | "x" | "linkedin" | "youtube";
 
@@ -17,12 +18,7 @@ const socials: Array<{ name: SocialName; label: string }> = [
 ];
 
 function SocialIcon({ name }: { name: SocialName }) {
-  const common = {
-    viewBox: "0 0 24 24",
-    width: 15,
-    height: 15,
-    "aria-hidden": true,
-  };
+  const common = { viewBox: "0 0 24 24", width: 15, height: 15, "aria-hidden": true };
 
   if (name === "instagram")
     return (
@@ -66,9 +62,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
     <div className="flex flex-wrap gap-1.5">
       {socials.map(({ name, label }) => {
         const href = member[name];
-        const classes = large
-          ? "grid h-10 w-10 place-items-center rounded-full border transition"
-          : "grid h-8 w-8 place-items-center rounded-full border transition";
+        const size = large ? "h-10 w-10" : "h-8 w-8";
 
         if (!href)
           return (
@@ -76,7 +70,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
               key={name}
               aria-label={`${label} link not added for ${member.name}`}
               title={`${label} link will appear when added`}
-              className={`${classes} border-black/6 bg-[#fafafa] text-[#c0c0c0]`}
+              className={`grid ${size} place-items-center rounded-full border border-black/6 bg-[#fafafa] text-[#c0c0c0]`}
             >
               <SocialIcon name={name} />
             </span>
@@ -89,7 +83,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
             target="_blank"
             rel="noreferrer"
             aria-label={`${member.name} on ${label}`}
-            className={`${classes} border-black/10 text-[#444] hover:border-[var(--brand-red)] hover:bg-[var(--brand-red)] hover:text-white`}
+            className={`grid ${size} place-items-center rounded-full border border-black/10 text-[#444] transition hover:border-[var(--brand-red)] hover:bg-[var(--brand-red)] hover:text-white`}
           >
             <SocialIcon name={name} />
           </a>
@@ -127,11 +121,9 @@ export function CoreTeamSection() {
       <div className="site-shell">
         <div className="site-section-heading">
           <div>
-            <p className="site-kicker">The People Behind the Work</p>
-            <h2 className="site-heading mt-2">Core Team</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777]">
-              Directors, producers and specialists working together across development, production, performance and post-production.
-            </p>
+            <p className="site-kicker">{websiteData.aboutUs.teamSection.eyebrow}</p>
+            <h2 className="site-heading mt-2">{websiteData.aboutUs.teamSection.title}</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777]">{websiteData.aboutUs.teamSection.description}</p>
           </div>
         </div>
 
@@ -153,7 +145,6 @@ export function CoreTeamSection() {
 
                 <div className="mt-auto pt-5">
                   <SocialLinks member={member} />
-
                   <button
                     type="button"
                     onClick={() => setSelected(member)}
@@ -203,14 +194,13 @@ export function CoreTeamSection() {
               />
 
               <div className="flex flex-col justify-center p-6 sm:p-8 md:p-10">
-                <p className="site-kicker">Core Team</p>
+                <p className="site-kicker">{websiteData.aboutUs.teamSection.modalEyebrow}</p>
                 <h2 id="team-member-name" className="font-display mt-2 text-3xl font-semibold leading-tight sm:text-4xl">
                   {selected.name}
                 </h2>
                 <p className="mt-3 text-xs font-extrabold uppercase tracking-[.11em] text-[var(--brand-red)]">{selected.designation}</p>
 
                 <div className="my-6 h-px bg-black/7" />
-
                 <p className="text-sm leading-7 text-[#666]">{selected.details}</p>
 
                 <div className="mt-6">

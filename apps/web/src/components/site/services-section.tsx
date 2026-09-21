@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import template from "@/data/public-site.json";
+import template from "@/data/website-data.json";
 import { api } from "@/services/api";
 import { type ContentRecord, mediaUrl, type Page } from "@/services/workspace";
 

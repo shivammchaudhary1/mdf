@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
 import { PUBLIC_COMPANY } from "@/config/company";
-import template from "@/data/public-site.json";
+import template from "@/data/website-data.json";
 import { type ContentRecord, dateLabel, fetchPage, mediaUrl, type PageMeta } from "@/services/workspace";
 type PublicTalentRecord = {
   id: string;

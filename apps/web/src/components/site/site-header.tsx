@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
-import data from "@/data/public-site.json";
+import data from "@/data/website-data.json";
 import { signOut } from "@/services/auth-session";
 import { useAppStore } from "@/store/app-store";
 import { usePublicUiStore } from "@/store/public-ui-store";
