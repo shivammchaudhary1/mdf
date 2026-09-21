@@ -1093,5 +1093,36 @@
       "imageAlt": "Filmmaker developing ideas and production stories in a cinematic workspace",
       "tags": ["Production Stories", "Casting Advice", "Creative Journal"]
     }
+  },
+  "homeTestimonials": {
+    "eyebrow": "Client Voices",
+    "title": "What collaborators say about working with us.",
+    "description": "People, performers and creative collaborators are at the centre of every production relationship.",
+    "items": [
+      {
+        "name": "Anshu Varshney",
+        "designation": "Actress & Model",
+        "image": "/testimonials/mdf-testimonial-ansshu-varshney.jpg",
+        "imageAlt": "Anshu Varshney",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      },
+      {
+        "name": "Lekha Prajapati",
+        "designation": "Actress",
+        "image": "/testimonials/mdf-testimonial-lekha-prajapati.jpg",
+        "imageAlt": "Lekha Prajapati",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      },
+      {
+        "name": "Shreedhar Dubey",
+        "designation": "Actor & Casting Director",
+        "image": "/testimonials/mdf-testimonial-shreedhar-dubey.png",
+        "imageAlt": "Shreedhar Dubey",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      }
+    ]
   }
 }

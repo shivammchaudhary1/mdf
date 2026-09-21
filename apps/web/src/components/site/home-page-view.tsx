@@ -137,6 +137,56 @@ export function HomePageView() {
           </div>
         </section>
 
+        <section className="site-section bg-[#0b0b0b] text-white">
+          <div className="site-shell">
+            <div className="site-section-heading">
+              <div>
+                <p className="site-kicker !text-[#ff5a62]">{websiteData.homeTestimonials.eyebrow}</p>
+                <h2 className="site-heading mt-2 !text-white">{websiteData.homeTestimonials.title}</h2>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">{websiteData.homeTestimonials.description}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {websiteData.homeTestimonials.items.map((testimonial) => (
+                <article
+                  key={testimonial.name}
+                  className="flex min-h-[310px] flex-col rounded-[20px] border border-white/10 bg-white/[.045] p-6 sm:p-7"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-display text-5xl leading-none text-[var(--brand-red)]">“</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[.12em] text-white/30">Client Voice</span>
+                  </div>
+
+                  <div className="mt-4 flex-1">
+                    {testimonial.comment ? (
+                      <p className="font-display text-xl leading-8 text-white/90">“{testimonial.comment}”</p>
+                    ) : (
+                      <p className="text-sm leading-7 text-white/45">
+                        Approved testimonial copy can be added here directly from website-data.json.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-7 flex items-center gap-4 border-t border-white/10 pt-5">
+                    <SiteMedia
+                      src={testimonial.image}
+                      alt={testimonial.imageAlt}
+                      kind="team"
+                      className="h-14 w-14 shrink-0 rounded-full border border-white/10"
+                      imageClassName="object-cover"
+                    />
+                    <div className="min-w-0">
+                      <h3 className="font-display text-lg font-semibold leading-tight text-white">{testimonial.name}</h3>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-[.09em] text-[#ff646b]">{testimonial.designation}</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="site-shell py-8 lg:py-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-6 py-10 text-white sm:px-10 lg:px-12 lg:py-12">
             <div className="absolute inset-y-0 right-0 hidden w-[48%] opacity-42 sm:block">
