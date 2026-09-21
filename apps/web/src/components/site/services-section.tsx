@@ -1,83 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import template from "@/data/website-data.json";
-import { api } from "@/services/api";
-import { type ContentRecord, mediaUrl, type Page } from "@/services/workspace";
-
-import { SiteMedia } from "./site-media";
-
-type ServiceCard = {
-  key: string;
-  title: string;
-  category: string;
-  description: string;
-  image: string;
-};
-
-const fallback: ServiceCard[] = template.services.map((service) => ({
-  key: service.slug,
-  title: service.title,
-  category: service.category,
-  description: service.description,
-  image: service.image,
-}));
+import { SiteMedia } from "@/components/site/site-media";
+import websiteData from "@/data/website-data.json";
 
 export function ServicesSection() {
-  const [items, setItems] = useState<ServiceCard[]>(fallback);
-
-  useEffect(() => {
-    let active = true;
-
-    void api<Page<ContentRecord>>("/content/services?page=1&limit=6")
-      .then((response) => {
-        if (!active || !response.items.length) return;
-        setItems(
-          response.items.map((item) => ({
-            key: item._id,
-            title: item.title,
-            category: item.category ?? "Production",
-            description: item.description ?? "",
-            image: mediaUrl(item.coverImage),
-          })),
-        );
-      })
-      .catch(() => undefined);
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const page = websiteData.servicesPage;
 
   return (
     <section className="site-section bg-[#fafafa]">
       <div className="site-shell">
         <div className="site-section-heading">
           <div>
-            <p className="site-kicker">What we offer</p>
-            <h2 className="site-heading mt-2">Services</h2>
+            <p className="site-kicker">{page.homeSection.eyebrow}</p>
+            <h2 className="site-heading mt-2">{page.homeSection.title}</h2>
           </div>
+
           <Link href="/services" className="site-text-link">
-            Explore Services →
+            {page.homeSection.linkLabel} →
           </Link>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <Link href="/services" key={item.key} className="group site-card overflow-hidden">
+          {websiteData.services.slice(0, 6).map((service) => (
+            <Link href="/services" key={service.slug} className="group site-card overflow-hidden">
               <SiteMedia
-                src={item.image}
-                alt={item.title}
+                src={service.image}
+                alt={service.title}
                 kind="project"
                 className="aspect-[16/9]"
                 imageClassName="transition duration-500 group-hover:scale-[1.025]"
               />
+
               <div className="p-5">
-                <p className="site-kicker">{item.category}</p>
-                <h3 className="font-display mt-2 text-xl font-semibold">{item.title}</h3>
-                {item.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#777]">{item.description}</p>}
+                <p className="site-kicker">{service.category}</p>
+                <h3 className="font-display mt-2 text-xl font-semibold">{service.title}</h3>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#777]">{service.description}</p>
               </div>
             </Link>
           ))}

@@ -442,42 +442,126 @@
       "title": "Film & Short Film Production",
       "category": "Production",
       "description": "End-to-end support for films and short films, from planning and shoot execution through final delivery.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Film Production",
+        "title": "Film & Short Film Production",
+        "overview": "We support narrative productions from early planning through shoot execution and post-production, bringing creative and technical departments together around a clear production plan.",
+        "highlights": [
+          "Concept, development and production planning support",
+          "Crew, schedule, location and shoot coordination",
+          "Camera, lighting, art and on-set production support",
+          "Editing, colour, sound and final delivery coordination"
+        ],
+        "idealFor": "Short films, independent films, narrative projects, proof-of-concepts and story-led productions.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Film & Short Film Production service. I'd like to discuss my project, production requirements, timeline and next steps.\n\nProject details: "
+      }
     },
     {
       "slug": "advertisement-brand-films",
       "title": "Advertisement & Brand Films",
       "category": "Commercial",
       "description": "Story-led advertisement and brand films shaped around the audience, message and campaign objective.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Commercial Production",
+        "title": "Advertisement & Brand Films",
+        "overview": "We create story-led commercial films that connect a brand message with strong visual storytelling, practical production and platform-ready delivery.",
+        "highlights": [
+          "Creative treatment and visual approach",
+          "Pre-production, casting, locations and scheduling",
+          "Commercial shoot production and direction support",
+          "Post-production and campaign-ready deliverables"
+        ],
+        "idealFor": "Brands, agencies, startups and businesses looking for advertisements, campaign films or branded storytelling.",
+        "contactSubject": "Brand / Business Inquiry",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Advertisement & Brand Films service. I'd like to discuss our brand, campaign objective, expected deliverables and production timeline.\n\nBrand / project details: "
+      }
     },
     {
       "slug": "music-videos",
       "title": "Music Videos",
       "category": "Music",
       "description": "Concept, production and visual storytelling for performance-led and narrative music videos.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Music & Visuals",
+        "title": "Music Videos",
+        "overview": "We develop music-led visual concepts that match the energy, emotion and identity of the track, from performance setups to narrative-driven music videos.",
+        "highlights": [
+          "Concept and visual treatment development",
+          "Artist, location, production and shoot planning",
+          "Performance and narrative production support",
+          "Edit, colour and final music-video delivery"
+        ],
+        "idealFor": "Independent artists, singers, labels and music producers looking for performance or narrative music videos.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Music Video service. I'd like to discuss the song, visual direction, production requirements, budget range and timeline.\n\nSong / project details: "
+      }
     },
     {
       "slug": "corporate-shoots",
       "title": "Corporate Shoots",
       "category": "Corporate",
       "description": "Professional corporate films, interviews, internal communication and event-focused production.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Corporate Content",
+        "title": "Corporate Shoots",
+        "overview": "We produce clean, professional corporate content that communicates clearly while still feeling visually considered and aligned with the organisation's identity.",
+        "highlights": [
+          "Corporate films and company profiles",
+          "Leadership interviews and testimonials",
+          "Internal communication and event coverage",
+          "Editing, graphics and final delivery support"
+        ],
+        "idealFor": "Companies, institutions, teams and organisations requiring professional communication, interview or event content.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Corporate Shoots service. I'd like to discuss our organisation, shoot requirement, expected deliverables and preferred timeline.\n\nRequirement details: "
+      }
     },
     {
       "slug": "creative-content",
       "title": "Creative Content Development",
       "category": "Creative",
       "description": "Development and production support for digital, social and story-driven creative content.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Creative Development",
+        "title": "Creative Content Development",
+        "overview": "We help turn early ideas into production-ready creative concepts for digital, social and visual storytelling, with an approach that keeps the idea practical to execute.",
+        "highlights": [
+          "Idea development and creative direction",
+          "Content concepts and visual treatments",
+          "Digital and social video planning",
+          "Production approach and execution support"
+        ],
+        "idealFor": "Creators, brands and teams that have an idea or objective but need help shaping it into strong visual content.",
+        "contactSubject": "Collaboration",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Creative Content Development service. I have an idea / objective and would like help shaping the concept and production approach.\n\nIdea / requirement: "
+      }
     },
     {
       "slug": "production-support",
       "title": "Production & Post-Production Support",
       "category": "Production",
       "description": "Practical production coordination and post-production support built around the needs of each project.",
-      "image": ""
+      "image": "",
+      "modal": {
+        "eyebrow": "Production Support",
+        "title": "Production & Post-Production Support",
+        "overview": "For projects that already have a creative direction, we can support specific production or post-production requirements without forcing a full-service workflow.",
+        "highlights": [
+          "Production coordination and on-set support",
+          "Crew and department coordination",
+          "Editing and post-production workflow support",
+          "D.I., colour, sound and delivery coordination"
+        ],
+        "idealFor": "Production houses, directors, agencies and independent teams that need additional execution or post-production support.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Production & Post-Production Support service. I'd like to discuss which parts of our current project need support and the expected timeline.\n\nCurrent project / support needed: "
+      }
     }
   ],
   "brands": [
@@ -898,6 +982,25 @@
       "text": "Good Stories Create a Better Tomorrow",
       "description": "The best work happens when a clear story, a prepared crew and the right collaborators move in the same direction.",
       "attribution": "M. Dadu Films"
+    }
+  },
+  "servicesPage": {
+    "hero": {
+      "eyebrow": "Our Services",
+      "title": "From Idea to Final Delivery",
+      "description": "Film production, branded content, music videos, corporate shoots and creative production support built around the needs of each story.",
+      "mediaAlt": "M. Dadu Films production services"
+    },
+    "list": {
+      "eyebrow": "What We Do",
+      "title": "Production services shaped around the project.",
+      "description": "Explore a service and open Know More to see how we can support the project, what is included and how to start a conversation with our team.",
+      "buttonLabel": "Know More"
+    },
+    "homeSection": {
+      "eyebrow": "What We Offer",
+      "title": "Services",
+      "linkLabel": "Explore Services"
     }
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, type ReactNode, useState } from "react";
 
 import { PageIntro } from "@/components/site/page-intro";
@@ -102,6 +103,10 @@ function ContactIcon({ name }: { name: ContactIconName }) {
 
 export function ContactPageView() {
   const data = usePublicData("brand");
+  const searchParams = useSearchParams();
+  const requestedSubject = searchParams.get("subject") ?? "General Inquiry";
+  const requestedMessage = searchParams.get("message") ?? "";
+  const requestedService = searchParams.get("service");
   const toast = useToast();
   const [sending, setSending] = useState(false);
 
@@ -229,6 +234,13 @@ export function ContactPageView() {
             </div>
 
             <form onSubmit={submit} className="site-card grid gap-4 p-6 sm:p-8">
+              {requestedService && (
+                <div className="rounded-xl border border-[#f2c9cc] bg-[#fff5f6] px-4 py-3">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--brand-red)]">Service Inquiry</p>
+                  <p className="mt-1 text-sm font-semibold text-[#333]">{requestedService}</p>
+                </div>
+              )}
+
               <div>
                 <p className="site-kicker">Send a Message</p>
                 <h2 className="font-display mt-2 text-2xl font-semibold sm:text-3xl">Tell us what you’re working on.</h2>
@@ -264,7 +276,7 @@ export function ContactPageView() {
                 <label className="site-label" htmlFor="contact-subject">
                   Subject
                 </label>
-                <select id="contact-subject" name="subject" className="site-input">
+                <select id="contact-subject" name="subject" defaultValue={requestedSubject} className="site-input">
                   <option>General Inquiry</option>
                   <option>Production</option>
                   <option>Brand / Business Inquiry</option>
@@ -285,6 +297,7 @@ export function ContactPageView() {
                   maxLength={5000}
                   className="site-input resize-y"
                   placeholder="Tell us a little about your project, collaboration or enquiry..."
+                  defaultValue={requestedMessage}
                 />
               </div>
 
