@@ -119,7 +119,17 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
           Join Now
         </Link>
       </>
-    ) : null;
+    ) : (
+      <div className="hidden items-center gap-2 sm:flex" role="status" aria-live="polite" aria-label="Checking account session">
+        <span className={`h-4 w-11 animate-pulse rounded-full ${dark ? "bg-white/16" : "bg-black/8"}`} />
+        <span
+          className={`h-10 w-[88px] animate-pulse rounded-full border ${
+            dark ? "border-white/15 bg-white/10" : "border-black/8 bg-[#f6f6f4]"
+          }`}
+        />
+        <span className="sr-only">Checking account…</span>
+      </div>
+    );
 
   return (
     <header
@@ -158,7 +168,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 sm:min-w-[168px]">
           {profileControl}
           <button
             type="button"
@@ -206,7 +216,12 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
                     Join Now
                   </Link>
                 </div>
-              ) : null}
+              ) : (
+                <div className="flex items-center gap-3 rounded-xl bg-[#f6f6f4] px-4 py-3" role="status" aria-live="polite">
+                  <span className="h-3 w-3 animate-pulse rounded-full bg-[#999]" />
+                  <span className="text-sm font-semibold text-[#666]">Checking account…</span>
+                </div>
+              )}
             </div>
           </nav>
         </div>
