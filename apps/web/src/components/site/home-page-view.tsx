@@ -6,6 +6,7 @@ import { ServicesSection } from "@/components/site/services-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
+import websiteData from "@/data/website-data.json";
 
 import { usePublicData } from "./use-public-data";
 
@@ -55,12 +56,15 @@ export function HomePageView() {
             </div>
           </div>
 
-          <div className="relative z-10 border-t border-white/10 bg-black/45 backdrop-blur-[2px]">
-            <div className="site-shell grid grid-cols-2 divide-x divide-white/8 py-5 sm:grid-cols-4">
-              {data.stats.map((stat) => (
-                <div key={stat.label} className="px-3 text-center sm:px-6">
-                  <p className="font-display text-2xl font-semibold sm:text-3xl">{stat.value}</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[.12em] text-white/46">{stat.label}</p>
+          <div className="relative z-10 border-t border-white/10 bg-black/55 backdrop-blur-[2px]">
+            <div className="site-shell grid grid-cols-2 gap-y-5 py-5 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x lg:divide-white/8">
+              {websiteData.aboutUs.stats.map((stat) => (
+                <div key={stat.label} className="px-3 text-center sm:px-5">
+                  <p className="font-display text-2xl font-semibold tracking-[-.02em] text-white sm:text-3xl">
+                    {stat.value}
+                    {stat.suffix}
+                  </p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[.11em] text-white/46">{stat.label}</p>
                 </div>
               ))}
             </div>
