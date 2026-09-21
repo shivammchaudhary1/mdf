@@ -42,7 +42,7 @@ const empty = {
   },
   projects: [] as typeof template.projects,
   blogs: [] as typeof template.blogs,
-  team: [] as typeof template.team,
+  team: template.team,
   gallery: [] as typeof template.gallery,
   castings: [] as typeof template.castings,
   talents: [] as Array<(typeof template.talents)[number] & { id: string }>,
@@ -86,25 +86,29 @@ export function usePublicData(
           fetchPage<PublicRecord>("/projects", 1, 4),
           fetchPage<PublicRecord>("/content/blog", 1, 3),
         ]);
-        updates.projects = projects.items.map((x) => ({
-          slug: x.slug,
-          title: x.title,
-          category: x.type ?? "",
-          status: x.status ?? "",
-          summary: x.summary ?? x.description ?? "",
-          year: new Date(x.createdAt).getFullYear().toString(),
-          location: x.location ?? "",
-          image: mediaUrl(x.coverImage),
-        }));
-        updates.blogs = blogs.items.map((x) => ({
-          slug: x.slug,
-          title: x.title,
-          category: x.category ?? "",
-          date: dateLabel(x.publishedAt ?? x.createdAt),
-          readTime: `${Math.max(1, Math.ceil((x.body ?? []).join(" ").split(/\s+/).length / 200))} min read`,
-          summary: x.description ?? "",
-          image: mediaUrl(x.coverImage),
-        }));
+        if (projects.items.length) {
+          updates.projects = projects.items.map((x) => ({
+            slug: x.slug,
+            title: x.title,
+            category: x.type ?? "",
+            status: x.status ?? "",
+            summary: x.summary ?? x.description ?? "",
+            year: new Date(x.createdAt).getFullYear().toString(),
+            location: x.location ?? "",
+            image: mediaUrl(x.coverImage),
+          }));
+        }
+        if (blogs.items.length) {
+          updates.blogs = blogs.items.map((x) => ({
+            slug: x.slug,
+            title: x.title,
+            category: x.category ?? "",
+            date: dateLabel(x.publishedAt ?? x.createdAt),
+            readTime: `${Math.max(1, Math.ceil((x.body ?? []).join(" ").split(/\s+/).length / 200))} min read`,
+            summary: x.description ?? "",
+            image: mediaUrl(x.coverImage),
+          }));
+        }
       } else if (domain !== "brand") {
         const page = options.page ?? 1,
           limit = options.limit ?? (domain === "blogs" ? 9 : 12);
@@ -168,7 +172,7 @@ export function usePublicData(
               summary: x.description ?? "",
               image: mediaUrl(x.coverImage),
             }));
-          if (domain === "team")
+          if (domain === "team" && rows.length)
             updates.team = rows.map((x) => ({
               name: x.title,
               role: x.role ?? "",

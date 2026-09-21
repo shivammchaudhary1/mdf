@@ -6,8 +6,6 @@ M. Dadu Films V1 includes the public production-house website, member/talent com
 
 Groups 0–12 are merged. The project is in **pre-UAT cleanup and verification**.
 
-`pendingTask.md` is the canonical roadmap/checklist and must not be replaced by another progress file.
-
 Production deployment remains frozen until UAT is explicitly approved.
 
 ## Stack
@@ -143,26 +141,14 @@ The browser never receives a Google client secret.
 
 ## Database utilities
 
-Development:
+MongoDB indexes:
 
 ```bash
-npm run db:seed:dev
-npm run db:reset:dev
 npm run db:indexes:dev
-npm run db:content:dev
-npm run db:content:dev:apply
+npm run db:indexes:prod
 ```
 
-Migration scripts:
-
-```bash
-npm run db:migrate:v2:dev
-npm run db:migrate:v2:dev:apply
-npm run db:migrate:media:dev
-npm run db:migrate:media:dev:apply
-```
-
-Production variants exist for the deployment stage only.
+Legacy development seed, backend migration, media migration and Group 11 content-upsert scripts have been removed. A fresh database seed/bootstrap workflow will be created separately for the current manual-UAT requirements.
 
 ## Stable documentation
 

@@ -21,7 +21,7 @@ import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
 
-type Kind = "blog" | "gallery" | "bts" | "shows" | "team" | "work";
+type Kind = "blog" | "gallery" | "bts" | "shows" | "team" | "services";
 type Source = {
   _id: string;
   title: string;
@@ -72,11 +72,11 @@ type Item = {
 };
 
 const cfg = {
-  work: {
+  services: {
     eyebrow: "Production services",
-    title: "Our Work",
-    description: "Manage production-work categories and service content.",
-    action: "Add Work Item",
+    title: "Services",
+    description: "Manage the services offered by M. Dadu Films.",
+    action: "Add Service",
   },
   blog: {
     eyebrow: "Editorial CMS",
@@ -110,7 +110,7 @@ const cfg = {
   },
 } as const;
 
-const kindPath = (kind: Kind) => (kind === "bts" ? "behind-the-scenes" : kind === "work" ? "our-work" : kind);
+const kindPath = (kind: Kind) => (kind === "bts" ? "behind-the-scenes" : kind);
 const mapItem = (x: Source): Item => ({
   id: x._id,
   title: x.title,

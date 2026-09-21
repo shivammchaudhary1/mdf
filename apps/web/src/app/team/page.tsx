@@ -1,7 +1,5 @@
-import { TeamPageView } from "@/components/site/team-page-view";
-
-export const metadata = { title: "Team" };
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <TeamPageView />;
+  redirect("/about#core-team");
 }

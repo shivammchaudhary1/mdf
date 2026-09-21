@@ -1,7 +1,7 @@
 {
   "brand": {
     "name": "M. Dadu Films",
-    "eyebrow": "Film Production · Creative Collaboration",
+    "eyebrow": "Film Production \u00b7 Creative Collaboration",
     "headline": "Transforming Visions into Cinematic Reality",
     "description": "M. Dadu Films is a film production house based in Lucknow and Noida, working across films, short films, music videos, advertisement and brand films, corporate shoots, and creative content development.",
     "email": "m.dadufilms@gmail.com",
@@ -14,31 +14,31 @@
       "href": "/"
     },
     {
+      "label": "About Us",
+      "href": "/about"
+    },
+    {
+      "label": "Services",
+      "href": "/services"
+    },
+    {
       "label": "Projects",
       "href": "/projects"
-    },
-    {
-      "label": "Our Work",
-      "href": "/our-work"
-    },
-    {
-      "label": "Talent",
-      "href": "/talent"
     },
     {
       "label": "Casting",
       "href": "/casting"
     },
     {
-      "label": "About",
-      "href": "/about"
+      "label": "Talents",
+      "href": "/talent"
     },
     {
       "label": "Blog",
       "href": "/blog"
     },
     {
-      "label": "Contact",
+      "label": "Contact Us",
       "href": "/contact"
     }
   ],
@@ -249,24 +249,24 @@
   "castings": [
     {
       "slug": "lead-actor-short-film",
-      "title": "Lead Actor — Short Film",
+      "title": "Lead Actor \u2014 Short Film",
       "project": "The Last Frame",
       "category": "Acting",
       "location": "Indore",
-      "age": "24–32",
+      "age": "24\u201332",
       "gender": "Any",
-      "shoot": "Oct 18–20, 2026",
+      "shoot": "Oct 18\u201320, 2026",
       "deadline": "Oct 05, 2026",
       "compensation": "Paid",
       "summary": "Looking for an expressive performer comfortable with subtle, emotionally grounded scenes."
     },
     {
       "slug": "female-lead-web-series",
-      "title": "Female Lead — Web Series",
+      "title": "Female Lead \u2014 Web Series",
       "project": "She Talks",
       "category": "Acting",
       "location": "Mumbai",
-      "age": "22–30",
+      "age": "22\u201330",
       "gender": "Female",
       "shoot": "Nov 2026",
       "deadline": "Oct 12, 2026",
@@ -281,7 +281,7 @@
       "location": "Indore",
       "age": "18+",
       "gender": "Any",
-      "shoot": "Oct–Nov 2026",
+      "shoot": "Oct\u2013Nov 2026",
       "deadline": "Sep 30, 2026",
       "compensation": "Paid",
       "summary": "Organized production-minded collaborator comfortable with schedules, coordination and set communication."
@@ -378,6 +378,76 @@
       ],
       "verified": false,
       "image": ""
+    }
+  ],
+  "services": [
+    {
+      "slug": "film-short-film-production",
+      "title": "Film & Short Film Production",
+      "category": "Production",
+      "description": "End-to-end support for films and short films, from planning and shoot execution through final delivery.",
+      "image": ""
+    },
+    {
+      "slug": "advertisement-brand-films",
+      "title": "Advertisement & Brand Films",
+      "category": "Commercial",
+      "description": "Story-led advertisement and brand films shaped around the audience, message and campaign objective.",
+      "image": ""
+    },
+    {
+      "slug": "music-videos",
+      "title": "Music Videos",
+      "category": "Music",
+      "description": "Concept, production and visual storytelling for performance-led and narrative music videos.",
+      "image": ""
+    },
+    {
+      "slug": "corporate-shoots",
+      "title": "Corporate Shoots",
+      "category": "Corporate",
+      "description": "Professional corporate films, interviews, internal communication and event-focused production.",
+      "image": ""
+    },
+    {
+      "slug": "creative-content",
+      "title": "Creative Content Development",
+      "category": "Creative",
+      "description": "Development and production support for digital, social and story-driven creative content.",
+      "image": ""
+    },
+    {
+      "slug": "production-support",
+      "title": "Production & Post-Production Support",
+      "category": "Production",
+      "description": "Practical production coordination and post-production support built around the needs of each project.",
+      "image": ""
+    }
+  ],
+  "brands": [
+    {
+      "name": "Brand Partner 01",
+      "logo": ""
+    },
+    {
+      "name": "Brand Partner 02",
+      "logo": ""
+    },
+    {
+      "name": "Brand Partner 03",
+      "logo": ""
+    },
+    {
+      "name": "Brand Partner 04",
+      "logo": ""
+    },
+    {
+      "name": "Brand Partner 05",
+      "logo": ""
+    },
+    {
+      "name": "Brand Partner 06",
+      "logo": ""
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { Schema, Types } from "mongoose";
-export const contentKinds = ["pages", "blog", "team", "gallery", "behind-the-scenes", "shows", "our-work", "settings", "legal"] as const;
+export const contentKinds = ["pages", "blog", "team", "gallery", "behind-the-scenes", "shows", "services", "settings", "legal"] as const;
 export type ContentKind = (typeof contentKinds)[number];
 export interface ContentRecord {
   _id: Types.ObjectId;

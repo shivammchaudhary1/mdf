@@ -19,7 +19,7 @@ export const adminNav = [
   ["applications", "Applications", "/admin/applications"],
   ["projects", "Projects", "/admin/projects"],
   ["casting", "Casting Calls", "/admin/casting"],
-  ["work", "Our Work", "/admin/work"],
+  ["services", "Services", "/admin/services"],
   ["blog", "Blog & News", "/admin/blog"],
   ["gallery", "Gallery", "/admin/gallery"],
   ["bts", "Behind the Scenes", "/admin/behind-the-scenes"],

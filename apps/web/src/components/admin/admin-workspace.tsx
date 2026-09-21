@@ -15,6 +15,7 @@ const valid = [
   "applications",
   "projects",
   "casting",
+  "services",
   "work",
   "blog",
   "gallery",
@@ -39,8 +40,8 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
         <AdminProjectsView />
       ) : safe === "casting" ? (
         <AdminCastingView />
-      ) : safe === "work" ? (
-        <AdminContentView kind="work" />
+      ) : safe === "services" || safe === "work" ? (
+        <AdminContentView kind="services" />
       ) : safe === "blog" ? (
         <AdminContentView kind="blog" />
       ) : safe === "gallery" ? (

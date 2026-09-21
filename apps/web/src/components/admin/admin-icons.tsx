@@ -28,6 +28,12 @@ const paths: Record<string, ReactNode> = {
       <path d="M8 7V4h8v3" />
     </>
   ),
+  services: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M8 12h8M12 8v8" />
+    </>
+  ),
   casting: (
     <>
       <circle cx="12" cy="12" r="9" />

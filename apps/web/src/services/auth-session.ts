@@ -6,6 +6,17 @@ import { type SessionUser, useAppStore } from "@/store/app-store";
 
 let sessionPromise: Promise<SessionUser | null> | null = null;
 
+async function requestCurrentSession() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8_000);
+
+  try {
+    return await api<SessionUser>("/auth/me", { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function hydrateMemberPhoto(user: SessionUser, force = false) {
   if (user.role !== "USER") {
     useAppStore.getState().setProfilePhoto("");
@@ -29,7 +40,7 @@ export async function ensureSession(force = false) {
 
   state.setAuthLoading();
 
-  sessionPromise = api<SessionUser>("/auth/me")
+  sessionPromise = requestCurrentSession()
     .then(async (user) => {
       useAppStore.getState().setAuthenticated(user);
       await hydrateMemberPhoto(user, force);
