@@ -168,8 +168,10 @@ try {
   r = await request(`/admin/applications/${applicationId}`, { method: "PATCH", state: admin, body: { status: "Shortlisted", adminNotes: "Private note" } });
   assert.equal(r.status, 200);
   r = await request("/member/applications", { state: member });
-  assert.equal(r.data.items[0].status, "Shortlisted");
-  assert.equal(r.data.items[0].adminNotes, undefined);
+  const shortlistedApplication = r.data.items.find((item) => item._id === applicationId);
+  assert.ok(shortlistedApplication, "Updated casting application was not returned to the member.");
+  assert.equal(shortlistedApplication.status, "Shortlisted");
+  assert.equal(shortlistedApplication.adminNotes, undefined);
 
   r = await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
   assert.equal(r.status, 200);
