@@ -1008,5 +1008,148 @@
       "title": "Services",
       "linkLabel": "Explore Services"
     }
+  },
+  "contactPage": {
+    "hero": {
+      "eyebrow": "Let's Talk",
+      "title": "We’d Love to Hear From You",
+      "description": "Whether you’re planning a production, representing a brand, looking to collaborate or reaching out about talent — every good project starts with a conversation.",
+      "image": "/contact/contact-us-hero-image.webp",
+      "imageAlt": "Creative filmmakers discussing a production inside a cinematic studio",
+      "tags": [
+        "Production Enquiries",
+        "Collaborations",
+        "Casting & Talent"
+      ]
+    },
+    "contactCards": [
+      {
+        "label": "Email",
+        "valueKey": "email",
+        "icon": "mail",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Phone",
+        "valueKey": "phone",
+        "icon": "phone",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Location",
+        "valueKey": "location",
+        "icon": "location",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Business Inquiries",
+        "valueKey": "email",
+        "icon": "briefcase",
+        "mailtoSubject": "Business Inquiry"
+      }
+    ],
+    "form": {
+      "serviceInquiryLabel": "Service Inquiry",
+      "eyebrow": "Send a Message",
+      "title": "Tell us what you’re working on.",
+      "description": "Share the basics and our team can review your enquiry and get back to you.",
+      "subjects": [
+        "General Inquiry",
+        "Production",
+        "Brand / Business Inquiry",
+        "Casting",
+        "Collaboration"
+      ],
+      "messagePlaceholder": "Tell us a little about your project, collaboration or enquiry...",
+      "submitLabel": "Send Message",
+      "sendingLabel": "Sending...",
+      "successMessage": "Thanks — your message has been received.",
+      "errorMessage": "Unable to send message.",
+      "privacyPrefix": "By sending this message, you provide your contact details so M. Dadu Films can review and respond to your enquiry. See our",
+      "privacyLinkLabel": "Privacy Policy"
+    },
+    "community": {
+      "eyebrow": "Join the Community",
+      "title": "Join us as a member and keep opportunities within reach.",
+      "description": "Build your profile once, use your personal dashboard to stay updated and apply to relevant projects and casting calls.",
+      "primaryCta": "Join as a Member",
+      "secondaryCta": "Explore Casting",
+      "benefits": [
+        {
+          "title": "Stay Updated",
+          "description": "See the latest casting calls, projects and community opportunities.",
+          "icon": "updates"
+        },
+        {
+          "title": "Build Your Profile",
+          "description": "Create a talent profile and keep your portfolio, skills and showreel ready.",
+          "icon": "profile"
+        },
+        {
+          "title": "Your Dashboard",
+          "description": "Track your profile, saved opportunities and applications in one place.",
+          "icon": "dashboard"
+        },
+        {
+          "title": "Apply Easily",
+          "description": "Apply to relevant projects and casting calls directly from your account.",
+          "icon": "apply"
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Let’s create together",
+      "title": "Good ideas start with a simple conversation.",
+      "description": "Whether it is production, casting, collaboration or community, reach out and let’s see what we can build together."
+    }
+  },
+  "auth": {
+    "mobileTagline": "Good People. Great Stories.",
+    "pages": {
+      "login": {
+        "eyebrow": "Member Access",
+        "title": "Welcome Back",
+        "description": "Sign in to continue your creative journey with M. Dadu Films.",
+        "visualTitle": "Good People.\nGreat Stories.",
+        "visualFooter": "Stories that move people.",
+        "bottomPrompt": "Don't have an account?",
+        "bottomLinkLabel": "Create one",
+        "image": "/auth/mdf-auth-login.webp",
+        "imageAlt": "Filmmaker working in a cinematic studio workspace"
+      },
+      "signup": {
+        "eyebrow": "Join The Community",
+        "title": "Create Your Account",
+        "description": "Join M. Dadu Films and be part of a community that brings powerful stories to life.",
+        "visualTitle": "Creative\nPeople.\nBrighter\nTomorrows.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Already have an account?",
+        "bottomLinkLabel": "Sign in",
+        "image": "/auth/mdf-auth-signup.webp",
+        "imageAlt": "Creative film team collaborating around storyboards in a studio"
+      },
+      "forgot-password": {
+        "eyebrow": "Account Recovery",
+        "title": "Forgot Password?",
+        "description": "Enter your account email and we’ll help you continue your journey.",
+        "visualTitle": "Every Story\nFinds Its Way\nBack.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Remember your password?",
+        "bottomLinkLabel": "Back to sign in",
+        "image": "/auth/mdf-auth-forget-password.webp",
+        "imageAlt": "Quiet cinematic creative workspace prepared for account recovery"
+      },
+      "reset-password": {
+        "eyebrow": "Secure Your Account",
+        "title": "Create New Password",
+        "description": "Choose a secure password to regain access to your creative profile.",
+        "visualTitle": "Back To\nCreating.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Ready to continue?",
+        "bottomLinkLabel": "Sign in",
+        "image": "/auth/mdf-auth-forget-password.webp",
+        "imageAlt": "Quiet cinematic creative workspace prepared for account recovery"
+      }
+    }
   }
 }

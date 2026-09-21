@@ -1,13 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, type ReactNode, useState } from "react";
 
-import { PageIntro } from "@/components/site/page-intro";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { useToast } from "@/components/ui/toast-provider";
+import websiteData from "@/data/website-data.json";
 import { api } from "@/services/api";
 
 import { usePublicData } from "./use-public-data";
@@ -103,6 +104,7 @@ function ContactIcon({ name }: { name: ContactIconName }) {
 
 export function ContactPageView() {
   const data = usePublicData("brand");
+  const page = websiteData.contactPage;
   const searchParams = useSearchParams();
   const requestedSubject = searchParams.get("subject") ?? "General Inquiry";
   const requestedMessage = searchParams.get("message") ?? "";
@@ -129,9 +131,9 @@ export function ContactPageView() {
         }),
       });
       form.reset();
-      toast.success("Thanks — your message has been received.");
+      toast.success(page.form.successMessage);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to send message.");
+      toast.error(error instanceof Error ? error.message : page.form.errorMessage);
     } finally {
       setSending(false);
     }
@@ -142,58 +144,35 @@ export function ContactPageView() {
     value: string;
     icon: ContactIconName;
     href?: string;
-  }> = [
-    {
-      label: "Email",
-      value: data.brand.email,
-      icon: "mail",
-      href: data.brand.email ? `mailto:${data.brand.email}` : undefined,
-    },
-    {
-      label: "Phone",
-      value: data.brand.phone,
-      icon: "phone",
-      href: data.brand.phone ? `tel:${data.brand.phone.replace(/\s+/g, "")}` : undefined,
-    },
-    {
-      label: "Location",
-      value: data.brand.location,
-      icon: "location",
-    },
-    {
-      label: "Business Inquiries",
-      value: data.brand.email,
-      icon: "briefcase",
-      href: data.brand.email ? `mailto:${data.brand.email}?subject=Business%20Inquiry` : undefined,
-    },
-  ];
+  }> = page.contactCards.map((card) => {
+    if (card.valueKey === "phone") {
+      return {
+        label: card.label,
+        value: data.brand.phone,
+        icon: card.icon as ContactIconName,
+        href: data.brand.phone ? `tel:${data.brand.phone.replace(/\s+/g, "")}` : undefined,
+      };
+    }
 
-  const memberBenefits: Array<{
-    title: string;
-    description: string;
-    icon: ContactIconName;
-  }> = [
-    {
-      title: "Stay Updated",
-      description: "See the latest casting calls, projects and community opportunities.",
-      icon: "updates",
-    },
-    {
-      title: "Build Your Profile",
-      description: "Create a talent profile and keep your portfolio, skills and showreel ready.",
-      icon: "profile",
-    },
-    {
-      title: "Your Dashboard",
-      description: "Track your profile, saved opportunities and applications in one place.",
-      icon: "dashboard",
-    },
-    {
-      title: "Apply Easily",
-      description: "Apply to relevant projects and casting calls directly from your account.",
-      icon: "apply",
-    },
-  ];
+    if (card.valueKey === "location") {
+      return {
+        label: card.label,
+        value: data.brand.location,
+        icon: card.icon as ContactIconName,
+      };
+    }
+
+    return {
+      label: card.label,
+      value: data.brand.email,
+      icon: card.icon as ContactIconName,
+      href: data.brand.email
+        ? card.mailtoSubject
+          ? `mailto:${data.brand.email}?subject=${encodeURIComponent(card.mailtoSubject)}`
+          : `mailto:${data.brand.email}`
+        : undefined,
+    };
+  });
 
   const contactValue = (value: string, href?: string): ReactNode =>
     href ? (
@@ -209,13 +188,60 @@ export function ContactPageView() {
       <SiteHeader />
 
       <main id="main-content">
-        <PageIntro
-          eyebrow="Let's Talk"
-          title="We’d Love to Hear From You"
-          description="Whether you’re a creator, a brand or a collaborator — we’re always open to new conversations."
-          mediaAlt="M. Dadu Films production contact"
-          mediaKind="project"
-        />
+        <section className="border-b border-black/6 bg-white">
+          <div className="site-shell py-3 sm:py-4">
+            <nav className="flex items-center gap-3 text-[11px] font-semibold text-[#888]" aria-label="Breadcrumb">
+              <Link href="/" className="transition hover:text-black">
+                Home
+              </Link>
+              <span aria-hidden="true">/</span>
+              <span className="text-[#444]">Contact Us</span>
+            </nav>
+          </div>
+
+          <div className="grid overflow-hidden bg-[#f7f6f3] lg:grid-cols-2">
+            <div className="flex justify-end">
+              <div className="flex w-full max-w-[590px] flex-col justify-center px-6 py-10 sm:px-8 sm:py-12 lg:min-h-[560px] lg:px-8 lg:py-16">
+                <div className="flex items-center gap-3">
+                  <p className="site-kicker">{page.hero.eyebrow}</p>
+                  <span className="h-px w-12 bg-[var(--brand-red)]" aria-hidden="true" />
+                </div>
+
+                <h1 className="font-display mt-5 max-w-xl text-[clamp(3rem,5.4vw,5.5rem)] font-semibold leading-[.91] tracking-[-.045em] text-[#111]">
+                  {page.hero.title}
+                </h1>
+
+                <p className="mt-6 max-w-xl text-sm leading-7 text-[#666] sm:text-[15px]">{page.hero.description}</p>
+
+                <div className="mt-7 flex flex-wrap gap-2">
+                  {page.hero.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-black/8 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-[.08em] text-[#555]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative min-h-[340px] overflow-hidden sm:min-h-[430px] lg:min-h-[560px]">
+              <Image
+                src={page.hero.image}
+                alt={page.hero.imageAlt}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+              <div
+                className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#f7f6f3] to-transparent lg:block"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+        </section>
 
         <section className="site-section bg-[#fafafa]">
           <div className="site-shell grid gap-7 lg:grid-cols-[.72fr_1.28fr]">
@@ -236,17 +262,17 @@ export function ContactPageView() {
             <form onSubmit={submit} className="site-card grid gap-4 p-6 sm:p-8">
               {requestedService && (
                 <div className="rounded-xl border border-[#f2c9cc] bg-[#fff5f6] px-4 py-3">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--brand-red)]">Service Inquiry</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--brand-red)]">
+                    {page.form.serviceInquiryLabel}
+                  </p>
                   <p className="mt-1 text-sm font-semibold text-[#333]">{requestedService}</p>
                 </div>
               )}
 
               <div>
-                <p className="site-kicker">Send a Message</p>
-                <h2 className="font-display mt-2 text-2xl font-semibold sm:text-3xl">Tell us what you’re working on.</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-[#777]">
-                  Share the basics and our team can review your enquiry and get back to you.
-                </p>
+                <p className="site-kicker">{page.form.eyebrow}</p>
+                <h2 className="font-display mt-2 text-2xl font-semibold sm:text-3xl">{page.form.title}</h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-[#777]">{page.form.description}</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -277,11 +303,9 @@ export function ContactPageView() {
                   Subject
                 </label>
                 <select id="contact-subject" name="subject" defaultValue={requestedSubject} className="site-input">
-                  <option>General Inquiry</option>
-                  <option>Production</option>
-                  <option>Brand / Business Inquiry</option>
-                  <option>Casting</option>
-                  <option>Collaboration</option>
+                  {page.form.subjects.map((subject) => (
+                    <option key={subject}>{subject}</option>
+                  ))}
                 </select>
               </div>
 
@@ -296,19 +320,19 @@ export function ContactPageView() {
                   required
                   maxLength={5000}
                   className="site-input resize-y"
-                  placeholder="Tell us a little about your project, collaboration or enquiry..."
+                  placeholder={page.form.messagePlaceholder}
                   defaultValue={requestedMessage}
                 />
               </div>
 
               <button type="submit" disabled={sending} className="site-button site-button-primary justify-center">
-                {sending ? "Sending..." : "Send Message"}
+                {sending ? page.form.sendingLabel : page.form.submitLabel}
               </button>
 
               <p className="text-xs leading-5 text-[#777]">
-                By sending this message, you provide your contact details so M. Dadu Films can review and respond to your enquiry. See our{" "}
+                {page.form.privacyPrefix}{" "}
                 <Link href="/privacy" className="font-semibold underline">
-                  Privacy Policy
+                  {page.form.privacyLinkLabel}
                 </Link>
                 .
               </p>
@@ -321,29 +345,25 @@ export function ContactPageView() {
             <div className="overflow-hidden rounded-[24px] bg-[#0d0d0d] text-white">
               <div className="grid gap-8 px-6 py-9 sm:px-9 lg:grid-cols-[.78fr_1.22fr] lg:items-center lg:px-12 lg:py-12">
                 <div>
-                  <p className="site-kicker !text-[#ff646b]">Join the Community</p>
-                  <h2 className="font-display mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
-                    Join us as a member and keep opportunities within reach.
-                  </h2>
-                  <p className="mt-4 max-w-lg text-sm leading-7 text-white/62">
-                    Build your profile once, use your personal dashboard to stay updated and apply to relevant projects and casting calls.
-                  </p>
+                  <p className="site-kicker !text-[#ff646b]">{page.community.eyebrow}</p>
+                  <h2 className="font-display mt-3 text-3xl font-semibold leading-tight sm:text-4xl">{page.community.title}</h2>
+                  <p className="mt-4 max-w-lg text-sm leading-7 text-white/62">{page.community.description}</p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Link href="/signup" className="site-button site-button-primary">
-                      Join as a Member
+                      {page.community.primaryCta}
                     </Link>
                     <Link href="/casting" className="site-button site-button-dark-outline">
-                      Explore Casting
+                      {page.community.secondaryCta}
                     </Link>
                   </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {memberBenefits.map((benefit) => (
+                  {page.community.benefits.map((benefit) => (
                     <article key={benefit.title} className="rounded-2xl border border-white/10 bg-white/[.055] p-5">
                       <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-[#ff646b]">
-                        <ContactIcon name={benefit.icon} />
+                        <ContactIcon name={benefit.icon as ContactIconName} />
                       </span>
                       <h3 className="mt-4 text-sm font-bold">{benefit.title}</h3>
                       <p className="mt-2 text-xs leading-5 text-white/55">{benefit.description}</p>
@@ -357,11 +377,9 @@ export function ContactPageView() {
 
         <section className="site-shell pb-8 lg:pb-12">
           <div className="rounded-[20px] border border-black/6 bg-[#fafafa] p-7 sm:p-9">
-            <p className="site-kicker">Let’s create together</p>
-            <h2 className="font-display mt-2 text-3xl font-semibold">Good ideas start with a simple conversation.</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777]">
-              Whether it is production, casting, collaboration or community, reach out and let’s see what we can build together.
-            </p>
+            <p className="site-kicker">{page.closing.eyebrow}</p>
+            <h2 className="font-display mt-2 text-3xl font-semibold">{page.closing.title}</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777]">{page.closing.description}</p>
           </div>
         </section>
       </main>
