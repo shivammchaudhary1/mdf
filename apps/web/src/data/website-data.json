@@ -1120,5 +1120,14 @@
         "commentStatus": "pending-approved-copy"
       }
     ]
+  },
+  "homeCommunity": {
+    "eyebrow": "Creative Community",
+    "title": "Be Part of Our Creative Community",
+    "description": "Create your profile, showcase your talent and discover film opportunities built around real collaboration.",
+    "ctaLabel": "Join Now",
+    "ctaHref": "/signup",
+    "image": "/home/mdf-supporting-image.webp",
+    "imageAlt": "Creative filmmaking team reviewing a shot together on set"
   }
 }

@@ -228,18 +228,25 @@ export function HomePageView() {
 
         <section className="site-shell py-8 lg:py-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-6 py-10 text-white sm:px-10 lg:px-12 lg:py-12">
-            <div className="absolute inset-y-0 right-0 hidden w-[48%] opacity-42 sm:block">
-              <SiteMedia alt="M. Dadu Films creative community" kind="team" className="h-full" imageClassName="opacity-85" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0b] via-[#0b0b0b]/60 to-transparent" />
+            <div className="absolute inset-y-0 right-0 hidden w-[54%] sm:block">
+              <SiteMedia
+                src={websiteData.homeCommunity.image}
+                alt={websiteData.homeCommunity.imageAlt}
+                kind="team"
+                className="h-full"
+                imageClassName="object-cover object-center opacity-100"
+              />
+              <div
+                className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#0b0b0b] via-[#0b0b0b]/55 to-transparent"
+                aria-hidden="true"
+              />
             </div>
             <div className="relative z-10 max-w-xl">
-              <p className="site-kicker !text-[#ff5a62]">Creative Community</p>
-              <h2 className="font-display mt-3 text-3xl font-semibold sm:text-4xl">Be Part of Our Creative Community</h2>
-              <p className="mt-4 max-w-md text-sm leading-6 text-white/62">
-                Create your profile, showcase your talent and discover film opportunities built around real collaboration.
-              </p>
-              <Link href="/signup" className="site-button site-button-primary mt-6">
-                Join Now
+              <p className="site-kicker !text-[#ff5a62]">{websiteData.homeCommunity.eyebrow}</p>
+              <h2 className="font-display mt-3 text-3xl font-semibold sm:text-4xl">{websiteData.homeCommunity.title}</h2>
+              <p className="mt-4 max-w-md text-sm leading-6 text-white/62">{websiteData.homeCommunity.description}</p>
+              <Link href={websiteData.homeCommunity.ctaHref} className="site-button site-button-primary mt-6">
+                {websiteData.homeCommunity.ctaLabel}
               </Link>
             </div>
           </div>
