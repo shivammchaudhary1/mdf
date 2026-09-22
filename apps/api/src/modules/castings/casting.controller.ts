@@ -28,15 +28,15 @@ export class AdminCastingController {
     return this.castings.byId(id);
   }
   @Post() create(@Req() r: AuthRequest, @Body() i: CreateCastingDto) {
-    return this.castings.create(i, r.user.id);
+    return this.castings.create(i, r.account.id);
   }
   @Patch(":id") update(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: UpdateCastingDto) {
-    return this.castings.update(id, i, r.user.id);
+    return this.castings.update(id, i, r.account.id);
   }
   @Patch(":id/close") close(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.castings.close(id, r.user.id);
+    return this.castings.close(id, r.account.id);
   }
   @Delete(":id") archive(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.castings.archive(id, r.user.id);
+    return this.castings.archive(id, r.account.id);
   }
 }

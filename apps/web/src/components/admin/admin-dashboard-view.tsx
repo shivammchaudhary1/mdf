@@ -30,7 +30,7 @@ export function AdminDashboardView() {
         {data.stats.map((s, i) => (
           <article key={s.label} className="ad-stat-card">
             <div className="ad-stat-icon">
-              <AdminIcon name={i === 0 ? "users" : i === 1 ? "check" : i === 2 ? "casting" : "applications"} />
+              <AdminIcon name={i === 0 ? "members" : i === 1 ? "check" : i === 2 ? "casting" : "applications"} />
             </div>
             <div>
               <p>{s.label}</p>
@@ -99,7 +99,7 @@ export function AdminDashboardView() {
                     <AdminIcon
                       name={
                         x.type === "member"
-                          ? "users"
+                          ? "members"
                           : x.type === "project"
                             ? "projects"
                             : x.type === "contact"
@@ -133,7 +133,7 @@ export function AdminDashboardView() {
               <span>Pending applications</span>
               <strong>{data.queue.pending}</strong>
             </Link>
-            <Link href="/admin/users">
+            <Link href="/admin/members">
               <span>Profiles awaiting verification</span>
               <strong>{data.queue.unverified}</strong>
             </Link>

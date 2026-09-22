@@ -12,7 +12,7 @@ import { Profile } from "../profiles/profile.model";
 import { profileCompletion } from "../profiles/profile.service";
 import { Project } from "../projects/project.model";
 import { SavedTalentList } from "./saved-list.model";
-import { CreateListDto, TalentListQueryDto, TalentQueryDto, UpdateListDto, UserUpdateDto } from "./talent.dto";
+import { CreateListDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
 type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
   profile?: Profile | null;
 };
@@ -43,7 +43,7 @@ export class TalentService {
   ) {}
   private pipeline(q: TalentQueryDto, publicOnly: boolean): PipelineStage[] {
     const a: Record<string, unknown> = {
-      role: "USER",
+      role: "MEMBER",
       ...(publicOnly
         ? { verified: true, suspended: false }
         : {
@@ -80,7 +80,7 @@ export class TalentService {
         $lookup: {
           from: this.profiles.collection.name,
           localField: "_id",
-          foreignField: "userId",
+          foreignField: "memberId",
           as: "profile",
         },
       },
@@ -135,7 +135,7 @@ export class TalentService {
       ? {
           ...p,
           _id: p._id ? String(p._id) : undefined,
-          userId: String(item._id),
+          memberId: String(item._id),
           photoMediaId: photo,
           photo: photo ? this.media.urlsFor(photo).profile : undefined,
           portfolioMediaIds: (p.portfolioMediaIds ?? []).map(String),
@@ -186,30 +186,30 @@ export class TalentService {
     const a = await this.accounts
       .findOne({
         _id: objectId(id),
-        role: "USER",
+        role: "MEMBER",
         verified: true,
         suspended: false,
       })
       .lean();
-    const p = a ? await this.profiles.findOne({ userId: a._id, publicVisible: true }).lean() : null;
+    const p = a ? await this.profiles.findOne({ memberId: a._id, publicVisible: true }).lean() : null;
     if (!a || !p) throw new NotFoundException("Talent profile not found.");
     return this.serialize({ ...a, profile: p }, true);
   }
   async adminDetail(id: string) {
-    const a = await this.accounts.findOne({ _id: objectId(id), role: "USER" }).lean();
+    const a = await this.accounts.findOne({ _id: objectId(id), role: "MEMBER" }).lean();
     if (!a) throw new NotFoundException("Member not found.");
-    const p = await this.profiles.findOne({ userId: a._id }).lean();
+    const p = await this.profiles.findOne({ memberId: a._id }).lean();
     return this.serialize({ ...a, profile: p }, false);
   }
-  async updateUser(id: string, input: UserUpdateDto, actorId: string) {
+  async updateMember(id: string, input: MemberUpdateDto, actorId: string) {
     if (id === actorId && input.suspended === true) throw new ForbiddenException("You cannot suspend your own account.");
     const a = await this.accounts.findOneAndUpdate(
-      { _id: objectId(id), role: "USER" },
+      { _id: objectId(id), role: "MEMBER" },
       { $set: input },
       { new: true, runValidators: true },
     );
     if (!a) throw new NotFoundException("Member not found.");
-    if (input.suspended === true) await this.sessions.deleteMany({ userId: a._id });
+    if (input.suspended === true) await this.sessions.deleteMany({ accountId: a._id });
     await this.audit.record({
       actorId,
       action: "member.update",
@@ -264,7 +264,7 @@ export class TalentService {
       const u = [...new Set(input.memberIds)];
       const count = await this.accounts.countDocuments({
         _id: { $in: u.map((id) => objectId(id)) },
-        role: "USER",
+        role: "MEMBER",
       });
       if (count !== u.length) throw new BadRequestException("One or more members no longer exist.");
     }
@@ -352,7 +352,7 @@ export class TalentService {
     };
   }
   async addMember(ownerId: string, id: string, memberId: string) {
-    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "USER" }))) throw new NotFoundException("Member not found.");
+    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "MEMBER" }))) throw new NotFoundException("Member not found.");
     const l = await this.lists.findOneAndUpdate(
       {
         _id: objectId(id),

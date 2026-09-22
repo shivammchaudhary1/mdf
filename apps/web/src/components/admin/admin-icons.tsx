@@ -9,7 +9,7 @@ const paths: Record<string, ReactNode> = {
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </>
   ),
-  users: (
+  members: (
     <>
       <circle cx="9" cy="8" r="3" />
       <circle cx="17" cy="10" r="2.5" />

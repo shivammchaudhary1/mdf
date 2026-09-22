@@ -143,7 +143,7 @@ export function MemberData({ children }: { children: ReactNode }) {
           { label: "Profile photograph", done: !!p.photoMediaId },
           { label: "Skills & languages", done: !!(p.skills?.length && p.languages?.length) },
           { label: "Portfolio photographs", done: !!p.portfolioMediaIds?.length },
-          { label: "Showreel", done: !!p.showreel },
+          { label: "Intro / pitch video", done: !!p.showreel },
         ],
         profile: {
           bio: p.bio ?? "",

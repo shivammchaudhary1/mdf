@@ -55,7 +55,7 @@ export class ApplicationService {
     return {
       ...application,
       _id: String((application as { _id: unknown })._id),
-      userId: String(item.userId),
+      memberId: String(item.memberId),
       opportunityId: String(item.opportunityId),
       projectId: item.projectId ? String(item.projectId) : undefined,
       portfolioMediaIds: portfolio,
@@ -115,26 +115,26 @@ export class ApplicationService {
     throw new BadRequestException("This opportunity is no longer accepting applications.");
   }
 
-  async apply(userId: string, input: CreateApplicationDto) {
-    await this.rateLimits.consume("member-application", userId, 30, 86_400_000);
+  async apply(memberId: string, input: CreateApplicationDto) {
+    await this.rateLimits.consume("member-application", memberId, 30, 86_400_000);
 
     const opportunity = await this.resolveOpportunity(input);
 
-    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image", "user-portfolio");
-    await this.media.assertOwnedBy(userId, [input.documentMediaId], "document", "user-resume");
+    await this.media.assertOwnedBy(memberId, [...(input.portfolioMediaIds ?? [])], "image", "member-portfolio");
+    await this.media.assertOwnedBy(memberId, [input.documentMediaId], "document", "member-resume");
 
-    const account = await this.accounts.findById(objectId(userId)).lean();
+    const account = await this.accounts.findById(objectId(memberId)).lean();
 
     if (!account || account.suspended) {
       throw new BadRequestException("Account is not available.");
     }
     const applicantProfile = await this.applications.db
       .collection("profiles")
-      .findOne({ userId: account._id }, { projection: { city: 1 } });
+      .findOne({ memberId: account._id }, { projection: { city: 1 } });
 
     try {
       const application = await this.applications.create({
-        userId: account._id,
+        memberId: account._id,
         opportunityType: opportunity.type,
         opportunityId: opportunity.id,
         projectId: opportunity.projectId,
@@ -169,9 +169,9 @@ export class ApplicationService {
     }
   }
 
-  async mine(userId: string, query: MemberApplicationQueryDto) {
+  async mine(memberId: string, query: MemberApplicationQueryDto) {
     const filter: QueryFilter<Application> = {
-      userId: objectId(userId),
+      memberId: objectId(memberId),
     };
 
     if (query.status) {
@@ -193,11 +193,11 @@ export class ApplicationService {
     };
   }
 
-  async mineById(userId: string, id: string) {
+  async mineById(memberId: string, id: string) {
     const application = await this.applications
       .findOne({
         _id: objectId(id),
-        userId: objectId(userId),
+        memberId: objectId(memberId),
       })
       .lean();
 

@@ -2,12 +2,12 @@
 
 import { create } from "zustand";
 
-export type SessionUser = {
+export type SessionAccount = {
   id: string;
   name: string;
   email: string;
   mobile: string;
-  role: "USER" | "SUPER_ADMIN";
+  role: "MEMBER" | "SUPER_ADMIN";
   verified: boolean;
   csrfToken?: string;
 };
@@ -19,11 +19,11 @@ type QueryEntry = {
 
 type AppState = {
   authStatus: "unknown" | "loading" | "authenticated" | "anonymous";
-  user: SessionUser | null;
+  account: SessionAccount | null;
   profilePhoto: string;
   queries: Record<string, QueryEntry>;
   setAuthLoading: () => void;
-  setAuthenticated: (user: SessionUser) => void;
+  setAuthenticated: (account: SessionAccount) => void;
   setAnonymous: () => void;
   setProfilePhoto: (value: string) => void;
   setQuery: (key: string, data: unknown, expiresAt: number) => void;
@@ -34,12 +34,12 @@ type AppState = {
 
 export const useAppStore = create<AppState>((set) => ({
   authStatus: "unknown",
-  user: null,
+  account: null,
   profilePhoto: "",
   queries: {},
   setAuthLoading: () => set({ authStatus: "loading" }),
-  setAuthenticated: (user) => set({ authStatus: "authenticated", user }),
-  setAnonymous: () => set({ authStatus: "anonymous", user: null, profilePhoto: "", queries: {} }),
+  setAuthenticated: (account) => set({ authStatus: "authenticated", account }),
+  setAnonymous: () => set({ authStatus: "anonymous", account: null, profilePhoto: "", queries: {} }),
   setProfilePhoto: (profilePhoto) => set({ profilePhoto }),
   setQuery: (key, data, expiresAt) =>
     set((state) => {
@@ -67,5 +67,5 @@ export const useAppStore = create<AppState>((set) => ({
         queries: Object.fromEntries(Object.entries(state.queries).filter(([key]) => !key.startsWith(prefix))),
       };
     }),
-  clearSession: () => set({ authStatus: "anonymous", user: null, profilePhoto: "", queries: {} }),
+  clearSession: () => set({ authStatus: "anonymous", account: null, profilePhoto: "", queries: {} }),
 }));

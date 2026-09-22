@@ -28,12 +28,12 @@ export class AdminProjectController {
     return this.projects.byId(id);
   }
   @Post() create(@Req() request: AuthRequest, @Body() input: CreateProjectDto) {
-    return this.projects.create(input, request.user.id);
+    return this.projects.create(input, request.account.id);
   }
   @Patch(":id") update(@Req() request: AuthRequest, @Param("id") id: string, @Body() input: UpdateProjectDto) {
-    return this.projects.update(id, input, request.user.id);
+    return this.projects.update(id, input, request.account.id);
   }
   @Delete(":id") archive(@Req() request: AuthRequest, @Param("id") id: string) {
-    return this.projects.archive(id, request.user.id);
+    return this.projects.archive(id, request.account.id);
   }
 }

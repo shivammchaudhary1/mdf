@@ -73,7 +73,7 @@ export function AdminListsView() {
     let active = true;
     setPickerLoading(true);
     const qs = pickerQuery.trim() ? `?search=${encodeURIComponent(pickerQuery.trim())}` : "";
-    void fetchPage<TalentRecord>(`/admin/users${qs}`, pickerPage, 8)
+    void fetchPage<TalentRecord>(`/admin/members${qs}`, pickerPage, 8)
       .then((r) => {
         if (active) {
           setPicker(r.items);

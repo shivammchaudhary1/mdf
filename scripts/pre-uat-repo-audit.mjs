@@ -55,10 +55,10 @@ assert.match(siteHeader, /href="\/login"/, "Anonymous Login action is missing fr
 assert.match(siteHeader, /href="\/signup"/, "Anonymous Join/Signup action is missing from SiteHeader.");
 assert.match(siteHeader, /Dashboard/, "Authenticated dashboard action is missing from SiteHeader.");
 assert.match(siteHeader, /Logout/, "Authenticated logout action is missing from SiteHeader.");
-assert.match(siteHeader, /user\?\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"/, "Role-aware dashboard routing is missing.");
+assert.match(siteHeader, /account\?\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"/, "Role-aware dashboard routing is missing.");
 
 const guestOnly = readFileSync("apps/web/src/components/guest-only.tsx", "utf8");
-assert.match(guestOnly, /router\.replace\(user\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"\)/, "Guest auth-page redirect is missing.");
+assert.match(guestOnly, /router\.replace\(account\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"\)/, "Guest auth-page redirect is missing.");
 
 const dashboard = readFileSync("apps/web/src/app/dashboard/page.tsx", "utf8");
 assert.match(dashboard, /ensureSession/, "/dashboard compatibility route must resolve the current session.");

@@ -24,7 +24,7 @@ export type AuthPrincipal = {
   name: string;
   email: string;
   mobile: string;
-  role: "USER" | "SUPER_ADMIN";
+  role: "MEMBER" | "SUPER_ADMIN";
   verified: boolean;
   sessionId: string;
   sessionExpiresAt: Date;
@@ -197,7 +197,7 @@ export class AuthService {
     const duration = remember ? rememberDays * 86_400_000 : shortHours * 3_600_000;
     const now = new Date();
     const session = await this.sessions.create({
-      userId: this.accountId(account),
+      accountId: this.accountId(account),
       tokenHash: tokenDigest(token),
       remember,
       ipHash: this.contextHash(context.ip),
@@ -206,21 +206,21 @@ export class AuthService {
       lastSeenAt: now,
       expiresAt: new Date(now.getTime() + duration),
     });
-    const maxSessions = Math.max(1, Math.min(25, Number(this.config.get("SESSION_MAX_PER_USER") ?? 10)));
+    const maxSessions = Math.max(1, Math.min(25, Number(this.config.get("SESSION_MAX_PER_ACCOUNT") ?? 10)));
     const stale = await this.sessions
-      .find({ userId: this.accountId(account) })
+      .find({ accountId: this.accountId(account) })
       .sort({ createdAt: -1 })
       .skip(maxSessions)
       .select("_id")
       .lean();
     if (stale.length) await this.sessions.deleteMany({ _id: { $in: stale.map((item) => item._id) } });
-    return { token, duration, remember, sessionId: String(session._id), user: this.publicAccount(account) };
+    return { token, duration, remember, sessionId: String(session._id), account: this.publicAccount(account) };
   }
 
   async authenticate(token?: string): Promise<AuthPrincipal> {
     if (!token || !/^[A-Za-z0-9_-]{40,128}$/.test(token)) throw new UnauthorizedException("Please sign in.");
     const session = await this.sessions.findOne({ tokenHash: tokenDigest(token), expiresAt: { $gt: new Date() } }).lean();
-    const account = session ? await this.accounts.findById(session.userId).lean() : null;
+    const account = session ? await this.accounts.findById(session.accountId).lean() : null;
     if (!session || !account || account.suspended) throw new UnauthorizedException("Your session has expired. Please sign in.");
     if (!session.lastSeenAt || session.lastSeenAt.getTime() < Date.now() - 15 * 60 * 1000) {
       void this.sessions
@@ -257,23 +257,23 @@ export class AuthService {
     }
     return this.publicAccount(account);
   }
-  async logoutAll(userId: string) {
-    await this.sessions.deleteMany({ userId: new Types.ObjectId(userId) });
+  async logoutAll(accountId: string) {
+    await this.sessions.deleteMany({ accountId: new Types.ObjectId(accountId) });
     return { message: "All sessions have been signed out." };
   }
-  async deactivate(userId: string) {
+  async deactivate(accountId: string) {
     const account = await this.accounts.findOneAndUpdate(
-      { _id: new Types.ObjectId(userId), role: "USER" },
+      { _id: new Types.ObjectId(accountId), role: "MEMBER" },
       { $set: { suspended: true } },
       { new: true },
     );
     if (!account) throw new BadRequestException("An administrator account cannot be deactivated here.");
-    await this.sessions.deleteMany({ userId: account._id });
+    await this.sessions.deleteMany({ accountId: account._id });
     return { message: "Account deactivated. Contact the team to reactivate it." };
   }
-  async listSessions(userId: string, currentSessionId: string) {
+  async listSessions(accountId: string, currentSessionId: string) {
     const sessions = await this.sessions
-      .find({ userId: new Types.ObjectId(userId), expiresAt: { $gt: new Date() } })
+      .find({ accountId: new Types.ObjectId(accountId), expiresAt: { $gt: new Date() } })
       .select("_id remember deviceLabel createdAt lastSeenAt expiresAt")
       .sort({ createdAt: -1 })
       .lean();
@@ -287,9 +287,9 @@ export class AuthService {
       current: String(session._id) === currentSessionId,
     }));
   }
-  async revokeSession(userId: string, sessionId: string, currentSessionId: string) {
+  async revokeSession(accountId: string, sessionId: string, currentSessionId: string) {
     if (!Types.ObjectId.isValid(sessionId)) throw new NotFoundException("Session not found.");
-    const result = await this.sessions.deleteOne({ _id: new Types.ObjectId(sessionId), userId: new Types.ObjectId(userId) });
+    const result = await this.sessions.deleteOne({ _id: new Types.ObjectId(sessionId), accountId: new Types.ObjectId(accountId) });
     if (!result.deletedCount) throw new NotFoundException("Session not found.");
     return { message: "Session revoked.", currentSessionRevoked: sessionId === currentSessionId };
   }
@@ -299,8 +299,8 @@ export class AuthService {
     const account = await this.accounts.findOne({ email: input.email, suspended: false });
     if (account) {
       const token = randomToken(32);
-      await this.resets.deleteMany({ userId: account._id });
-      await this.resets.create({ userId: account._id, tokenHash: tokenDigest(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) });
+      await this.resets.deleteMany({ accountId: account._id });
+      await this.resets.create({ accountId: account._id, tokenHash: tokenDigest(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) });
       const origin = String(this.config.get("FRONTEND_URL") ?? "http://localhost:3333").split(",")[0];
       await this.mail
         .send(account.email, "Reset your password", `Reset your password within one hour: ${origin}/reset-password#token=${token}`)
@@ -313,13 +313,13 @@ export class AuthService {
     if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
     const reset = await this.resets.findOneAndDelete({ tokenHash: tokenDigest(input.token), expiresAt: { $gt: new Date() } });
     if (!reset) throw new BadRequestException("This reset link is invalid or expired.");
-    const account = await this.accounts.findById(reset.userId).select("+googleSub +passwordHash");
+    const account = await this.accounts.findById(reset.accountId).select("+googleSub +passwordHash");
     if (!account) throw new BadRequestException("This reset link is invalid or expired.");
     account.passwordHash = await hashPassword(input.password);
     const provider: AuthProvider = account.googleSub ? "both" : "local";
     account.authProvider = provider;
     await account.save();
-    await this.sessions.deleteMany({ userId: reset.userId });
+    await this.sessions.deleteMany({ accountId: reset.accountId });
     return { message: "Password updated. Please sign in." };
   }
 }

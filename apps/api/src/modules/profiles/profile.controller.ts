@@ -11,15 +11,15 @@ import { ProfileService } from "./profile.service";
 export class ProfileController {
   constructor(private readonly profiles: ProfileService) {}
   @Get("profile") profile(@Req() r: AuthRequest) {
-    return this.profiles.get(r.user.id);
+    return this.profiles.get(r.account.id);
   }
   @Put("profile") save(@Req() r: AuthRequest, @Body() i: ProfileDto) {
-    return this.profiles.save(r.user.id, i);
+    return this.profiles.save(r.account.id, i);
   }
   @Patch("settings") settings(@Req() r: AuthRequest, @Body() i: MemberSettingsDto) {
-    return this.profiles.updateSettings(r.user.id, i);
+    return this.profiles.updateSettings(r.account.id, i);
   }
   @Get("dashboard") dashboard(@Req() r: AuthRequest) {
-    return this.profiles.dashboard(r.user.id);
+    return this.profiles.dashboard(r.account.id);
   }
 }

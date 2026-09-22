@@ -8,27 +8,64 @@ import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
 import { uploadMedia } from "@/services/workspace";
 
-function splitList(value: string) {
-  return [
-    ...new Set(
-      value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  ];
-}
+const SKILL_OPTIONS = [
+  "Acting",
+  "Theatre",
+  "Screen Acting",
+  "Direction",
+  "DOP / Cinematography",
+  "Camera",
+  "Lighting",
+  "Editing",
+  "Sound",
+  "Screenwriting",
+  "Production",
+  "Production Design",
+  "Makeup",
+  "Costume",
+  "Dance",
+  "Voice Over",
+  "Photography",
+  "Music",
+];
 
-function splitUrls(value: string) {
-  return [
-    ...new Set(
-      value
-        .split(/\r?\n/)
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  ];
-}
+const LANGUAGE_OPTIONS = [
+  "Hindi",
+  "English",
+  "Urdu",
+  "Punjabi",
+  "Marathi",
+  "Bengali",
+  "Gujarati",
+  "Tamil",
+  "Telugu",
+  "Malayalam",
+  "Kannada",
+  "Bhojpuri",
+];
+
+type SocialLinksForm = {
+  youtube: string;
+  instagram: string;
+  facebook: string;
+  other: string;
+};
+
+type ProfileForm = {
+  bio: string;
+  profession: string;
+  city: string;
+  gender: string;
+  birthDate: string;
+  experience: string;
+  availability: string;
+  skills: string[];
+  languages: string[];
+  previousWork: string;
+  socialLinks: SocialLinksForm;
+};
+
+type TextField = Exclude<keyof ProfileForm, "skills" | "languages" | "socialLinks">;
 
 function validHttps(values: string[]) {
   return values.every((value) => {
@@ -40,12 +77,137 @@ function validHttps(values: string[]) {
   });
 }
 
+function hostMatches(value: string, domains: string[]) {
+  if (!value.trim()) return true;
+
+  try {
+    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+    return domains.some((domain) => host === domain || host.endsWith(`.${domain}`));
+  } catch {
+    return false;
+  }
+}
+
+function socialForm(values: string[] = []): SocialLinksForm {
+  const result: SocialLinksForm = { youtube: "", instagram: "", facebook: "", other: "" };
+
+  for (const value of values) {
+    let host = "";
+
+    try {
+      host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+    } catch {
+      if (!result.other) result.other = value;
+      continue;
+    }
+
+    if (!result.youtube && (host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com"))) {
+      result.youtube = value;
+    } else if (!result.instagram && (host === "instagram.com" || host.endsWith(".instagram.com"))) {
+      result.instagram = value;
+    } else if (
+      !result.facebook &&
+      (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.com" || host.endsWith(".fb.com"))
+    ) {
+      result.facebook = value;
+    } else if (!result.other) {
+      result.other = value;
+    }
+  }
+
+  return result;
+}
+
+function MultiSelectField({
+  label,
+  placeholder,
+  options,
+  values,
+  customValue,
+  onCustomChange,
+  onToggle,
+  onAddCustom,
+  onRemove,
+}: {
+  label: string;
+  placeholder: string;
+  options: string[];
+  values: string[];
+  customValue: string;
+  onCustomChange: (value: string) => void;
+  onToggle: (value: string) => void;
+  onAddCustom: () => void;
+  onRemove: (value: string) => void;
+}) {
+  const [otherOpen, setOtherOpen] = useState(false);
+
+  return (
+    <div className="md-field">
+      <span>{label}</span>
+
+      <details className="md-multi-select">
+        <summary>{values.length ? `${values.length} selected` : placeholder}</summary>
+
+        <div className="md-multi-menu">
+          <div className="md-multi-options">
+            {options.map((option) => (
+              <label key={option} className="md-multi-option">
+                <input type="checkbox" checked={values.includes(option)} onChange={() => onToggle(option)} />
+                <span>{option}</span>
+              </label>
+            ))}
+
+            <label className="md-multi-option">
+              <input type="checkbox" checked={otherOpen} onChange={(event) => setOtherOpen(event.target.checked)} />
+              <span>Other</span>
+            </label>
+          </div>
+
+          {otherOpen && (
+            <div className="md-multi-other">
+              <strong>Add your own</strong>
+              <div>
+                <input
+                  value={customValue}
+                  onChange={(event) => onCustomChange(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      onAddCustom();
+                    }
+                  }}
+                  placeholder={`Add another ${label.toLowerCase().replace("select ", "")}`}
+                />
+                <button type="button" onClick={onAddCustom} disabled={!customValue.trim()}>
+                  Add
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </details>
+
+      {!!values.length && (
+        <div className="md-selected-tags">
+          {values.map((value) => (
+            <button key={value} type="button" onClick={() => onRemove(value)} title={`Remove ${value}`}>
+              {value} <span aria-hidden="true">×</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MemberProfileSection() {
   const { data, profile, refresh } = useMemberData();
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
+  const [customSkill, setCustomSkill] = useState("");
+  const [customLanguage, setCustomLanguage] = useState("");
+  const [form, setForm] = useState<ProfileForm>({
     bio: "",
     profession: "",
     city: "",
@@ -53,10 +215,10 @@ export function MemberProfileSection() {
     birthDate: "",
     experience: "",
     availability: "",
-    skills: "",
-    languages: "",
+    skills: [],
+    languages: [],
     previousWork: "",
-    socialLinks: "",
+    socialLinks: { youtube: "", instagram: "", facebook: "", other: "" },
   });
 
   useEffect(() => {
@@ -68,27 +230,89 @@ export function MemberProfileSection() {
       birthDate: profile.birthDate?.slice(0, 10) ?? "",
       experience: profile.experience ?? "",
       availability: profile.availability ?? "",
-      skills: (profile.skills ?? []).join(", "),
-      languages: (profile.languages ?? []).join(", "),
+      skills: profile.skills ?? [],
+      languages: profile.languages ?? [],
       previousWork: profile.previousWork ?? "",
-      socialLinks: (profile.socialLinks ?? []).join("\n"),
+      socialLinks: socialForm(profile.socialLinks ?? []),
     });
+    setCustomSkill("");
+    setCustomLanguage("");
   }, [profile]);
 
-  function field<K extends keyof typeof form>(key: K, value: string) {
+  function field(key: TextField, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function socialField(key: keyof SocialLinksForm, value: string) {
+    setForm((current) => ({
+      ...current,
+      socialLinks: { ...current.socialLinks, [key]: value },
+    }));
+  }
+
+  function toggleList(key: "skills" | "languages", value: string) {
+    const current = form[key];
+
+    if (current.includes(value)) {
+      setForm((state) => ({ ...state, [key]: state[key].filter((item) => item !== value) }));
+      return;
+    }
+
+    if (current.length >= 30) {
+      toast.info(`You can select up to 30 ${key}.`);
+      return;
+    }
+
+    setForm((state) => ({ ...state, [key]: [...state[key], value] }));
+  }
+
+  function addCustom(key: "skills" | "languages", value: string, clear: () => void) {
+    const item = value.trim();
+    if (!item) return;
+
+    if (form[key].some((current) => current.toLowerCase() === item.toLowerCase())) {
+      clear();
+      return;
+    }
+
+    if (form[key].length >= 30) {
+      toast.info(`You can select up to 30 ${key}.`);
+      return;
+    }
+
+    setForm((state) => ({ ...state, [key]: [...state[key], item] }));
+    clear();
   }
 
   async function save() {
     if (saving) return;
-    const socialLinks = splitUrls(form.socialLinks);
+
+    const socialLinks = Object.values(form.socialLinks)
+      .map((value) => value.trim())
+      .filter(Boolean);
 
     if (!validHttps(socialLinks)) {
       toast.error("Social links must use valid https:// URLs.");
       return;
     }
 
+    if (!hostMatches(form.socialLinks.youtube, ["youtube.com", "youtu.be"])) {
+      toast.error("YouTube must contain a valid YouTube link.");
+      return;
+    }
+
+    if (!hostMatches(form.socialLinks.instagram, ["instagram.com"])) {
+      toast.error("Instagram must contain a valid Instagram link.");
+      return;
+    }
+
+    if (!hostMatches(form.socialLinks.facebook, ["facebook.com", "fb.com"])) {
+      toast.error("Facebook must contain a valid Facebook link.");
+      return;
+    }
+
     setSaving(true);
+
     try {
       await api("/member/profile", {
         method: "PUT",
@@ -100,12 +324,13 @@ export function MemberProfileSection() {
           ...(form.birthDate ? { birthDate: form.birthDate } : {}),
           experience: form.experience.trim(),
           availability: form.availability.trim(),
-          skills: splitList(form.skills),
-          languages: splitList(form.languages),
+          skills: form.skills,
+          languages: form.languages,
           previousWork: form.previousWork.trim(),
           socialLinks,
         }),
       });
+
       await refresh();
       setEditing(false);
       toast.success("Profile saved.");
@@ -119,19 +344,24 @@ export function MemberProfileSection() {
   async function updatePhoto(file: File) {
     if (saving) return;
     setSaving(true);
+
     let uploaded: Awaited<ReturnType<typeof uploadMedia>> | undefined;
+
     try {
-      uploaded = await uploadMedia(file, "user-profile");
+      uploaded = await uploadMedia(file, "member-profile");
+
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({ photoMediaId: uploaded.id }),
       });
+
       await refresh();
       toast.success("Profile photo saved.");
     } catch (error) {
       if (uploaded && !uploaded.duplicate) {
         await api(`/media/${uploaded.id}`, { method: "DELETE" }).catch(() => undefined);
       }
+
       toast.error(error instanceof Error ? error.message : "Unable to save photo.");
     } finally {
       setSaving(false);
@@ -140,6 +370,7 @@ export function MemberProfileSection() {
 
   function choosePhoto() {
     if (saving) return;
+
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/jpeg,image/png,image/webp";
@@ -153,11 +384,13 @@ export function MemberProfileSection() {
   async function removePhoto() {
     if (saving || !profile.photoMediaId) return;
     setSaving(true);
+
     try {
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({ photoMediaId: null }),
       });
+
       await refresh();
       toast.success("Profile photo removed.");
     } catch (error) {
@@ -188,12 +421,15 @@ export function MemberProfileSection() {
               ✎
             </button>
           </div>
+
           <h2>{data.member.name}</h2>
           <p>{data.member.profession}</p>
+
           <div className="md-badges">
             <span>{data.member.verified ? "✓ Verified Member" : "Not verified"}</span>
             <span>{data.member.availability || "Availability not set"}</span>
           </div>
+
           <div className="md-mini-details">
             <div>
               <span>Location</span>
@@ -208,9 +444,11 @@ export function MemberProfileSection() {
               <strong>{data.member.memberSince}</strong>
             </div>
           </div>
+
           <button className="md-primary full" type="button" onClick={choosePhoto} disabled={saving}>
             {profile.photoMediaId ? "Replace Profile Photo" : "Upload Profile Photo"}
           </button>
+
           {profile.photoMediaId && (
             <button className="md-secondary full" type="button" onClick={() => void removePhoto()} disabled={saving}>
               Remove Photo
@@ -226,6 +464,7 @@ export function MemberProfileSection() {
                 <h2>About You</h2>
               </div>
             </div>
+
             <label className="md-field">
               <span>Bio</span>
               <textarea rows={5} value={form.bio} onChange={(event) => field("bio", event.target.value)} disabled={!editing} />
@@ -239,15 +478,18 @@ export function MemberProfileSection() {
                 <h2>Personal & Professional</h2>
               </div>
             </div>
+
             <div className="md-form-grid">
               <label className="md-field">
                 <span>Profession</span>
                 <input value={form.profession} onChange={(event) => field("profession", event.target.value)} disabled={!editing} />
               </label>
+
               <label className="md-field">
                 <span>City</span>
                 <input value={form.city} onChange={(event) => field("city", event.target.value)} disabled={!editing} />
               </label>
+
               <label className="md-field">
                 <span>Gender</span>
                 <select value={form.gender} onChange={(event) => field("gender", event.target.value)} disabled={!editing}>
@@ -258,6 +500,7 @@ export function MemberProfileSection() {
                   <option value="Prefer not to say">Prefer not to say</option>
                 </select>
               </label>
+
               <label className="md-field">
                 <span>Date of Birth</span>
                 <input
@@ -267,10 +510,12 @@ export function MemberProfileSection() {
                   disabled={!editing}
                 />
               </label>
+
               <label className="md-field">
                 <span>Experience</span>
                 <input value={form.experience} onChange={(event) => field("experience", event.target.value)} disabled={!editing} />
               </label>
+
               <label className="md-field">
                 <span>Availability</span>
                 <input value={form.availability} onChange={(event) => field("availability", event.target.value)} disabled={!editing} />
@@ -285,25 +530,40 @@ export function MemberProfileSection() {
                 <h2>Skills & Languages</h2>
               </div>
             </div>
+
             {editing ? (
               <div className="md-form-grid">
-                <label className="md-field">
-                  <span>Skills — comma separated</span>
-                  <textarea rows={4} value={form.skills} onChange={(event) => field("skills", event.target.value)} />
-                </label>
-                <label className="md-field">
-                  <span>Languages — comma separated</span>
-                  <textarea rows={4} value={form.languages} onChange={(event) => field("languages", event.target.value)} />
-                </label>
+                <MultiSelectField
+                  label="Select skills"
+                  placeholder="Choose one or more skills"
+                  options={SKILL_OPTIONS}
+                  values={form.skills}
+                  customValue={customSkill}
+                  onCustomChange={setCustomSkill}
+                  onToggle={(value) => toggleList("skills", value)}
+                  onAddCustom={() => addCustom("skills", customSkill, () => setCustomSkill(""))}
+                  onRemove={(value) => toggleList("skills", value)}
+                />
+
+                <MultiSelectField
+                  label="Select languages"
+                  placeholder="Choose one or more languages"
+                  options={LANGUAGE_OPTIONS}
+                  values={form.languages}
+                  customValue={customLanguage}
+                  onCustomChange={setCustomLanguage}
+                  onToggle={(value) => toggleList("languages", value)}
+                  onAddCustom={() => addCustom("languages", customLanguage, () => setCustomLanguage(""))}
+                  onRemove={(value) => toggleList("languages", value)}
+                />
               </div>
             ) : (
               <div className="md-tag-block">
                 <span>Skills</span>
-                <div>{(profile.skills ?? []).length ? profile.skills?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
+                <div>{form.skills.length ? form.skills.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
+
                 <span>Languages</span>
-                <div>
-                  {(profile.languages ?? []).length ? profile.languages?.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}
-                </div>
+                <div>{form.languages.length ? form.languages.map((item) => <i key={item}>{item}</i>) : <i>Not added</i>}</div>
               </div>
             )}
           </article>
@@ -315,6 +575,7 @@ export function MemberProfileSection() {
                 <h2>Previous Work & Social Links</h2>
               </div>
             </div>
+
             <label className="md-field">
               <span>Previous Work</span>
               <textarea
@@ -325,16 +586,52 @@ export function MemberProfileSection() {
                 placeholder="Selected projects, productions, credits or relevant work."
               />
             </label>
-            <label className="md-field">
-              <span>Social Links — one HTTPS URL per line</span>
-              <textarea
-                rows={5}
-                value={form.socialLinks}
-                onChange={(event) => field("socialLinks", event.target.value)}
-                disabled={!editing}
-                placeholder={"https://instagram.com/...\nhttps://youtube.com/..."}
-              />
-            </label>
+
+            <div className="md-social-grid">
+              <label className="md-field">
+                <span>YouTube</span>
+                <input
+                  type="url"
+                  value={form.socialLinks.youtube}
+                  onChange={(event) => socialField("youtube", event.target.value)}
+                  disabled={!editing}
+                  placeholder="https://youtube.com/@yourchannel"
+                />
+              </label>
+
+              <label className="md-field">
+                <span>Instagram</span>
+                <input
+                  type="url"
+                  value={form.socialLinks.instagram}
+                  onChange={(event) => socialField("instagram", event.target.value)}
+                  disabled={!editing}
+                  placeholder="https://instagram.com/yourprofile"
+                />
+              </label>
+
+              <label className="md-field">
+                <span>Facebook</span>
+                <input
+                  type="url"
+                  value={form.socialLinks.facebook}
+                  onChange={(event) => socialField("facebook", event.target.value)}
+                  disabled={!editing}
+                  placeholder="https://facebook.com/yourprofile"
+                />
+              </label>
+
+              <label className="md-field">
+                <span>Other</span>
+                <input
+                  type="url"
+                  value={form.socialLinks.other}
+                  onChange={(event) => socialField("other", event.target.value)}
+                  disabled={!editing}
+                  placeholder="https://your-portfolio-or-other-link.com"
+                />
+              </label>
+            </div>
           </article>
 
           {editing && (
@@ -342,6 +639,7 @@ export function MemberProfileSection() {
               <button className="md-secondary" type="button" onClick={() => setEditing(false)} disabled={saving}>
                 Cancel
               </button>
+
               <button className="md-primary" type="button" disabled={saving} onClick={() => void save()}>
                 {saving ? "Saving…" : "Save Changes"}
               </button>

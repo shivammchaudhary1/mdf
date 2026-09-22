@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { AdminWorkspace } from "@/components/admin/admin-workspace";
 const sections = [
-  "users",
+  "members",
   "applications",
   "projects",
   "casting",
@@ -23,7 +23,7 @@ type Props = { params: Promise<{ section: string }> };
 export async function generateMetadata({ params }: Props) {
   const { section } = await params;
   const labels: Record<string, string> = {
-    users: "Members & Talent",
+    members: "Members & Talent",
     applications: "Applications",
     projects: "Projects",
     casting: "Casting Calls",

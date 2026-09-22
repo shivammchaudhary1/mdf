@@ -55,11 +55,21 @@ export function TalentProfileView({ id }: { id: string }) {
                   <p className="mt-2 text-sm text-[#666]">{data.role}</p>
 
                   <div className="mt-5 grid gap-3 text-sm">
-                    <p><strong>Location:</strong> {data.location}</p>
-                    <p><strong>Experience:</strong> {data.experience}</p>
-                    <p><strong>Availability:</strong> {data.availability}</p>
-                    <p><strong>Gender:</strong> {data.gender}</p>
-                    <p><strong>Age:</strong> {data.age}</p>
+                    <p>
+                      <strong>Location:</strong> {data.location}
+                    </p>
+                    <p>
+                      <strong>Experience:</strong> {data.experience}
+                    </p>
+                    <p>
+                      <strong>Availability:</strong> {data.availability}
+                    </p>
+                    <p>
+                      <strong>Gender:</strong> {data.gender}
+                    </p>
+                    <p>
+                      <strong>Age:</strong> {data.age}
+                    </p>
                   </div>
 
                   {data.showreel && (
@@ -78,9 +88,7 @@ export function TalentProfileView({ id }: { id: string }) {
               <div className="grid gap-6">
                 <article className="site-card p-7">
                   <h2 className="font-display text-2xl font-semibold">About</h2>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#666]">
-                    {data.bio || "No biography added yet."}
-                  </p>
+                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#666]">{data.bio || "No biography added yet."}</p>
                 </article>
 
                 <article className="site-card p-7">
@@ -113,9 +121,7 @@ export function TalentProfileView({ id }: { id: string }) {
                 {!!data.portfolio?.length && (
                   <article className="site-card p-7">
                     <h2 className="font-display text-2xl font-semibold">Portfolio</h2>
-                    <p className="mt-2 text-sm leading-6 text-[#777]">
-                      Public photographs selected by the member.
-                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#777]">Public photographs selected by the member.</p>
 
                     <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
                       {data.portfolio.map((src, index) => (

@@ -26,9 +26,9 @@ export class AdminContactController {
     return this.contacts.detail(id);
   }
   @Patch(":id") update(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: ContactUpdateDto) {
-    return this.contacts.update(id, i, r.user.id);
+    return this.contacts.update(id, i, r.account.id);
   }
   @Delete(":id") remove(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.contacts.remove(id, r.user.id);
+    return this.contacts.remove(id, r.account.id);
   }
 }

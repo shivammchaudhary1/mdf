@@ -61,8 +61,6 @@ export function TalentPageView() {
   const languages = useMemo(() => unique(talents.flatMap((talent) => talent.languages)), [talents]);
   const availabilities = useMemo(() => unique(talents.map((talent) => talent.availability)), [talents]);
 
-
-
   const filteredTalents = useMemo(() => {
     const search = normalize(filters.search);
     const skill = normalize(filters.skill);
@@ -270,9 +268,7 @@ export function TalentPageView() {
                     type="button"
                     onClick={() => setAdvancedOpen((open) => !open)}
                     className={`h-9 rounded-[9px] border px-3 text-[10px] font-bold transition lg:col-span-1 ${
-                      advancedOpen
-                        ? "border-[#111] bg-[#111] text-white"
-                        : "border-black/10 bg-white text-[#555] hover:border-black/20"
+                      advancedOpen ? "border-[#111] bg-[#111] text-white" : "border-black/10 bg-white text-[#555] hover:border-black/20"
                     }`}
                   >
                     {advancedOpen ? "Less" : "More"}
@@ -326,7 +322,11 @@ export function TalentPageView() {
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Gender</span>
-                      <select className={inputClass} value={draft.gender} onChange={(event) => setDraft({ ...draft, gender: event.target.value })}>
+                      <select
+                        className={inputClass}
+                        value={draft.gender}
+                        onChange={(event) => setDraft({ ...draft, gender: event.target.value })}
+                      >
                         <option value="">Any gender</option>
                         {genders.map((gender) => (
                           <option key={gender} value={gender}>
@@ -394,9 +394,7 @@ export function TalentPageView() {
                   </div>
                 )}
 
-                {ageError && (
-                  <p className="mt-2 text-[10px] font-semibold text-[#c5353e]">Minimum age cannot exceed maximum age.</p>
-                )}
+                {ageError && <p className="mt-2 text-[10px] font-semibold text-[#c5353e]">Minimum age cannot exceed maximum age.</p>}
               </div>
             </div>
 
@@ -496,7 +494,9 @@ export function TalentPageView() {
                         </div>
 
                         <div className="mt-4 flex items-center justify-between gap-3 text-[10px] font-semibold text-[#999]">
-                          <span>{talent.age} yrs · {talent.gender}</span>
+                          <span>
+                            {talent.age} yrs · {talent.gender}
+                          </span>
                           <span className="truncate text-right">{talent.languages.slice(0, 2).join(" · ")}</span>
                         </div>
                       </div>

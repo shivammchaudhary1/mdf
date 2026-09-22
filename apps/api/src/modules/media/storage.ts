@@ -8,8 +8,8 @@ const LEGACY_IMAGE = /^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/
 const LEGACY_DOCUMENT = /^media\/[a-f0-9]{24}\/document\.pdf$/;
 const ASSET_IMAGE =
   /^assets\/(website-images|projects|castings|blog|gallery|team|bts|shows)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
-const USER_IMAGE = /^users\/[a-f0-9]{24}\/(profile-pic|portfolio-images)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
-const USER_DOCUMENT = /^users\/[a-f0-9]{24}\/resume\/[a-f0-9]{24}\/document\.pdf$/;
+const MEMBER_IMAGE = /^members\/[a-f0-9]{24}\/(profile-pic|portfolio-images)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const MEMBER_DOCUMENT = /^members\/[a-f0-9]{24}\/resume\/[a-f0-9]{24}\/document\.pdf$/;
 
 export abstract class StorageAdapter {
   abstract write(key: string, data: Buffer, contentType?: string): Promise<void>;
@@ -18,7 +18,7 @@ export abstract class StorageAdapter {
 }
 
 export function validateStorageKey(key: string) {
-  if (![LEGACY_IMAGE, LEGACY_DOCUMENT, ASSET_IMAGE, USER_IMAGE, USER_DOCUMENT].some((pattern) => pattern.test(key))) {
+  if (![LEGACY_IMAGE, LEGACY_DOCUMENT, ASSET_IMAGE, MEMBER_IMAGE, MEMBER_DOCUMENT].some((pattern) => pattern.test(key))) {
     throw new Error("Invalid storage key.");
   }
 

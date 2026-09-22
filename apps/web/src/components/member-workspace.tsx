@@ -151,8 +151,14 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
           </button>
         </div>
 
-        <div className="md-mini-user">
-          <div className="md-avatar">{data.member.firstName[0]}</div>
+        <div className="md-mini-member">
+          <div className={`md-avatar ${data.member.photo ? "has-photo" : ""}`}>
+            {data.member.photo ? (
+              <SiteMedia src={data.member.photo} alt={`${data.member.name} profile`} kind="team" className="h-full w-full rounded-full" />
+            ) : (
+              data.member.firstName[0]
+            )}
+          </div>
           <div>
             <strong>{data.member.name}</strong>
             <span>{data.member.profession}</span>
@@ -191,11 +197,16 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
             </div>
           </div>
           <div className="md-top-actions">
-            <Link href="/member/opportunities" className="md-search-pill">
-              <Icon name="search" /> Find opportunities
-            </Link>
-            <Link href="/member/profile" className="md-avatar md-top-avatar">
-              {data.member.firstName[0]}
+            <Link
+              href="/member/profile"
+              aria-label="Open my profile"
+              className={`md-avatar md-top-avatar ${data.member.photo ? "has-photo" : ""}`}
+            >
+              {data.member.photo ? (
+                <SiteMedia src={data.member.photo} alt={`${data.member.name} profile`} kind="team" className="h-full w-full rounded-full" />
+              ) : (
+                data.member.firstName[0]
+              )}
             </Link>
           </div>
         </header>

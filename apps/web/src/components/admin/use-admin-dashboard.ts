@@ -51,7 +51,7 @@ export function useAdminDashboard() {
   });
   return {
     stats: [
-      { label: "Total Members", value: m.users ?? 0, delta: "", tone: "positive", helper: "" },
+      { label: "Total Members", value: m.members ?? 0, delta: "", tone: "positive", helper: "" },
       { label: "Verified Talent", value: m.verified ?? 0, delta: "", tone: "positive", helper: "" },
       { label: "Open Castings", value: m.openCastings ?? 0, delta: "", tone: "neutral", helper: "" },
       { label: "Pending Applications", value: m.pending ?? 0, delta: "", tone: "warning", helper: "" },
@@ -65,6 +65,6 @@ export function useAdminDashboard() {
       type: x.entityType,
       time: dateLabel(x.createdAt),
     })),
-    queue: { pending: m.pending ?? 0, unverified: (m.users ?? 0) - (m.verified ?? 0), contacts: m.newContacts ?? 0, drafts },
+    queue: { pending: m.pending ?? 0, unverified: (m.members ?? 0) - (m.verified ?? 0), contacts: m.newContacts ?? 0, drafts },
   };
 }

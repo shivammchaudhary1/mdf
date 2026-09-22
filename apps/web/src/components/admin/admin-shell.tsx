@@ -15,7 +15,7 @@ import { useAppStore } from "@/store/app-store";
 
 export const adminNav = [
   ["dashboard", "Overview", "/admin"],
-  ["users", "Members & Talent", "/admin/users"],
+  ["members", "Members & Talent", "/admin/members"],
   ["applications", "Applications", "/admin/applications"],
   ["projects", "Projects", "/admin/projects"],
   ["casting", "Casting Calls", "/admin/casting"],
@@ -39,11 +39,11 @@ export function AdminShell({ section, children }: { section: string; children: R
   const open = useAdminDashboardStore((state) => state.mobileOpen);
   const setOpen = useAdminDashboardStore((state) => state.setMobileOpen);
   const status = useAppStore((state) => state.authStatus);
-  const user = useAppStore((state) => state.user);
+  const account = useAppStore((state) => state.account);
 
   const admin = {
-    name: user?.name ?? "",
-    initials: (user?.name ?? "")
+    name: account?.name ?? "",
+    initials: (account?.name ?? "")
       .split(" ")
       .map((value) => value[0])
       .join("")
@@ -70,11 +70,11 @@ export function AdminShell({ section, children }: { section: string; children: R
     }
   }
 
-  if (status === "unknown" || status === "loading" || !user) {
+  if (status === "unknown" || status === "loading" || !account) {
     return <LoadingState label="Verifying administrator access…" />;
   }
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (account.role !== "SUPER_ADMIN") {
     return <LoadingState label="Redirecting to your workspace…" />;
   }
 

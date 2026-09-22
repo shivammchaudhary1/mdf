@@ -1,7 +1,7 @@
 import { Schema, Types } from "mongoose";
 export interface Profile {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  memberId: Types.ObjectId;
   bio?: string;
   city?: string;
   profession?: string;
@@ -28,7 +28,7 @@ export interface Profile {
 }
 export const ProfileSchema = new Schema<Profile>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true, unique: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Account", required: true, unique: true },
     bio: { type: String, maxlength: 2000 },
     city: { type: String, trim: true, maxlength: 100, index: true },
     profession: { type: String, trim: true, maxlength: 100, index: true },

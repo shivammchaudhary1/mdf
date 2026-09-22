@@ -28,12 +28,12 @@ export class AdminContentController {
     return this.service.adminItem(k, id);
   }
   @Post(":kind") create(@Req() r: AuthRequest, @Param("kind") k: string, @Body() i: ContentDto) {
-    return this.service.create(k, i, r.user.id);
+    return this.service.create(k, i, r.account.id);
   }
   @Patch(":kind/:id") update(@Req() r: AuthRequest, @Param("kind") k: string, @Param("id") id: string, @Body() i: UpdateContentDto) {
-    return this.service.update(k, id, i, r.user.id);
+    return this.service.update(k, id, i, r.account.id);
   }
   @Delete(":kind/:id") archive(@Req() r: AuthRequest, @Param("kind") k: string, @Param("id") id: string) {
-    return this.service.archive(k, id, r.user.id);
+    return this.service.archive(k, id, r.account.id);
   }
 }

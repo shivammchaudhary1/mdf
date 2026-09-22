@@ -11,7 +11,7 @@ import { AdminSettingsView } from "@/components/admin/admin-settings-view";
 import { AdminShell } from "@/components/admin/admin-shell";
 const valid = [
   "dashboard",
-  "users",
+  "members",
   "applications",
   "projects",
   "casting",
@@ -32,7 +32,7 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
   const safe = valid.includes(section as (typeof valid)[number]) ? section : "dashboard";
   return (
     <AdminShell section={safe === "behind-the-scenes" ? "bts" : safe}>
-      {safe === "users" ? (
+      {safe === "members" ? (
         <AdminMembersView />
       ) : safe === "applications" ? (
         <AdminApplicationsView />

@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Use
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 import { AdminGuard, AuthRequest, SessionGuard } from "../auth/auth.guard";
-import { CreateListDto, ListMemberDto, TalentListQueryDto, TalentQueryDto, UpdateListDto, UserUpdateDto } from "./talent.dto";
+import { CreateListDto, ListMemberDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
 import { TalentService } from "./talent.service";
 @ApiTags("talent network")
 @Controller("talent")
@@ -21,34 +21,34 @@ export class PublicTalentController {
 @Controller("admin")
 export class AdminTalentController {
   constructor(private readonly talent: TalentService) {}
-  @Get("users") users(@Query() q: TalentQueryDto) {
+  @Get("members") members(@Query() q: TalentQueryDto) {
     return this.talent.listAdmin(q);
   }
-  @Get("users/:id") user(@Param("id") id: string) {
+  @Get("members/:id") member(@Param("id") id: string) {
     return this.talent.adminDetail(id);
   }
-  @Patch("users/:id") updateUser(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: UserUpdateDto) {
-    return this.talent.updateUser(id, i, r.user.id);
+  @Patch("members/:id") updateMember(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: MemberUpdateDto) {
+    return this.talent.updateMember(id, i, r.account.id);
   }
   @Get("lists") lists(@Req() r: AuthRequest, @Query() q: TalentListQueryDto) {
-    return this.talent.listSavedLists(r.user.id, q);
+    return this.talent.listSavedLists(r.account.id, q);
   }
   @Get("lists/:id") listDetail(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.talent.listDetail(r.user.id, id);
+    return this.talent.listDetail(r.account.id, id);
   }
   @Post("lists") createList(@Req() r: AuthRequest, @Body() i: CreateListDto) {
-    return this.talent.createList(r.user.id, i);
+    return this.talent.createList(r.account.id, i);
   }
   @Put("lists/:id") updateList(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: UpdateListDto) {
-    return this.talent.updateList(r.user.id, id, i);
+    return this.talent.updateList(r.account.id, id, i);
   }
   @Post("lists/:id/members") addMember(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: ListMemberDto) {
-    return this.talent.addMember(r.user.id, id, i.memberId);
+    return this.talent.addMember(r.account.id, id, i.memberId);
   }
   @Delete("lists/:id/members/:memberId") removeMember(@Req() r: AuthRequest, @Param("id") id: string, @Param("memberId") memberId: string) {
-    return this.talent.removeMember(r.user.id, id, memberId);
+    return this.talent.removeMember(r.account.id, id, memberId);
   }
   @Delete("lists/:id") deleteList(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.talent.deleteList(r.user.id, id);
+    return this.talent.deleteList(r.account.id, id);
   }
 }

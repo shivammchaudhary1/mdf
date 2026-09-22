@@ -1,5 +1,5 @@
 import { Schema, Types } from "mongoose";
-export type UserRole = "USER" | "SUPER_ADMIN";
+export type MemberRole = "MEMBER" | "SUPER_ADMIN";
 export type AuthProvider = "local" | "google" | "both";
 export interface Account {
   _id: Types.ObjectId;
@@ -7,7 +7,7 @@ export interface Account {
   email: string;
   mobile: string;
   passwordHash?: string;
-  role: UserRole;
+  role: MemberRole;
   authProvider: AuthProvider;
   googleSub?: string;
   verified: boolean;
@@ -27,7 +27,7 @@ export const AccountSchema = new Schema<Account>(
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
     mobile: { type: String, required: true, trim: true, maxlength: 24 },
     passwordHash: { type: String, select: false },
-    role: { type: String, enum: ["USER", "SUPER_ADMIN"], default: "USER", required: true },
+    role: { type: String, enum: ["MEMBER", "SUPER_ADMIN"], default: "MEMBER", required: true },
     authProvider: { type: String, enum: ["local", "google", "both"], default: "local", required: true },
     googleSub: { type: String, select: false },
     verified: { type: Boolean, default: false, required: true },
@@ -47,7 +47,7 @@ AccountSchema.index({ role: 1, verified: 1, suspended: 1, createdAt: -1 });
 
 export interface Session {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  accountId: Types.ObjectId;
   tokenHash: Buffer;
   remember: boolean;
   ipHash?: Buffer;
@@ -59,7 +59,7 @@ export interface Session {
 }
 export const SessionSchema = new Schema<Session>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
+    accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
     tokenHash: { type: Buffer, required: true, select: false },
     remember: { type: Boolean, default: false },
     ipHash: { type: Buffer, select: false },
@@ -72,18 +72,18 @@ export const SessionSchema = new Schema<Session>(
 );
 SessionSchema.index({ tokenHash: 1 }, { unique: true });
 SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-SessionSchema.index({ userId: 1, createdAt: -1 });
+SessionSchema.index({ accountId: 1, createdAt: -1 });
 
 export interface PasswordReset {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  accountId: Types.ObjectId;
   tokenHash: Buffer;
   expiresAt: Date;
   createdAt: Date;
 }
 export const ResetSchema = new Schema<PasswordReset>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
+    accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
     tokenHash: { type: Buffer, required: true, select: false },
     expiresAt: { type: Date, required: true },
   },

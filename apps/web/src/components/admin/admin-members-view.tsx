@@ -26,7 +26,7 @@ export function AdminMembersView() {
   const setActive = useAdminDashboardStore((state) => state.setMemberFilter);
   const [query, setQuery] = useState("");
   const [members, , refresh, meta, setPage, , loading, error] = useAdminRecords(
-    `/admin/users?search=${encodeURIComponent(query)}${active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""}`,
+    `/admin/members?search=${encodeURIComponent(query)}${active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""}`,
     memberView,
     true,
     1,
@@ -37,7 +37,7 @@ export function AdminMembersView() {
   async function toggleVerify() {
     if (!selected) return;
     try {
-      await api(`/admin/users/${selected.id}`, { method: "PATCH", body: JSON.stringify({ verified: !selected.verified }) });
+      await api(`/admin/members/${selected.id}`, { method: "PATCH", body: JSON.stringify({ verified: !selected.verified }) });
       await refresh();
       toast.success("Verification updated.");
       setSelected(null);
@@ -49,7 +49,7 @@ export function AdminMembersView() {
   async function toggleSuspended() {
     if (!selected) return;
     try {
-      await api(`/admin/users/${selected.id}`, { method: "PATCH", body: JSON.stringify({ suspended: !selected.suspended }) });
+      await api(`/admin/members/${selected.id}`, { method: "PATCH", body: JSON.stringify({ suspended: !selected.suspended }) });
       await refresh();
       toast.success(selected.suspended ? "Member reactivated." : "Member suspended and sessions revoked.");
       setSelected(null);

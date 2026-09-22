@@ -20,13 +20,13 @@ export class MemberApplicationController {
     return this.applications.opportunities(q);
   }
   @Get("applications") list(@Req() r: AuthRequest, @Query() q: MemberApplicationQueryDto) {
-    return this.applications.mine(r.user.id, q);
+    return this.applications.mine(r.account.id, q);
   }
   @Get("applications/:id") detail(@Req() r: AuthRequest, @Param("id") id: string) {
-    return this.applications.mineById(r.user.id, id);
+    return this.applications.mineById(r.account.id, id);
   }
   @Post("applications") apply(@Req() r: AuthRequest, @Body() i: CreateApplicationDto) {
-    return this.applications.apply(r.user.id, i);
+    return this.applications.apply(r.account.id, i);
   }
 }
 @ApiTags("super admin applications")
@@ -42,6 +42,6 @@ export class AdminApplicationController {
     return this.applications.adminById(id);
   }
   @Patch(":id") update(@Req() r: AuthRequest, @Param("id") id: string, @Body() i: UpdateApplicationDto) {
-    return this.applications.update(id, i, r.user.id);
+    return this.applications.update(id, i, r.account.id);
   }
 }

@@ -9,9 +9,9 @@ export const mediaPurposes = [
   "team",
   "bts",
   "show",
-  "user-profile",
-  "user-portfolio",
-  "user-resume",
+  "member-profile",
+  "member-portfolio",
+  "member-resume",
 ] as const;
 
 export type MediaPurpose = (typeof mediaPurposes)[number];
