@@ -1,33 +1,20 @@
 import type { Metadata } from "next";
 
 import { TalentProfileView } from "@/components/site/talent-profile-view";
-import { runtimeConfig } from "@/config/runtime";
 import { pageMetadata } from "@/config/seo";
+import websiteData from "@/data/website-data.json";
 
 type Props = { params: Promise<{ id: string }> };
-type TalentMeta = {
-  name: string;
-  profile?: {
-    bio?: string;
-    profession?: string;
-    city?: string;
-    photo?: string;
-  } | null;
-};
 
-async function talent(id: string) {
-  const response = await fetch(`${runtimeConfig.apiUrl}/talent/${encodeURIComponent(id)}`, {
-    next: { revalidate: 300 },
-  });
-  if (!response.ok) return undefined;
-  return (await response.json()) as TalentMeta;
+export function generateStaticParams() {
+  return websiteData.talentPage.directory.items.map((item) => ({ id: item.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const item = await talent(id).catch(() => undefined);
+  const item = websiteData.talentPage.directory.items.find((talent) => talent.id === id);
 
-  if (!item?.profile) {
+  if (!item) {
     return pageMetadata({
       title: "Talent Profile",
       description: "Public talent profile on M. Dadu Films.",
@@ -36,14 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
   }
 
-  const role = item.profile.profession ? ` — ${item.profile.profession}` : "";
-  const location = item.profile.city ? ` in ${item.profile.city}` : "";
-
   return pageMetadata({
-    title: `${item.name}${role}`,
-    description: item.profile.bio || `Discover ${item.name}${location} on the M. Dadu Films talent network.`,
-    path: `/talent/${id}`,
-    image: item.profile.photo,
+    title: `${item.name} — ${item.role}`,
+    description: item.bio,
+    path: `/talent/${item.id}`,
+    image: item.image || undefined,
   });
 }
 

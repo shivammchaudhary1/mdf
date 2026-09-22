@@ -424,8 +424,15 @@ export function TalentPageView() {
                   {pageTalents.map((talent) => (
                     <article
                       key={talent.id}
-                      className="group overflow-hidden rounded-[20px] border border-black/6 bg-white shadow-[0_14px_38px_rgba(0,0,0,.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,.08)]"
+                      className="group relative overflow-hidden rounded-[20px] border border-black/6 bg-white shadow-[0_14px_38px_rgba(0,0,0,.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,.08)]"
                     >
+                      <Link
+                        href={`/talent/${talent.id}`}
+                        aria-label={`View ${talent.name} portfolio`}
+                        className="absolute inset-0 z-10 cursor-pointer"
+                      >
+                        <span className="sr-only">View {talent.name} portfolio</span>
+                      </Link>
                       <div className="relative">
                         <SiteMedia
                           src={talent.image}
