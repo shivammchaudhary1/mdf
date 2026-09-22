@@ -7,6 +7,7 @@ import { AboutStatsCounter } from "@/components/site/about-stats-counter";
 import { CoreTeamSection } from "@/components/site/core-team-section";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { SiteMedia } from "@/components/site/site-media";
 import websiteData from "@/data/website-data.json";
 
 type ValueIconName = "story" | "craft" | "collaboration" | "opportunity";
@@ -240,7 +241,21 @@ export function AboutPageView() {
 
         <section className="site-shell py-8 lg:py-12">
           <div className="relative overflow-hidden rounded-[22px] bg-[#0b0b0b] px-7 py-12 text-white sm:px-10 lg:px-12 lg:py-14">
-            <div className="max-w-3xl">
+            <div className="absolute inset-y-0 right-0 hidden w-[54%] sm:block">
+              <SiteMedia
+                src={about.quote.image}
+                alt={about.quote.imageAlt}
+                kind="team"
+                className="h-full"
+                imageClassName="object-cover object-center opacity-100"
+              />
+              <div
+                className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#0b0b0b] via-[#0b0b0b]/55 to-transparent"
+                aria-hidden="true"
+              />
+            </div>
+
+            <div className="relative z-10 max-w-xl">
               <p className="site-kicker !text-[#ff646b]">{about.quote.eyebrow}</p>
               <p className="font-display mt-3 text-3xl leading-tight sm:text-4xl">“{about.quote.text}”</p>
               <p className="mt-5 max-w-xl text-sm leading-6 text-white/55">{about.quote.description}</p>

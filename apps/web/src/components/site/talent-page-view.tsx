@@ -245,11 +245,26 @@ export function TalentPageView() {
               </div>
             )}
             <PaginationControls meta={data.meta} onPage={setPage} />
-            <div className="mt-10 rounded-[20px] bg-[#101010] p-7 text-white">
-              <h2 className="font-display text-3xl font-semibold">Build your profile. Be discoverable.</h2>
-              <p className="mt-3 text-sm text-white/58">
-                Create a member profile, showcase your work and choose whether your verified talent profile is publicly discoverable.
-              </p>
+            <div className="relative mt-10 overflow-hidden rounded-[20px] bg-[#101010] p-7 text-white sm:p-8 lg:px-10 lg:py-9">
+              <div className="absolute inset-y-0 right-0 hidden w-[54%] sm:block">
+                <SiteMedia
+                  src={pageContent.supportingSection.image}
+                  alt={pageContent.supportingSection.imageAlt}
+                  kind="team"
+                  className="h-full"
+                  imageClassName="object-cover object-center opacity-100"
+                />
+                <div
+                  className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#101010] via-[#101010]/55 to-transparent"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="relative z-10 max-w-xl">
+                <p className="site-kicker !text-[#ff646b]">{pageContent.supportingSection.eyebrow}</p>
+                <h2 className="font-display mt-3 text-3xl font-semibold">{pageContent.supportingSection.title}</h2>
+                <p className="mt-3 max-w-md text-sm leading-6 text-white/58">{pageContent.supportingSection.description}</p>
+              </div>
             </div>
           </div>
         </section>

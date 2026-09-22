@@ -893,7 +893,9 @@
       "eyebrow": "Our Belief",
       "text": "Good Stories Create a Better Tomorrow",
       "description": "The best work happens when a clear story, a prepared crew and the right collaborators move in the same direction.",
-      "attribution": "M. Dadu Films"
+      "attribution": "M. Dadu Films",
+      "image": "/about/mdf-about-supportive-image.webp",
+      "imageAlt": "Filmmaking team reviewing a scene together on set"
     }
   },
   "servicesPage": {
@@ -1078,6 +1080,13 @@
       "image": "/talent/mdf-talent-hero.webp",
       "imageAlt": "Creative talent and production professionals working together on set",
       "tags": ["Actors & Creators", "Crew & Specialists", "Creative Community"]
+    },
+    "supportingSection": {
+      "eyebrow": "Creative Community",
+      "title": "Build your profile. Be discoverable.",
+      "description": "Create a member profile, showcase your work and choose whether your verified talent profile is publicly discoverable.",
+      "image": "/talent/mdf-talent-supportive-image.webp",
+      "imageAlt": "Creative talent preparing for a professional film and casting opportunity"
     }
   },
   "blogPage": {
