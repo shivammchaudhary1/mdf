@@ -34,6 +34,10 @@
       "href": "/talent"
     },
     {
+      "label": "Gallery",
+      "href": "/gallery"
+    },
+    {
       "label": "Blog",
       "href": "/blog"
     },
@@ -2012,5 +2016,551 @@
     "ctaHref": "/signup",
     "image": "/home/mdf-supporting-image.webp",
     "imageAlt": "Creative filmmaking team reviewing a shot together on set"
+  },
+  "galleryPage": {
+    "hero": {
+      "eyebrow": "Our Gallery",
+      "title": "Frames From the Work Behind the Stories",
+      "description": "Explore recent production stills, behind-the-scenes moments and visual memories from the M. Dadu Films journey.",
+      "image": "",
+      "imageAlt": "M. Dadu Films gallery and behind-the-scenes visual archive",
+      "tags": ["Featured Frames", "Behind the Scenes", "Public Library"]
+    },
+    "sectionIntro": {
+      "eyebrow": "Visual Archive",
+      "title": "Explore the gallery by section.",
+      "description": "Each section shows the 20 most recent uploads. Open the public library to browse the complete section with pagination."
+    },
+    "pageSize": 20,
+    "sections": [
+      {
+        "slug": "featured-images",
+        "title": "Featured Images",
+        "eyebrow": "Public Library",
+        "description": "A curated selection of frames, portraits and production moments from our recent work.",
+        "items": [
+          {
+            "id": "featured-images-01",
+            "title": "Featured 01",
+            "caption": "Featured Images gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-02",
+            "title": "Featured 02",
+            "caption": "Featured Images gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-03",
+            "title": "Featured 03",
+            "caption": "Featured Images gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-04",
+            "title": "Featured 04",
+            "caption": "Featured Images gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-05",
+            "title": "Featured 05",
+            "caption": "Featured Images gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-06",
+            "title": "Featured 06",
+            "caption": "Featured Images gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-07",
+            "title": "Featured 07",
+            "caption": "Featured Images gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-08",
+            "title": "Featured 08",
+            "caption": "Featured Images gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-09",
+            "title": "Featured 09",
+            "caption": "Featured Images gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-10",
+            "title": "Featured 10",
+            "caption": "Featured Images gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-11",
+            "title": "Featured 11",
+            "caption": "Featured Images gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-12",
+            "title": "Featured 12",
+            "caption": "Featured Images gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-13",
+            "title": "Featured 13",
+            "caption": "Featured Images gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-14",
+            "title": "Featured 14",
+            "caption": "Featured Images gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-15",
+            "title": "Featured 15",
+            "caption": "Featured Images gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-16",
+            "title": "Featured 16",
+            "caption": "Featured Images gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-17",
+            "title": "Featured 17",
+            "caption": "Featured Images gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-18",
+            "title": "Featured 18",
+            "caption": "Featured Images gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-19",
+            "title": "Featured 19",
+            "caption": "Featured Images gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-20",
+            "title": "Featured 20",
+            "caption": "Featured Images gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-21",
+            "title": "Featured 21",
+            "caption": "Featured Images gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      },
+      {
+        "slug": "behind-the-scenes",
+        "title": "Behind the Scenes",
+        "eyebrow": "Public Library",
+        "description": "On-set moments, crew collaboration, camera setups and the work happening around the frame.",
+        "items": [
+          {
+            "id": "behind-the-scenes-01",
+            "title": "Behind the Scenes 01",
+            "caption": "Behind the Scenes gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-02",
+            "title": "Behind the Scenes 02",
+            "caption": "Behind the Scenes gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-03",
+            "title": "Behind the Scenes 03",
+            "caption": "Behind the Scenes gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-04",
+            "title": "Behind the Scenes 04",
+            "caption": "Behind the Scenes gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-05",
+            "title": "Behind the Scenes 05",
+            "caption": "Behind the Scenes gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-06",
+            "title": "Behind the Scenes 06",
+            "caption": "Behind the Scenes gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-07",
+            "title": "Behind the Scenes 07",
+            "caption": "Behind the Scenes gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-08",
+            "title": "Behind the Scenes 08",
+            "caption": "Behind the Scenes gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-09",
+            "title": "Behind the Scenes 09",
+            "caption": "Behind the Scenes gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-10",
+            "title": "Behind the Scenes 10",
+            "caption": "Behind the Scenes gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-11",
+            "title": "Behind the Scenes 11",
+            "caption": "Behind the Scenes gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-12",
+            "title": "Behind the Scenes 12",
+            "caption": "Behind the Scenes gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-13",
+            "title": "Behind the Scenes 13",
+            "caption": "Behind the Scenes gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-14",
+            "title": "Behind the Scenes 14",
+            "caption": "Behind the Scenes gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-15",
+            "title": "Behind the Scenes 15",
+            "caption": "Behind the Scenes gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-16",
+            "title": "Behind the Scenes 16",
+            "caption": "Behind the Scenes gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-17",
+            "title": "Behind the Scenes 17",
+            "caption": "Behind the Scenes gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-18",
+            "title": "Behind the Scenes 18",
+            "caption": "Behind the Scenes gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-19",
+            "title": "Behind the Scenes 19",
+            "caption": "Behind the Scenes gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-20",
+            "title": "Behind the Scenes 20",
+            "caption": "Behind the Scenes gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-21",
+            "title": "Behind the Scenes 21",
+            "caption": "Behind the Scenes gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      },
+      {
+        "slug": "others",
+        "title": "Others",
+        "eyebrow": "Public Library",
+        "description": "Events, community moments, references and visual memories that sit beyond a single production category.",
+        "items": [
+          {
+            "id": "others-01",
+            "title": "Others 01",
+            "caption": "Others gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "others-02",
+            "title": "Others 02",
+            "caption": "Others gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "others-03",
+            "title": "Others 03",
+            "caption": "Others gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "others-04",
+            "title": "Others 04",
+            "caption": "Others gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "others-05",
+            "title": "Others 05",
+            "caption": "Others gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "others-06",
+            "title": "Others 06",
+            "caption": "Others gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "others-07",
+            "title": "Others 07",
+            "caption": "Others gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "others-08",
+            "title": "Others 08",
+            "caption": "Others gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "others-09",
+            "title": "Others 09",
+            "caption": "Others gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "others-10",
+            "title": "Others 10",
+            "caption": "Others gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "others-11",
+            "title": "Others 11",
+            "caption": "Others gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "others-12",
+            "title": "Others 12",
+            "caption": "Others gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "others-13",
+            "title": "Others 13",
+            "caption": "Others gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "others-14",
+            "title": "Others 14",
+            "caption": "Others gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "others-15",
+            "title": "Others 15",
+            "caption": "Others gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "others-16",
+            "title": "Others 16",
+            "caption": "Others gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "others-17",
+            "title": "Others 17",
+            "caption": "Others gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "others-18",
+            "title": "Others 18",
+            "caption": "Others gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "others-19",
+            "title": "Others 19",
+            "caption": "Others gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "others-20",
+            "title": "Others 20",
+            "caption": "Others gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "others-21",
+            "title": "Others 21",
+            "caption": "Others gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      }
+    ]
   }
 }
