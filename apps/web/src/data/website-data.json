@@ -1960,6 +1960,711 @@
       "description": "Create a member profile, showcase your work and choose whether your verified talent profile is publicly discoverable.",
       "image": "/talent/mdf-talent-supportive-image.webp",
       "imageAlt": "Creative talent preparing for a professional film and casting opportunity"
+    },
+    "directory": {
+      "pageSize": 20,
+      "items": [
+        {
+          "id": "talent-aarav-mehta",
+          "name": "Aarav Mehta",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Mumbai",
+          "age": 28,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Screen Acting",
+            "Theatre",
+            "Improvisation"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-meera-joshi",
+          "name": "Meera Joshi",
+          "group": "Actor",
+          "role": "Actor / Voice Artist",
+          "location": "Indore",
+          "age": 26,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Screen Acting",
+            "Voice Over",
+            "Commercials"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-vihaan-kapoor",
+          "name": "Vihaan Kapoor",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Delhi",
+          "age": 31,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Theatre",
+            "Action",
+            "Hindi Dialogue"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Punjabi"
+          ],
+          "availability": "Limited",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-ananya-saxena",
+          "name": "Ananya Saxena",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Lucknow",
+          "age": 24,
+          "gender": "Female",
+          "experienceYears": 2,
+          "experience": "2 years",
+          "skills": [
+            "Screen Acting",
+            "Dance",
+            "Self Tape"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-kabir-singh",
+          "name": "Kabir Singh",
+          "group": "Actor",
+          "role": "Actor / Theatre Artist",
+          "location": "Bhopal",
+          "age": 34,
+          "gender": "Male",
+          "experienceYears": 8,
+          "experience": "8 years",
+          "skills": [
+            "Theatre",
+            "Character Acting",
+            "Improvisation"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-riya-chauhan",
+          "name": "Riya Chauhan",
+          "group": "Actor",
+          "role": "Actor / Dancer",
+          "location": "Noida",
+          "age": 23,
+          "gender": "Female",
+          "experienceYears": 2,
+          "experience": "2 years",
+          "skills": [
+            "Dance",
+            "Commercials",
+            "Screen Acting"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-advait-sharma",
+          "name": "Advait Sharma",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Pune",
+          "age": 29,
+          "gender": "Male",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Screen Acting",
+            "Comedy",
+            "Voice"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Marathi"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-sana-mirza",
+          "name": "Sana Mirza",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Mumbai",
+          "age": 27,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Drama",
+            "Camera Acting",
+            "Urdu Dialogue"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Urdu"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-aryan-tripathi",
+          "name": "Aryan Tripathi",
+          "group": "Actor",
+          "role": "Actor / Model",
+          "location": "Lucknow",
+          "age": 25,
+          "gender": "Male",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Commercials",
+            "Screen Acting",
+            "Modelling"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-navya-rao",
+          "name": "Navya Rao",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Hyderabad",
+          "age": 30,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Screen Acting",
+            "Drama",
+            "Dance"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Telugu"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-kabir-verma",
+          "name": "Kabir Verma",
+          "group": "Crew",
+          "role": "Director of Photography",
+          "location": "Bhopal",
+          "age": 33,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Camera",
+            "Lighting",
+            "Documentary"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-dev-arora",
+          "name": "Dev Arora",
+          "group": "Crew",
+          "role": "Editor",
+          "location": "Pune",
+          "age": 32,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Premiere Pro",
+            "DaVinci Resolve",
+            "Narrative Editing"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-rhea-kapoor",
+          "name": "Rhea Kapoor",
+          "group": "Crew",
+          "role": "Production Designer",
+          "location": "Mumbai",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Art Direction",
+            "Set Dressing",
+            "Props"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-manish-yadav",
+          "name": "Manish Yadav",
+          "group": "Crew",
+          "role": "Sound Recordist",
+          "location": "Lucknow",
+          "age": 35,
+          "gender": "Male",
+          "experienceYears": 9,
+          "experience": "9 years",
+          "skills": [
+            "Location Sound",
+            "Boom",
+            "Wireless Audio"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-priya-nair",
+          "name": "Priya Nair",
+          "group": "Crew",
+          "role": "Assistant Director",
+          "location": "Mumbai",
+          "age": 28,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Scheduling",
+            "Call Sheets",
+            "Set Coordination"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Malayalam"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-rahul-biswas",
+          "name": "Rahul Biswas",
+          "group": "Crew",
+          "role": "Gaffer",
+          "location": "Kolkata",
+          "age": 38,
+          "gender": "Male",
+          "experienceYears": 10,
+          "experience": "10 years",
+          "skills": [
+            "Lighting",
+            "Grip",
+            "Power Distribution"
+          ],
+          "languages": [
+            "Hindi",
+            "Bengali"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-neha-bhardwaj",
+          "name": "Neha Bhardwaj",
+          "group": "Crew",
+          "role": "Costume Stylist",
+          "location": "Delhi",
+          "age": 30,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Costume",
+            "Continuity",
+            "Look Development"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-omkar-patil",
+          "name": "Omkar Patil",
+          "group": "Crew",
+          "role": "Focus Puller",
+          "location": "Pune",
+          "age": 27,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Camera",
+            "Focus",
+            "Lens Support"
+          ],
+          "languages": [
+            "Hindi",
+            "Marathi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-kriti-sen",
+          "name": "Kriti Sen",
+          "group": "Crew",
+          "role": "Makeup Artist",
+          "location": "Noida",
+          "age": 26,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Makeup",
+            "Hair",
+            "Continuity"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-rohan-suri",
+          "name": "Rohan Suri",
+          "group": "Crew",
+          "role": "Line Producer",
+          "location": "Delhi",
+          "age": 37,
+          "gender": "Male",
+          "experienceYears": 11,
+          "experience": "11 years",
+          "skills": [
+            "Budgeting",
+            "Logistics",
+            "Vendor Management"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Punjabi"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-isha-rao",
+          "name": "Isha Rao",
+          "group": "Writer",
+          "role": "Screenwriter",
+          "location": "Delhi",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Screenwriting",
+            "Research",
+            "Story Development"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-aman-shukla",
+          "name": "Aman Shukla",
+          "group": "Writer",
+          "role": "Dialogue Writer",
+          "location": "Lucknow",
+          "age": 34,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Dialogue",
+            "Hindi",
+            "Comedy Writing"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-suhani-garg",
+          "name": "Suhani Garg",
+          "group": "Writer",
+          "role": "Content Writer",
+          "location": "Indore",
+          "age": 25,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Brand Films",
+            "Concept Notes",
+            "Research"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-aditya-mishra",
+          "name": "Aditya Mishra",
+          "group": "Writer",
+          "role": "Screenwriter",
+          "location": "Mumbai",
+          "age": 32,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Screenplay",
+            "Adaptation",
+            "Story Structure"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-farheen-khan",
+          "name": "Farheen Khan",
+          "group": "Writer",
+          "role": "Script Researcher",
+          "location": "Bhopal",
+          "age": 27,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Research",
+            "Documentation",
+            "Story References"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Urdu"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-tanvi-menon",
+          "name": "Tanvi Menon",
+          "group": "Creator",
+          "role": "Voice Artist",
+          "location": "Bengaluru",
+          "age": 28,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Voice Over",
+            "Dubbing",
+            "Commercial Voice"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Malayalam"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-harsh-vardhan",
+          "name": "Harsh Vardhan",
+          "group": "Creator",
+          "role": "Music Composer",
+          "location": "Mumbai",
+          "age": 31,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Background Score",
+            "Music Production",
+            "Arrangement"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-nandini-paul",
+          "name": "Nandini Paul",
+          "group": "Creator",
+          "role": "Choreographer",
+          "location": "Kolkata",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Choreography",
+            "Performance Direction",
+            "Dance"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Bengali"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": ""
+        },
+        {
+          "id": "talent-yash-malik",
+          "name": "Yash Malik",
+          "group": "Creator",
+          "role": "Photographer",
+          "location": "Delhi",
+          "age": 27,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Portraits",
+            "BTS Photography",
+            "Editorial"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": ""
+        },
+        {
+          "id": "talent-aisha-qureshi",
+          "name": "Aisha Qureshi",
+          "group": "Creator",
+          "role": "Creative Director",
+          "location": "Noida",
+          "age": 33,
+          "gender": "Female",
+          "experienceYears": 8,
+          "experience": "8 years",
+          "skills": [
+            "Creative Direction",
+            "Brand Films",
+            "Visual References"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": ""
+        }
+      ]
     }
   },
   "blogPage": {
