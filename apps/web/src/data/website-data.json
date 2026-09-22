@@ -163,6 +163,13 @@
       "image": "/team/mdf-team-alex.webp"
     },
     {
+      "name": "Raaj Aaryan",
+      "role": "Director",
+      "group": "Core Team",
+      "bio": "Directs visual storytelling and performance, shaping scenes from creative interpretation through on-set execution.",
+      "image": "/team/mdf-team-raaz-aaryan.webp"
+    },
+    {
       "name": "Devendra Singh",
       "role": "Producer / Actor",
       "group": "Core Team",
@@ -204,13 +211,7 @@
       "bio": "Contributes to the musical identity of projects through music production and vocal performance.",
       "image": "/team/mdf-team-shailesh-singh-sanjay.webp"
     },
-    {
-      "name": "Raaj Aaryan",
-      "role": "Director",
-      "group": "Core Team",
-      "bio": "Handles digital intermediate and color finishing, helping create a consistent and polished final visual tone.",
-      "image": "/team/mdf-team-raaj aryan"
-    },
+
     {
       "name": "Pradeep Yadav",
       "role": "Casting Director",
@@ -218,7 +219,6 @@
       "bio": "Supports casting requirements by identifying and coordinating suitable talent for production roles.",
       "image": "/team/mdf-team-pradeep-yadav.webp"
     },
-
     {
       "name": "Sharad Chand Upadhyay",
       "role": "Anchor / Voice Over Artist",
@@ -733,6 +733,19 @@
         "youtube": ""
       },
       {
+        "name": "Raaj Aaryan",
+        "designation": "Director",
+        "shortBio": "Directs visual storytelling and performance, shaping scenes from creative interpretation through on-set execution.",
+        "details": "Works across direction and visual storytelling, guiding performance, scene execution and the overall creative approach on set. His focus is translating the intent of the script into clear, engaging screen moments while keeping the production aligned with the story.",
+        "focus": ["Direction", "Visual Storytelling", "Performance"],
+        "image": "/team/mdf-team-raaz-aaryan.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
         "name": "Devendra Singh",
         "designation": "Producer / Actor",
         "shortBio": "Contributes both on screen and behind the scenes, supporting production coordination and performance requirements.",
@@ -810,19 +823,7 @@
         "linkedin": "",
         "youtube": ""
       },
-      {
-        "name": "Raaj Aaryan",
-        "designation": "D.I. Colorist",
-        "shortBio": "Handles digital intermediate and color finishing, helping create a consistent and polished final visual tone.",
-        "details": "Focuses on color finishing and visual consistency in post-production. His work helps balance shots, refine mood and bring the final image closer to the intended cinematic look.",
-        "focus": ["D.I.", "Color Grading", "Post-Production"],
-        "image": "",
-        "instagram": "",
-        "facebook": "",
-        "x": "",
-        "linkedin": "",
-        "youtube": ""
-      },
+
       {
         "name": "Pradeep Yadav",
         "designation": "Casting Director",
