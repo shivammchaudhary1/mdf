@@ -127,7 +127,6 @@ function MultiSelectField({
   onCustomChange,
   onToggle,
   onAddCustom,
-  onRemove,
 }: {
   label: string;
   placeholder: string;
@@ -137,7 +136,6 @@ function MultiSelectField({
   onCustomChange: (value: string) => void;
   onToggle: (value: string) => void;
   onAddCustom: () => void;
-  onRemove: (value: string) => void;
 }) {
   const [otherOpen, setOtherOpen] = useState(false);
 
@@ -187,15 +185,7 @@ function MultiSelectField({
         </div>
       </details>
 
-      {!!values.length && (
-        <div className="md-selected-tags">
-          {values.map((value) => (
-            <button key={value} type="button" onClick={() => onRemove(value)} title={`Remove ${value}`}>
-              {value} <span aria-hidden="true">×</span>
-            </button>
-          ))}
-        </div>
-      )}
+
     </div>
   );
 }
@@ -542,7 +532,6 @@ export function MemberProfileSection() {
                   onCustomChange={setCustomSkill}
                   onToggle={(value) => toggleList("skills", value)}
                   onAddCustom={() => addCustom("skills", customSkill, () => setCustomSkill(""))}
-                  onRemove={(value) => toggleList("skills", value)}
                 />
 
                 <MultiSelectField
@@ -554,7 +543,6 @@ export function MemberProfileSection() {
                   onCustomChange={setCustomLanguage}
                   onToggle={(value) => toggleList("languages", value)}
                   onAddCustom={() => addCustom("languages", customLanguage, () => setCustomLanguage(""))}
-                  onRemove={(value) => toggleList("languages", value)}
                 />
               </div>
             ) : (

@@ -126,6 +126,43 @@ export function MemberPortfolioSection() {
     input.click();
   }
 
+  function replacePhoto(index: number) {
+    if (busy) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      setBusy(true);
+      let uploaded: UploadedMediaResult | undefined;
+
+      try {
+        uploaded = await uploadMedia(file, "member-portfolio");
+
+        await api(`/member/portfolio/${index}`, {
+          method: "PATCH",
+          body: JSON.stringify({ mediaId: uploaded.id }),
+        });
+
+        await refresh();
+        toast.success("Portfolio photograph replaced.");
+      } catch (error) {
+        if (uploaded && !uploaded.duplicate) {
+          await cleanupUploads([uploaded]);
+        }
+        toast.error(error instanceof Error ? error.message : "Unable to replace photograph.");
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    input.click();
+  }
+
   function chooseResume() {
     if (busy) return;
 
@@ -254,9 +291,25 @@ export function MemberPortfolioSection() {
                 {item.title}
                 <span>{item.category}</span>
               </p>
-              <button type="button" onClick={() => setRemoving(item.id)} disabled={busy} aria-label={`Remove ${item.title}`}>
+              <button
+                className="md-remove-photo"
+                type="button"
+                onClick={() => setRemoving(item.id)}
+                disabled={busy}
+                aria-label={`Remove ${item.title}`}
+              >
                 ×
               </button>
+              {(profile.portfolioMediaIds?.length ?? 0) >= 8 && (
+                <button
+                  className="md-replace-photo"
+                  type="button"
+                  onClick={() => replacePhoto(data.portfolio.findIndex((photo) => photo.id === item.id))}
+                  disabled={busy}
+                >
+                  Replace
+                </button>
+              )}
             </div>
           ))}
 

@@ -306,18 +306,22 @@ function Dashboard() {
               <Link href="/member/applications">View all →</Link>
             </div>
             <div className="md-app-list">
-              {data.applications.slice(0, 3).map((a) => (
-                <div key={a.id} className="md-app-row">
-                  <div className="md-project-mark">{a.project[0]}</div>
-                  <div>
-                    <strong>{a.role}</strong>
-                    <span>
-                      {a.project} · {a.location}
-                    </span>
+              {data.applications.length ? (
+                data.applications.slice(0, 3).map((a) => (
+                  <div key={a.id} className="md-app-row">
+                    <div className="md-project-mark">{a.project[0]}</div>
+                    <div>
+                      <strong>{a.role}</strong>
+                      <span>
+                        {a.project} · {a.location}
+                      </span>
+                    </div>
+                    <Status status={a.status} tone={a.tone} />
                   </div>
-                  <Status status={a.status} tone={a.tone} />
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="md-empty-state">No recent applications found.</div>
+              )}
             </div>
           </article>
 
@@ -330,18 +334,22 @@ function Dashboard() {
               <Link href="/member/opportunities">Explore all →</Link>
             </div>
             <div className="md-rec-grid">
-              {data.opportunities.slice(0, 2).map((o) => (
-                <Link href="/member/opportunities" key={o.id} className="md-rec-card">
-                  <SiteMedia src={o.image} alt={o.title} kind="team" className="aspect-[16/8] rounded-xl" />
-                  <div>
-                    <span>{o.match} match</span>
-                    <h3>{o.title}</h3>
-                    <p>
-                      {o.project} · {o.location}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+              {data.opportunities.length ? (
+                data.opportunities.slice(0, 2).map((o) => (
+                  <Link href="/member/opportunities" key={o.id} className="md-rec-card">
+                    <SiteMedia src={o.image} alt={o.title} kind="team" className="aspect-[16/8] rounded-xl" />
+                    <div>
+                      <span>{o.match} match</span>
+                      <h3>{o.title}</h3>
+                      <p>
+                        {o.project} · {o.location}
+                      </p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="md-empty-state">No recommended opportunities found.</div>
+              )}
             </div>
           </article>
         </div>
@@ -374,15 +382,19 @@ function Dashboard() {
               </div>
             </div>
             <div className="md-activity">
-              {data.activity.map((x) => (
-                <div key={x.title}>
-                  <i />
-                  <p>
-                    {x.title}
-                    <span>{x.time}</span>
-                  </p>
-                </div>
-              ))}
+              {data.activity.length ? (
+                data.activity.map((x) => (
+                  <div key={x.title}>
+                    <i />
+                    <p>
+                      {x.title}
+                      <span>{x.time}</span>
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="md-empty-state">No recent activity found.</div>
+              )}
             </div>
           </article>
         </aside>
@@ -503,8 +515,9 @@ function Opportunities() {
           </button>
         ))}
       </div>
-      <section className="md-opportunity-grid">
-        {items.map((o) => (
+      <section className={items.length ? "md-opportunity-grid" : "md-empty-opportunities"}>
+        {items.length ? (
+          items.map((o) => (
           <article className="md-opportunity-card" key={o._id}>
             <div className="md-opp-image">
               <SiteMedia src={mediaUrl(o.coverImage)} alt={o.title} kind="team" className="h-full min-h-[210px]" />
@@ -531,7 +544,10 @@ function Opportunities() {
               </button>
             </div>
           </article>
-        ))}
+          ))
+        ) : (
+          <div className="md-empty-state">No opportunities found.</div>
+        )}
       </section>
       <PaginationControls meta={meta} onPage={setPage} />
     </div>
@@ -542,6 +558,7 @@ function Settings() {
   const { data, profile, refresh } = useMemberData();
   const fields = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
+  const [preferenceSaving, setPreferenceSaving] = useState<"emailCastingAlerts" | "emailUpdates" | "publicVisible" | null>(null);
   const [deactivating, setDeactivating] = useState(false);
   const router = useRouter();
   async function deactivate() {
@@ -572,26 +589,47 @@ function Settings() {
     }
   }
   async function preference(key: "emailCastingAlerts" | "emailUpdates" | "publicVisible", value: boolean) {
+    if (preferenceSaving) return;
+    setPreferenceSaving(key);
     try {
       await api("/member/settings", { method: "PATCH", body: JSON.stringify({ [key]: value }) });
       await refresh();
       toast.success("Preference saved.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to save preference.");
+    } finally {
+      setPreferenceSaving(null);
     }
   }
   const toast = useToast();
   const cast = profile.emailCastingAlerts ?? true,
     mail = profile.emailUpdates ?? true,
     visible = profile.publicVisible ?? false;
-  const Toggle = ({ title, desc, value, set }: { title: string; desc: string; value: boolean; set: (v: boolean) => void }) => (
+  const Toggle = ({
+    title,
+    desc,
+    value,
+    set,
+    loading = false,
+  }: {
+    title: string;
+    desc: string;
+    value: boolean;
+    set: (v: boolean) => void;
+    loading?: boolean;
+  }) => (
     <div className="md-toggle-row">
       <div>
         <strong>{title}</strong>
         <p>{desc}</p>
       </div>
-      <button className={value ? "on" : ""} onClick={() => set(!value)}>
-        <span />
+      <button
+        className={`${value ? "on" : ""} ${loading ? "loading" : ""}`.trim()}
+        onClick={() => set(!value)}
+        disabled={loading}
+        aria-busy={loading}
+      >
+        {loading ? <i className="md-toggle-loader" /> : <span />}
       </button>
     </div>
   );
@@ -604,11 +642,12 @@ function Settings() {
       />
       <section className="md-settings-grid">
         <div className="md-form-stack" ref={fields} key={`${data.member.email}-${data.member.mobile}`}>
-          <article className="md-card">
+          <article className="md-card md-login-card">
             <div className="md-card-head">
               <div>
                 <p className="md-kicker">Account</p>
                 <h2>Login Details</h2>
+                <span className="md-card-subtitle">Keep your sign-in contact details accurate and up to date.</span>
               </div>
             </div>
             <div className="md-form-grid">
@@ -622,7 +661,7 @@ function Settings() {
                 <input name="mobile" defaultValue={data.member.mobile} />
               </label>
             </div>
-            <div className="md-save-row">
+            <div className="md-save-row md-login-actions">
               <Link href="/forgot-password" className="md-secondary">
                 Change Password
               </Link>
@@ -642,12 +681,14 @@ function Settings() {
               title="Casting recommendations"
               desc="Receive alerts when a role closely matches your profile."
               value={cast}
+              loading={preferenceSaving === "emailCastingAlerts"}
               set={(v) => void preference("emailCastingAlerts", v)}
             />
             <Toggle
               title="Community updates"
               desc="Receive useful product news and community updates."
               value={mail}
+              loading={preferenceSaving === "emailUpdates"}
               set={(v) => void preference("emailUpdates", v)}
             />
           </article>
@@ -662,6 +703,7 @@ function Settings() {
               title="Public talent profile"
               desc="When enabled, approved profile fields, your profile photo and portfolio can be visible to website visitors and casting teams. Email, mobile, date of birth and private documents stay private."
               value={visible}
+              loading={preferenceSaving === "publicVisible"}
               set={(v) => void preference("publicVisible", v)}
             />
           </article>

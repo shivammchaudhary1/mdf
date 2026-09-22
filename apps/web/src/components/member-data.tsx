@@ -135,7 +135,7 @@ export function MemberData({ children }: { children: ReactNode }) {
         stats: [
           { label: "Applications", value: String(counts.total), helper: `${counts.submitted + counts.underReview} active` },
           { label: "Shortlisted", value: String(counts.shortlisted), helper: "" },
-          { label: "Profile views", value: "—", helper: "" },
+          { label: "Profile views", value: "0", helper: "" },
           { label: "Saved roles", value: String(p.savedOpportunityIds?.length ?? 0), helper: "" },
         ],
         profileChecklist: [

@@ -111,6 +111,12 @@ export class ProfileDto {
   publicVisible?: boolean;
 }
 
+export class ReplacePortfolioPhotoDto {
+  @ApiPropertyOptional()
+  @IsMongoId()
+  mediaId!: string;
+}
+
 export class MemberSettingsDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()

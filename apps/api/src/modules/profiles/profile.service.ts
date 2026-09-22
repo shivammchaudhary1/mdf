@@ -235,6 +235,43 @@ export class ProfileService {
     return this.get(memberId);
   }
 
+  async replacePortfolioPhoto(memberId: string, index: number, mediaId: string) {
+    if (!Number.isInteger(index) || index < 0 || index > 7) {
+      throw new BadRequestException("Portfolio photograph position is invalid.");
+    }
+
+    await this.media.assertOwnedBy(memberId, [mediaId], "image", "member-portfolio");
+
+    const profile = await this.profiles.findOne({ memberId: objectId(memberId) });
+    if (!profile) throw new NotFoundException("Profile not found.");
+
+    const current = [...(profile.portfolioMediaIds ?? [])];
+    if (index >= current.length) {
+      throw new BadRequestException("Portfolio photograph position is invalid.");
+    }
+
+    if (current.some((id, itemIndex) => itemIndex !== index && String(id) === mediaId)) {
+      throw new BadRequestException("The same photograph cannot be added to the portfolio more than once.");
+    }
+
+    const previousMediaId = String(current[index]);
+    current[index] = new Types.ObjectId(mediaId);
+    profile.portfolioMediaIds = current;
+    await profile.save();
+
+    if (profile.publicVisible) {
+      await this.media.makePublic([mediaId]);
+    } else {
+      await this.media.makePrivate([mediaId]);
+    }
+
+    // Replace only the active profile reference. The old media record/object is
+    // deliberately retained in storage for archival/recovery purposes.
+    await this.media.makePrivate([previousMediaId]);
+
+    return this.get(memberId);
+  }
+
   async updateSettings(memberId: string, input: MemberSettingsDto) {
     if (input.savedOpportunityIds) {
       const ids = [...new Set(input.savedOpportunityIds)].map((id) => objectId(id));
