@@ -205,11 +205,11 @@
       "image": "/team/mdf-team-shailesh-singh-sanjay.webp"
     },
     {
-      "name": "Raaj Aaryan",
-      "role": "Director",
+      "name": "Deepak Arya",
+      "role": "D.I. Colorist",
       "group": "Core Team",
       "bio": "Handles digital intermediate and color finishing, helping create a consistent and polished final visual tone.",
-      "image": "/team/mdf-team-raaj aryan"
+      "image": ""
     },
     {
       "name": "Pradeep Yadav",
@@ -218,7 +218,20 @@
       "bio": "Supports casting requirements by identifying and coordinating suitable talent for production roles.",
       "image": "/team/mdf-team-pradeep-yadav.webp"
     },
-
+    {
+      "name": "Mrityunjaya",
+      "role": "Gaffer",
+      "group": "Core Team",
+      "bio": "Works with camera and lighting teams to execute dependable lighting setups safely and consistently on set.",
+      "image": ""
+    },
+    {
+      "name": "Mamvijay",
+      "role": "Singer",
+      "group": "Core Team",
+      "bio": "Contributes vocal performance to music-led and creative productions when the project calls for it.",
+      "image": ""
+    },
     {
       "name": "Sharad Chand Upadhyay",
       "role": "Anchor / Voice Over Artist",
@@ -812,7 +825,7 @@
       },
       {
         "name": "Raaj Aaryan",
-        "designation": "D.I. Colorist",
+        "designation": "Director",
         "shortBio": "Handles digital intermediate and color finishing, helping create a consistent and polished final visual tone.",
         "details": "Focuses on color finishing and visual consistency in post-production. His work helps balance shots, refine mood and bring the final image closer to the intended cinematic look.",
         "focus": ["D.I.", "Color Grading", "Post-Production"],
@@ -830,6 +843,32 @@
         "details": "Works with the creative and production teams to understand character requirements, identify suitable performers and coordinate the casting process from outreach through selection.",
         "focus": ["Casting", "Talent Coordination", "Character Matching"],
         "image": "/team/mdf-team-pradeep-yadav.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Mrityunjaya",
+        "designation": "Gaffer",
+        "shortBio": "Works with camera and lighting teams to execute dependable lighting setups safely and consistently on set.",
+        "details": "Supports the cinematography team through practical lighting execution, fixture placement and on-set adjustments. His role helps translate the lighting plan into a controlled shooting environment.",
+        "focus": ["Lighting", "On-Set Execution", "Electrical"],
+        "image": "",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Mamvijay",
+        "designation": "Singer",
+        "shortBio": "Contributes vocal performance to music-led and creative productions when the project calls for it.",
+        "details": "Supports music-led productions with vocal performance and interpretation. The focus is on delivering vocals that fit the emotion, style and storytelling requirements of the project.",
+        "focus": ["Vocals", "Performance", "Music"],
+        "image": "",
         "instagram": "",
         "facebook": "",
         "x": "",
