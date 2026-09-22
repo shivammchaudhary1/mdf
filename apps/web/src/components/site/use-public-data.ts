@@ -23,6 +23,16 @@ type PublicRecord = ContentRecord & {
   gender?: string;
   compensation?: string;
 };
+type PublicBlogPreview = {
+  slug: string;
+  title: string;
+  category: string;
+  date: string;
+  readTime: string;
+  summary: string;
+  image: string;
+};
+
 const empty = {
   ...template,
   stats: [
@@ -41,7 +51,7 @@ const empty = {
     location: String(PUBLIC_COMPANY.location),
   },
   projects: [] as typeof template.projects,
-  blogs: [] as typeof template.blogs,
+  blogs: [] as PublicBlogPreview[],
   team: template.team,
   gallery: [] as typeof template.gallery,
   castings: [] as typeof template.castings,

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { runtimeConfig } from "@/config/runtime";
+import websiteData from "@/data/website-data.json";
 
 type Page<T> = { items: T[]; meta?: { pages?: number } };
 type SlugRecord = { slug?: string; updatedAt?: string; publishedAt?: string };
@@ -64,11 +65,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  const dynamicBlogSlugs = new Set<string>();
+
   for (const item of blogs) {
     if (!item.slug) continue;
+    dynamicBlogSlugs.add(item.slug);
     result.push({
       url: `${base}/blog/${encodeURIComponent(item.slug)}`,
       lastModified: item.updatedAt || item.publishedAt ? new Date(item.updatedAt ?? item.publishedAt ?? now) : now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
+
+  for (const item of websiteData.blogs) {
+    if (!item.slug || dynamicBlogSlugs.has(item.slug)) continue;
+    result.push({
+      url: `${base}/blog/${encodeURIComponent(item.slug)}`,
+      lastModified: new Date(item.updatedAt || item.publishedAt),
       changeFrequency: "monthly",
       priority: 0.7,
     });

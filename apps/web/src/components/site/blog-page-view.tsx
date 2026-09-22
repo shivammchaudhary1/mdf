@@ -10,13 +10,33 @@ import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import websiteData from "@/data/website-data.json";
 
-import { usePublicData } from "./use-public-data";
+const PAGE_SIZE = 20;
 
 export function BlogPageView() {
   const [page, setPage] = useState(1);
-  const data = usePublicData("blogs", { page, limit: 9 });
-  const [featured, ...rest] = data.blogs;
   const pageContent = websiteData.blogPage;
+  const allBlogs = websiteData.blogs;
+  const pages = Math.max(1, Math.ceil(allBlogs.length / PAGE_SIZE));
+  const safePage = Math.min(page, pages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const visibleBlogs = allBlogs.slice(start, start + PAGE_SIZE);
+  const [featured, ...rest] = visibleBlogs;
+
+  const meta = {
+    page: safePage,
+    limit: PAGE_SIZE,
+    total: allBlogs.length,
+    pages,
+    hasNext: safePage < pages,
+    hasPrevious: safePage > 1,
+  };
+
+  function changePage(nextPage: number) {
+    setPage(nextPage);
+    requestAnimationFrame(() => {
+      document.getElementById("blog-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   return (
     <>
@@ -76,31 +96,62 @@ export function BlogPageView() {
             </div>
           </div>
         </section>
-        <section className="site-section bg-[#fafafa]">
+
+        <section id="blog-list" className="site-section scroll-mt-24 bg-[#fafafa]">
           <div className="site-shell">
+            <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="site-kicker">{pageContent.list.eyebrow}</p>
+                <h2 className="font-display mt-2 text-3xl font-semibold">{pageContent.list.title}</h2>
+              </div>
+              <p className="text-xs text-[#888]">
+                Showing {allBlogs.length ? start + 1 : 0}–{Math.min(start + PAGE_SIZE, allBlogs.length)} of {allBlogs.length} articles
+              </p>
+            </div>
+
             {featured && (
               <Link href={`/blog/${featured.slug}`} className="site-card grid overflow-hidden lg:grid-cols-[1.15fr_.85fr]">
-                <SiteMedia src={featured.image} alt={featured.title} kind="blog" className="min-h-[310px]" />
-                <div className="p-7 sm:p-10">
-                  <p className="site-kicker">{featured.category}</p>
-                  <h2 className="font-display mt-3 text-3xl font-semibold">{featured.title}</h2>
+                <SiteMedia src={featured.image} alt={featured.imageAlt || featured.title} kind="blog" className="min-h-[310px]" />
+                <div className="flex flex-col justify-center p-7 sm:p-10">
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.1em] text-[#999]">
+                    <span className="text-[var(--brand-red)]">{featured.category}</span>
+                    <span>•</span>
+                    <span>{featured.date}</span>
+                    <span>•</span>
+                    <span>{featured.readTime}</span>
+                  </div>
+                  <h2 className="font-display mt-3 text-3xl font-semibold leading-tight">{featured.title}</h2>
                   <p className="mt-4 text-sm leading-7 text-[#707070]">{featured.summary}</p>
+                  <span className="mt-6 text-xs font-bold text-[var(--brand-red)]">Read article →</span>
                 </div>
               </Link>
             )}
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {rest.map((post) => (
-                <Link key={post.slug} href={`/blog/${post.slug}`} className="site-card overflow-hidden">
-                  <SiteMedia src={post.image} alt={post.title} kind="blog" className="aspect-[16/10]" />
-                  <div className="p-5">
-                    <p className="site-kicker">{post.category}</p>
-                    <h3 className="font-display mt-2 text-xl font-semibold">{post.title}</h3>
-                    <p className="mt-3 text-sm text-[#777]">{post.summary}</p>
+                <Link key={post.slug} href={`/blog/${post.slug}`} className="group site-card flex h-full flex-col overflow-hidden">
+                  <SiteMedia
+                    src={post.image}
+                    alt={post.imageAlt || post.title}
+                    kind="blog"
+                    className="aspect-[16/10]"
+                    imageClassName="transition duration-500 group-hover:scale-[1.025]"
+                  />
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.09em] text-[#999]">
+                      <span className="text-[var(--brand-red)]">{post.category}</span>
+                      <span>•</span>
+                      <span>{post.readTime}</span>
+                    </div>
+                    <h3 className="font-display mt-2 text-xl font-semibold leading-snug">{post.title}</h3>
+                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#777]">{post.summary}</p>
+                    <div className="mt-auto pt-5 text-xs text-[#999]">{post.date}</div>
                   </div>
                 </Link>
               ))}
             </div>
-            <PaginationControls meta={data.meta} onPage={setPage} />
+
+            <PaginationControls meta={meta} onPage={changePage} />
           </div>
         </section>
       </main>
