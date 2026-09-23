@@ -687,3 +687,29 @@
   padding:0 10px;
   border-radius:7px;
 }
+
+/* CASTING CREATE FORM V1 */
+.ad-casting-form-section{display:grid;gap:13px;border:1px solid #0000000d;border-radius:13px;background:#fafaf8;padding:14px}
+.ad-casting-form-head{display:flex;align-items:end;justify-content:space-between;gap:14px;border-bottom:1px solid #0000000b;padding-bottom:10px}
+.ad-casting-form-head span{max-width:430px;color:#999;font-size:7.5px;line-height:1.45;text-align:right}
+.ad-casting-save-state{display:flex;align-items:center;gap:11px;border:1px solid #f1c9cc;border-radius:11px;background:#fff6f6;padding:12px 14px}
+.ad-casting-save-state i{width:22px;height:22px;flex:0 0 auto;border:2px solid #ead5d6;border-top-color:var(--brand-red);border-radius:50%;animation:ad-project-spin .75s linear infinite}
+.ad-casting-save-state strong{display:block;font-size:9px}
+.ad-casting-save-state span{display:block;margin-top:2px;color:#888;font-size:7.5px}
+.ad-casting-cover-preview{display:flex;align-items:center;gap:11px;margin-top:9px;padding:9px;border:1px solid #0000000d;border-radius:10px;background:#fff}
+.ad-casting-cover-preview img{width:110px;height:68px;flex:0 0 auto;border-radius:8px;object-fit:cover}
+.ad-casting-cover-preview strong{display:block;font-size:8.5px}
+.ad-casting-cover-preview span{display:block;margin-top:3px;color:#999;font-size:7.5px;line-height:1.4}
+.ad-casting-tags-builder{display:grid;gap:10px}
+.ad-casting-tag-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+.ad-casting-tag-add select,.ad-casting-tag-add input{width:100%;min-height:38px;border:1px solid #dfdfdb;border-radius:8px;background:#fff;padding:8px 10px;color:#333;font-size:8px;outline:0}
+.ad-casting-tag-add input{grid-column:1/-1}
+.ad-casting-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ad-casting-tags button{border:1px solid #0000000e;border-radius:999px;background:#fff;padding:6px 9px;color:#666;font-size:7.5px;font-weight:700}
+.ad-casting-card-v2{padding:0!important}
+.ad-casting-card-v2 .ad-casting-card-content{padding:16px}
+.ad-casting-card-media{border-radius:17px 17px 0 0}
+@media(min-width:640px){
+  .ad-casting-tag-add{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+  .ad-casting-tag-add input{grid-column:auto}
+}
