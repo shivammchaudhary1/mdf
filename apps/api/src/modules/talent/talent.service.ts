@@ -332,12 +332,48 @@ export class TalentService {
       meta: pageMeta(q.page, q.limit, total),
     };
   }
+  async savedListSummary(ownerId: string) {
+    const owner = objectId(ownerId);
+
+    const [lists, linkedLists, aggregate] = await Promise.all([
+      this.lists.countDocuments({ ownerId: owner }),
+      this.lists.countDocuments({ ownerId: owner, projectId: { $exists: true, $ne: null } }),
+      this.lists.aggregate<{
+        savedEntries: { count: number }[];
+        uniqueTalent: { count: number }[];
+      }>([
+        { $match: { ownerId: owner } },
+        {
+          $facet: {
+            savedEntries: [
+              { $project: { count: { $size: { $ifNull: ["$memberIds", []] } } } },
+              { $group: { _id: null, count: { $sum: "$count" } } },
+            ],
+            uniqueTalent: [
+              { $unwind: "$memberIds" },
+              { $group: { _id: "$memberIds" } },
+              { $count: "count" },
+            ],
+          },
+        },
+      ]),
+    ]);
+
+    return {
+      lists,
+      linkedLists,
+      savedEntries: Number(aggregate?.[0]?.savedEntries?.[0]?.count ?? 0),
+      uniqueTalent: Number(aggregate?.[0]?.uniqueTalent?.[0]?.count ?? 0),
+    };
+  }
+
   private async validateList(ownerId: string, input: CreateListDto | UpdateListDto) {
     if (input.memberIds) {
       const u = [...new Set(input.memberIds)];
       const count = await this.accounts.countDocuments({
         _id: { $in: u.map((id) => objectId(id)) },
         role: "MEMBER",
+        suspended: false,
       });
       if (count !== u.length) throw new BadRequestException("One or more members no longer exist.");
     }
@@ -405,9 +441,12 @@ export class TalentService {
     };
   }
   async listDetail(ownerId: string, id: string) {
+    await this.memberCodes.ensureLegacyCodes();
+
     const l = await this.lists.findOne({ _id: objectId(id), ownerId: objectId(ownerId) }).lean();
     if (!l) throw new NotFoundException("Talent list not found.");
-    const members = l.memberIds?.length
+
+    const serialized = l.memberIds?.length
       ? (
           await this.accounts.aggregate<TalentRecord>([
             ...this.pipeline(new TalentQueryDto(), false),
@@ -415,17 +454,22 @@ export class TalentService {
           ])
         ).map((item) => this.serialize(item, false))
       : [];
+
+    const order = new Map((l.memberIds ?? []).map((memberId, index) => [String(memberId), index]));
+    serialized.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));
+
     return {
       ...l,
       _id: String(l._id),
       ownerId: String(l.ownerId),
       projectId: l.projectId ? String(l.projectId) : undefined,
       memberIds: (l.memberIds ?? []).map(String),
-      members: members.filter(Boolean),
+      members: serialized.filter(Boolean),
     };
   }
   async addMember(ownerId: string, id: string, memberId: string) {
-    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "MEMBER" }))) throw new NotFoundException("Member not found.");
+    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "MEMBER", suspended: false })))
+      throw new BadRequestException("This member is not available for shortlisting.");
     const l = await this.lists.findOneAndUpdate(
       {
         _id: objectId(id),

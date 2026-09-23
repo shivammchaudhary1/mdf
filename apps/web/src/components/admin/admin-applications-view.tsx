@@ -13,8 +13,7 @@ import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
 
-const APPLICATION_STATUSES = ["Submitted", "Under Review", "Shortlisted", "Selected", "Rejected"] as const;
-type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+type ApplicationStatus = "Submitted" | "Under Review" | "Shortlisted" | "Selected" | "Rejected";
 
 type ApplicationRecord = {
   _id: string;

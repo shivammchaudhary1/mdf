@@ -7,7 +7,7 @@ import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch, Admin
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
-import { memberView, type MemberView, type TalentRecord } from "@/services/admin-workspace";
+import { type MemberView, memberView, type TalentRecord } from "@/services/admin-workspace";
 import { api } from "@/services/api";
 import { mediaUrl } from "@/services/workspace";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
