@@ -359,6 +359,7 @@ export class ProfileService {
         verified: account.verified,
       },
       profileCompletion: profileCompletion(profile ?? {}),
+      profileViews: Number(profile?.profileViews ?? 0),
       profile: this.serialize(profile),
       applicationSummary: {
         total,

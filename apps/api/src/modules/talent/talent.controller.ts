@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Use
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 import { AdminGuard, AuthRequest, SessionGuard } from "../auth/auth.guard";
-import { CreateListDto, ListMemberDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
+import { CreateListDto, ListMemberDto, MemberUpdateDto, PublicProfileViewDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
 import { TalentService } from "./talent.service";
 @ApiTags("talent network")
 @Controller("talent")
@@ -10,6 +10,12 @@ export class PublicTalentController {
   constructor(private readonly talent: TalentService) {}
   @Get() list(@Query() q: TalentQueryDto) {
     return this.talent.listPublic(q);
+  }
+  @Get("options") options() {
+    return this.talent.publicOptions();
+  }
+  @Get(":id/view") view(@Param("id") id: string, @Query() q: PublicProfileViewDto) {
+    return this.talent.recordPublicView(id, q.visitorKey);
   }
   @Get(":id") detail(@Param("id") id: string) {
     return this.talent.publicDetail(id);

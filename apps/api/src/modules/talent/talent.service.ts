@@ -11,6 +11,7 @@ import { MediaService } from "../media/media.service";
 import { Profile } from "../profiles/profile.model";
 import { profileCompletion } from "../profiles/profile.service";
 import { Project } from "../projects/project.model";
+import { ProfileView } from "./profile-view.model";
 import { SavedTalentList } from "./saved-list.model";
 import { CreateListDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
 type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
@@ -35,6 +36,7 @@ export class TalentService {
     @InjectModel("Account") private readonly accounts: Model<Account>,
     @InjectModel("Session") private readonly sessions: Model<Session>,
     @InjectModel("Profile") private readonly profiles: Model<Profile>,
+    @InjectModel("ProfileView") private readonly profileViews: Model<ProfileView>,
     @InjectModel("SavedTalentList")
     private readonly lists: Model<SavedTalentList>,
     @InjectModel("Project") private readonly projects: Model<Project>,
@@ -116,6 +118,9 @@ export class TalentService {
           city: p.city,
           profession: p.profession,
           gender: p.gender,
+          age: p.birthDate
+            ? Math.max(0, Math.floor((Date.now() - new Date(p.birthDate).getTime()) / 31557600000))
+            : undefined,
           skills: p.skills,
           languages: p.languages,
           experience: p.experience,
@@ -178,6 +183,62 @@ export class TalentService {
   }
   listPublic(q: TalentQueryDto) {
     return this.list(q, true);
+  }
+  async publicOptions() {
+    const eligibleMemberIds = await this.accounts
+      .find({ role: "MEMBER", verified: true, suspended: false })
+      .distinct("_id");
+
+    const base = { memberId: { $in: eligibleMemberIds }, publicVisible: true };
+    const [cities, professions, genders, languages, availabilities] = await Promise.all([
+      this.profiles.distinct("city", base),
+      this.profiles.distinct("profession", base),
+      this.profiles.distinct("gender", base),
+      this.profiles.distinct("languages", base),
+      this.profiles.distinct("availability", base),
+    ]);
+
+    const tidy = (values: unknown[]) =>
+      [...new Set(values.filter((value): value is string => typeof value === "string" && !!value.trim()).map((value) => value.trim()))].sort(
+        (left, right) => left.localeCompare(right),
+      );
+
+    return {
+      cities: tidy(cities),
+      professions: tidy(professions),
+      genders: tidy(genders),
+      languages: tidy(languages),
+      availabilities: tidy(availabilities),
+    };
+  }
+  async recordPublicView(id: string, visitorKey: string) {
+    const memberId = objectId(id);
+    const account = await this.accounts.exists({ _id: memberId, role: "MEMBER", verified: true, suspended: false });
+    if (!account) throw new NotFoundException("Talent profile not found.");
+
+    const profile = await this.profiles.findOne({ memberId, publicVisible: true }).select("_id profileViews").lean();
+    if (!profile) throw new NotFoundException("Talent profile not found.");
+
+    const dayKey = new Date().toISOString().slice(0, 10);
+    let inserted = false;
+
+    try {
+      const result = await this.profileViews.updateOne(
+        { memberId, visitorKey, dayKey },
+        { $setOnInsert: { memberId, visitorKey, dayKey } },
+        { upsert: true },
+      );
+      inserted = result.upsertedCount === 1;
+    } catch (error) {
+      if ((error as { code?: number })?.code !== 11000) throw error;
+    }
+
+    if (inserted) {
+      await this.profiles.updateOne({ _id: profile._id }, { $inc: { profileViews: 1 } });
+    }
+
+    const fresh = await this.profiles.findById(profile._id).select("profileViews").lean();
+    return { counted: inserted, profileViews: Number(fresh?.profileViews ?? 0) };
   }
   listAdmin(q: TalentQueryDto) {
     return this.list(q, false);

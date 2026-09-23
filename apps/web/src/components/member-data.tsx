@@ -69,7 +69,10 @@ type View = {
   activity: Array<{ title: string; time: string }>;
   posts: Array<{ title: string; category: string; date: string; image: string }>;
 };
-type Dashboard = { applicationSummary: { total: number; shortlisted: number; submitted: number; underReview: number } };
+type Dashboard = {
+  profileViews: number;
+  applicationSummary: { total: number; shortlisted: number; submitted: number; underReview: number };
+};
 const empty: View = {
   member: {
     name: "",
@@ -135,7 +138,7 @@ export function MemberData({ children }: { children: ReactNode }) {
         stats: [
           { label: "Applications", value: String(counts.total), helper: `${counts.submitted + counts.underReview} active` },
           { label: "Shortlisted", value: String(counts.shortlisted), helper: "" },
-          { label: "Profile views", value: "0", helper: "" },
+          { label: "Profile views", value: String(dashboard.profileViews ?? 0), helper: "" },
           { label: "Saved roles", value: String(p.savedOpportunityIds?.length ?? 0), helper: "" },
         ],
         profileChecklist: [

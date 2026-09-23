@@ -9,13 +9,15 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import websiteData from "@/data/website-data.json";
+import { api } from "@/services/api";
+import type { Page, PageMeta } from "@/services/workspace";
 
 const groupTabs = [
-  { label: "All Talent", value: "All" },
-  { label: "Actors", value: "Actor" },
-  { label: "Crew", value: "Crew" },
-  { label: "Writers", value: "Writer" },
-  { label: "Creators", value: "Creator" },
+  { label: "All Talent", value: "all" },
+  { label: "Actors", value: "actor" },
+  { label: "Crew", value: "crew" },
+  { label: "Writers", value: "writer" },
+  { label: "Creators", value: "creator" },
 ] as const;
 
 const blank = {
@@ -32,72 +34,133 @@ const blank = {
 };
 
 type Filters = typeof blank;
-type Talent = (typeof websiteData.talentPage.directory.items)[number];
+
+type PublicTalentProfile = {
+  bio?: string;
+  city?: string;
+  profession?: string;
+  gender?: string;
+  age?: number;
+  skills?: string[];
+  languages?: string[];
+  experience?: string;
+  availability?: string;
+  photo?: string;
+  portfolio?: string[];
+  videos?: string[];
+  showreel?: string;
+  previousWork?: string;
+  socialLinks?: string[];
+};
+
+type PublicTalent = {
+  id: string;
+  name: string;
+  verified: boolean;
+  profile: PublicTalentProfile | null;
+};
+
+type TalentOptions = {
+  cities: string[];
+  professions: string[];
+  genders: string[];
+  languages: string[];
+  availabilities: string[];
+};
 
 const inputClass =
   "h-9 w-full rounded-[9px] border border-black/10 bg-[#fbfbf9] px-3 text-[12px] text-[#222] outline-none transition placeholder:text-[#aaa] focus:border-black/25 focus:bg-white focus:ring-2 focus:ring-black/[.03]";
 
-function normalize(value: string) {
-  return value.trim().toLowerCase();
+function groupLabel(profession = "") {
+  if (/actor/i.test(profession)) return "Actor";
+  if (/writer/i.test(profession)) return "Writer";
+  if (/creator/i.test(profession)) return "Creator";
+  return "Crew";
 }
 
-function unique(values: string[]) {
-  return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+function experienceLabel(value?: string) {
+  return value?.trim() || "Not added";
 }
 
 export function TalentPageView() {
   const pageContent = websiteData.talentPage;
-  const talents = pageContent.directory.items as Talent[];
-  const pageSize = pageContent.directory.pageSize;
-  const [activeGroup, setActiveGroup] = useState<(typeof groupTabs)[number]["value"]>("All");
+  const pageSize = pageContent.directory.pageSize || 20;
+  const [activeGroup, setActiveGroup] = useState<(typeof groupTabs)[number]["value"]>("all");
   const [page, setPage] = useState(1);
   const [draft, setDraft] = useState<Filters>(blank);
   const [filters, setFilters] = useState<Filters>(blank);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [items, setItems] = useState<PublicTalent[]>([]);
+  const [meta, setMeta] = useState<PageMeta>();
+  const [options, setOptions] = useState<TalentOptions>({
+    cities: [],
+    professions: [],
+    genders: [],
+    languages: [],
+    availabilities: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const cities = useMemo(() => unique(talents.map((talent) => talent.location)), [talents]);
-  const roles = useMemo(() => unique(talents.map((talent) => talent.role)), [talents]);
-  const genders = useMemo(() => unique(talents.map((talent) => talent.gender)), [talents]);
-  const languages = useMemo(() => unique(talents.flatMap((talent) => talent.languages)), [talents]);
-  const availabilities = useMemo(() => unique(talents.map((talent) => talent.availability)), [talents]);
-
-  const filteredTalents = useMemo(() => {
-    const search = normalize(filters.search);
-    const skill = normalize(filters.skill);
-
-    return talents.filter((talent) => {
-      if (activeGroup !== "All" && talent.group !== activeGroup) return false;
-
-      if (search) {
-        const haystack = normalize(
-          [talent.name, talent.role, talent.location, talent.group, ...talent.skills, ...talent.languages].join(" "),
-        );
-        if (!haystack.includes(search)) return false;
-      }
-
-      if (filters.city && talent.location !== filters.city) return false;
-      if (filters.profession && talent.role !== filters.profession) return false;
-      if (filters.gender && talent.gender !== filters.gender) return false;
-      if (filters.language && !talent.languages.includes(filters.language)) return false;
-      if (filters.availability && talent.availability !== filters.availability) return false;
-      if (skill && !talent.skills.some((item) => normalize(item).includes(skill))) return false;
-
-      if (filters.experience === "0-2" && talent.experienceYears > 2) return false;
-      if (filters.experience === "3-5" && (talent.experienceYears < 3 || talent.experienceYears > 5)) return false;
-      if (filters.experience === "6+" && talent.experienceYears < 6) return false;
-
-      if (filters.ageMin && talent.age < Number(filters.ageMin)) return false;
-      if (filters.ageMax && talent.age > Number(filters.ageMax)) return false;
-
-      return true;
-    });
-  }, [activeGroup, filters, talents]);
-
-  const pages = Math.max(1, Math.ceil(filteredTalents.length / pageSize));
-  const safePage = Math.min(page, pages);
-  const start = (safePage - 1) * pageSize;
-  const pageTalents = filteredTalents.slice(start, start + pageSize);
   const ageError = Boolean(draft.ageMin && draft.ageMax && Number(draft.ageMin) > Number(draft.ageMax));
+
+  const queryPath = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(pageSize));
+
+    if (activeGroup === "actor" || activeGroup === "writer" || activeGroup === "crew") {
+      params.set("group", activeGroup);
+    } else if (activeGroup === "creator") {
+      params.set("profession", filters.profession || "creator");
+    } else if (filters.profession) {
+      params.set("profession", filters.profession);
+    }
+
+    if (filters.search) params.set("search", filters.search.trim());
+    if (filters.city) params.set("city", filters.city);
+    if (filters.gender) params.set("gender", filters.gender);
+    if (filters.skill) params.set("skills", filters.skill.trim());
+    if (filters.language) params.set("languages", filters.language);
+    if (filters.availability) params.set("availability", filters.availability);
+    if (filters.experience) params.set("experience", filters.experience);
+    if (filters.ageMin) params.set("ageMin", filters.ageMin);
+    if (filters.ageMax) params.set("ageMax", filters.ageMax);
+
+    return `/talent?${params.toString()}`;
+  }, [activeGroup, filters, page, pageSize]);
+
+  useEffect(() => {
+    void api<TalentOptions>("/talent/options")
+      .then(setOptions)
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+
+    void api<Page<PublicTalent>>(queryPath)
+      .then((response) => {
+        if (!active) return;
+        setItems(response.items);
+        setMeta(response.meta);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setItems([]);
+        setMeta(undefined);
+        setLoadError(error instanceof Error ? error.message : "Unable to load talent profiles.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [queryPath]);
 
   useEffect(() => {
     setPage(1);
@@ -106,12 +169,13 @@ export function TalentPageView() {
   function apply() {
     if (ageError) return;
     setFilters({ ...draft });
+    setPage(1);
   }
 
   function clear() {
     setDraft(blank);
     setFilters(blank);
-    setActiveGroup("All");
+    setActiveGroup("all");
     setAdvancedOpen(false);
     setPage(1);
   }
@@ -174,10 +238,7 @@ export function TalentPageView() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              <div
-                className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#f7f6f3] to-transparent lg:block"
-                aria-hidden="true"
-              />
+              <div className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#f7f6f3] to-transparent lg:block" aria-hidden="true" />
             </div>
           </div>
         </section>
@@ -190,7 +251,7 @@ export function TalentPageView() {
                 Find the right person for the next frame.
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-7 text-[#777]">
-                Browse actors, crew, writers and creators using practical production filters without losing the visual focus of the work.
+                Live public profiles from verified M. Dadu Films members who have chosen to make their talent profile visible.
               </p>
             </div>
 
@@ -203,7 +264,10 @@ export function TalentPageView() {
                       <button
                         key={tab.value}
                         type="button"
-                        onClick={() => setActiveGroup(tab.value)}
+                        onClick={() => {
+                          setActiveGroup(tab.value);
+                          setPage(1);
+                        }}
                         className={`inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold transition ${
                           active
                             ? "bg-[#111] text-white shadow-sm"
@@ -240,10 +304,8 @@ export function TalentPageView() {
                       onChange={(event) => setDraft({ ...draft, city: event.target.value })}
                     >
                       <option value="">All cities</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
+                      {options.cities.map((city) => (
+                        <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
                   </div>
@@ -254,12 +316,11 @@ export function TalentPageView() {
                       className={inputClass}
                       value={draft.profession}
                       onChange={(event) => setDraft({ ...draft, profession: event.target.value })}
+                      disabled={activeGroup === "creator"}
                     >
                       <option value="">All roles</option>
-                      {roles.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
+                      {options.professions.map((role) => (
+                        <option key={role} value={role}>{role}</option>
                       ))}
                     </select>
                   </div>
@@ -306,64 +367,42 @@ export function TalentPageView() {
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Language</span>
-                      <select
-                        className={inputClass}
-                        value={draft.language}
-                        onChange={(event) => setDraft({ ...draft, language: event.target.value })}
-                      >
+                      <select className={inputClass} value={draft.language} onChange={(event) => setDraft({ ...draft, language: event.target.value })}>
                         <option value="">Any language</option>
-                        {languages.map((language) => (
-                          <option key={language} value={language}>
-                            {language}
-                          </option>
+                        {options.languages.map((language) => (
+                          <option key={language} value={language}>{language}</option>
                         ))}
                       </select>
                     </label>
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Gender</span>
-                      <select
-                        className={inputClass}
-                        value={draft.gender}
-                        onChange={(event) => setDraft({ ...draft, gender: event.target.value })}
-                      >
+                      <select className={inputClass} value={draft.gender} onChange={(event) => setDraft({ ...draft, gender: event.target.value })}>
                         <option value="">Any gender</option>
-                        {genders.map((gender) => (
-                          <option key={gender} value={gender}>
-                            {gender}
-                          </option>
+                        {options.genders.map((gender) => (
+                          <option key={gender} value={gender}>{gender}</option>
                         ))}
                       </select>
                     </label>
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Availability</span>
-                      <select
-                        className={inputClass}
-                        value={draft.availability}
-                        onChange={(event) => setDraft({ ...draft, availability: event.target.value })}
-                      >
+                      <select className={inputClass} value={draft.availability} onChange={(event) => setDraft({ ...draft, availability: event.target.value })}>
                         <option value="">Any availability</option>
-                        {availabilities.map((availability) => (
-                          <option key={availability} value={availability}>
-                            {availability}
-                          </option>
+                        {options.availabilities.map((availability) => (
+                          <option key={availability} value={availability}>{availability}</option>
                         ))}
                       </select>
                     </label>
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Experience</span>
-                      <select
+                      <input
                         className={inputClass}
+                        placeholder="e.g. 3 years"
                         value={draft.experience}
                         onChange={(event) => setDraft({ ...draft, experience: event.target.value })}
-                      >
-                        <option value="">Any experience</option>
-                        <option value="0-2">0–2 years</option>
-                        <option value="3-5">3–5 years</option>
-                        <option value="6+">6+ years</option>
-                      </select>
+                      />
                     </label>
 
                     <label>
@@ -372,7 +411,7 @@ export function TalentPageView() {
                         className={inputClass}
                         type="number"
                         min="16"
-                        max="80"
+                        max="100"
                         placeholder="Min age"
                         value={draft.ageMin}
                         onChange={(event) => setDraft({ ...draft, ageMin: event.target.value })}
@@ -385,7 +424,7 @@ export function TalentPageView() {
                         className={inputClass}
                         type="number"
                         min="16"
-                        max="80"
+                        max="100"
                         placeholder="Max age"
                         value={draft.ageMax}
                         onChange={(event) => setDraft({ ...draft, ageMax: event.target.value })}
@@ -402,16 +441,22 @@ export function TalentPageView() {
               <div className="mb-5">
                 <p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#999]">Public profiles</p>
                 <h3 className="font-display mt-1 text-2xl font-semibold text-[#111]">
-                  {filteredTalents.length ? "People ready to collaborate" : "No matching talent"}
+                  {loading ? "Loading talent…" : items.length ? "People ready to collaborate" : "No matching talent"}
                 </h3>
               </div>
 
-              {pageTalents.length === 0 ? (
+              {loadError ? (
+                <div className="rounded-[24px] border border-black/6 bg-white px-6 py-14 text-center">
+                  <p className="site-kicker">Unable to load</p>
+                  <h3 className="font-display mt-2 text-3xl font-semibold">Talent directory is temporarily unavailable.</h3>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#777]">{loadError}</p>
+                </div>
+              ) : !loading && items.length === 0 ? (
                 <div className="rounded-[24px] border border-black/6 bg-white px-6 py-14 text-center shadow-[0_18px_55px_rgba(0,0,0,.035)]">
                   <p className="site-kicker">No Results</p>
-                  <h3 className="font-display mt-2 text-3xl font-semibold">Try a wider search.</h3>
+                  <h3 className="font-display mt-2 text-3xl font-semibold">No public talent profiles found.</h3>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#777]">
-                    Clear one or more filters to discover more people in the M. Dadu Films creative community.
+                    Only verified members who enable Public talent profile appear here.
                   </p>
                   <button type="button" onClick={clear} className="site-button site-button-outline mt-6">
                     Clear all filters
@@ -419,103 +464,83 @@ export function TalentPageView() {
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {pageTalents.map((talent) => (
-                    <article
-                      key={talent.id}
-                      className="group relative overflow-hidden rounded-[20px] border border-black/6 bg-white shadow-[0_14px_38px_rgba(0,0,0,.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,.08)]"
-                    >
-                      <Link
-                        href={`/talent/${talent.id}`}
-                        aria-label={`View ${talent.name} portfolio`}
-                        className="absolute inset-0 z-10 cursor-pointer"
+                  {items.map((talent) => {
+                    const profile = talent.profile ?? {};
+                    const group = groupLabel(profile.profession);
+                    return (
+                      <article
+                        key={talent.id}
+                        className="group relative overflow-hidden rounded-[20px] border border-black/6 bg-white shadow-[0_14px_38px_rgba(0,0,0,.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,.08)]"
                       >
-                        <span className="sr-only">View {talent.name} portfolio</span>
-                      </Link>
-                      <div className="relative">
-                        <SiteMedia
-                          src={talent.image}
-                          alt={`${talent.name}, ${talent.role}`}
-                          kind="team"
-                          className="aspect-[4/4.7] bg-[#efeee9]"
-                          imageClassName="transition duration-500 group-hover:scale-[1.025]"
-                        />
+                        <Link href={`/talent/${talent.id}`} aria-label={`View ${talent.name} portfolio`} className="absolute inset-0 z-10 cursor-pointer">
+                          <span className="sr-only">View {talent.name} portfolio</span>
+                        </Link>
 
-                        <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/90 px-3 py-1.5 text-[9px] font-black uppercase tracking-[.1em] text-[#444] shadow-sm backdrop-blur">
-                          {talent.group}
-                        </div>
-
-                        <div
-                          className={`absolute right-3 top-3 rounded-full border px-3 py-1.5 text-[9px] font-black shadow-sm backdrop-blur ${
-                            talent.emailVerified
-                              ? "border-[#cfe8d5] bg-[#eff9f1]/95 text-[#2f7041]"
-                              : "border-white/60 bg-white/90 text-[#777]"
-                          }`}
-                        >
-                          {talent.emailVerified ? "✓ Email verified" : "Not verified"}
-                        </div>
-                      </div>
-
-                      <div className="p-4 sm:p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h3 className="font-display truncate text-[22px] font-semibold leading-tight text-[#111]">{talent.name}</h3>
-                            <p className="mt-1 truncate text-sm font-medium text-[#666]">{talent.role}</p>
-                          </div>
-                          <span
-                            className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                              talent.availability === "Available"
-                                ? "bg-[#4f9b62]"
-                                : talent.availability === "Limited"
-                                  ? "bg-[#d49b45]"
-                                  : "bg-[#aaa]"
-                            }`}
-                            title={talent.availability}
-                            aria-label={talent.availability}
+                        <div className="relative">
+                          <SiteMedia
+                            src={profile.photo ?? ""}
+                            alt={`${talent.name}, ${profile.profession ?? "Talent"}`}
+                            kind="team"
+                            className="aspect-[4/4.7] bg-[#efeee9]"
+                            imageClassName="transition duration-500 group-hover:scale-[1.025]"
                           />
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-2 gap-3 border-y border-black/6 py-3 text-[11px]">
-                          <div>
-                            <span className="block text-[9px] font-bold uppercase tracking-[.08em] text-[#aaa]">Based in</span>
-                            <strong className="mt-1 block font-semibold text-[#555]">{talent.location}</strong>
+                          <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/90 px-3 py-1.5 text-[9px] font-black uppercase tracking-[.1em] text-[#444] shadow-sm backdrop-blur">
+                            {group}
                           </div>
-                          <div>
-                            <span className="block text-[9px] font-bold uppercase tracking-[.08em] text-[#aaa]">Experience</span>
-                            <strong className="mt-1 block font-semibold text-[#555]">{talent.experience}</strong>
+                          <div className="absolute right-3 top-3 rounded-full border border-[#cfe8d5] bg-[#eff9f1]/95 px-3 py-1.5 text-[9px] font-black text-[#2f7041] shadow-sm backdrop-blur">
+                            ✓ Verified
                           </div>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {talent.skills.slice(0, 3).map((skill) => (
-                            <span key={skill} className="rounded-full bg-[#f4f4f1] px-2.5 py-1.5 text-[10px] font-semibold text-[#666]">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
+                        <div className="p-4 sm:p-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className="font-display truncate text-[22px] font-semibold leading-tight text-[#111]">{talent.name}</h3>
+                              <p className="mt-1 truncate text-sm font-medium text-[#666]">{profile.profession || "Creative Member"}</p>
+                            </div>
+                            <span
+                              className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                                profile.availability === "Available"
+                                  ? "bg-[#4f9b62]"
+                                  : profile.availability === "Limited"
+                                    ? "bg-[#d49b45]"
+                                    : "bg-[#aaa]"
+                              }`}
+                              title={profile.availability || "Availability not added"}
+                            />
+                          </div>
 
-                        <div className="mt-4 flex items-center justify-between gap-3 text-[10px] font-semibold text-[#999]">
-                          <span>
-                            {talent.age} yrs · {talent.gender}
-                          </span>
-                          <span className="truncate text-right">{talent.languages.slice(0, 2).join(" · ")}</span>
+                          <div className="mt-4 grid grid-cols-2 gap-3 border-y border-black/6 py-3 text-[11px]">
+                            <div>
+                              <span className="block text-[9px] font-bold uppercase tracking-[.08em] text-[#aaa]">Based in</span>
+                              <strong className="mt-1 block font-semibold text-[#555]">{profile.city || "Not added"}</strong>
+                            </div>
+                            <div>
+                              <span className="block text-[9px] font-bold uppercase tracking-[.08em] text-[#aaa]">Experience</span>
+                              <strong className="mt-1 block font-semibold text-[#555]">{experienceLabel(profile.experience)}</strong>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex min-h-7 flex-wrap gap-1.5">
+                            {(profile.skills ?? []).slice(0, 3).map((skill) => (
+                              <span key={skill} className="rounded-full bg-[#f4f4f1] px-2.5 py-1.5 text-[10px] font-semibold text-[#666]">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-4 flex items-center justify-between gap-3 text-[10px] font-semibold text-[#999]">
+                            <span>{profile.age ? `${profile.age} yrs` : "Age not added"}{profile.gender ? ` · ${profile.gender}` : ""}</span>
+                            <span className="truncate text-right">{(profile.languages ?? []).slice(0, 2).join(" · ") || "Languages not added"}</span>
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
               )}
 
-              <PaginationControls
-                meta={{
-                  page: safePage,
-                  limit: pageSize,
-                  total: filteredTalents.length,
-                  pages,
-                  hasNext: safePage < pages,
-                  hasPrevious: safePage > 1,
-                }}
-                onPage={changePage}
-              />
+              <PaginationControls meta={meta} onPage={changePage} />
             </div>
 
             <div className="relative mt-12 overflow-hidden rounded-[20px] bg-[#101010] p-7 text-white sm:p-8 lg:px-10 lg:py-9">
@@ -527,10 +552,7 @@ export function TalentPageView() {
                   className="h-full"
                   imageClassName="object-cover object-center opacity-100"
                 />
-                <div
-                  className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#101010] via-[#101010]/55 to-transparent"
-                  aria-hidden="true"
-                />
+                <div className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#101010] via-[#101010]/55 to-transparent" aria-hidden="true" />
               </div>
 
               <div className="relative z-10 max-w-xl">

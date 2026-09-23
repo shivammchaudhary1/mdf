@@ -23,6 +23,7 @@ export interface Profile {
   savedOpportunityIds?: Types.ObjectId[];
   emailCastingAlerts: boolean;
   emailUpdates: boolean;
+  profileViews: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,6 +59,7 @@ export const ProfileSchema = new Schema<Profile>(
     savedOpportunityIds: { type: [Schema.Types.ObjectId], default: undefined },
     emailCastingAlerts: { type: Boolean, default: true, required: true },
     emailUpdates: { type: Boolean, default: true, required: true },
+    profileViews: { type: Number, default: 0, min: 0, required: true },
   },
   { timestamps: true, versionKey: false, minimize: true },
 );
