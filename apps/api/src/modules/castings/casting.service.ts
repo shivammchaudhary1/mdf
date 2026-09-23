@@ -11,6 +11,13 @@ import { Project } from "../projects/project.model";
 import { CastingQueryDto, CreateCastingDto, UpdateCastingDto } from "./casting.dto";
 import { Casting } from "./casting.model";
 
+const DAY_MS = 86_400_000;
+
+function indiaDateKey(now = new Date()) {
+  const india = new Date(now.getTime() + 330 * 60_000);
+  return new Date(Date.UTC(india.getUTCFullYear(), india.getUTCMonth(), india.getUTCDate()));
+}
+
 @Injectable()
 export class CastingService {
   constructor(
@@ -26,6 +33,8 @@ export class CastingService {
     const item = casting as Casting;
     const coverId = item.coverMediaId ? String(item.coverMediaId) : undefined;
     const deadline = item.deadline ? new Date(item.deadline) : undefined;
+    const today = indiaDateKey();
+    const deadlineExpired = !!deadline && deadline.getTime() < today.getTime();
 
     return {
       ...casting,
@@ -33,9 +42,13 @@ export class CastingService {
       projectId: item.projectId ? String(item.projectId) : undefined,
       coverMediaId: coverId,
       coverImage: coverId ? this.media.urlsFor(coverId).large : undefined,
+      deadlineExpired,
       closingSoon:
-        item.status === "Open" && !!deadline && deadline.getTime() > Date.now() && deadline.getTime() < Date.now() + 7 * 86_400_000,
-      acceptingApplications: item.published && !item.archived && item.status === "Open" && (!deadline || deadline.getTime() > Date.now()),
+        item.status === "Open" &&
+        !!deadline &&
+        !deadlineExpired &&
+        deadline.getTime() < today.getTime() + 7 * DAY_MS,
+      acceptingApplications: item.published && !item.archived && item.status === "Open" && !deadlineExpired,
     };
   }
 
@@ -48,15 +61,14 @@ export class CastingService {
   }
 
   private async list(query: CastingQueryDto, admin: boolean) {
+    const today = indiaDateKey();
+    const activeDeadline = {
+      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gte: today } }],
+    };
+    const and: Record<string, unknown>[] = [];
+
     const filter: Record<string, unknown> = {
       archived: false,
-      ...(admin
-        ? {}
-        : {
-            published: true,
-            status: "Open",
-          }),
-      ...(query.status ? { status: query.status } : {}),
       ...(query.category ? { category: query.category } : {}),
       ...(query.location
         ? {
@@ -64,22 +76,39 @@ export class CastingService {
           }
         : {}),
       ...(query.projectId ? { projectId: objectId(query.projectId) } : {}),
-      ...(query.closingSoon
-        ? {
-            status: "Open",
-            deadline: {
-              $gt: new Date(),
-              $lt: new Date(Date.now() + 7 * 86_400_000),
-            },
-          }
-        : {}),
     };
+
+    if (!admin) {
+      filter.published = true;
+      filter.status = "Open";
+      and.push(activeDeadline);
+    }
+
+    if (admin && query.status === "Open") {
+      filter.status = "Open";
+      and.push(activeDeadline);
+    } else if (admin && query.status === "Closed") {
+      and.push({
+        $or: [{ status: "Closed" }, { status: "Open", deadline: { $lt: today } }],
+      });
+    } else if (admin && query.status) {
+      filter.status = query.status;
+    }
+
+    if (query.closingSoon) {
+      filter.status = "Open";
+      filter.deadline = {
+        $gte: today,
+        $lt: new Date(today.getTime() + 7 * DAY_MS),
+      };
+    }
 
     if (query.search) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
-
-      filter.$or = [{ title: search }, { role: search }, { summary: search }, { location: search }];
+      and.push({ $or: [{ title: search }, { role: search }, { summary: search }, { location: search }] });
     }
+
+    if (and.length) filter.$and = and;
 
     const [result] = await this.castings.aggregate<{ items: Casting[]; total: { count: number }[] }>([
       { $match: filter },

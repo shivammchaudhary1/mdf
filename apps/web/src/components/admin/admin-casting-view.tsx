@@ -173,7 +173,7 @@ function CastingFields({
           </AdminFormField>
 
           <AdminFormField label="Status">
-            <select name="status" defaultValue={edit?.status === "Closing Soon" ? "Open" : (edit?.status ?? "Draft")}>
+            <select name="status" defaultValue={edit?.workflowStatus ?? "Draft"}>
               <option>Draft</option>
               <option>Open</option>
               <option>Closed</option>

@@ -21,6 +21,11 @@ import {
 } from "./application.dto";
 import { Application } from "./application.model";
 
+function indiaDateKey(now = new Date()) {
+  const india = new Date(now.getTime() + 330 * 60_000);
+  return new Date(Date.UTC(india.getUTCFullYear(), india.getUTCMonth(), india.getUTCDate()));
+}
+
 type ResolvedOpportunity = {
   type: "PROJECT" | "CASTING";
   id: Types.ObjectId;
@@ -67,6 +72,7 @@ export class ApplicationService {
 
   private async resolveOpportunity(input: CreateApplicationDto): Promise<ResolvedOpportunity> {
     const id = objectId(input.opportunityId, "Opportunity not found.");
+    const today = indiaDateKey();
 
     if (!input.opportunityType || input.opportunityType === "CASTING") {
       const casting = await this.castings
@@ -75,7 +81,7 @@ export class ApplicationService {
           published: true,
           archived: false,
           status: "Open",
-          $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
+          $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gte: today } }],
         })
         .lean();
 
@@ -306,11 +312,12 @@ export class ApplicationService {
   }
 
   async opportunities(query: OpportunityQueryDto) {
+    const today = indiaDateKey();
     const castingMatch: Record<string, unknown> = {
       published: true,
       archived: false,
       status: "Open",
-      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
+      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gte: today } }],
     };
 
     const projectMatch: Record<string, unknown> = {

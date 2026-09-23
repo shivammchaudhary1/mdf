@@ -151,6 +151,7 @@ export type CastingRecord = {
   deadline?: string;
   status: string;
   closingSoon: boolean;
+  deadlineExpired?: boolean;
   acceptingApplications?: boolean;
   published: boolean;
   applications?: number;
@@ -180,6 +181,7 @@ export type CastingView = {
   shootDate: string;
   deadline: string;
   status: string;
+  workflowStatus: string;
   applications: number;
   ageMin?: number;
   ageMax?: number;
@@ -208,7 +210,8 @@ export const castingView = (x: CastingRecord): CastingView => ({
   location: x.location ?? "",
   shootDate: x.shootDate?.slice(0, 10) ?? "",
   deadline: x.deadline?.slice(0, 10) ?? "",
-  status: !x.published ? "Draft" : x.closingSoon ? "Closing Soon" : x.status,
+  status: !x.published ? "Draft" : x.deadlineExpired && x.status === "Open" ? "Closed" : x.closingSoon ? "Closing Soon" : x.status,
+  workflowStatus: x.status,
   applications: x.applications ?? 0,
   ageMin: x.ageMin,
   ageMax: x.ageMax,

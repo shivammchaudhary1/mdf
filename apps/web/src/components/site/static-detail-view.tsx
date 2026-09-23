@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ApplyForm } from "@/components/apply-form";
+import { CastingApplyPanel } from "@/components/site/casting-apply-panel";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
@@ -10,11 +11,22 @@ import { getContentItem } from "@/services/content";
 type DetailKind = "projects" | "blogs" | "castings";
 type ContentItem = NonNullable<Awaited<ReturnType<typeof getContentItem>>>;
 
-const dateLabel = (value?: string) =>
-  value ? new Date(value).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+function dateLabel(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
 
 function text(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function ageLabel(min?: number, max?: number) {
+  if (min !== undefined && max !== undefined) return `${min}–${max} years`;
+  if (min !== undefined) return `${min}+ years`;
+  if (max !== undefined) return `Up to ${max} years`;
+  return "";
 }
 
 function ProjectApply({ item, status }: { item: ContentItem; status: string }) {
@@ -294,13 +306,195 @@ function ProjectDetail({ item }: { item: ContentItem }) {
   );
 }
 
+function CastingDetail({ item, slug }: { item: ContentItem; slug: string }) {
+  const title = text(item.title) || "Casting Opportunity";
+  const category = text(item.category) || "Casting Call";
+  const role = text(item.role);
+  const summary = text(item.summary) || text(item.description);
+  const description = text(item.description);
+  const image = text(item.image);
+  const location = text(item.location);
+  const experience = text(item.experience);
+  const compensation = text(item.compensation);
+  const requirements = text(item.requirements);
+  const deadline = dateLabel(item.deadline);
+  const shootDate = dateLabel(item.shootDate);
+  const age = ageLabel(item.ageMin, item.ageMax);
+  const gender = text(item.gender);
+  const closed = item.acceptingApplications === false;
+
+  const tags = Array.isArray(item.tags)
+    ? [...new Set(item.tags.map((value) => text(value)).filter(Boolean))].slice(0, 20)
+    : [];
+
+  const details = Array.isArray(item.details) ? item.details.map((value) => text(value)).filter(Boolean) : [];
+  const showDescription = !!description && description !== summary;
+  const hasContent = showDescription || !!requirements || details.length > 0;
+
+  const facts = [
+    role ? { label: "Role", value: role } : null,
+    location ? { label: "Location", value: location } : null,
+    deadline ? { label: "Apply By", value: deadline } : null,
+    shootDate ? { label: "Shoot Date", value: shootDate } : null,
+    age ? { label: "Age", value: age } : null,
+    gender ? { label: "Gender", value: gender } : null,
+    experience ? { label: "Experience", value: experience } : null,
+    compensation ? { label: "Compensation", value: compensation } : null,
+  ].filter((value): value is { label: string; value: string } => Boolean(value));
+
+  return (
+    <>
+      <SiteHeader />
+      <main id="main-content" className="bg-[#f7f6f3]">
+        <section className="border-b border-black/6 bg-white">
+          <div className="site-shell py-3 sm:py-4">
+            <nav className="flex items-center gap-3 text-[11px] font-semibold text-[#888]" aria-label="Breadcrumb">
+              <Link href="/" className="transition hover:text-black">
+                Home
+              </Link>
+              <span aria-hidden="true">/</span>
+              <Link href="/casting" className="transition hover:text-black">
+                Casting
+              </Link>
+              <span aria-hidden="true">/</span>
+              <span className="max-w-[190px] truncate text-[#444] sm:max-w-sm">{title}</span>
+            </nav>
+          </div>
+
+          <div className="site-shell pb-6 pt-4 sm:pb-8 sm:pt-6">
+            <div className="grid overflow-hidden rounded-[24px] border border-black/6 bg-[#111] shadow-[0_22px_70px_rgba(0,0,0,.12)] lg:grid-cols-[.95fr_1.05fr]">
+              <div className="flex min-h-[360px] flex-col justify-between p-6 text-white sm:p-8 lg:min-h-[430px] lg:p-10">
+                <div>
+                  <Link
+                    href="/casting"
+                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.1em] text-white/55 transition hover:text-white"
+                  >
+                    ← Back to Casting
+                  </Link>
+
+                  <div className="mt-8 flex items-center gap-3">
+                    <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#ff5e67]">{category}</p>
+                    <span className="h-px w-10 bg-[#ff5e67]" aria-hidden="true" />
+                  </div>
+
+                  <h1 className="font-display mt-4 max-w-xl text-[clamp(2.65rem,4.6vw,4.7rem)] font-semibold leading-[.93] tracking-[-.045em]">
+                    {title}
+                  </h1>
+
+                  {summary && <p className="mt-5 max-w-xl text-sm leading-7 text-white/65 sm:text-[15px]">{summary}</p>}
+                </div>
+
+                <div className="mt-8">
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-full border px-3 py-2 text-[10px] font-bold ${
+                        closed ? "border-amber-300/25 bg-amber-300/10 text-amber-100" : "border-emerald-300/20 bg-emerald-300/10 text-emerald-100"
+                      }`}
+                    >
+                      {closed ? "Applications Closed" : "Applications Open"}
+                    </span>
+
+                    {role && (
+                      <span className="rounded-full border border-white/12 bg-white/8 px-3 py-2 text-[10px] font-bold text-white/80">{role}</span>
+                    )}
+                  </div>
+
+                  {!!tags.length && (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.slice(0, 6).map((tag) => (
+                        <span key={tag} className="rounded-full bg-white/7 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.07em] text-white/55">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {!closed && (
+                    <a href="#casting-application" className="site-button site-button-primary mt-6">
+                      View & Apply
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <SiteMedia
+                src={image || undefined}
+                alt={image ? `${title} casting cover` : `${title} casting artwork`}
+                kind="team"
+                priority
+                className="min-h-[300px] sm:min-h-[360px] lg:min-h-[430px]"
+                imageClassName="object-cover"
+              />
+            </div>
+
+            {!!facts.length && (
+              <section className="mt-4 grid overflow-hidden rounded-[18px] border border-black/6 bg-white shadow-[0_10px_32px_rgba(0,0,0,.025)] sm:grid-cols-2 lg:grid-cols-4">
+                {facts.map((fact) => (
+                  <div key={fact.label} className="border-black/6 px-4 py-3.5 sm:border-r sm:last:border-r-0 lg:[&:nth-child(4n)]:border-r-0">
+                    <span className="block text-[8px] font-black uppercase tracking-[.1em] text-[#aaa]">{fact.label}</span>
+                    <strong className="mt-1 block text-[12px] font-semibold text-[#333]">{fact.value}</strong>
+                  </div>
+                ))}
+              </section>
+            )}
+          </div>
+        </section>
+
+        <section className="site-section !py-8 sm:!py-10">
+          <div className="site-shell">
+            <div className={`grid gap-5 ${hasContent ? "lg:grid-cols-[1.4fr_.72fr]" : "lg:grid-cols-[minmax(0,760px)] lg:justify-center"}`}>
+              {hasContent && (
+                <article className="rounded-[20px] border border-black/6 bg-white p-6 shadow-[0_12px_36px_rgba(0,0,0,.025)] sm:p-7">
+                  {showDescription && (
+                    <section>
+                      <p className="site-kicker">Role Brief</p>
+                      <h2 className="font-display mt-1 text-2xl font-semibold">About this opportunity</h2>
+                      <p className="mt-4 text-[14px] leading-7 text-[#626262]">{description}</p>
+                    </section>
+                  )}
+
+                  {(requirements || details.length > 0) && (
+                    <section className={showDescription ? "mt-7 border-t border-black/6 pt-7" : ""}>
+                      <p className="site-kicker">What we need</p>
+                      <h2 className="font-display mt-1 text-2xl font-semibold">Requirements & details</h2>
+
+                      {requirements && <p className="mt-4 whitespace-pre-line text-[14px] leading-7 text-[#626262]">{requirements}</p>}
+
+                      {!!details.length && (
+                        <ul className="mt-5 grid gap-2.5">
+                          {details.map((detail, index) => (
+                            <li key={`${detail}-${index}`} className="flex gap-3 rounded-xl bg-[#f7f6f3] px-4 py-3 text-[13px] leading-6 text-[#5f5f5f]">
+                              <span className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--brand-red)]" aria-hidden="true" />
+                              <span>{detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+                  )}
+                </article>
+              )}
+
+              <aside id="casting-application" className="scroll-mt-28 lg:sticky lg:top-24 lg:self-start">
+                <CastingApplyPanel opportunityId={String(item._id ?? "")} closed={closed} returnPath={`/casting/${slug}`} />
+              </aside>
+            </div>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
+
 export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug: string }) {
   const item = await getContentItem(kind === "blogs" ? "blog" : kind === "castings" ? "casting" : "projects", slug);
   if (!item) notFound();
 
   if (kind === "projects") return <ProjectDetail item={item} />;
+  if (kind === "castings") return <CastingDetail item={item} slug={slug} />;
 
-  const title = text(item.title) || (kind === "blogs" ? "Story" : "Casting Opportunity");
+  const title = text(item.title) || "Story";
   const summary = text(item.description);
   const category = text(item.category);
   const image = text(item.image);
@@ -310,7 +504,7 @@ export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug:
       <SiteHeader />
       <main id="main-content">
         <section className="site-shell py-9 lg:py-14">
-          <Link href={kind === "blogs" ? "/blog" : "/casting"} className="text-xs font-semibold text-[#777] hover:text-black">
+          <Link href="/blog" className="text-xs font-semibold text-[#777] hover:text-black">
             ← Back
           </Link>
 
@@ -320,67 +514,7 @@ export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug:
             {summary && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">{summary}</p>}
           </div>
 
-          {image && (
-            <SiteMedia
-              src={image}
-              alt={title}
-              kind={kind === "blogs" ? "blog" : "team"}
-              className="mx-auto mt-10 aspect-[16/7] max-w-5xl rounded-[20px]"
-            />
-          )}
-
-          {kind === "castings" && (
-            <section className="mx-auto mt-8 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {item.role && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Role</span>
-                  <strong className="mt-1 block">{String(item.role)}</strong>
-                </div>
-              )}
-              {item.location && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Location</span>
-                  <strong className="mt-1 block">{String(item.location)}</strong>
-                </div>
-              )}
-              {item.shootDate && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Shoot Date</span>
-                  <strong className="mt-1 block">{dateLabel(item.shootDate)}</strong>
-                </div>
-              )}
-              {item.deadline && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Deadline</span>
-                  <strong className="mt-1 block">{dateLabel(item.deadline)}</strong>
-                </div>
-              )}
-              {(item.ageMin !== undefined || item.ageMax !== undefined) && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Age</span>
-                  <strong className="mt-1 block">{`${item.ageMin ?? 0}–${item.ageMax ?? 120}`}</strong>
-                </div>
-              )}
-              {item.gender && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Gender</span>
-                  <strong className="mt-1 block">{String(item.gender)}</strong>
-                </div>
-              )}
-              {item.experience && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Experience</span>
-                  <strong className="mt-1 block">{String(item.experience)}</strong>
-                </div>
-              )}
-              {item.compensation && (
-                <div className="site-card p-4">
-                  <span className="text-xs text-[#777]">Compensation</span>
-                  <strong className="mt-1 block">{String(item.compensation)}</strong>
-                </div>
-              )}
-            </section>
-          )}
+          {image && <SiteMedia src={image} alt={title} kind="blog" className="mx-auto mt-10 aspect-[16/7] max-w-5xl rounded-[20px]" />}
 
           {(item.body?.length || item.description) && (
             <article className="mx-auto max-w-3xl py-10 text-[15px] leading-8 text-[#555]">
@@ -390,26 +524,6 @@ export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug:
                 </p>
               ))}
             </article>
-          )}
-
-          {kind === "castings" && (item.requirements || item.details?.length) && (
-            <section className="mx-auto max-w-3xl pb-8">
-              <h2 className="font-display text-2xl font-semibold">Requirements & Details</h2>
-              {item.requirements && <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#666]">{item.requirements}</p>}
-              {item.details?.length ? (
-                <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-[#666]">
-                  {item.details.map((value) => (
-                    <li key={value}>{value}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </section>
-          )}
-
-          {kind === "castings" && (
-            <div className="mx-auto max-w-3xl pb-12">
-              <ApplyForm opportunityId={String(item._id)} opportunityType="CASTING" closed={item.acceptingApplications === false} />
-            </div>
           )}
         </section>
       </main>
