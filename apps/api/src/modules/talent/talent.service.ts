@@ -13,7 +13,7 @@ import { profileCompletion } from "../profiles/profile.service";
 import { Project } from "../projects/project.model";
 import { ProfileView } from "./profile-view.model";
 import { SavedTalentList } from "./saved-list.model";
-import { CreateListDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
+import { CreateListDto, MemberUpdateDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
 type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
   profile?: Profile | null;
 };
@@ -118,9 +118,7 @@ export class TalentService {
           city: p.city,
           profession: p.profession,
           gender: p.gender,
-          age: p.birthDate
-            ? Math.max(0, Math.floor((Date.now() - new Date(p.birthDate).getTime()) / 31557600000))
-            : undefined,
+          age: p.birthDate ? Math.max(0, Math.floor((Date.now() - new Date(p.birthDate).getTime()) / 31557600000)) : undefined,
           skills: p.skills,
           languages: p.languages,
           experience: p.experience,
@@ -185,9 +183,7 @@ export class TalentService {
     return this.list(q, true);
   }
   async publicOptions() {
-    const eligibleMemberIds = await this.accounts
-      .find({ role: "MEMBER", verified: true, suspended: false })
-      .distinct("_id");
+    const eligibleMemberIds = await this.accounts.find({ role: "MEMBER", verified: true, suspended: false }).distinct("_id");
 
     const base = { memberId: { $in: eligibleMemberIds }, publicVisible: true };
     const [cities, professions, genders, languages, availabilities] = await Promise.all([
@@ -199,9 +195,9 @@ export class TalentService {
     ]);
 
     const tidy = (values: unknown[]) =>
-      [...new Set(values.filter((value): value is string => typeof value === "string" && !!value.trim()).map((value) => value.trim()))].sort(
-        (left, right) => left.localeCompare(right),
-      );
+      [
+        ...new Set(values.filter((value): value is string => typeof value === "string" && !!value.trim()).map((value) => value.trim())),
+      ].sort((left, right) => left.localeCompare(right));
 
     return {
       cities: tidy(cities),

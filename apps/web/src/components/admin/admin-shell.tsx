@@ -13,6 +13,8 @@ import { ensureSession, signOut } from "@/services/auth-session";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useAppStore } from "@/store/app-store";
 
+type AdminNavItem = readonly [key: string, label: string, href: string];
+
 export const adminNavGroups = [
   { label: "Overview", items: [["dashboard", "Overview", "/admin"]] },
   {
@@ -50,7 +52,7 @@ export const adminNavGroups = [
   },
 ] as const;
 
-export const adminNav = adminNavGroups.flatMap((group) => group.items);
+export const adminNav: AdminNavItem[] = adminNavGroups.flatMap<AdminNavItem>((group) => [...group.items]);
 
 export function AdminShell({ section, children }: { section: string; children: ReactNode }) {
   const pathname = usePathname();

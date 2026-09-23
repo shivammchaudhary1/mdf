@@ -600,3 +600,90 @@
   height:14px;
   accent-color:var(--brand-red);
 }
+
+/* PROJECT CRUD V1 */
+.ad-project-uploading{display:flex;align-items:center;gap:11px;border:1px solid #f1c9cc;border-radius:11px;background:#fff6f6;padding:12px 14px;color:#555}.ad-project-uploading i{width:22px;height:22px;flex:0 0 auto;border:2px solid #ead5d6;border-top-color:var(--brand-red);border-radius:50%;animation:ad-project-spin .75s linear infinite}.ad-project-uploading strong{display:block;font-size:9px}.ad-project-uploading span{display:block;margin-top:2px;color:#888;font-size:7.5px}.ad-project-cover-preview{display:flex;align-items:center;gap:10px;margin-top:8px}.ad-project-cover-preview img{width:96px;height:58px;border:1px solid #0000000d;border-radius:9px;object-fit:cover}.ad-project-cover-preview span,.ad-project-help{color:#999;font-size:7.5px}.ad-project-gallery-pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ad-project-gallery-slot{position:relative;display:grid;min-height:92px;place-items:center;overflow:hidden;border:1px dashed #ccc;border-radius:10px;background:#fafaf8;color:#999;font-size:8px;font-weight:800;cursor:pointer}.ad-project-gallery-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ad-project-gallery-slot input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.ad-project-builder{display:grid;gap:10px;border:1px solid #0000000d;border-radius:12px;background:#fafaf8;padding:13px}.ad-project-builder-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.ad-project-builder-head strong{display:block;margin-top:3px;font-size:9px}.ad-project-row{display:grid;gap:7px;padding-top:9px;border-top:1px solid #0000000d}.ad-project-row input,.ad-project-row select,.ad-project-tag-add input,.ad-project-tag-add select{width:100%;min-height:38px;border:1px solid #dfdfdb;border-radius:8px;background:#fff;padding:8px 10px;color:#333;font-size:8px;outline:0}.ad-project-remove{justify-self:start;border:0;background:transparent;color:#b82e37;font-size:7.5px;font-weight:800}.ad-project-tag-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}.ad-project-tag-add input{grid-column:1/-1}.ad-project-tags{display:flex;flex-wrap:wrap;gap:6px}.ad-project-tags button{border:1px solid #0000000e;border-radius:999px;background:#fff;padding:6px 9px;color:#666;font-size:7.5px;font-weight:700}@keyframes ad-project-spin{to{transform:rotate(360deg)}}@media(min-width:640px){.ad-project-gallery-pickers{grid-template-columns:repeat(4,minmax(0,1fr))}.ad-project-row{grid-template-columns:1fr 1fr 1fr auto;align-items:center}.ad-project-tag-add{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.ad-project-tag-add input{grid-column:auto}}
+
+/* PROJECT CREATE FIX V2 */
+.ad-dialog-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.ad-submit-spinner{display:none;width:13px;height:13px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;animation:ad-project-spin .7s linear infinite}
+.ad-dialog-form[aria-busy="true"] .ad-dialog-primary .ad-submit-spinner{display:block}
+.ad-dialog-form[aria-busy="true"] .ad-dialog-primary{cursor:wait;opacity:.88}
+.ad-dialog-form[aria-busy="true"] .ad-dialog-cancel{pointer-events:none;opacity:.55}
+
+/* ADMIN PROJECT MENU CLIP FIX V1 */
+.ad-project-card{overflow:visible}
+.ad-project-card>div:first-child:not(.ad-project-body){overflow:hidden;border-radius:17px 17px 0 0}
+.ad-project-body{position:relative;z-index:2;border-radius:0 0 17px 17px;background:#fff}
+.ad-project-card .ad-row-actions{position:relative;z-index:95}
+.ad-project-card .ad-more-wrap{z-index:96}
+.ad-project-card .ad-more-menu{z-index:110;top:36px;right:0;min-width:132px;box-shadow:0 18px 44px #0000002b}
+
+/* PROJECT UI FINAL FIX V1 */
+/* Keep project cards compact instead of stretching across the dashboard. */
+@media(min-width:1024px){
+  .ad-project-grid{
+    grid-template-columns:repeat(auto-fill,minmax(260px,320px))!important;
+    justify-content:start;
+    align-items:start;
+  }
+}
+.ad-project-card{
+  width:100%;
+  max-width:320px;
+}
+.ad-project-body{
+  padding:14px!important;
+}
+.ad-project-body h2{
+  font-size:18px!important;
+  line-height:1.2;
+}
+.ad-project-numbers{
+  margin-top:12px!important;
+}
+.ad-project-footer{
+  margin-top:12px!important;
+}
+
+/* Open the project three-dot menu upward so it never falls below the card/page edge. */
+.ad-project-card .ad-more-menu{
+  top:auto!important;
+  bottom:38px!important;
+  right:0!important;
+  z-index:130!important;
+}
+.ad-project-card .ad-more-wrap{
+  z-index:129!important;
+}
+.ad-project-card .ad-row-actions{
+  overflow:visible!important;
+}
+
+/* PROJECT ACTION MENU FINAL V1 */
+.ad-project-card{
+  transition:box-shadow .18s ease,min-height .18s ease;
+}
+.ad-project-card:has(.ad-more-wrap.is-open){
+  box-shadow:0 18px 44px #00000012;
+}
+.ad-project-card:has(.ad-more-wrap.is-open) .ad-project-body{
+  padding-bottom:118px!important;
+}
+.ad-project-card .ad-more-wrap{
+  position:relative;
+}
+.ad-project-card .ad-more-menu{
+  top:34px!important;
+  bottom:auto!important;
+  right:0!important;
+  min-width:118px!important;
+  border-radius:10px!important;
+  padding:5px!important;
+  box-shadow:0 14px 34px #0000001c!important;
+}
+.ad-project-card .ad-more-menu button{
+  min-height:32px;
+  padding:0 10px;
+  border-radius:7px;
+}

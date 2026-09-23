@@ -97,40 +97,63 @@ export function CastingPageView() {
                 </button>
               ))}
             </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {data.castings.map((c) => (
-                <article key={c.slug} className="site-card p-6 sm:p-7">
-                  <div className="flex items-center justify-between">
-                    <span className="site-kicker">{c.category}</span>
-                    <span className="rounded-full bg-[#eef9f1] px-3 py-1 text-[10px] font-bold text-[#2e7d46]">Open</span>
-                  </div>
-                  <h2 className="font-display mt-3 text-2xl font-semibold">{c.title}</h2>
-                  <p className="mt-4 text-sm leading-6 text-[#777]">{c.summary}</p>
-                  <div className="mt-5 grid grid-cols-2 gap-3 border-y border-black/6 py-4 text-xs">
-                    <div>
-                      Location<strong className="block">{c.location}</strong>
+            {data.castings.length ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {data.castings.map((c) => (
+                  <article key={c.slug} className="site-card p-6 sm:p-7">
+                    <div className="flex items-center justify-between">
+                      {c.category && <span className="site-kicker">{c.category}</span>}
+                      <span className="rounded-full bg-[#eef9f1] px-3 py-1 text-[10px] font-bold text-[#2e7d46]">Open</span>
                     </div>
-                    <div>
-                      Deadline<strong className="block">{c.deadline}</strong>
+                    <h2 className="font-display mt-3 text-2xl font-semibold">{c.title}</h2>
+                    {c.summary && <p className="mt-4 text-sm leading-6 text-[#777]">{c.summary}</p>}
+                    {(c.location || c.deadline || c.age || c.gender || c.compensation) && (
+                      <div className="mt-5 grid grid-cols-2 gap-3 border-y border-black/6 py-4 text-xs">
+                        {c.location && (
+                          <div>
+                            Location<strong className="block">{c.location}</strong>
+                          </div>
+                        )}
+                        {c.deadline && (
+                          <div>
+                            Deadline<strong className="block">{c.deadline}</strong>
+                          </div>
+                        )}
+                        {(c.age || c.gender) && (
+                          <div>
+                            Age / Gender
+                            <strong className="block">{[c.age, c.gender].filter(Boolean).join(" · ")}</strong>
+                          </div>
+                        )}
+                        {c.compensation && (
+                          <div>
+                            Compensation<strong className="block">{c.compensation}</strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="mt-5 flex justify-end">
+                      <Link href={`/casting/${c.slug}`} className="site-button site-button-primary">
+                        View & Apply
+                      </Link>
                     </div>
-                    <div>
-                      Age / Gender
-                      <strong className="block">
-                        {c.age} · {c.gender}
-                      </strong>
-                    </div>
-                    <div>
-                      Compensation<strong className="block">{c.compensation}</strong>
-                    </div>
-                  </div>
-                  <div className="mt-5 flex justify-end">
-                    <Link href={`/casting/${c.slug}`} className="site-button site-button-primary">
-                      View & Apply
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </article>
+                ))}
+              </div>
+            ) : !data.loading ? (
+              <div className="rounded-[24px] border border-black/6 bg-white px-6 py-14 text-center shadow-[0_18px_55px_rgba(0,0,0,.035)] sm:py-16">
+                <p className="site-kicker">No Open Calls</p>
+                <h3 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">No casting calls found.</h3>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#777]">
+                  There are no published casting opportunities in this category right now.
+                </p>
+                {active !== "All" && (
+                  <button type="button" className="site-button site-button-outline mt-6" onClick={() => setActive("All")}>
+                    View all casting calls
+                  </button>
+                )}
+              </div>
+            ) : null}
             <PaginationControls meta={data.meta} onPage={setPage} />
           </div>
         </section>

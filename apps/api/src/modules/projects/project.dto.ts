@@ -38,6 +38,20 @@ export class ProjectCreditDto {
   role!: string;
 }
 
+export class ProjectLinkDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  title!: string;
+
+  @ApiProperty()
+  @IsString()
+  @Matches(/^https:\/\/[^\s]+$/i, { message: "Project links must use a valid HTTPS URL." })
+  @MaxLength(500)
+  url!: string;
+}
+
 export class CreateProjectDto {
   @ApiProperty()
   @IsString()
@@ -108,10 +122,10 @@ export class CreateProjectDto {
   @IsMongoId()
   coverMediaId?: string | null;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], maxItems: 4 })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(50)
+  @ArrayMaxSize(4)
   @IsMongoId({ each: true })
   galleryMediaIds?: string[];
 
@@ -123,12 +137,18 @@ export class CreateProjectDto {
   @Type(() => ProjectCreditDto)
   credits?: ProjectCreditDto[];
 
+  @ApiPropertyOptional({ type: [ProjectLinkDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => ProjectLinkDto)
+  links?: ProjectLinkDto[];
+
+  // Kept for backward compatibility with existing records.
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUrl({
-    protocols: ["https"],
-    require_protocol: true,
-  })
+  @IsUrl({ protocols: ["https"], require_protocol: true })
   @MaxLength(500)
   trailerUrl?: string | null;
 
@@ -145,12 +165,12 @@ export class CreateProjectDto {
   @IsBoolean()
   published?: boolean;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ nullable: true })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(10_000)
-  order?: number;
+  order?: number | null;
 }
 
 export class UpdateProjectDto extends PartialType(CreateProjectDto) {}

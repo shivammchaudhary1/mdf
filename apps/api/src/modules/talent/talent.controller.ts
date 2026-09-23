@@ -2,7 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Use
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 import { AdminGuard, AuthRequest, SessionGuard } from "../auth/auth.guard";
-import { CreateListDto, ListMemberDto, MemberUpdateDto, PublicProfileViewDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
+import {
+  CreateListDto,
+  ListMemberDto,
+  MemberUpdateDto,
+  PublicProfileViewDto,
+  TalentListQueryDto,
+  TalentQueryDto,
+  UpdateListDto,
+} from "./talent.dto";
 import { TalentService } from "./talent.service";
 @ApiTags("talent network")
 @Controller("talent")

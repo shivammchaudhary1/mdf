@@ -50,6 +50,7 @@ export const applicationView = (x: ApplicationRecord) => ({
 });
 
 export type ProjectCredit = { name: string; role: string };
+export type ProjectLink = { title: string; url: string };
 
 export type ProjectRecord = {
   _id: string;
@@ -69,6 +70,7 @@ export type ProjectRecord = {
   galleryMediaIds?: string[];
   galleryImages?: string[];
   credits?: ProjectCredit[];
+  links?: ProjectLink[];
   trailerUrl?: string;
   tags?: string[];
   published: boolean;
@@ -98,10 +100,11 @@ export type ProjectView = {
   galleryMediaIds: string[];
   galleryImages: string[];
   credits: ProjectCredit[];
+  links: ProjectLink[];
   trailerUrl: string;
   tags: string[];
   published: boolean;
-  order: number;
+  order?: number;
 };
 
 export const projectView = (x: ProjectRecord): ProjectView => ({
@@ -125,10 +128,11 @@ export const projectView = (x: ProjectRecord): ProjectView => ({
   galleryMediaIds: x.galleryMediaIds ?? [],
   galleryImages: x.galleryImages ?? [],
   credits: x.credits ?? [],
+  links: x.links ?? [],
   trailerUrl: x.trailerUrl ?? "",
   tags: x.tags ?? [],
   published: !!x.published,
-  order: x.order ?? 0,
+  order: x.order,
 });
 
 export type CastingRecord = {

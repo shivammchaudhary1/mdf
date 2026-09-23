@@ -127,7 +127,9 @@ export function TalentProfileView({ id }: { id: string }) {
             <div className="site-shell py-20 text-center">
               <p className="site-kicker">Profile unavailable</p>
               <h1 className="font-display mt-3 text-4xl font-semibold">This public talent profile is not available.</h1>
-              <Link href="/talent" className="site-button site-button-primary mt-7">Back to Talent Network</Link>
+              <Link href="/talent" className="site-button site-button-primary mt-7">
+                Back to Talent Network
+              </Link>
             </div>
           </section>
         </main>
@@ -155,23 +157,40 @@ export function TalentProfileView({ id }: { id: string }) {
                 <div className="p-6">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="font-display text-3xl font-semibold">{data.name}</h1>
-                    <span className="rounded-full bg-[#edf8f0] px-2.5 py-1 text-[10px] font-bold text-[#2f7543]">
-                      ✓ Verified Member
-                    </span>
+                    <span className="rounded-full bg-[#edf8f0] px-2.5 py-1 text-[10px] font-bold text-[#2f7543]">✓ Verified Member</span>
                   </div>
 
                   <p className="mt-2 text-sm text-[#666]">{profile.profession || "Creative Member"}</p>
 
                   <div className="mt-5 grid gap-3 text-sm">
-                    <p><strong>Location:</strong> {profile.city || "Not added"}</p>
-                    <p><strong>Experience:</strong> {profile.experience || "Not added"}</p>
-                    <p><strong>Availability:</strong> {profile.availability || "Not added"}</p>
-                    {profile.gender && <p><strong>Gender:</strong> {profile.gender}</p>}
-                    {profile.age ? <p><strong>Age:</strong> {profile.age}</p> : null}
+                    <p>
+                      <strong>Location:</strong> {profile.city || "Not added"}
+                    </p>
+                    <p>
+                      <strong>Experience:</strong> {profile.experience || "Not added"}
+                    </p>
+                    <p>
+                      <strong>Availability:</strong> {profile.availability || "Not added"}
+                    </p>
+                    {profile.gender && (
+                      <p>
+                        <strong>Gender:</strong> {profile.gender}
+                      </p>
+                    )}
+                    {profile.age ? (
+                      <p>
+                        <strong>Age:</strong> {profile.age}
+                      </p>
+                    ) : null}
                   </div>
 
                   {profile.showreel && (
-                    <a href={profile.showreel} target="_blank" rel="noreferrer" className="site-button site-button-primary mt-6 w-full justify-center">
+                    <a
+                      href={profile.showreel}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="site-button site-button-primary mt-6 w-full justify-center"
+                    >
                       View Intro / Pitch Video ↗
                     </a>
                   )}
@@ -188,12 +207,16 @@ export function TalentProfileView({ id }: { id: string }) {
                   <h2 className="font-display text-2xl font-semibold">Skills & Languages</h2>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {(profile.skills ?? []).map((item) => (
-                      <span key={`skill-${item}`} className="rounded-full bg-[#f4f4f2] px-3 py-1.5 text-xs">{item}</span>
+                      <span key={`skill-${item}`} className="rounded-full bg-[#f4f4f2] px-3 py-1.5 text-xs">
+                        {item}
+                      </span>
                     ))}
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {(profile.languages ?? []).map((item) => (
-                      <span key={`language-${item}`} className="rounded-full border border-black/10 px-3 py-1.5 text-xs">{item}</span>
+                      <span key={`language-${item}`} className="rounded-full border border-black/10 px-3 py-1.5 text-xs">
+                        {item}
+                      </span>
                     ))}
                   </div>
                 </article>
@@ -228,12 +251,24 @@ export function TalentProfileView({ id }: { id: string }) {
                     <h2 className="font-display text-2xl font-semibold">Work Links</h2>
                     <div className="mt-4 flex flex-wrap gap-3">
                       {profile.videos?.map((value, index) => (
-                        <a key={`${value}-${index}`} href={value} target="_blank" rel="noreferrer" className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold">
+                        <a
+                          key={`${value}-${index}`}
+                          href={value}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold"
+                        >
                           Video {index + 1} ↗
                         </a>
                       ))}
                       {profile.socialLinks?.map((value, index) => (
-                        <a key={`${value}-${index}`} href={value} target="_blank" rel="noreferrer" className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold">
+                        <a
+                          key={`${value}-${index}`}
+                          href={value}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold"
+                        >
                           {linkLabel(value, `Link ${index + 1}`)} ↗
                         </a>
                       ))}
