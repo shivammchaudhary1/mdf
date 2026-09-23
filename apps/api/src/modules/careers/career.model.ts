@@ -44,3 +44,5 @@ export const CareerApplicationSchema = new Schema<CareerApplication>(
 CareerApplicationSchema.index({ status: 1, createdAt: -1 });
 CareerApplicationSchema.index({ email: 1, createdAt: -1 });
 CareerApplicationSchema.index({ role: 1, createdAt: -1 });
+
+CareerApplicationSchema.index({ createdAt: -1 });

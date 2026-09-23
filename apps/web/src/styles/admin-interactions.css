@@ -853,3 +853,44 @@
 @media(min-width:700px){.ad-list-overview-v2{grid-template-columns:repeat(4,minmax(0,1fr))}.ad-list-how-v2{grid-template-columns:repeat(3,minmax(0,1fr))}.ad-list-member-grid-v2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:960px){.ad-list-grid-v2{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.ad-list-summary-v2{grid-template-columns:1fr}.ad-list-manage-actions-v2,.ad-list-footer-v2{align-items:stretch;flex-direction:column}.ad-list-picker-v2>header{align-items:start;flex-direction:column}}
+
+/* CONTACT + CAREERS ADMIN V2 */
+.ad-inbox-overview-v2,.ad-career-overview-v2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ad-inbox-overview-v2>div,.ad-career-overview-v2>div{border:1px solid #0000000e;border-radius:13px;background:#fff;padding:12px 14px;box-shadow:0 8px 28px #00000006}
+.ad-inbox-overview-v2 span,.ad-career-overview-v2 span{display:block;color:#999;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.ad-inbox-overview-v2 strong,.ad-career-overview-v2 strong{display:block;margin-top:4px;font-family:var(--font-playfair),Georgia,serif;font-size:22px;color:#222}
+.ad-inbox-how-v2{display:grid;gap:8px;border-radius:14px;background:#111;padding:10px}
+.ad-inbox-how-v2>div{display:grid;grid-template-columns:26px 1fr;gap:8px;border-radius:10px;background:#ffffff0a;padding:9px}
+.ad-inbox-how-v2 b{display:grid;width:24px;height:24px;place-items:center;border-radius:50%;background:var(--brand-red);color:#fff;font-size:8px}
+.ad-inbox-how-v2 span{color:#ffffff80;font-size:7.5px;line-height:1.45}.ad-inbox-how-v2 strong{display:block;color:#fff;font-size:8px}
+.ad-inbox-empty-v2{display:grid;max-width:720px;justify-items:center;margin:12px auto 0;border:1px solid #0000000d;border-radius:20px;background:#fff;padding:42px 24px;text-align:center;box-shadow:0 18px 55px #00000008}
+.ad-inbox-empty-icon{display:grid;width:54px;height:54px;place-items:center;margin-bottom:13px;border-radius:16px;background:#111;color:#fff;font-size:22px}
+.ad-inbox-empty-v2 h2{margin-top:7px;font-family:var(--font-playfair),Georgia,serif;font-size:27px}.ad-inbox-empty-v2>p:not(.ad-kicker){max-width:510px;margin-top:9px;color:#777;font-size:8.5px;line-height:1.65}.ad-inbox-empty-v2>button{margin-top:17px}
+.ad-inbox-grid-v2,.ad-career-grid-v2{display:grid;gap:10px}
+.ad-inbox-card-v2,.ad-career-card-v2{overflow:hidden;border:1px solid #0000000d;border-radius:15px;background:#fff;box-shadow:0 10px 32px #00000006}
+.ad-inbox-card-head-v2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 15px 9px}
+.ad-inbox-card-head-v2 h2{margin-top:5px;font-family:var(--font-playfair),Georgia,serif;font-size:18px;line-height:1.1}
+.ad-inbox-sender-v2{display:grid;gap:2px;padding:0 15px 10px}.ad-inbox-sender-v2 strong{font-size:8px}.ad-inbox-sender-v2 span{color:#999;font-size:7px}
+.ad-inbox-preview-v2{display:-webkit-box;overflow:hidden;margin:0 15px 13px;color:#777;font-size:8px;line-height:1.6;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.ad-inbox-card-footer-v2{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #0000000c;background:#fafaf8;padding:10px 15px}
+.ad-inbox-card-footer-v2 time{color:#999;font-size:7px}.ad-inbox-card-footer-v2>div{display:flex;gap:6px}
+.ad-inbox-card-footer-v2 button{border:1px solid #00000010;border-radius:7px;background:#fff;padding:7px 9px;color:#444;font-size:7px;font-weight:800}.ad-inbox-card-footer-v2 button:last-child{color:#b42c35}
+.ad-contact-detail-v2{display:grid;gap:14px}.ad-contact-detail-head-v2{display:grid;grid-template-columns:1.2fr .7fr 1fr;gap:8px}.ad-contact-detail-head-v2>div{border:1px solid #0000000d;border-radius:10px;background:#fafaf8;padding:10px}
+.ad-contact-detail-head-v2 span{display:block;color:#999;font-size:6.8px;text-transform:uppercase;letter-spacing:.07em}.ad-contact-detail-head-v2 strong,.ad-contact-detail-head-v2 a{display:block;margin-top:4px;color:#333;font-size:8px}.ad-contact-detail-head-v2 a{color:#b62c35}
+.ad-contact-message-v2{border:1px solid #0000000d;border-radius:12px;background:#fff;padding:15px}.ad-contact-message-v2>p:last-child{margin-top:8px;white-space:pre-wrap;color:#555;font-size:9px;line-height:1.7}
+.ad-contact-workflow-v2{display:grid;gap:11px;border:1px solid #0000000d;border-radius:12px;background:#fafaf8;padding:13px}.ad-contact-workflow-v2 h3{margin-top:3px;font-family:var(--font-playfair),Georgia,serif;font-size:18px}.ad-contact-workflow-v2>div:first-child>span{display:block;margin-top:3px;color:#999;font-size:7px}
+.ad-contact-status-actions-v2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.ad-contact-status-actions-v2 button{min-height:34px;border:1px solid #00000010;border-radius:8px;background:#fff;color:#555;font-size:7px;font-weight:800}.ad-contact-status-actions-v2 button.active{border-color:#efbec2;background:#fff1f2;color:#b42c35}.ad-contact-status-actions-v2 button:disabled{opacity:.55}
+.ad-contact-detail-actions-v2{display:flex;justify-content:flex-end;gap:6px}
+.ad-career-card-head-v2{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:14px 15px}.ad-career-avatar-v2{display:grid;width:42px;height:42px;place-items:center;border-radius:12px;background:#111;color:#fff;font-family:var(--font-playfair),Georgia,serif;font-size:15px}
+.ad-career-card-head-v2 h2{margin-top:3px;font-family:var(--font-playfair),Georgia,serif;font-size:18px}.ad-career-card-head-v2>div:nth-child(2)>span{display:block;margin-top:2px;color:#999;font-size:7px}
+.ad-career-role-v2{border-top:1px solid #0000000c;padding:11px 15px}.ad-career-role-v2 span,.ad-career-meta-v2 span{display:block;color:#aaa;font-size:6.5px;text-transform:uppercase;letter-spacing:.07em}.ad-career-role-v2 strong{display:block;margin-top:3px;font-size:9px}
+.ad-career-meta-v2{display:grid;grid-template-columns:repeat(3,1fr);background:#fafaf8}.ad-career-meta-v2>div{padding:10px 15px}.ad-career-meta-v2>div+div{border-left:1px solid #0000000c}.ad-career-meta-v2 strong{display:block;margin-top:3px;overflow:hidden;color:#555;font-size:7.5px;text-overflow:ellipsis;white-space:nowrap}
+.ad-career-card-actions-v2{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #0000000c;padding:10px 15px}.ad-career-card-actions-v2 a{color:#777;font-size:7px;font-weight:800}.ad-career-card-actions-v2 button{border:0;background:transparent;color:var(--brand-red);font-size:7.5px;font-weight:900}
+.ad-career-detail-head-v2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ad-career-detail-head-v2>div{border:1px solid #0000000d;border-radius:10px;background:#fafaf8;padding:10px}.ad-career-detail-head-v2 span{display:block;color:#999;font-size:6.8px;text-transform:uppercase;letter-spacing:.07em}.ad-career-detail-head-v2 strong,.ad-career-detail-head-v2 a{display:block;margin-top:4px;color:#333;font-size:8px}.ad-career-detail-head-v2 a{color:#b62c35}
+.ad-career-cover-v2{border:1px solid #0000000d;border-radius:12px;background:#fff;padding:14px}.ad-career-cover-v2>p:last-child{margin-top:8px;white-space:pre-wrap;color:#555;font-size:8.5px;line-height:1.7}
+.ad-career-links-v2{display:flex;flex-wrap:wrap;gap:6px}.ad-career-links-v2 a{border:1px solid #00000010;border-radius:8px;background:#fff;padding:8px 10px;color:#444;font-size:7.5px;font-weight:800}
+.ad-career-decision-v2{display:grid;gap:11px;border:1px solid #0000000d;border-radius:12px;background:#fafaf8;padding:13px}.ad-career-decision-v2 h3{margin-top:3px;font-family:var(--font-playfair),Georgia,serif;font-size:18px}.ad-career-decision-v2>div:first-child>span{display:block;margin-top:3px;color:#999;font-size:7px}
+.ad-career-decision-v2>div:last-child{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.ad-career-decision-v2 button{min-height:34px;border:1px solid #00000010;border-radius:8px;background:#fff;color:#555;font-size:7px;font-weight:800}.ad-career-decision-v2 button.active{border-color:#efbec2;background:#fff1f2;color:#b42c35}
+@media(min-width:700px){.ad-inbox-overview-v2,.ad-career-overview-v2{grid-template-columns:repeat(4,minmax(0,1fr))}.ad-inbox-how-v2{grid-template-columns:repeat(3,minmax(0,1fr))}.ad-inbox-grid-v2,.ad-career-grid-v2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1100px){.ad-inbox-grid-v2,.ad-career-grid-v2{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.ad-contact-detail-head-v2,.ad-career-detail-head-v2{grid-template-columns:1fr}.ad-contact-status-actions-v2,.ad-career-decision-v2>div:last-child{grid-template-columns:repeat(2,1fr)}.ad-career-meta-v2{grid-template-columns:1fr}.ad-career-meta-v2>div+div{border-left:0;border-top:1px solid #0000000c}}

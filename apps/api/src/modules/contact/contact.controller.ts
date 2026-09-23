@@ -22,6 +22,9 @@ export class AdminContactController {
   @Get() list(@Query() q: ContactQueryDto) {
     return this.contacts.list(q);
   }
+  @Get("summary") summary() {
+    return this.contacts.summary();
+  }
   @Get(":id") detail(@Param("id") id: string) {
     return this.contacts.detail(id);
   }

@@ -24,3 +24,5 @@ export const ContactSchema = new Schema<ContactMessage>(
 );
 ContactSchema.index({ status: 1, createdAt: -1 });
 ContactSchema.index({ email: 1, createdAt: -1 });
+
+ContactSchema.index({ createdAt: -1 });

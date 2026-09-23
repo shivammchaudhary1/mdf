@@ -61,7 +61,7 @@ export class ContactService {
 
     if (query.search) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
-      filter.$or = [{ name: search }, { email: search }, { subject: search }];
+      filter.$or = [{ name: search }, { email: search }, { subject: search }, { message: search }];
     }
 
     const [result] = await this.contacts.aggregate<{ items: ContactMessage[]; total: { count: number }[] }>([
@@ -76,6 +76,32 @@ export class ContactService {
     return {
       items: items.map((item) => ({ ...item, _id: String(item._id) })),
       meta: pageMeta(query.page, query.limit, total),
+    };
+  }
+
+  async summary() {
+    const [result] = await this.contacts.aggregate<{
+      total: number;
+      newCount: number;
+      open: number;
+      resolved: number;
+    }>([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          newCount: { $sum: { $cond: [{ $eq: ["$status", "New"] }, 1, 0] } },
+          open: { $sum: { $cond: [{ $eq: ["$status", "Open"] }, 1, 0] } },
+          resolved: { $sum: { $cond: [{ $eq: ["$status", "Resolved"] }, 1, 0] } },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      new: Number(result?.newCount ?? 0),
+      open: Number(result?.open ?? 0),
+      resolved: Number(result?.resolved ?? 0),
     };
   }
 
