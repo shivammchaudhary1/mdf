@@ -4,6 +4,7 @@ import { type Model, type PipelineStage, Types } from "mongoose";
 
 import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
+import { memberCodeFor } from "../../common/utils/member-code";
 import { objectId } from "../../common/utils/object-id";
 import { escapeSearch } from "../../common/utils/search";
 import { Account, Session } from "../auth/auth.models";
@@ -14,7 +15,7 @@ import { Project } from "../projects/project.model";
 import { ProfileView } from "./profile-view.model";
 import { SavedTalentList } from "./saved-list.model";
 import { CreateListDto, MemberUpdateDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
-type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
+type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "memberCode" | "suspended" | "createdAt" | "verified"> & {
   profile?: Profile | null;
 };
 interface TalentPage {
@@ -97,7 +98,7 @@ export class TalentService {
         $match: {
           $or: [
             { name: s },
-            ...(publicOnly ? [] : [{ email: s }]),
+            ...(publicOnly ? [] : [{ email: s }, { mobile: s }, { memberCode: s }]),
             { "profile.city": s },
             { "profile.profession": s },
             { "profile.skills": s },
@@ -153,6 +154,7 @@ export class TalentService {
         : {
             email: item.email,
             mobile: item.mobile,
+            memberCode: item.memberCode,
             suspended: item.suspended,
             createdAt: item.createdAt,
           }),
@@ -179,6 +181,29 @@ export class TalentService {
       meta: pageMeta(q.page, q.limit, total),
     };
   }
+  private async ensureMemberCodes() {
+    const missing = await this.accounts
+      .find({
+        role: "MEMBER",
+        $or: [{ memberCode: { $exists: false } }, { memberCode: null }, { memberCode: "" }],
+      })
+      .select("_id createdAt")
+      .limit(1000)
+      .lean();
+
+    if (!missing.length) return;
+
+    await this.accounts.bulkWrite(
+      missing.map((member) => ({
+        updateOne: {
+          filter: { _id: member._id },
+          update: { $set: { memberCode: memberCodeFor(String(member._id), member.createdAt ?? new Date()) } },
+        },
+      })),
+      { ordered: false },
+    );
+  }
+
   listPublic(q: TalentQueryDto) {
     return this.list(q, true);
   }
@@ -236,7 +261,8 @@ export class TalentService {
     const fresh = await this.profiles.findById(profile._id).select("profileViews").lean();
     return { counted: inserted, profileViews: Number(fresh?.profileViews ?? 0) };
   }
-  listAdmin(q: TalentQueryDto) {
+  async listAdmin(q: TalentQueryDto) {
+    await this.ensureMemberCodes();
     return this.list(q, false);
   }
   async publicDetail(id: string) {
@@ -253,6 +279,7 @@ export class TalentService {
     return this.serialize({ ...a, profile: p }, true);
   }
   async adminDetail(id: string) {
+    await this.ensureMemberCodes();
     const a = await this.accounts.findOne({ _id: objectId(id), role: "MEMBER" }).lean();
     if (!a) throw new NotFoundException("Member not found.");
     const p = await this.profiles.findOne({ memberId: a._id }).lean();

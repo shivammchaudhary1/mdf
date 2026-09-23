@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 
 import { AdminDialog } from "@/components/admin/admin-dialog";
 import {
@@ -20,41 +20,74 @@ import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
 
+type MemberOverview = {
+  members: number;
+  verified: number;
+  newMembers: number;
+};
+
 export function AdminMembersView() {
   const toast = useToast();
   const active = useAdminDashboardStore((state) => state.memberFilter);
   const setActive = useAdminDashboardStore((state) => state.setMemberFilter);
   const [query, setQuery] = useState("");
-  const [members, , refresh, meta, setPage, , loading, error] = useAdminRecords(
-    `/admin/members?search=${encodeURIComponent(query)}${active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""}`,
+  const deferredQuery = useDeferredValue(query.trim());
+  const [overview, setOverview] = useState<MemberOverview | null>(null);
+
+  const [members, , refresh, meta, setPage, page, loading, error] = useAdminRecords(
+    `/admin/members?search=${encodeURIComponent(deferredQuery)}${
+      active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""
+    }`,
     memberView,
     true,
     1,
-    25,
+    20,
   );
+
   const [selected, setSelected] = useState<MemberView | null>(null);
+
+  async function loadOverview() {
+    try {
+      const result = await api<MemberOverview>("/admin/metrics");
+      setOverview(result);
+    } catch {
+      setOverview(null);
+    }
+  }
+
+  useEffect(() => {
+    void loadOverview();
+  }, []);
 
   async function toggleVerify() {
     if (!selected) return;
+
     try {
-      await api(`/admin/members/${selected.id}`, { method: "PATCH", body: JSON.stringify({ verified: !selected.verified }) });
-      await refresh();
+      await api(`/admin/members/${selected.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ verified: !selected.verified }),
+      });
+      await Promise.all([refresh(), loadOverview()]);
       toast.success("Verification updated.");
       setSelected(null);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to update member.");
+    } catch (updateError) {
+      toast.error(updateError instanceof Error ? updateError.message : "Unable to update member.");
     }
   }
 
   async function toggleSuspended() {
     if (!selected) return;
+
     try {
-      await api(`/admin/members/${selected.id}`, { method: "PATCH", body: JSON.stringify({ suspended: !selected.suspended }) });
+      await api(`/admin/members/${selected.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ suspended: !selected.suspended }),
+      });
       await refresh();
       toast.success(selected.suspended ? "Member reactivated." : "Member suspended and sessions revoked.");
       setSelected(null);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to update member.");
+    } catch (updateError) {
+      toast.error(updateError instanceof Error ? updateError.message : "Unable to update member.");
     }
   }
 
@@ -62,13 +95,28 @@ export function AdminMembersView() {
     <div className="ad-stack">
       <AdminPageHeader
         eyebrow="Community management"
-        title="Members & Talent"
-        description="Search, verify, suspend and review registered community members. New members join through the public registration flow."
+        title="Members"
+        description="Search, verify, suspend and review registered community members. Every member has a permanent MDF Member ID."
       />
+
+      <section className="ad-member-overview" aria-label="Member overview">
+        <div>
+          <span>Total members</span>
+          <strong>{overview?.members ?? "—"}</strong>
+        </div>
+        <div>
+          <span>Verified</span>
+          <strong>{overview?.verified ?? "—"}</strong>
+        </div>
+        <div>
+          <span>Joined in last 30 days</span>
+          <strong>{overview?.newMembers ?? "—"}</strong>
+        </div>
+      </section>
 
       <section className="ad-toolbar">
         <AdminFilters values={["All", "Verified", "Unverified", "Needs Review"]} active={active} onChange={setActive} />
-        <AdminSearch value={query} onChange={setQuery} placeholder="Search members" />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search name, email, Member ID, mobile…" />
       </section>
 
       <AdminCollectionState
@@ -90,26 +138,36 @@ export function AdminMembersView() {
             <span></span>
           </div>
 
-          {members.map((member) => (
+          {members.map((member, index) => (
             <div key={member.id} className="ad-table-row">
               <div className="ad-person-cell">
                 <SiteMedia src={member.image} alt={member.name} kind="team" className="h-10 w-10 shrink-0 rounded-full" />
                 <div>
                   <strong>{member.name}</strong>
                   <span>{member.email}</span>
+                  {member.memberCode && (
+                    <small className="ad-member-code" title="Permanent MDF Member ID">
+                      {member.memberCode}
+                    </small>
+                  )}
+                  <small className="ad-member-row-number">#{(page - 1) * 20 + index + 1}</small>
                 </div>
               </div>
-              <span>{member.role}</span>
-              <span>{member.city}</span>
+
+              <span>{member.role || "—"}</span>
+              <span>{member.city || "—"}</span>
+
               <div className="ad-completion">
                 <strong>{member.completion}%</strong>
                 <i>
                   <b style={{ width: `${member.completion}%` }} />
                 </i>
               </div>
+
               <div className="ad-member-status">
                 {member.verified ? <span className="verified">✓ Verified</span> : <AdminStatus value={member.status} />}
               </div>
+
               <AdminMoreButton onEdit={() => setSelected(member)} />
             </div>
           ))}
@@ -123,7 +181,7 @@ export function AdminMembersView() {
         onClose={() => setSelected(null)}
         eyebrow="Member review"
         title={selected?.name ?? "Member"}
-        description={selected ? `${selected.role} · ${selected.city}` : ""}
+        description={selected ? `${selected.memberCode || "MDF Member"} · ${selected.role || "No category"} · ${selected.city || "No location"}` : ""}
       >
         {selected && (
           <div className="ad-member-review">
@@ -134,6 +192,14 @@ export function AdminMembersView() {
                 <span>Profile completion {selected.completion}%</span>
               </div>
             </div>
+
+            {selected.memberCode && (
+              <div className="ad-member-id-card">
+                <span>MDF Member ID</span>
+                <strong>{selected.memberCode}</strong>
+                <small>Permanent internal reference for this member.</small>
+              </div>
+            )}
 
             <div className="ad-review-summary">
               <div>
@@ -147,6 +213,10 @@ export function AdminMembersView() {
               <div>
                 <span>Verification</span>
                 <strong>{selected.verified ? "Verified" : "Not verified"}</strong>
+              </div>
+              <div>
+                <span>Profile</span>
+                <strong>{selected.completion}%</strong>
               </div>
             </div>
 

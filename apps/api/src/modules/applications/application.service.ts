@@ -231,7 +231,14 @@ export class ApplicationService {
     if (query.search) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
 
-      filter.$or = [{ "applicant.name": search }, { "applicant.email": search }, { opportunityTitle: search }, { roleSnapshot: search }];
+      filter.$or = [
+        { "applicant.name": search },
+        { "applicant.email": search },
+        { "applicant.mobile": search },
+        { "applicant.city": search },
+        { opportunityTitle: search },
+        { roleSnapshot: search },
+      ];
     }
 
     const [result] = await this.applications.aggregate<{ items: Application[]; total: { count: number }[] }>([
@@ -287,11 +294,12 @@ export class ApplicationService {
     }
 
     if (existing.status !== application.status) {
+      const memberStatus = application.status === "Rejected" ? "Not Selected" : application.status;
       await this.mail
         .send(
           application.applicant.email,
           "Application status updated",
-          `Your application for ${application.opportunityTitle} is now ${application.status}.`,
+          `Your application for ${application.opportunityTitle} is now ${memberStatus}.`,
         )
         .catch(() => undefined);
     }

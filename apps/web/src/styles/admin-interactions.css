@@ -757,3 +757,28 @@
   padding:0 10px;
   border-radius:7px;
 }
+
+/* MEMBERS + APPLICATIONS ADMIN V1 */
+.ad-member-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.ad-member-overview>div{border:1px solid #0000000e;border-radius:13px;background:#fff;padding:13px 15px;box-shadow:0 8px 28px #00000006}
+.ad-member-overview span{display:block;color:#999;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.ad-member-overview strong{display:block;margin-top:4px;font-family:var(--font-playfair),Georgia,serif;font-size:21px;color:#222}
+.ad-member-code{display:inline-flex!important;width:max-content;margin-top:4px!important;border-radius:999px;background:#f2f2ef;padding:3px 6px;color:#666!important;font-size:6.5px!important;font-weight:800;letter-spacing:.03em}
+.ad-member-row-number{display:block!important;margin-top:3px!important;color:#bbb!important;font-size:6.5px!important}
+.ad-member-id-card{border:1px solid #0000000d;border-radius:11px;background:#111;padding:13px 14px;color:#fff}
+.ad-member-id-card span{display:block;color:#ffffff78;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.ad-member-id-card strong{display:block;margin-top:4px;font-size:11px;letter-spacing:.035em}
+.ad-member-id-card small{display:block;margin-top:3px;color:#ffffff65;font-size:7px}
+.ad-members-table .ad-table-row:has(.ad-more-wrap.is-open){position:relative;z-index:8;padding-bottom:82px}
+.ad-members-table .ad-more-wrap{z-index:125}
+.ad-members-table .ad-more-menu{top:34px!important;right:0!important;z-index:130!important;min-width:118px!important}
+.ad-application-decision{display:flex;flex-direction:column;gap:13px;border:1px solid #0000000d;border-radius:12px;background:#fafaf8;padding:14px}
+.ad-application-decision h3{margin-top:3px;font-family:var(--font-playfair),Georgia,serif;font-size:18px}
+.ad-application-decision>div:first-child>span{display:block;margin-top:4px;color:#888;font-size:7.5px}
+.ad-application-decision-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ad-application-decision-actions button{min-height:38px;border:1px solid #00000010;border-radius:9px;background:#fff;color:#555;font-size:8px;font-weight:800}
+.ad-application-decision-actions button.selected{border-color:#b9dfc4;background:#eef9f1;color:#287441;box-shadow:0 0 0 3px #2d84490b}
+.ad-application-decision-actions button.not-selected{border-color:#efc8cb;background:#fff1f2;color:#ad2832;box-shadow:0 0 0 3px #b62c3508}
+@media(max-width:640px){
+  .ad-member-overview{grid-template-columns:1fr}
+}

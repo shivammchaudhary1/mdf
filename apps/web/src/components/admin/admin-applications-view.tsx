@@ -1,9 +1,9 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useDeferredValue, useState } from "react";
 
 import { AdminDialog, AdminDialogActions, AdminDialogForm, AdminDialogGrid, AdminFormField } from "@/components/admin/admin-dialog";
-import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch, AdminStatus } from "@/components/admin/admin-shared";
+import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch } from "@/components/admin/admin-shared";
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
@@ -38,9 +38,18 @@ type ApplicationView = {
   role: string;
   project: string;
   type: string;
+  rawStatus: string;
   status: string;
   applied: string;
 };
+
+function statusLabel(status: string) {
+  return status === "Rejected" ? "Not Selected" : status;
+}
+
+function StatusBadge({ value }: { value: string }) {
+  return <span className={`ad-status ${value.toLowerCase().replaceAll(" ", "-")}`}>{statusLabel(value)}</span>;
+}
 
 const view = (record: ApplicationRecord): ApplicationView => ({
   id: record._id,
@@ -51,7 +60,8 @@ const view = (record: ApplicationRecord): ApplicationView => ({
   role: record.roleSnapshot ?? record.opportunityTitle,
   project: record.opportunityTitle,
   type: record.opportunityType,
-  status: record.status,
+  rawStatus: record.status,
+  status: statusLabel(record.status),
   applied: dateLabel(record.createdAt),
 });
 
@@ -60,21 +70,28 @@ export function AdminApplicationsView() {
   const active = useAdminDashboardStore((state) => state.applicationFilter);
   const setActive = useAdminDashboardStore((state) => state.setApplicationFilter);
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query.trim());
   const [selected, setSelected] = useState<ApplicationRecord | null>(null);
+  const [reviewStatus, setReviewStatus] = useState("Submitted");
   const [detailLoading, setDetailLoading] = useState(false);
 
+  const backendStatus = active === "Not Selected" ? "Rejected" : active === "All" ? "" : active;
+
   const [applications, , refresh, meta, setPage, , loading, error] = useAdminRecords(
-    `/admin/applications?search=${encodeURIComponent(query)}${active !== "All" ? `&status=${encodeURIComponent(active)}` : ""}`,
+    `/admin/applications?search=${encodeURIComponent(deferredQuery)}${backendStatus ? `&status=${encodeURIComponent(backendStatus)}` : ""}`,
     view,
     true,
     1,
-    25,
+    20,
   );
 
   async function review(id: string) {
     setDetailLoading(true);
+
     try {
-      setSelected(await api<ApplicationRecord>(`/admin/applications/${id}`));
+      const result = await api<ApplicationRecord>(`/admin/applications/${id}`);
+      setSelected(result);
+      setReviewStatus(result.status);
     } catch (loadError) {
       toast.error(loadError instanceof Error ? loadError.message : "Unable to load application.");
     } finally {
@@ -85,19 +102,24 @@ export function AdminApplicationsView() {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selected) return;
+
     const form = new FormData(event.currentTarget);
 
     try {
       await api(`/admin/applications/${selected._id}`, {
         method: "PATCH",
         body: JSON.stringify({
-          status: String(form.get("status") ?? selected.status),
+          status: reviewStatus,
           adminNotes: String(form.get("notes") ?? ""),
         }),
       });
+
       await refresh();
       setSelected(null);
-      toast.success("Application updated.", "The member will see the new status immediately.");
+      toast.success(
+        reviewStatus === "Selected" ? "Applicant selected." : reviewStatus === "Rejected" ? "Applicant marked Not Selected." : "Application updated.",
+        "The member will see the new status immediately.",
+      );
     } catch (saveError) {
       toast.error(saveError instanceof Error ? saveError.message : "Unable to update application.");
     }
@@ -108,16 +130,16 @@ export function AdminApplicationsView() {
       <AdminPageHeader
         eyebrow="Casting workflow"
         title="Applications"
-        description="Review complete submissions, private notes, portfolio material and application status."
+        description="Review complete submissions, portfolio material, private notes and final selection status."
       />
 
       <section className="ad-toolbar">
         <AdminFilters
-          values={["All", "Submitted", "Under Review", "Shortlisted", "Selected", "Rejected"]}
+          values={["All", "Submitted", "Under Review", "Shortlisted", "Selected", "Not Selected"]}
           active={active}
           onChange={setActive}
         />
-        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant or project" />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant, email, mobile or project" />
       </section>
 
       <AdminCollectionState
@@ -151,10 +173,10 @@ export function AdminApplicationsView() {
               </div>
               <span>{application.applied}</span>
               <span>{application.city}</span>
-              <AdminStatus value={application.status} />
+              <StatusBadge value={application.rawStatus} />
               <div className="ad-row-actions">
                 <button disabled={detailLoading} onClick={() => void review(application.id)}>
-                  Review
+                  {detailLoading ? "Loading…" : "Review"}
                 </button>
               </div>
             </div>
@@ -198,12 +220,14 @@ export function AdminApplicationsView() {
                 <span className="text-[10px] font-bold uppercase tracking-wide text-[#999]">Cover note</span>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#555]">{selected.coverNote}</p>
               </div>
+
               {selected.pitch && (
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wide text-[#999]">Pitch</span>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#555]">{selected.pitch}</p>
                 </div>
               )}
+
               <div className="flex flex-wrap gap-3">
                 {selected.showreelUrl && (
                   <a href={selected.showreelUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">
@@ -235,20 +259,50 @@ export function AdminApplicationsView() {
               </section>
             )}
 
+            <section className="ad-application-decision">
+              <div>
+                <p className="ad-kicker">Decision</p>
+                <h3>Application outcome</h3>
+                <span>Use the quick actions or choose a workflow status below.</span>
+              </div>
+
+              <div className="ad-application-decision-actions">
+                <button
+                  type="button"
+                  className={reviewStatus === "Selected" ? "selected" : ""}
+                  onClick={() => setReviewStatus("Selected")}
+                >
+                  ✓ Selected
+                </button>
+                <button
+                  type="button"
+                  className={reviewStatus === "Rejected" ? "not-selected" : ""}
+                  onClick={() => setReviewStatus("Rejected")}
+                >
+                  × Not Selected
+                </button>
+              </div>
+            </section>
+
             <AdminDialogGrid>
               <AdminFormField label="Application Status">
-                <select name="status" defaultValue={selected.status}>
-                  <option>Submitted</option>
-                  <option>Under Review</option>
-                  <option>Shortlisted</option>
-                  <option>Selected</option>
-                  <option>Rejected</option>
+                <select value={reviewStatus} onChange={(event) => setReviewStatus(event.target.value)}>
+                  <option value="Submitted">Submitted</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Shortlisted">Shortlisted</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Rejected">Not Selected</option>
                 </select>
               </AdminFormField>
+
               <AdminFormField label="Internal Review Notes" wide>
-                <textarea name="notes" rows={5} defaultValue={selected.adminNotes ?? ""} />
+                <textarea name="notes" rows={5} defaultValue={selected.adminNotes ?? ""} placeholder="Private notes visible only to admins" />
               </AdminFormField>
             </AdminDialogGrid>
+
+            <p className="ad-dialog-footnote">
+              Members see the final status in My Applications. “Not Selected” is stored internally as the existing Rejected workflow state.
+            </p>
 
             <AdminDialogActions onCancel={() => setSelected(null)} primaryLabel="Save Review" />
           </AdminDialogForm>
