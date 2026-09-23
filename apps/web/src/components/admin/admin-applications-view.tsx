@@ -13,6 +13,9 @@ import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
 
+const APPLICATION_STATUSES = ["Submitted", "Under Review", "Shortlisted", "Selected", "Rejected"] as const;
+type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
 type ApplicationRecord = {
   _id: string;
   applicant: { name: string; email: string; mobile: string; city?: string };
@@ -24,7 +27,7 @@ type ApplicationRecord = {
   showreelUrl?: string;
   pitch?: string;
   documentUrl?: string;
-  status: string;
+  status: ApplicationStatus;
   adminNotes?: string;
   createdAt: string;
 };
@@ -33,21 +36,18 @@ type ApplicationView = {
   id: string;
   applicant: string;
   email: string;
-  mobile: string;
   city: string;
   role: string;
   project: string;
-  type: string;
-  rawStatus: string;
-  status: string;
+  rawStatus: ApplicationStatus;
   applied: string;
 };
 
-function statusLabel(status: string) {
+function statusLabel(status: ApplicationStatus) {
   return status === "Rejected" ? "Not Selected" : status;
 }
 
-function StatusBadge({ value }: { value: string }) {
+function StatusBadge({ value }: { value: ApplicationStatus }) {
   return <span className={`ad-status ${value.toLowerCase().replaceAll(" ", "-")}`}>{statusLabel(value)}</span>;
 }
 
@@ -55,13 +55,10 @@ const view = (record: ApplicationRecord): ApplicationView => ({
   id: record._id,
   applicant: record.applicant.name,
   email: record.applicant.email,
-  mobile: record.applicant.mobile,
   city: record.applicant.city ?? "—",
   role: record.roleSnapshot ?? record.opportunityTitle,
   project: record.opportunityTitle,
-  type: record.opportunityType,
   rawStatus: record.status,
-  status: statusLabel(record.status),
   applied: dateLabel(record.createdAt),
 });
 
@@ -72,12 +69,13 @@ export function AdminApplicationsView() {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim());
   const [selected, setSelected] = useState<ApplicationRecord | null>(null);
-  const [reviewStatus, setReviewStatus] = useState("Submitted");
+  const [reviewStatus, setReviewStatus] = useState<ApplicationStatus>("Submitted");
   const [detailLoading, setDetailLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const backendStatus = active === "Not Selected" ? "Rejected" : active === "All" ? "" : active;
 
-  const [applications, , refresh, meta, setPage, , loading, error] = useAdminRecords(
+  const [applications, setApplications, refresh, meta, setPage, , loading, error] = useAdminRecords(
     `/admin/applications?search=${encodeURIComponent(deferredQuery)}${backendStatus ? `&status=${encodeURIComponent(backendStatus)}` : ""}`,
     view,
     true,
@@ -101,27 +99,51 @@ export function AdminApplicationsView() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected) return;
+    if (!selected || saving) return;
 
     const form = new FormData(event.currentTarget);
+    setSaving(true);
 
     try {
-      await api(`/admin/applications/${selected._id}`, {
+      const updated = await api<ApplicationRecord>(`/admin/applications/${selected._id}`, {
         method: "PATCH",
         body: JSON.stringify({
           status: reviewStatus,
-          adminNotes: String(form.get("notes") ?? ""),
+          adminNotes: String(form.get("notes") ?? "").trim(),
         }),
       });
 
-      await refresh();
-      setSelected(null);
-      toast.success(
-        reviewStatus === "Selected" ? "Applicant selected." : reviewStatus === "Rejected" ? "Applicant marked Not Selected." : "Application updated.",
-        "The member will see the new status immediately.",
+      setApplications((current) =>
+        current.map((item) =>
+          item.id === updated._id
+            ? {
+                ...item,
+                rawStatus: updated.status,
+              }
+            : item,
+        ),
       );
+
+      setSelected(null);
+
+      toast.success(
+        updated.status === "Selected"
+          ? "Applicant selected."
+          : updated.status === "Rejected"
+            ? "Applicant marked Not Selected."
+            : updated.status === "Shortlisted"
+              ? "Applicant shortlisted."
+              : "Application updated.",
+        "The member can see the updated status in My Applications.",
+      );
+
+      void refresh().catch(() => {
+        toast.info("Review was saved.", "Refresh the page if the application list does not update immediately.");
+      });
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : "Unable to update application.");
+      toast.error("Review was not saved.", saveError instanceof Error ? saveError.message : "Unable to update application.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -139,7 +161,7 @@ export function AdminApplicationsView() {
           active={active}
           onChange={setActive}
         />
-        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant, email, mobile or project" />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant, email, phone, city or project" />
       </section>
 
       <AdminCollectionState
@@ -175,7 +197,7 @@ export function AdminApplicationsView() {
               <span>{application.city}</span>
               <StatusBadge value={application.rawStatus} />
               <div className="ad-row-actions">
-                <button disabled={detailLoading} onClick={() => void review(application.id)}>
+                <button disabled={detailLoading || saving} onClick={() => void review(application.id)}>
                   {detailLoading ? "Loading…" : "Review"}
                 </button>
               </div>
@@ -188,7 +210,9 @@ export function AdminApplicationsView() {
 
       <AdminDialog
         open={!!selected}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          if (!saving) setSelected(null);
+        }}
         eyebrow="Application review"
         title={selected?.applicant.name ?? "Applicant"}
         description={selected ? `${selected.roleSnapshot ?? selected.opportunityTitle} · ${selected.opportunityTitle}` : ""}
@@ -197,22 +221,10 @@ export function AdminApplicationsView() {
         {selected && (
           <AdminDialogForm onSubmit={save}>
             <div className="ad-review-summary">
-              <div>
-                <span>Email</span>
-                <strong>{selected.applicant.email}</strong>
-              </div>
-              <div>
-                <span>Mobile</span>
-                <strong>{selected.applicant.mobile}</strong>
-              </div>
-              <div>
-                <span>City</span>
-                <strong>{selected.applicant.city ?? "—"}</strong>
-              </div>
-              <div>
-                <span>Applied</span>
-                <strong>{dateLabel(selected.createdAt)}</strong>
-              </div>
+              <div><span>Email</span><strong>{selected.applicant.email}</strong></div>
+              <div><span>Mobile</span><strong>{selected.applicant.mobile}</strong></div>
+              <div><span>City</span><strong>{selected.applicant.city ?? "—"}</strong></div>
+              <div><span>Applied</span><strong>{dateLabel(selected.createdAt)}</strong></div>
             </div>
 
             <section className="grid gap-3 rounded-xl border border-black/8 bg-[#fafaf8] p-4">
@@ -229,16 +241,8 @@ export function AdminApplicationsView() {
               )}
 
               <div className="flex flex-wrap gap-3">
-                {selected.showreelUrl && (
-                  <a href={selected.showreelUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">
-                    Showreel ↗
-                  </a>
-                )}
-                {selected.documentUrl && (
-                  <a href={selected.documentUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">
-                    Supporting PDF ↗
-                  </a>
-                )}
+                {selected.showreelUrl && <a href={selected.showreelUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">Showreel ↗</a>}
+                {selected.documentUrl && <a href={selected.documentUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">Supporting PDF ↗</a>}
               </div>
             </section>
 
@@ -263,10 +267,17 @@ export function AdminApplicationsView() {
               <div>
                 <p className="ad-kicker">Decision</p>
                 <h3>Application outcome</h3>
-                <span>Use the quick actions or choose a workflow status below.</span>
+                <span>Shortlist first, or record the final selected / not selected outcome.</span>
               </div>
 
-              <div className="ad-application-decision-actions">
+              <div className="ad-application-decision-actions three">
+                <button
+                  type="button"
+                  className={reviewStatus === "Shortlisted" ? "shortlisted" : ""}
+                  onClick={() => setReviewStatus("Shortlisted")}
+                >
+                  ★ Shortlist
+                </button>
                 <button
                   type="button"
                   className={reviewStatus === "Selected" ? "selected" : ""}
@@ -286,7 +297,11 @@ export function AdminApplicationsView() {
 
             <AdminDialogGrid>
               <AdminFormField label="Application Status">
-                <select value={reviewStatus} onChange={(event) => setReviewStatus(event.target.value)}>
+                <select
+                  value={reviewStatus}
+                  onChange={(event) => setReviewStatus(event.target.value as ApplicationStatus)}
+                  disabled={saving}
+                >
                   <option value="Submitted">Submitted</option>
                   <option value="Under Review">Under Review</option>
                   <option value="Shortlisted">Shortlisted</option>
@@ -296,15 +311,24 @@ export function AdminApplicationsView() {
               </AdminFormField>
 
               <AdminFormField label="Internal Review Notes" wide>
-                <textarea name="notes" rows={5} defaultValue={selected.adminNotes ?? ""} placeholder="Private notes visible only to admins" />
+                <textarea
+                  name="notes"
+                  rows={5}
+                  defaultValue={selected.adminNotes ?? ""}
+                  placeholder="Private notes visible only to admins"
+                  disabled={saving}
+                />
               </AdminFormField>
             </AdminDialogGrid>
 
             <p className="ad-dialog-footnote">
-              Members see the final status in My Applications. “Not Selected” is stored internally as the existing Rejected workflow state.
+              The member sees Shortlisted, Selected or Not Selected immediately in My Applications. Internal notes remain private.
             </p>
 
-            <AdminDialogActions onCancel={() => setSelected(null)} primaryLabel="Save Review" />
+            <AdminDialogActions
+              onCancel={() => setSelected(null)}
+              primaryLabel={saving ? "Saving Review…" : "Save Review"}
+            />
           </AdminDialogForm>
         )}
       </AdminDialog>

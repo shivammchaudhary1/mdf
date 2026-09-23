@@ -27,7 +27,7 @@ export const AccountSchema = new Schema<Account>(
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
     mobile: { type: String, required: true, trim: true, maxlength: 24 },
-    memberCode: { type: String, trim: true, uppercase: true, maxlength: 48 },
+    memberCode: { type: String, trim: true, lowercase: true, maxlength: 20 },
     passwordHash: { type: String, select: false },
     role: { type: String, enum: ["MEMBER", "SUPER_ADMIN"], default: "MEMBER", required: true },
     authProvider: { type: String, enum: ["local", "google", "both"], default: "local", required: true },

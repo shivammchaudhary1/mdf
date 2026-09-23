@@ -4,7 +4,11 @@ export type TalentRecord = {
   id: string;
   name: string;
   email: string;
+  mobile: string;
   memberCode?: string;
+  authProvider?: string;
+  lastLoginAt?: string;
+  loginCount?: number;
   verified: boolean;
   suspended: boolean;
   createdAt: string;
@@ -15,6 +19,7 @@ export type MemberView = {
   id: string;
   name: string;
   email: string;
+  mobile: string;
   memberCode: string;
   role: string;
   city: string;
@@ -30,6 +35,7 @@ export const memberView = (x: TalentRecord): MemberView => ({
   id: x.id,
   name: x.name,
   email: x.email,
+  mobile: x.mobile ?? "",
   memberCode: x.memberCode ?? "",
   verified: x.verified,
   status: x.suspended ? "Suspended" : x.verified ? "Active" : "Needs Review",

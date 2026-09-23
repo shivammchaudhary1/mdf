@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import { ArrayMaxSize, IsArray, IsIn, IsMongoId, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
 
 import { PageQueryDto } from "../../common/dto/pagination.dto";
@@ -52,7 +53,8 @@ export class CreateApplicationDto {
 }
 
 export class UpdateApplicationDto {
-  @ApiProperty({ enum: applicationStatuses })
+  @ApiProperty({ enum: [...applicationStatuses, "Not Selected"] })
+  @Transform(({ value }) => (value === "Not Selected" ? "Rejected" : value))
   @IsIn(applicationStatuses)
   status!: ApplicationStatus;
 

@@ -4,10 +4,10 @@ import { type Model, type PipelineStage, Types } from "mongoose";
 
 import { AuditService } from "../../common/audit/audit.service";
 import { pageMeta } from "../../common/dto/pagination.dto";
-import { memberCodeFor } from "../../common/utils/member-code";
 import { objectId } from "../../common/utils/object-id";
 import { escapeSearch } from "../../common/utils/search";
 import { Account, Session } from "../auth/auth.models";
+import { MemberCodeService } from "../auth/member-code.service";
 import { MediaService } from "../media/media.service";
 import { Profile } from "../profiles/profile.model";
 import { profileCompletion } from "../profiles/profile.service";
@@ -15,7 +15,10 @@ import { Project } from "../projects/project.model";
 import { ProfileView } from "./profile-view.model";
 import { SavedTalentList } from "./saved-list.model";
 import { CreateListDto, MemberUpdateDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
-type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "memberCode" | "suspended" | "createdAt" | "verified"> & {
+type TalentRecord = Pick<
+  Account,
+  "_id" | "name" | "email" | "mobile" | "memberCode" | "suspended" | "createdAt" | "verified" | "authProvider" | "lastLoginAt" | "loginCount"
+> & {
   profile?: Profile | null;
 };
 interface TalentPage {
@@ -43,6 +46,7 @@ export class TalentService {
     @InjectModel("Project") private readonly projects: Model<Project>,
     private readonly media: MediaService,
     private readonly audit: AuditService,
+    private readonly memberCodes: MemberCodeService,
   ) {}
   private pipeline(q: TalentQueryDto, publicOnly: boolean): PipelineStage[] {
     const a: Record<string, unknown> = {
@@ -135,6 +139,8 @@ export class TalentService {
           completion,
         }
       : null;
+    const adminPortfolioIds = (p?.portfolioMediaIds ?? []).map(String);
+    const resumeId = p?.resumeMediaId ? String(p.resumeMediaId) : undefined;
     const adminProfile = p
       ? {
           ...p,
@@ -142,7 +148,10 @@ export class TalentService {
           memberId: String(item._id),
           photoMediaId: photo,
           photo: photo ? this.media.urlsFor(photo).profile : undefined,
-          portfolioMediaIds: (p.portfolioMediaIds ?? []).map(String),
+          portfolioMediaIds: adminPortfolioIds,
+          portfolio: adminPortfolioIds.map((id) => this.media.urlsFor(id).medium),
+          resumeMediaId: resumeId,
+          resume: resumeId ? this.media.urlsFor(resumeId, "document").document : undefined,
           completion,
         }
       : null;
@@ -156,6 +165,9 @@ export class TalentService {
             mobile: item.mobile,
             memberCode: item.memberCode,
             suspended: item.suspended,
+            authProvider: item.authProvider,
+            lastLoginAt: item.lastLoginAt,
+            loginCount: item.loginCount,
             createdAt: item.createdAt,
           }),
       verified: item.verified,
@@ -181,29 +193,6 @@ export class TalentService {
       meta: pageMeta(q.page, q.limit, total),
     };
   }
-  private async ensureMemberCodes() {
-    const missing = await this.accounts
-      .find({
-        role: "MEMBER",
-        $or: [{ memberCode: { $exists: false } }, { memberCode: null }, { memberCode: "" }],
-      })
-      .select("_id createdAt")
-      .limit(1000)
-      .lean();
-
-    if (!missing.length) return;
-
-    await this.accounts.bulkWrite(
-      missing.map((member) => ({
-        updateOne: {
-          filter: { _id: member._id },
-          update: { $set: { memberCode: memberCodeFor(String(member._id), member.createdAt ?? new Date()) } },
-        },
-      })),
-      { ordered: false },
-    );
-  }
-
   listPublic(q: TalentQueryDto) {
     return this.list(q, true);
   }
@@ -262,7 +251,7 @@ export class TalentService {
     return { counted: inserted, profileViews: Number(fresh?.profileViews ?? 0) };
   }
   async listAdmin(q: TalentQueryDto) {
-    await this.ensureMemberCodes();
+    await this.memberCodes.ensureLegacyCodes();
     return this.list(q, false);
   }
   async publicDetail(id: string) {
@@ -279,7 +268,7 @@ export class TalentService {
     return this.serialize({ ...a, profile: p }, true);
   }
   async adminDetail(id: string) {
-    await this.ensureMemberCodes();
+    await this.memberCodes.ensureLegacyCodes();
     const a = await this.accounts.findOne({ _id: objectId(id), role: "MEMBER" }).lean();
     if (!a) throw new NotFoundException("Member not found.");
     const p = await this.profiles.findOne({ memberId: a._id }).lean();

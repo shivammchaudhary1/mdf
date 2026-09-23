@@ -266,34 +266,20 @@ export class ApplicationService {
   }
 
   async update(id: string, input: UpdateApplicationDto, actorId: string) {
-    const existing = await this.applications.findById(objectId(id)).select("+adminNotes").lean();
-    if (!existing) {
-      throw new NotFoundException("Application not found.");
-    }
-
-    const application = await this.applications
-      .findByIdAndUpdate(
-        objectId(id),
-        {
-          $set: {
-            status: input.status,
-            ...(input.adminNotes !== undefined ? { adminNotes: input.adminNotes.trim() } : {}),
-            reviewedBy: objectId(actorId),
-            reviewedAt: new Date(),
-          },
-        },
-        {
-          new: true,
-          runValidators: true,
-        },
-      )
-      .select("+adminNotes");
-
+    const application = await this.applications.findById(objectId(id)).select("+adminNotes");
     if (!application) {
       throw new NotFoundException("Application not found.");
     }
 
-    if (existing.status !== application.status) {
+    const previousStatus = application.status;
+    application.status = input.status;
+    if (input.adminNotes !== undefined) application.adminNotes = input.adminNotes.trim();
+    application.reviewedBy = objectId(actorId);
+    application.reviewedAt = new Date();
+
+    await application.save();
+
+    if (previousStatus !== application.status) {
       const memberStatus = application.status === "Rejected" ? "Not Selected" : application.status;
       await this.mail
         .send(
