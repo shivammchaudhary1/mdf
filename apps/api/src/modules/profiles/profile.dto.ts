@@ -96,7 +96,7 @@ export class ProfileDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(10)
+  @ArrayMaxSize(4)
   @IsUrl({ protocols: ["https"], require_protocol: true }, { each: true })
   socialLinks?: string[];
 
@@ -109,6 +109,12 @@ export class ProfileDto {
   @IsOptional()
   @IsBoolean()
   publicVisible?: boolean;
+}
+
+export class ReplacePortfolioPhotoDto {
+  @ApiPropertyOptional()
+  @IsMongoId()
+  mediaId!: string;
 }
 
 export class MemberSettingsDto {

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { runtimeConfig } from "@/config/runtime";
+import websiteData from "@/data/website-data.json";
 
 type Page<T> = { items: T[]; meta?: { pages?: number } };
 type SlugRecord = { slug?: string; updatedAt?: string; publishedAt?: string };
@@ -25,16 +26,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticRoutes = [
     ["", "daily", 1],
+    ["/about", "monthly", 0.8],
+    ["/services", "monthly", 0.8],
     ["/projects", "weekly", 0.9],
-    ["/our-work", "monthly", 0.8],
-    ["/talent", "daily", 0.9],
     ["/casting", "daily", 0.9],
-    ["/about", "monthly", 0.7],
+    ["/talent", "daily", 0.9],
     ["/blog", "weekly", 0.8],
     ["/gallery", "weekly", 0.7],
     ["/behind-the-scenes", "weekly", 0.7],
     ["/shows", "weekly", 0.7],
-    ["/team", "monthly", 0.6],
     ["/contact", "monthly", 0.5],
     ["/careers", "weekly", 0.7],
     ["/privacy", "yearly", 0.3],
@@ -65,11 +65,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  const dynamicBlogSlugs = new Set<string>();
+
   for (const item of blogs) {
     if (!item.slug) continue;
+    dynamicBlogSlugs.add(item.slug);
     result.push({
       url: `${base}/blog/${encodeURIComponent(item.slug)}`,
       lastModified: item.updatedAt || item.publishedAt ? new Date(item.updatedAt ?? item.publishedAt ?? now) : now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
+
+  for (const item of websiteData.blogs) {
+    if (!item.slug || dynamicBlogSlugs.has(item.slug)) continue;
+    result.push({
+      url: `${base}/blog/${encodeURIComponent(item.slug)}`,
+      lastModified: new Date(item.updatedAt || item.publishedAt),
       changeFrequency: "monthly",
       priority: 0.7,
     });

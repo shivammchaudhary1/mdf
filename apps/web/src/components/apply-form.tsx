@@ -12,10 +12,12 @@ export function ApplyForm({
   opportunityId,
   closed,
   opportunityType,
+  hideHeading = false,
 }: {
   opportunityId: string;
   closed: boolean;
   opportunityType: "PROJECT" | "CASTING";
+  hideHeading?: boolean;
 }) {
   const toast = useToast();
   const [pending, setPending] = useState(false);
@@ -71,7 +73,7 @@ export function ApplyForm({
       let documentMediaId: string | undefined;
       if (document instanceof File && document.size > 0) {
         if (document.type !== "application/pdf") throw new Error("Optional document must be a PDF.");
-        documentMediaId = (await uploadMedia(document, "user-resume")).id;
+        documentMediaId = (await uploadMedia(document, "member-resume")).id;
       }
 
       await api("/member/applications", {
@@ -116,11 +118,13 @@ export function ApplyForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 grid gap-5">
-      <div>
-        <p className="site-kicker">Apply now</p>
-        <h2 className="font-display mt-2 text-2xl font-semibold">Share the strongest version of your profile</h2>
-      </div>
+    <form onSubmit={submit} className={`${hideHeading ? "mt-5" : "mt-8"} grid gap-5`}>
+      {!hideHeading && (
+        <div>
+          <p className="site-kicker">Apply now</p>
+          <h2 className="font-display mt-2 text-2xl font-semibold">Share the strongest version of your profile</h2>
+        </div>
+      )}
 
       <label className="grid gap-2 text-sm font-semibold">
         Cover note
@@ -173,13 +177,13 @@ export function ApplyForm({
       )}
 
       {login && (
-        <Link href="/login" className="text-sm font-semibold text-red-700">
-          Sign in to apply →
+        <Link href="/signup" className="text-sm font-semibold text-red-700">
+          Create an account to apply →
         </Link>
       )}
 
       <button disabled={pending || login} className="site-button site-button-primary justify-center">
-        {pending ? "Submitting…" : login ? "Sign in required" : "Submit application"}
+        {pending ? "Submitting…" : login ? "Account required" : "Submit application"}
       </button>
     </form>
   );

@@ -29,6 +29,11 @@ export class AdminCareerController {
     return this.careers.list(query);
   }
 
+  @Get("summary")
+  summary() {
+    return this.careers.summary();
+  }
+
   @Get(":id")
   detail(@Param("id") id: string) {
     return this.careers.detail(id);
@@ -36,6 +41,6 @@ export class AdminCareerController {
 
   @Patch(":id")
   update(@Req() request: AuthRequest, @Param("id") id: string, @Body() input: UpdateCareerApplicationDto) {
-    return this.careers.update(id, input, request.user.id);
+    return this.careers.update(id, input, request.account.id);
   }
 }

@@ -19,6 +19,17 @@ function cleanList(values?: string[]) {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
 
+function isYoutubeUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    return host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com");
+  } catch {
+    return false;
+  }
+}
+
 export function profileCompletion(profile: Partial<Profile>) {
   const values = [
     profile.bio,
@@ -61,7 +72,7 @@ export class ProfileService {
     return {
       ...profile,
       _id: String((profile as { _id: unknown })._id),
-      userId: String(item.userId),
+      memberId: String(item.memberId),
       photoMediaId: photoId,
       photo: photoId ? this.media.urlsFor(photoId).profile : undefined,
       portfolioMediaIds: portfolioIds,
@@ -72,12 +83,12 @@ export class ProfileService {
     };
   }
 
-  async get(userId: string) {
+  async get(memberId: string) {
     const [account, profile] = await Promise.all([
-      this.accounts.findById(objectId(userId)).lean(),
+      this.accounts.findById(objectId(memberId)).lean(),
       this.profiles
         .findOne({
-          userId: objectId(userId),
+          memberId: objectId(memberId),
         })
         .lean(),
     ]);
@@ -99,12 +110,16 @@ export class ProfileService {
     };
   }
 
-  async save(userId: string, input: ProfileDto) {
-    const userObjectId = objectId(userId);
-    const previous = await this.profiles.findOne({ userId: userObjectId }).lean();
+  async save(memberId: string, input: ProfileDto) {
+    const memberObjectId = objectId(memberId);
+    const previous = await this.profiles.findOne({ memberId: memberObjectId }).lean();
 
     if (input.birthDate && new Date(input.birthDate) > new Date()) {
       throw new BadRequestException("Birth date cannot be in the future.");
+    }
+
+    if (input.showreel && !isYoutubeUrl(input.showreel)) {
+      throw new BadRequestException("Intro / pitch video must be a valid YouTube URL.");
     }
 
     if (input.portfolioMediaIds) {
@@ -114,9 +129,9 @@ export class ProfileService {
       }
     }
 
-    await this.media.assertOwnedBy(userId, [input.photoMediaId], "image", "user-profile");
-    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image", "user-portfolio");
-    await this.media.assertOwnedBy(userId, [input.resumeMediaId], "document", "user-resume");
+    await this.media.assertOwnedBy(memberId, [input.photoMediaId], "image", "member-profile");
+    await this.media.assertOwnedBy(memberId, [...(input.portfolioMediaIds ?? [])], "image", "member-portfolio");
+    await this.media.assertOwnedBy(memberId, [input.resumeMediaId], "document", "member-resume");
 
     const update: Record<string, unknown> = {
       ...input,
@@ -172,13 +187,13 @@ export class ProfileService {
 
     const profile = await this.profiles.findOneAndUpdate(
       {
-        userId: userObjectId,
+        memberId: memberObjectId,
       },
       {
         $set: update,
         ...(Object.keys(unset).length ? { $unset: unset } : {}),
         $setOnInsert: {
-          userId: userObjectId,
+          memberId: memberObjectId,
         },
       },
       {
@@ -213,14 +228,51 @@ export class ProfileService {
 
     for (const id of previousOwnedIds) {
       if (!currentOwnedIds.has(id)) {
-        await this.media.removeIfUnreferencedOwned(id, userId).catch(() => undefined);
+        await this.media.removeIfUnreferencedOwned(id, memberId).catch(() => undefined);
       }
     }
 
-    return this.get(userId);
+    return this.get(memberId);
   }
 
-  async updateSettings(userId: string, input: MemberSettingsDto) {
+  async replacePortfolioPhoto(memberId: string, index: number, mediaId: string) {
+    if (!Number.isInteger(index) || index < 0 || index > 7) {
+      throw new BadRequestException("Portfolio photograph position is invalid.");
+    }
+
+    await this.media.assertOwnedBy(memberId, [mediaId], "image", "member-portfolio");
+
+    const profile = await this.profiles.findOne({ memberId: objectId(memberId) });
+    if (!profile) throw new NotFoundException("Profile not found.");
+
+    const current = [...(profile.portfolioMediaIds ?? [])];
+    if (index >= current.length) {
+      throw new BadRequestException("Portfolio photograph position is invalid.");
+    }
+
+    if (current.some((id, itemIndex) => itemIndex !== index && String(id) === mediaId)) {
+      throw new BadRequestException("The same photograph cannot be added to the portfolio more than once.");
+    }
+
+    const previousMediaId = String(current[index]);
+    current[index] = new Types.ObjectId(mediaId);
+    profile.portfolioMediaIds = current;
+    await profile.save();
+
+    if (profile.publicVisible) {
+      await this.media.makePublic([mediaId]);
+    } else {
+      await this.media.makePrivate([mediaId]);
+    }
+
+    // Replace only the active profile reference. The old media record/object is
+    // deliberately retained in storage for archival/recovery purposes.
+    await this.media.makePrivate([previousMediaId]);
+
+    return this.get(memberId);
+  }
+
+  async updateSettings(memberId: string, input: MemberSettingsDto) {
     if (input.savedOpportunityIds) {
       const ids = [...new Set(input.savedOpportunityIds)].map((id) => objectId(id));
       const filter = { _id: { $in: ids }, published: true, archived: false };
@@ -232,7 +284,7 @@ export class ProfileService {
     }
     const profile = await this.profiles.findOneAndUpdate(
       {
-        userId: objectId(userId),
+        memberId: objectId(memberId),
       },
       {
         $set: {
@@ -240,7 +292,7 @@ export class ProfileService {
           ...(input.publicVisible === true ? { publicVisibleConsentAt: new Date() } : {}),
         },
         $setOnInsert: {
-          userId: objectId(userId),
+          memberId: objectId(memberId),
         },
       },
       {
@@ -260,19 +312,19 @@ export class ProfileService {
       }
     }
 
-    return this.get(userId);
+    return this.get(memberId);
   }
 
-  async dashboard(userId: string) {
-    const id = objectId(userId);
+  async dashboard(memberId: string) {
+    const id = objectId(memberId);
 
     const [account, profile, statusCounts, recent] = await Promise.all([
       this.accounts.findById(id).lean(),
-      this.profiles.findOne({ userId: id }).lean(),
+      this.profiles.findOne({ memberId: id }).lean(),
       this.applications.aggregate<StatusCount>([
         {
           $match: {
-            userId: id,
+            memberId: id,
           },
         },
         {
@@ -285,7 +337,7 @@ export class ProfileService {
         },
       ]),
       this.applications
-        .find({ userId: id })
+        .find({ memberId: id })
         .sort({ createdAt: -1 })
         .limit(5)
         .select("_id opportunityType opportunityId opportunityTitle roleSnapshot status createdAt")
@@ -307,6 +359,7 @@ export class ProfileService {
         verified: account.verified,
       },
       profileCompletion: profileCompletion(profile ?? {}),
+      profileViews: Number(profile?.profileViews ?? 0),
       profile: this.serialize(profile),
       applicationSummary: {
         total,

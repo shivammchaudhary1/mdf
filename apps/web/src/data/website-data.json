@@ -1,0 +1,4088 @@
+{
+  "brand": {
+    "name": "M. Dadu Films",
+    "eyebrow": "Film Production · Creative Collaboration",
+    "headline": "Transforming Visions into Cinematic Reality",
+    "description": "M. Dadu Films is a film production house based in Lucknow and Noida, working across films, short films, music videos, advertisement and brand films, corporate shoots, and creative content development.",
+    "email": "m.dadufilms@gmail.com",
+    "phone": "+91 92116 19085",
+    "location": "Lucknow & Noida, Uttar Pradesh, India"
+  },
+  "navigation": [
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "About Us",
+      "href": "/about"
+    },
+    {
+      "label": "Services",
+      "href": "/services"
+    },
+    {
+      "label": "Projects",
+      "href": "/projects"
+    },
+    {
+      "label": "Casting",
+      "href": "/casting"
+    },
+    {
+      "label": "Talents",
+      "href": "/talent"
+    },
+    {
+      "label": "Gallery",
+      "href": "/gallery"
+    },
+    {
+      "label": "Blog",
+      "href": "/blog"
+    },
+    {
+      "label": "Contact Us",
+      "href": "/contact"
+    }
+  ],
+  "stats": [
+    {
+      "value": "50+",
+      "label": "Projects"
+    },
+    {
+      "value": "10K+",
+      "label": "Talents in Community"
+    },
+    {
+      "value": "100+",
+      "label": "Casting Calls"
+    },
+    {
+      "value": "5+",
+      "label": "Years of Trust"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "the-last-frame",
+      "title": "The Last Frame",
+      "category": "Short Film",
+      "status": "In Production",
+      "summary": "A quiet human story about ambition, memory and the final image we choose to keep.",
+      "year": "2026",
+      "location": "Indore",
+      "image": ""
+    },
+    {
+      "slug": "she-talks",
+      "title": "She Talks",
+      "category": "Web Series",
+      "status": "Development",
+      "summary": "A character-led series following women whose everyday choices reshape the rooms around them.",
+      "year": "2026",
+      "location": "Mumbai",
+      "image": ""
+    },
+    {
+      "slug": "rangmanch",
+      "title": "Rangmanch",
+      "category": "Feature Film",
+      "status": "Pre-production",
+      "summary": "Artists, friendships and the messy beauty of building a life around performance.",
+      "year": "2026",
+      "location": "Madhya Pradesh",
+      "image": ""
+    },
+    {
+      "slug": "city-lights",
+      "title": "City Lights",
+      "category": "Music Video",
+      "status": "Released",
+      "summary": "A visual music story shaped around movement, night streets and unexpected connection.",
+      "year": "2025",
+      "location": "Indore",
+      "image": ""
+    }
+  ],
+  "blogs": [
+    {
+      "slug": "film-production-process-pre-production-to-final-cut",
+      "title": "From Pre-Production to Final Cut: The Complete Film Production Process",
+      "category": "Production",
+      "date": "Sep 22, 2026",
+      "publishedAt": "2026-09-22T09:00:00+05:30",
+      "updatedAt": "2026-09-22T09:00:00+05:30",
+      "readTime": "9 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A practical step-by-step guide to how a film moves from an early idea through pre-production, production, post-production and final delivery.",
+      "seoTitle": "Film Production Process: Pre-Production to Final Cut | M. Dadu Films",
+      "seoDescription": "Understand the complete film production process from concept and pre-production to shooting, editing, sound, colour grading and final delivery.",
+      "keywords": [
+        "film production process",
+        "pre production",
+        "film shooting process",
+        "post production",
+        "film production India"
+      ],
+      "image": "/blogs/mdf-blog-From Pre-Production to Final Cut The Complete Film.webp",
+      "imageAlt": "From Pre-Production to Final Cut: The Complete Film Production Process",
+      "intro": "A finished film may run for only a few minutes or a few hours, but the work behind it passes through several connected stages. The strongest productions do not treat writing, planning, shooting and post-production as separate islands. Each stage prepares the next one, and that is what keeps creative ambition from turning into production confusion.",
+      "sections": [
+        {
+          "heading": "1. Development: define what the film is really trying to do",
+          "paragraphs": [
+            "Development begins before the call sheet, camera package or casting conversation. This is where the core idea is tested: what is the story, who is it for and why should the audience care?",
+            "At this stage the script or treatment is refined, references are collected, scale is estimated and the production begins identifying what is essential versus optional."
+          ],
+          "bullets": [
+            "Clarify the story, audience and purpose",
+            "Develop the script, treatment or creative brief",
+            "Estimate cast, locations, scale and technical needs",
+            "Set early budget and timeline expectations"
+          ]
+        },
+        {
+          "heading": "2. Pre-production: turn the idea into a workable plan",
+          "paragraphs": [
+            "Pre-production is where creative ambition meets logistics. The team breaks the script into scenes, cast, locations, props, wardrobe, equipment, sound, lighting, transport and scheduling requirements.",
+            "The more decisions that are solved before the shoot, the more freedom the crew has on set. Good planning should remove avoidable uncertainty without making the creative process rigid."
+          ],
+          "bullets": [
+            "Casting and rehearsals",
+            "Location scouting and permissions",
+            "Budget, schedule and call sheets",
+            "Shot list, storyboard and technical recce",
+            "Art, costume, makeup and props",
+            "Camera, lighting and sound planning"
+          ]
+        },
+        {
+          "heading": "3. Production: protect the plan while staying adaptable",
+          "paragraphs": [
+            "The shoot is where time becomes expensive. Direction, camera, lighting, sound, art, makeup, production and performance have to move together.",
+            "Unexpected weather, performance changes, location restrictions or technical problems can alter a day. A prepared team can adapt without losing the story."
+          ],
+          "bullets": [
+            "Prioritise essential shots before optional coverage",
+            "Monitor sound, continuity and exposure",
+            "Keep departments informed when the plan changes",
+            "Back up footage and production audio before wrap"
+          ]
+        },
+        {
+          "heading": "4. Post-production: the film is written again in the edit",
+          "paragraphs": [
+            "Editing decides rhythm, emphasis and emotional timing. Once picture begins to settle, sound design, music, visual effects, titles, colour grading and mastering shape the final experience.",
+            "Post-production works best when it is planned from the beginning. Correct file organisation, slates, sound reports and backups can save hours later."
+          ]
+        },
+        {
+          "heading": "5. Delivery: finish for the screen where the audience will actually watch",
+          "paragraphs": [
+            "A film is not finished simply because the edit timeline is locked. Cinema, festival, OTT, broadcast, YouTube and social platforms can require different aspect ratios, loudness, subtitles, codecs and masters.",
+            "Confirm delivery requirements early, keep a clean master and archive the project properly. That protects the work after launch and makes future versions easier."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "question": "What are the main stages of film production?",
+          "answer": "Development, pre-production, production, post-production and final delivery/distribution."
+        },
+        {
+          "question": "Which stage prevents the most avoidable problems?",
+          "answer": "Strong pre-production usually prevents the most avoidable cost and schedule problems because key decisions are solved before shoot days begin."
+        }
+      ],
+      "conclusion": "The complete film production process is not a straight line, but a clear stage-by-stage workflow gives creativity a reliable structure. Solve the right problems early so the team can focus on storytelling when the camera rolls."
+    },
+    {
+      "slug": "pre-production-checklist-without-the-chaos",
+      "title": "Pre-Production Without the Chaos: A Practical Checklist Before You Shoot",
+      "category": "Pre-Production",
+      "date": "Sep 15, 2026",
+      "publishedAt": "2026-09-15T09:00:00+05:30",
+      "updatedAt": "2026-09-15T09:00:00+05:30",
+      "readTime": "8 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Pre-production is where most production problems can be prevented. Use this checklist to prepare cast, crew, locations, schedule, equipment and paperwork before shoot day.",
+      "seoTitle": "Pre-Production Checklist for Film Shoots | M. Dadu Films",
+      "seoDescription": "A practical film pre-production checklist covering script breakdown, budget, casting, locations, schedule, shot list, equipment, permissions and backups.",
+      "keywords": [
+        "pre production checklist",
+        "film pre production",
+        "shoot planning",
+        "call sheet",
+        "script breakdown"
+      ],
+      "image": "/blogs/mdf-blog-Pre-Production Without the Chao.webp",
+      "imageAlt": "Pre-Production Without the Chaos: A Practical Checklist Before You Shoot",
+      "intro": "A stressful shoot often starts days or weeks before anyone reaches the set. Missing permissions, unclear call times, incomplete props, last-minute casting and unrealistic schedules are usually pre-production problems disguised as production problems. A practical checklist turns uncertainty into decisions.",
+      "sections": [
+        {
+          "heading": "Start with a script breakdown, not a shopping list",
+          "paragraphs": [
+            "Break the script down scene by scene. Note cast, background artists, props, costume, makeup, vehicles, special equipment, sound challenges, VFX requirements, day or night, interior or exterior and location needs.",
+            "This breakdown becomes the production map. Departments can estimate resources from the same source instead of making separate assumptions."
+          ]
+        },
+        {
+          "heading": "Lock the budget around priorities",
+          "paragraphs": [
+            "Identify the things that directly affect story and safety first. Then decide where you can simplify. If one night exterior carries the film, it may deserve more time than several easy interiors.",
+            "Keep a contingency for overtime, transport changes, replacement props, weather or last-minute technical needs."
+          ]
+        },
+        {
+          "heading": "Confirm people, places and paperwork",
+          "paragraphs": [
+            "Cast dates, crew availability, location permission, transport, accommodation and rentals should be confirmed in writing. Share one current schedule rather than several conflicting documents."
+          ]
+        },
+        {
+          "heading": "Build the day before you build the call sheet",
+          "paragraphs": [
+            "Group scenes intelligently by location, lighting direction, cast availability and setup time. Include meal breaks, company moves and reset time. A schedule that ignores setup is a wish list."
+          ]
+        },
+        {
+          "heading": "Do a technical recce with the right departments",
+          "paragraphs": [
+            "Check natural light movement, power, ceiling height, reflections, ambient noise, mobile network, vehicle access and equipment holding areas."
+          ]
+        },
+        {
+          "heading": "Final 24-hour checklist",
+          "paragraphs": [
+            "The day before the shoot should be about confirmation, not invention."
+          ],
+          "bullets": [
+            "Final call sheet acknowledged",
+            "Cast, crew and transport reconfirmed",
+            "Location access reconfirmed",
+            "Camera, sound, batteries and storage checked",
+            "Wardrobe, makeup, props and art packed",
+            "Weather and backup plan reviewed",
+            "Data drives labelled and ready"
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Good pre-production does not remove every surprise. It makes surprises manageable and keeps the shoot focused on performance, images and story."
+    },
+    {
+      "slug": "film-location-scouting-to-location-lock",
+      "title": "From Location Scout to Location Lock: How to Choose the Right Place to Shoot",
+      "category": "Locations",
+      "date": "Sep 08, 2026",
+      "publishedAt": "2026-09-08T09:00:00+05:30",
+      "updatedAt": "2026-09-08T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A beautiful location is not automatically a shootable location. Learn what to check for story, light, sound, access, permissions, power and schedule before locking it.",
+      "seoTitle": "Film Location Scouting & Location Lock Guide | M. Dadu Films",
+      "seoDescription": "Learn how to scout and lock film locations by checking story fit, camera angles, light, sound, power, permissions, access and production logistics.",
+      "keywords": [
+        "film location scouting",
+        "location recce",
+        "shoot location checklist",
+        "film location permissions"
+      ],
+      "image": "/blogs/mdf-blog-From Location Scout to Location Lock.webp",
+      "imageAlt": "From Location Scout to Location Lock: How to Choose the Right Place to Shoot",
+      "intro": "A location influences performance, blocking, sound, lighting, art direction, schedule and budget. The best location is not always the most visually impressive one; it is the place that supports the story and remains controllable enough to shoot.",
+      "sections": [
+        {
+          "heading": "Choose for story first",
+          "paragraphs": [
+            "Ask what the location communicates before the actor says a line. Scale, architecture, texture, colour and depth all affect how the audience reads a scene."
+          ]
+        },
+        {
+          "heading": "Check how the camera can actually work there",
+          "paragraphs": [
+            "Stand where the camera is likely to stand. Check lens distance, depth, reflections, unwanted signs and safe camera movement. Photograph multiple directions, not just the best angle."
+          ]
+        },
+        {
+          "heading": "Listen before you fall in love with the image",
+          "paragraphs": [
+            "Traffic, generators, aircraft, construction, crowds, appliances and nearby music can make dialogue recording difficult. Visit at the same time of day you intend to shoot."
+          ]
+        },
+        {
+          "heading": "Study light and power",
+          "paragraphs": [
+            "Notice sun movement, window direction, power availability and whether high-load lighting needs separate distribution. Natural-light plans also need weather alternatives."
+          ]
+        },
+        {
+          "heading": "Production access can decide the location",
+          "paragraphs": [
+            "Check parking, loading, washrooms, holding areas, makeup space, meals, equipment security and safe access."
+          ]
+        },
+        {
+          "heading": "Get the lock in writing",
+          "paragraphs": [
+            "Confirm dates, hours, fees, overtime, restrictions, power use, art changes, parking, public access and restoration requirements before calling the location final."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A strong location lock balances story, control and logistics. When those align, the location becomes an asset instead of a problem the crew has to fight all day."
+    },
+    {
+      "slug": "music-video-50-percent-music-50-percent-visuals",
+      "title": "50% Music, 50% Visuals: Why Great Music Videos Need Both to Work",
+      "category": "Music Videos",
+      "date": "Sep 01, 2026",
+      "publishedAt": "2026-09-01T09:00:00+05:30",
+      "updatedAt": "2026-09-01T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A memorable music video needs a visual idea with as much intent as the song. Here is how performance, cinematography, art and edit can work as one experience.",
+      "seoTitle": "How to Make a Great Music Video: Music + Visuals | M. Dadu Films",
+      "seoDescription": "Learn why successful music videos balance song, visual concept, performance, cinematography, production design and editing.",
+      "keywords": [
+        "music video production",
+        "music video concept",
+        "cinematic music video",
+        "music video direction"
+      ],
+      "image": "/blogs/mdf-blog-50-Music-50-Visuals.webp",
+      "imageAlt": "50% Music, 50% Visuals: Why Great Music Videos Need Both to Work",
+      "intro": "A music video should not feel like attractive shots placed over playback. The strongest videos create a visual idea that feels inseparable from the track. Think of the song as one half of the audience experience and the visual world as the other half.",
+      "sections": [
+        {
+          "heading": "Listen for structure before creating images",
+          "paragraphs": [
+            "Map the intro, verse, chorus, bridge, instrumental moments and outro. Notice where energy rises and where lyrics become intimate. Editing becomes easier when the visual plan understands the musical structure."
+          ]
+        },
+        {
+          "heading": "Choose one strong visual promise",
+          "paragraphs": [
+            "A good concept can often be described in one sentence. It may be a performance world, short narrative, dance piece, single-take idea or visual metaphor. One coherent world often feels more premium than five unrelated ideas."
+          ]
+        },
+        {
+          "heading": "Performance must feel connected to the song",
+          "paragraphs": [
+            "Playback accuracy matters, but emotional accuracy matters more. Camera distance, movement and lens choice should support the artist’s energy."
+          ]
+        },
+        {
+          "heading": "Cinematography and art should share one language",
+          "paragraphs": [
+            "Colour palette, production design, lighting, texture and wardrobe should feel intentional together."
+          ]
+        },
+        {
+          "heading": "Edit with rhythm, not only on every beat",
+          "paragraphs": [
+            "Respond to lyrics, movement, breath, instrumentation and emotional changes. Sometimes holding a shot through several beats creates more power than constant cutting."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Music already gives the audience an emotional map. The job of the video is to expand it. When sound and image feel designed together, even a simple concept can become memorable."
+    },
+    {
+      "slug": "is-bollywood-dead-ott-theatres-future-hindi-cinema",
+      "title": "Is Bollywood Dead? How OTT, Theatres and New Audiences Are Reshaping Hindi Cinema",
+      "category": "Industry",
+      "date": "Aug 25, 2026",
+      "publishedAt": "2026-08-25T09:00:00+05:30",
+      "updatedAt": "2026-08-25T09:00:00+05:30",
+      "readTime": "9 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Bollywood is not disappearing; the way Hindi films are financed, discovered, released and discussed is changing. Here is what OTT, theatres and audience fragmentation mean for filmmakers.",
+      "seoTitle": "Is Bollywood Dead? OTT vs Theatres & Future of Hindi Cinema",
+      "seoDescription": "Is Bollywood really dying? Explore how OTT platforms, theatrical releases and changing audience habits are reshaping Hindi cinema rather than replacing it.",
+      "keywords": [
+        "is bollywood dead",
+        "OTT vs theatre India",
+        "future of Bollywood",
+        "Hindi cinema OTT"
+      ],
+      "image": "/blogs/mdf-blog-Is Bollywood Dead.webp",
+      "imageAlt": "Is Bollywood Dead? How OTT, Theatres and New Audiences Are Reshaping Hindi Cinema",
+      "intro": "“Is Bollywood dead?” is a dramatic question, but it hides a more useful one: what kind of Hindi cinema is changing, and why? Theatrical blockbusters, streaming originals, independent films, regional crossovers and creator-led video now compete for the same limited audience attention.",
+      "sections": [
+        {
+          "heading": "The audience has more choices than ever",
+          "paragraphs": [
+            "A viewer can move from a theatrical release to a streaming series, dubbed regional film, documentary, short-form creator or international title without caring which traditional industry label it belongs to.",
+            "That does not mean Hindi cinema has vanished. It means familiarity alone is a weaker reason to watch."
+          ]
+        },
+        {
+          "heading": "OTT changed discovery, not the need for good stories",
+          "paragraphs": [
+            "Streaming expanded the space for long-form series, niche genres and films that may not depend on a large opening weekend. But OTT is not an automatic home for every film; platforms still make selective programming and business decisions."
+          ]
+        },
+        {
+          "heading": "Theatres still offer something streaming cannot replicate",
+          "paragraphs": [
+            "Theatrical cinema creates a shared event: scale, collective reaction, premium sound and urgency. Large spectacle, stars, franchises and strong word of mouth can still make cinema-going an occasion."
+          ]
+        },
+        {
+          "heading": "The real shift is from one gatekeeper to many paths",
+          "paragraphs": [
+            "Filmmakers can now think about festivals, theatres, broadcasters, OTT services, YouTube, brand partnerships and community screenings. More paths mean distribution strategy should begin earlier."
+          ]
+        },
+        {
+          "heading": "So, is Bollywood dead?",
+          "paragraphs": [
+            "No. A more accurate description is that Hindi cinema is being pressured to adapt. Audience expectations, economics, competition and distribution habits have changed. Some old formulas may feel less reliable while new combinations of theatrical, streaming and digital-first storytelling emerge."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "The future of Hindi cinema is unlikely to belong to one screen. It will belong to stories that understand their audience, format and release path."
+    },
+    {
+      "slug": "can-you-shoot-a-full-film-on-iphone",
+      "title": "Can You Shoot a Full Film on an iPhone? What Matters More Than the Camera",
+      "category": "Filmmaking",
+      "date": "Aug 18, 2026",
+      "publishedAt": "2026-08-18T09:00:00+05:30",
+      "updatedAt": "2026-08-18T09:00:00+05:30",
+      "readTime": "8 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Modern phones can capture impressive video, but a professional film still depends on lighting, sound, exposure, movement, storage, performance and post-production.",
+      "seoTitle": "Can You Shoot a Full Film on an iPhone? Practical Guide",
+      "seoDescription": "Can an iPhone shoot a full film? Learn what modern iPhones can do, their limitations, and why sound, lighting, exposure, storage and workflow matter more than specs alone.",
+      "keywords": [
+        "shoot film on iphone",
+        "iphone filmmaking",
+        "iphone cinematography",
+        "mobile filmmaking",
+        "ProRes Log iPhone"
+      ],
+      "image": "/blogs/mdf-blog-Can You Shoot a Full Film on an iPhone.webp",
+      "imageAlt": "Can You Shoot a Full Film on an iPhone? What Matters More Than the Camera",
+      "intro": "Yes, a complete film can be shot on an iPhone. But that answer is misleading if it suggests the phone automatically makes professional images easy. The phone is a capture tool; filmmaking quality still depends on how deliberately you control light, sound, exposure, movement, production design and post-production.",
+      "sections": [
+        {
+          "heading": "What modern iPhones do well",
+          "paragraphs": [
+            "Recent Pro models can record high-resolution video and, on supported models, offer professional codecs and log-style recording that provide more flexibility in colour grading. Their small size also allows unusual camera placement and lightweight movement."
+          ]
+        },
+        {
+          "heading": "The biggest limitation is often not resolution",
+          "paragraphs": [
+            "Phone sensors and lenses behave differently from dedicated cinema cameras. Low light, highlight roll-off, depth-of-field control, lens consistency, heat and long recording sessions can become practical limits."
+          ]
+        },
+        {
+          "heading": "Sound still needs professional attention",
+          "paragraphs": [
+            "A sharp image with distant, noisy dialogue still feels unprofessional. Use dedicated microphones, proper placement and monitoring for narrative work."
+          ]
+        },
+        {
+          "heading": "Control exposure, white balance and focus",
+          "paragraphs": [
+            "Automatic settings can change in the middle of a shot. A filmmaking app with manual control can help lock exposure, shutter, white balance and focus."
+          ]
+        },
+        {
+          "heading": "Build a real data workflow",
+          "paragraphs": [
+            "High-quality recording creates large files. Plan storage, backups and naming. Do not leave the only copy of a shoot on the phone overnight."
+          ]
+        },
+        {
+          "heading": "When should you choose a cinema camera instead?",
+          "paragraphs": [
+            "If the production requires demanding VFX, complex multicamera matching, long takes, extreme low light, specialised lenses or large monitoring workflows, a dedicated cinema system may be safer."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "The camera is one part of the production system. If an iPhone lets you tell the story with fewer barriers, use it confidently—but support it with good lighting, clean sound, controlled settings and a disciplined post workflow."
+    },
+    {
+      "slug": "how-to-prepare-for-a-casting-call",
+      "title": "How to Prepare for a Casting Call: A Practical Actor Checklist",
+      "category": "Casting",
+      "date": "Aug 11, 2026",
+      "publishedAt": "2026-08-11T09:00:00+05:30",
+      "updatedAt": "2026-08-11T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A casting call is not only about talent. Preparation, punctuality, listening and clear communication make an actor easier to evaluate and work with.",
+      "seoTitle": "How to Prepare for a Casting Call | Actor Audition Checklist",
+      "seoDescription": "Prepare for your next casting call with a practical checklist for script work, self-tapes, wardrobe, punctuality and audition mindset.",
+      "keywords": [
+        "casting call preparation",
+        "audition tips actors",
+        "self tape tips"
+      ],
+      "image": "/blogs/mdf-blog-How to Prepare for a Casting Call.webp",
+      "imageAlt": "How to Prepare for a Casting Call: A Practical Actor Checklist",
+      "intro": "Prepare so the casting team can see the performance instead of fighting technical distractions.",
+      "sections": [
+        {
+          "heading": "Read the brief completely",
+          "paragraphs": [
+            "Check age range, language, location, shoot dates, compensation and submission instructions before applying."
+          ]
+        },
+        {
+          "heading": "Understand the scene, not just the lines",
+          "paragraphs": [
+            "Know what your character wants, what changes in the scene and who you are speaking to."
+          ]
+        },
+        {
+          "heading": "Keep self-tapes simple",
+          "paragraphs": [
+            "Use a clean background, stable camera, clear sound and soft front-facing light. Avoid filters and heavy editing."
+          ]
+        },
+        {
+          "heading": "Be professional after the audition",
+          "paragraphs": [
+            "Label files clearly, respond promptly and avoid repeated personal follow-ups unless invited."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A good audition is about giving a clear, truthful version of the role and showing that you can take direction and communicate professionally."
+    },
+    {
+      "slug": "actor-showreel-guide-casting-directors-watch",
+      "title": "How to Build an Actor Showreel Casting Teams Will Actually Watch",
+      "category": "Talent",
+      "date": "Aug 04, 2026",
+      "publishedAt": "2026-08-04T09:00:00+05:30",
+      "updatedAt": "2026-08-04T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A useful actor showreel is short, clear and performance-first. Learn what clips to include, how to order them and what to avoid.",
+      "seoTitle": "Actor Showreel Guide: What Casting Teams Want to See",
+      "seoDescription": "Build a stronger actor showreel with practical advice on clip selection, reel length, opening scenes and technical quality.",
+      "keywords": [
+        "actor showreel",
+        "casting showreel tips",
+        "acting portfolio video"
+      ],
+      "image": "/blogs/mdf-blog-How to Build an Actor Showreel.webp",
+      "imageAlt": "How to Build an Actor Showreel Casting Teams Will Actually Watch",
+      "intro": "A showreel is a fast proof of what you look and sound like on screen and what kinds of roles you can carry.",
+      "sections": [
+        {
+          "heading": "Open with your strongest current work",
+          "paragraphs": [
+            "Do not save the best scene for the end. The first clip should show your face clearly and demonstrate believable screen acting quickly."
+          ]
+        },
+        {
+          "heading": "Choose performance, not production value",
+          "paragraphs": [
+            "Prefer scenes where you have meaningful dialogue, reaction and emotional stakes."
+          ]
+        },
+        {
+          "heading": "Keep the reel focused",
+          "paragraphs": [
+            "Two to four strong scenes are often more effective than a long collection."
+          ]
+        },
+        {
+          "heading": "Make technical quality invisible",
+          "paragraphs": [
+            "Dialogue should be clear, image should be properly framed and transitions should stay simple."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "The best showreel answers the casting question quickly: who are you on camera, and what can you convincingly play today?"
+    },
+    {
+      "slug": "what-does-a-film-producer-do",
+      "title": "What Does a Film Producer Actually Do? From Idea to Delivery",
+      "category": "Production",
+      "date": "Jul 28, 2026",
+      "publishedAt": "2026-07-28T09:00:00+05:30",
+      "updatedAt": "2026-07-28T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Producing is more than arranging money. A producer connects creative goals, budgets, people, schedules, risk and delivery.",
+      "seoTitle": "What Does a Film Producer Do? Roles & Responsibilities",
+      "seoDescription": "Learn what a film producer does across development, budgeting, crew hiring, scheduling, production, post-production and delivery.",
+      "keywords": [
+        "film producer role",
+        "what does a producer do",
+        "film production responsibilities"
+      ],
+      "image": "/blogs/mdf-blog-What Does a Film Producer Actually Do.webp",
+      "imageAlt": "What Does a Film Producer Actually Do? From Idea to Delivery",
+      "intro": "The producer is often the person holding the complete picture of a production.",
+      "sections": [
+        {
+          "heading": "Development",
+          "paragraphs": [
+            "A producer may help develop material, secure rights, attach collaborators and define a realistic path from script to screen."
+          ]
+        },
+        {
+          "heading": "Budget and finance",
+          "paragraphs": [
+            "The producer works with production teams to estimate costs, prioritise spending and keep the project financially aware."
+          ]
+        },
+        {
+          "heading": "People and logistics",
+          "paragraphs": [
+            "Hiring key crew, coordinating vendors, approving schedules and solving availability conflicts are central responsibilities."
+          ]
+        },
+        {
+          "heading": "Post and delivery",
+          "paragraphs": [
+            "Producing continues after wrap through edit schedules, music, sound, VFX, colour, clearances and masters."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A strong producer creates the conditions that allow creative departments to do their best work within the reality of the project."
+    },
+    {
+      "slug": "director-vs-dop-cinematographer",
+      "title": "Director vs DOP: Who Decides What a Film Looks Like?",
+      "category": "Cinematography",
+      "date": "Jul 21, 2026",
+      "publishedAt": "2026-07-21T09:00:00+05:30",
+      "updatedAt": "2026-07-21T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "The director and DOP share responsibility for visual storytelling, but their roles are different.",
+      "seoTitle": "Director vs DOP: Roles in Film Visual Storytelling",
+      "seoDescription": "Understand the difference between a film director and DOP/cinematographer across performance, camera, lighting and visual language.",
+      "keywords": [
+        "director vs DOP",
+        "director of photography role",
+        "cinematographer vs director"
+      ],
+      "image": "/blogs/mdf-blog-Director vs DOP.webp",
+      "imageAlt": "Director vs DOP: Who Decides What a Film Looks Like?",
+      "intro": "Audiences experience one image, but that image is the result of collaboration.",
+      "sections": [
+        {
+          "heading": "The director protects the story",
+          "paragraphs": [
+            "The director thinks about performance, staging, tone, pacing and what the audience should understand or feel."
+          ]
+        },
+        {
+          "heading": "The DOP builds the photographic language",
+          "paragraphs": [
+            "The cinematographer develops lighting, exposure, lens strategy, camera movement and image texture with the director."
+          ]
+        },
+        {
+          "heading": "Blocking connects performance and camera",
+          "paragraphs": [
+            "Where actors move affects where the camera can move and how light can be shaped."
+          ]
+        },
+        {
+          "heading": "Disagreement can be productive",
+          "paragraphs": [
+            "Both roles should be solving the same story problem, even when they initially propose different solutions."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A film looks coherent when direction and cinematography share one intention."
+    },
+    {
+      "slug": "why-sound-can-make-or-break-a-film",
+      "title": "Why Sound Can Make or Break Your Film Before the Audience Notices",
+      "category": "Sound",
+      "date": "Jul 14, 2026",
+      "publishedAt": "2026-07-14T09:00:00+05:30",
+      "updatedAt": "2026-07-14T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Clear dialogue, believable ambience and controlled dynamics make images feel more expensive and performances feel closer.",
+      "seoTitle": "Film Sound Guide: Production Audio, ADR & Sound Design",
+      "seoDescription": "Learn why film sound matters and how production dialogue, room tone, ambience, ADR, effects and mixing shape professional results.",
+      "keywords": [
+        "film sound recording",
+        "production sound",
+        "sound design film"
+      ],
+      "image": "/blogs/mdf-blog-Why Sound Can Make or Break Your Film Before the Audience Notices.webp",
+      "imageAlt": "Why Sound Can Make or Break Your Film Before the Audience Notices",
+      "intro": "Sound is often invisible when it works well, which is exactly why it is easy to underestimate.",
+      "sections": [
+        {
+          "heading": "Record clean dialogue at the source",
+          "paragraphs": [
+            "Microphone distance matters. A boom or properly placed wireless microphone should capture the voice clearly while reducing unwanted noise."
+          ]
+        },
+        {
+          "heading": "Room tone is not optional",
+          "paragraphs": [
+            "Editors use room tone to bridge dialogue edits and preserve the acoustic character of a location."
+          ]
+        },
+        {
+          "heading": "Sound design builds the world",
+          "paragraphs": [
+            "Footsteps, cloth, doors, traffic and distant voices tell the audience where they are even when those things are not visible."
+          ]
+        },
+        {
+          "heading": "Music should not repair weak dialogue",
+          "paragraphs": [
+            "Dialogue cleanup, ADR where necessary and careful mixing should solve intelligibility first."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Treat sound as a creative department from pre-production, not a repair job after the shoot."
+    },
+    {
+      "slug": "cinematic-lighting-low-budget-films",
+      "title": "Cinematic Lighting on a Small Budget: Control Before Equipment",
+      "category": "Lighting",
+      "date": "Jul 07, 2026",
+      "publishedAt": "2026-07-07T09:00:00+05:30",
+      "updatedAt": "2026-07-07T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Cinematic lighting is less about owning more lights and more about controlling direction, contrast, colour and practical sources.",
+      "seoTitle": "Cinematic Lighting on a Small Budget | Film Lighting Tips",
+      "seoDescription": "Create better film lighting on a small budget by controlling natural light, negative fill, practicals, contrast and motivated sources.",
+      "keywords": [
+        "low budget film lighting",
+        "cinematic lighting tips",
+        "natural light filmmaking"
+      ],
+      "image": "/blogs/mdf-blog-Cinematic Lighting on a Small Budget.webp",
+      "imageAlt": "Cinematic Lighting on a Small Budget: Control Before Equipment",
+      "intro": "Cinematic light begins with observation and control, not with the number of fixtures on the truck.",
+      "sections": [
+        {
+          "heading": "Use natural light intentionally",
+          "paragraphs": [
+            "Scout at the intended shooting time and schedule around window direction and sun movement."
+          ]
+        },
+        {
+          "heading": "Negative fill can be as important as adding light",
+          "paragraphs": [
+            "Black cloth or flags can reduce unwanted bounce and create shape on a face."
+          ]
+        },
+        {
+          "heading": "Motivate sources",
+          "paragraphs": [
+            "Shape fixtures to support believable sources such as windows, lamps or streetlights."
+          ]
+        },
+        {
+          "heading": "Protect highlights and skin tones",
+          "paragraphs": [
+            "Expose carefully and test how your camera responds before the shoot."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A controlled window, one soft source and well-placed negative fill can look more intentional than many lights with no clear plan."
+    },
+    {
+      "slug": "film-budgeting-basics-india",
+      "title": "Film Budgeting Basics: Where the Money Really Goes on a Production",
+      "category": "Production",
+      "date": "Jun 30, 2026",
+      "publishedAt": "2026-06-30T09:00:00+05:30",
+      "updatedAt": "2026-06-30T09:00:00+05:30",
+      "readTime": "8 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "A film budget is a production plan expressed in money. Learn the major cost categories, contingency and how creative decisions affect spend.",
+      "seoTitle": "Film Budgeting Basics: Production Cost Guide | M. Dadu Films",
+      "seoDescription": "Understand film budgeting across cast, crew, camera, lighting, locations, art, travel, food, post-production and contingency.",
+      "keywords": [
+        "film budget",
+        "film production cost",
+        "movie budgeting India"
+      ],
+      "image": "/blogs/mdf-blog-Film Budgeting Basics Where the Money Really.webp",
+      "imageAlt": "Film Budgeting Basics: Where the Money Really Goes on a Production",
+      "intro": "Budgets reveal how a production intends to work. Every creative choice creates a cost somewhere else.",
+      "sections": [
+        {
+          "heading": "Track the major production categories",
+          "paragraphs": [
+            "Typical categories include cast, camera, lighting, sound, art, costume, makeup, locations, transport, food and post-production."
+          ]
+        },
+        {
+          "heading": "Schedule is a major cost driver",
+          "paragraphs": [
+            "Adding a shoot day affects crew, cast, equipment, transport, catering and accommodation together."
+          ]
+        },
+        {
+          "heading": "Protect a contingency",
+          "paragraphs": [
+            "Weather, overtime, replacement equipment and urgent art needs happen. Contingency protects the core work."
+          ]
+        },
+        {
+          "heading": "Spend where the audience will feel it",
+          "paragraphs": [
+            "Reduce unnecessary scope before removing essential safety, sound or production support."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "The best budget is not the cheapest one. It is the budget that honestly reflects the production plan."
+    },
+    {
+      "slug": "how-to-plan-one-day-film-shoot",
+      "title": "How to Plan a One-Day Film Shoot Without Losing Half the Day",
+      "category": "Production",
+      "date": "Jun 23, 2026",
+      "publishedAt": "2026-06-23T09:00:00+05:30",
+      "updatedAt": "2026-06-23T09:00:00+05:30",
+      "readTime": "6 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "One-day shoots work when setups, cast, locations, lighting and priorities are planned realistically.",
+      "seoTitle": "How to Plan a One-Day Film Shoot Efficiently",
+      "seoDescription": "Plan a one-day film shoot with realistic scheduling, shot priorities, lighting blocks, company moves and backup options.",
+      "keywords": [
+        "one day shoot plan",
+        "film shooting schedule",
+        "shoot day planning"
+      ],
+      "image": "/blogs/mdf-blog-How to Plan a One-Day Film Shoot Without.webp",
+      "imageAlt": "How to Plan a One-Day Film Shoot Without Losing Half the Day",
+      "intro": "A one-day shoot leaves little room for indecision. The biggest risk is spending the first hours discovering what should have been decided earlier.",
+      "sections": [
+        {
+          "heading": "Define the non-negotiable shots",
+          "paragraphs": [
+            "Separate essential story coverage from optional beauty shots and alternate versions."
+          ]
+        },
+        {
+          "heading": "Group by setup, not script order",
+          "paragraphs": [
+            "Shoot angles that share lighting, location and camera setup together whenever performance allows."
+          ]
+        },
+        {
+          "heading": "Control company moves",
+          "paragraphs": [
+            "Every location change consumes packing, transport, parking, unloading and reset time."
+          ]
+        },
+        {
+          "heading": "Leave space for performance",
+          "paragraphs": [
+            "Efficiency should come from clear decisions, not from rushing actors."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A successful one-day shoot is won in the schedule before the camera starts."
+    },
+    {
+      "slug": "shot-list-vs-storyboard-when-to-use",
+      "title": "Shot List vs Storyboard: What Do You Actually Need Before a Shoot?",
+      "category": "Direction",
+      "date": "Jun 16, 2026",
+      "publishedAt": "2026-06-16T09:00:00+05:30",
+      "updatedAt": "2026-06-16T09:00:00+05:30",
+      "readTime": "6 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Shot lists and storyboards solve different planning problems. Learn when each is useful.",
+      "seoTitle": "Shot List vs Storyboard: Film Pre-Production Guide",
+      "seoDescription": "Understand the difference between a shot list and storyboard and when each planning tool is most useful.",
+      "keywords": [
+        "shot list vs storyboard",
+        "film shot list",
+        "storyboard film"
+      ],
+      "image": "/blogs/mdf-blog-Shot List vs Storyboard.webp",
+      "imageAlt": "Shot List vs Storyboard: What Do You Actually Need Before a Shoot?",
+      "intro": "A shot list describes what you intend to capture. A storyboard shows how selected shots may look.",
+      "sections": [
+        {
+          "heading": "Use a shot list for coverage and logistics",
+          "paragraphs": [
+            "Shot size, movement, lens idea, subject, action and notes can be organised quickly in a list."
+          ]
+        },
+        {
+          "heading": "Use storyboards when spatial clarity matters",
+          "paragraphs": [
+            "Action, VFX, transitions, choreography and unusual camera moves benefit from drawings."
+          ]
+        },
+        {
+          "heading": "Do not let boards kill discovery",
+          "paragraphs": [
+            "Actors and real locations can reveal better possibilities. Protect the intention, not necessarily the exact frame."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Use the simplest planning tool that makes the day clearer."
+    },
+    {
+      "slug": "film-continuity-why-it-matters",
+      "title": "Why Continuity Matters: The Small Details That Save the Edit",
+      "category": "Production",
+      "date": "Jun 09, 2026",
+      "publishedAt": "2026-06-09T09:00:00+05:30",
+      "updatedAt": "2026-06-09T09:00:00+05:30",
+      "readTime": "6 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Continuity protects the illusion that a scene is happening in one uninterrupted world.",
+      "seoTitle": "Film Continuity Guide: Props, Performance, Eyelines & Edit",
+      "seoDescription": "Learn why continuity matters in filmmaking and how to track props, costume, actor movement, eyelines and screen direction.",
+      "keywords": [
+        "film continuity",
+        "script supervisor",
+        "continuity errors film"
+      ],
+      "image": "/blogs/mdf-blog-Why Continuity Matters.webp",
+      "imageAlt": "Why Continuity Matters: The Small Details That Save the Edit",
+      "intro": "Films are rarely shot in the order audiences watch them. Continuity makes separate fragments feel like one event.",
+      "sections": [
+        {
+          "heading": "Performance continuity",
+          "paragraphs": [
+            "Track where actions happen relative to dialogue so editors have compatible choices."
+          ]
+        },
+        {
+          "heading": "Props, wardrobe, hair and makeup",
+          "paragraphs": [
+            "Use reference photos and notes for levels, buttons, jewellery, dirt and hair changes."
+          ]
+        },
+        {
+          "heading": "Eyelines and screen direction",
+          "paragraphs": [
+            "Inconsistent directions can collapse the geography of a scene."
+          ]
+        },
+        {
+          "heading": "Continuity is emotional too",
+          "paragraphs": [
+            "Performance intensity should match where the scene is in the story."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Continuity gives the editor freedom and lets the audience focus on the story."
+    },
+    {
+      "slug": "production-design-low-budget-cinematic-look",
+      "title": "Production Design: How to Make a Low-Budget Frame Feel Intentional",
+      "category": "Art Direction",
+      "date": "Jun 02, 2026",
+      "publishedAt": "2026-06-02T09:00:00+05:30",
+      "updatedAt": "2026-06-02T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Production design can make a modest film feel richer by controlling colour, texture, props, clutter and character detail.",
+      "seoTitle": "Low-Budget Production Design for Cinematic Film Frames",
+      "seoDescription": "Learn how production design, colour palette, props, texture and set dressing can make low-budget films look more intentional.",
+      "keywords": [
+        "production design film",
+        "low budget art direction",
+        "film set design"
+      ],
+      "image": "/blogs/mdf-blog-Production Design How to Make a Low-Budget Frame Feel Intentional.webp",
+      "imageAlt": "Production Design: How to Make a Low-Budget Frame Feel Intentional",
+      "intro": "A camera records everything in front of it, including accidental clutter. Production design turns that space into story information.",
+      "sections": [
+        {
+          "heading": "Start with character and story",
+          "paragraphs": [
+            "Ask who owns the space, how long they have lived there, what they can afford and what they hide."
+          ]
+        },
+        {
+          "heading": "Control the colour palette",
+          "paragraphs": [
+            "Coordinate walls, wardrobe, furniture, props and lighting accents."
+          ]
+        },
+        {
+          "heading": "Remove what weakens the frame",
+          "paragraphs": [
+            "Unwanted labels, cables and distracting objects can make a set feel uncontrolled."
+          ]
+        },
+        {
+          "heading": "Spend on what the camera sees",
+          "paragraphs": [
+            "Prioritise hero props, foreground texture and areas used in close or medium shots."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Specific, story-driven choices can make a limited budget feel intentional rather than limited."
+    },
+    {
+      "slug": "film-editing-rhythm-when-to-cut",
+      "title": "Editing Rhythm: Knowing When to Cut—and When Not To",
+      "category": "Post-Production",
+      "date": "May 26, 2026",
+      "publishedAt": "2026-05-26T09:00:00+05:30",
+      "updatedAt": "2026-05-26T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Editing rhythm comes from performance, information, movement, sound and the emotional reason for changing perspective.",
+      "seoTitle": "Film Editing Rhythm: How Editors Decide When to Cut",
+      "seoDescription": "Learn how film editors use performance, emotion, movement, reaction shots and sound to decide when to cut and when to hold.",
+      "keywords": [
+        "film editing rhythm",
+        "when to cut film",
+        "video editing storytelling"
+      ],
+      "image": "/blogs/mdf-blog-Editing Rhythm Knowing When to Cut—and When Not To.webp",
+      "imageAlt": "Editing Rhythm: Knowing When to Cut—and When Not To",
+      "intro": "Every cut asks the audience to look somewhere new. The best editors cut because another angle, reaction or piece of information becomes more important.",
+      "sections": [
+        {
+          "heading": "Cut for emotion before decoration",
+          "paragraphs": [
+            "A technically imperfect moment may be the strongest performance."
+          ]
+        },
+        {
+          "heading": "Reactions can carry the scene",
+          "paragraphs": [
+            "Sometimes the listener is more important than the speaker."
+          ]
+        },
+        {
+          "heading": "Movement can motivate invisible cuts",
+          "paragraphs": [
+            "Cutting during physical motion can make edits feel fluid."
+          ]
+        },
+        {
+          "heading": "Silence and long takes create rhythm too",
+          "paragraphs": [
+            "Not cutting is also an editorial choice."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Rhythm belongs to the scene, not to a universal editing speed."
+    },
+    {
+      "slug": "color-grading-vs-color-correction",
+      "title": "Colour Correction vs Colour Grading: What Happens in the D.I. Suite?",
+      "category": "Post-Production",
+      "date": "May 19, 2026",
+      "publishedAt": "2026-05-19T09:00:00+05:30",
+      "updatedAt": "2026-05-19T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Colour correction makes shots technically consistent; colour grading shapes the final visual mood.",
+      "seoTitle": "Color Correction vs Color Grading: D.I. Explained",
+      "seoDescription": "Understand colour correction, colour grading and D.I. workflows, including exposure matching, skin tones and look development.",
+      "keywords": [
+        "color grading film",
+        "colour correction vs grading",
+        "DI colorist"
+      ],
+      "image": "/blogs/mdf-blog-Colour Correction vs Colour Grading.webp",
+      "imageAlt": "Colour Correction vs Colour Grading: What Happens in the D.I. Suite?",
+      "intro": "Colour work begins with making shots belong together. Once the technical base is consistent, grading can shape mood and visual identity.",
+      "sections": [
+        {
+          "heading": "Correction creates consistency",
+          "paragraphs": [
+            "Exposure, white balance, contrast and camera differences are balanced so cuts do not distract."
+          ]
+        },
+        {
+          "heading": "Grading creates intention",
+          "paragraphs": [
+            "A grade can make a world feel warmer, colder, softer, harsher or more textured."
+          ]
+        },
+        {
+          "heading": "Good grading starts on set",
+          "paragraphs": [
+            "Clipped highlights, severe underexposure and inconsistent settings reduce options later."
+          ]
+        },
+        {
+          "heading": "Finish for the delivery format",
+          "paragraphs": [
+            "Cinema, broadcast, streaming and online platforms may require different masters."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "The strongest results come when cinematography, production design and colour are planned as one visual pipeline."
+    },
+    {
+      "slug": "cinematic-brand-storytelling-beyond-advertising",
+      "title": "Beyond the Ad: How Brands Can Use Cinematic Storytelling",
+      "category": "Brand Films",
+      "date": "May 12, 2026",
+      "publishedAt": "2026-05-12T09:00:00+05:30",
+      "updatedAt": "2026-05-12T09:00:00+05:30",
+      "readTime": "7 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Brand films work best when they communicate a human idea instead of only listing features.",
+      "seoTitle": "Cinematic Brand Storytelling: How to Make Better Brand Films",
+      "seoDescription": "Learn how brands can use cinematic storytelling, human insight, visual language and platform planning to create stronger brand films.",
+      "keywords": [
+        "brand film production",
+        "cinematic advertising",
+        "brand storytelling"
+      ],
+      "image": "/blogs/mdf-blog-Beyond the Ad How Brands Can Use Cinematic Storytelling.webp",
+      "imageAlt": "Beyond the Ad: How Brands Can Use Cinematic Storytelling",
+      "intro": "Audiences recognise advertising immediately. The challenge is to give people a reason to keep watching.",
+      "sections": [
+        {
+          "heading": "Start with the audience problem",
+          "paragraphs": [
+            "Choose one clear audience insight and build the story around it."
+          ]
+        },
+        {
+          "heading": "Let the product earn its place",
+          "paragraphs": [
+            "Show how the brand participates naturally in the character’s world."
+          ]
+        },
+        {
+          "heading": "Build a visual identity that can travel",
+          "paragraphs": [
+            "Colour, composition, casting, locations and music should feel connected to the brand."
+          ]
+        },
+        {
+          "heading": "Plan multiple deliverables before shooting",
+          "paragraphs": [
+            "Design coverage for hero films, vertical reels, cutdowns, stills and behind-the-scenes needs from pre-production."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "A strong brand film respects both storytelling and business clarity."
+    },
+    {
+      "slug": "short-film-distribution-festivals-youtube-ott",
+      "title": "Your Short Film Is Finished—Now What? Festivals, YouTube, OTT and Distribution",
+      "category": "Distribution",
+      "date": "May 05, 2026",
+      "publishedAt": "2026-05-05T09:00:00+05:30",
+      "updatedAt": "2026-05-05T09:00:00+05:30",
+      "readTime": "8 min read",
+      "author": "M. Dadu Films Editorial",
+      "summary": "Compare festival strategy, online release, platform outreach and promotional planning before publishing your short film everywhere at once.",
+      "seoTitle": "Short Film Distribution: Festivals, YouTube & OTT Strategy",
+      "seoDescription": "Plan short film distribution across festivals, YouTube, OTT outreach, private screeners, press kits and social promotion.",
+      "keywords": [
+        "short film distribution",
+        "film festival strategy",
+        "short film OTT"
+      ],
+      "image": "/blogs/mdf-blog-Your Short Film Is Finished—Now What.webp",
+      "imageAlt": "Your Short Film Is Finished—Now What? Festivals, YouTube, OTT and Distribution",
+      "intro": "After months of production, the fastest instinct is often to publish immediately. But release order matters because some opportunities have premiere or availability rules.",
+      "sections": [
+        {
+          "heading": "Decide what success means",
+          "paragraphs": [
+            "A calling-card film, festival film and proof-of-concept may need different release paths."
+          ]
+        },
+        {
+          "heading": "Research festivals instead of submitting everywhere",
+          "paragraphs": [
+            "Look at genre, duration, eligibility, premiere requirements and past programming."
+          ]
+        },
+        {
+          "heading": "Prepare professional delivery materials",
+          "paragraphs": [
+            "Keep a master, subtitles, poster, stills, synopsis, credits, private screener and press notes ready."
+          ]
+        },
+        {
+          "heading": "Plan the online release as a campaign",
+          "paragraphs": [
+            "Schedule clips, cast shares, behind-the-scenes material and outreach around the release."
+          ]
+        },
+        {
+          "heading": "Be realistic about OTT outreach",
+          "paragraphs": [
+            "Streaming platforms are selective and acquisition routes vary. A professional package and clear rights help, but no route guarantees acquisition."
+          ]
+        }
+      ],
+      "faq": [],
+      "conclusion": "Distribution should be part of production thinking, not an afterthought."
+    }
+  ],
+  "team": [
+    {
+      "name": "Yuvraj Pratap Singh",
+      "role": "Director / Producer",
+      "group": "Core Team",
+      "bio": "Leads creative direction and production planning, helping shape projects from concept through execution.",
+      "image": "/team/mdf-team-yuvraj-pratap-singh.webp"
+    },
+    {
+      "name": "Aditya Mehta",
+      "role": "Director / Writer",
+      "group": "Core Team",
+      "bio": "Works across direction and writing, developing story ideas into clear narratives for screen.",
+      "image": "/team/mdf-team-aditya-mehta.webp"
+    },
+    {
+      "name": "Alex",
+      "role": "Director of Photography",
+      "group": "Core Team",
+      "bio": "Shapes cinematography, camera language and visual execution to support the mood and story of each production.",
+      "image": "/team/mdf-team-alex.webp"
+    },
+    {
+      "name": "Raaj Aaryan",
+      "role": "Director",
+      "group": "Core Team",
+      "bio": "Directs visual storytelling and performance, shaping scenes from creative interpretation through on-set execution.",
+      "image": "/team/mdf-team-raaz-aaryan.webp"
+    },
+    {
+      "name": "Devendra Singh",
+      "role": "Producer / Actor",
+      "group": "Core Team",
+      "bio": "Contributes both on screen and behind the scenes, supporting production coordination and performance requirements.",
+      "image": "/team/mdf-team-devendra-singh.webp"
+    },
+    {
+      "name": "Ravinder Singh",
+      "role": "Producer",
+      "group": "Core Team",
+      "bio": "Supports production planning, resources and execution so projects can move smoothly from preparation to delivery.",
+      "image": "/team/mdf-team-ravinder-singh.webp"
+    },
+    {
+      "name": "Shivam Chaudhary",
+      "role": "Production Head",
+      "group": "Core Team",
+      "bio": "Oversees production workflows and coordination, keeping teams, schedules and project requirements aligned.",
+      "image": "/team/mdf-team-shivam-chaudhary.webp"
+    },
+    {
+      "name": "Rahul Rasimo",
+      "role": "Executive Producer / Director",
+      "group": "Core Team",
+      "bio": "Works across executive production and direction, supporting creative decisions and overall project delivery.",
+      "image": "/team/mdf-team-rahul-rasimo.webp"
+    },
+    {
+      "name": "Akash",
+      "role": "Art Director",
+      "group": "Core Team",
+      "bio": "Shapes the visual world of productions through art direction, sets, props and design coordination.",
+      "image": "/team/mdf-team-akash.webp"
+    },
+    {
+      "name": "Shailesh Singh",
+      "role": "Music Producer / Singer",
+      "group": "Core Team",
+      "bio": "Contributes to the musical identity of projects through music production and vocal performance.",
+      "image": "/team/mdf-team-shailesh-singh-sanjay.webp"
+    },
+    {
+      "name": "Pradeep Yadav",
+      "role": "Casting Director",
+      "group": "Core Team",
+      "bio": "Supports casting requirements by identifying and coordinating suitable talent for production roles.",
+      "image": "/team/mdf-team-pradeep-yadav.webp"
+    },
+    {
+      "name": "Sharad Chand Upadhyay",
+      "role": "Anchor / Voice Over Artist",
+      "group": "Core Team",
+      "bio": "Works across anchoring and voice-over, bringing clear delivery and vocal presence to screen and audio content.",
+      "image": "/team/mdf-team-sharad.webp"
+    }
+  ],
+  "gallery": [
+    {
+      "title": "Camera Test",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Table Read",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Slate Ready",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Edit Suite",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Talent Portrait",
+      "category": "Talent",
+      "image": ""
+    },
+    {
+      "title": "Golden Hour",
+      "category": "Events",
+      "image": ""
+    },
+    {
+      "title": "Lighting Setup",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Crew Huddle",
+      "category": "Events",
+      "image": ""
+    },
+    {
+      "title": "Director's Monitor",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Location Recce",
+      "category": "Projects",
+      "image": ""
+    },
+    {
+      "title": "Lens Detail",
+      "category": "BTS",
+      "image": ""
+    },
+    {
+      "title": "Set Wrap",
+      "category": "Events",
+      "image": ""
+    }
+  ],
+  "castings": [
+    {
+      "slug": "lead-actor-short-film",
+      "title": "Lead Actor — Short Film",
+      "project": "The Last Frame",
+      "category": "Acting",
+      "location": "Indore",
+      "age": "24–32",
+      "gender": "Any",
+      "shoot": "Oct 18–20, 2026",
+      "deadline": "Oct 05, 2026",
+      "compensation": "Paid",
+      "summary": "Looking for an expressive performer comfortable with subtle, emotionally grounded scenes."
+    },
+    {
+      "slug": "female-lead-web-series",
+      "title": "Female Lead — Web Series",
+      "project": "She Talks",
+      "category": "Acting",
+      "location": "Mumbai",
+      "age": "22–30",
+      "gender": "Female",
+      "shoot": "Nov 2026",
+      "deadline": "Oct 12, 2026",
+      "compensation": "Paid",
+      "summary": "A confident screen presence with strong conversational performance and natural Hindi."
+    },
+    {
+      "slug": "assistant-director",
+      "title": "Assistant Director",
+      "project": "Rangmanch",
+      "category": "Crew",
+      "location": "Indore",
+      "age": "18+",
+      "gender": "Any",
+      "shoot": "Oct–Nov 2026",
+      "deadline": "Sep 30, 2026",
+      "compensation": "Paid",
+      "summary": "Organized production-minded collaborator comfortable with schedules, coordination and set communication."
+    },
+    {
+      "slug": "dop-assistant",
+      "title": "Camera / DOP Assistant",
+      "project": "Independent Production",
+      "category": "Crew",
+      "location": "Madhya Pradesh",
+      "age": "18+",
+      "gender": "Any",
+      "shoot": "Flexible",
+      "deadline": "Oct 20, 2026",
+      "compensation": "Project based",
+      "summary": "For emerging camera professionals looking to build hands-on production experience."
+    }
+  ],
+  "talents": [
+    {
+      "name": "Aarav Mehta",
+      "role": "Actor",
+      "location": "Mumbai",
+      "experience": "4 years",
+      "skills": [
+        "Hindi",
+        "English",
+        "Theatre"
+      ],
+      "verified": true,
+      "image": ""
+    },
+    {
+      "name": "Meera Joshi",
+      "role": "Actor / Voice Artist",
+      "location": "Indore",
+      "experience": "3 years",
+      "skills": [
+        "Hindi",
+        "Voice",
+        "Commercial"
+      ],
+      "verified": true,
+      "image": ""
+    },
+    {
+      "name": "Kabir Verma",
+      "role": "Director of Photography",
+      "location": "Bhopal",
+      "experience": "5 years",
+      "skills": [
+        "Camera",
+        "Lighting",
+        "Documentary"
+      ],
+      "verified": false,
+      "image": ""
+    },
+    {
+      "name": "Isha Rao",
+      "role": "Writer",
+      "location": "Delhi",
+      "experience": "4 years",
+      "skills": [
+        "Screenwriting",
+        "Hindi",
+        "Research"
+      ],
+      "verified": true,
+      "image": ""
+    },
+    {
+      "name": "Dev Arora",
+      "role": "Editor",
+      "location": "Pune",
+      "experience": "6 years",
+      "skills": [
+        "Premiere Pro",
+        "Resolve",
+        "Narrative"
+      ],
+      "verified": true,
+      "image": ""
+    },
+    {
+      "name": "Rhea Kapoor",
+      "role": "Production Designer",
+      "location": "Mumbai",
+      "experience": "3 years",
+      "skills": [
+        "Art Direction",
+        "Sets",
+        "Props"
+      ],
+      "verified": false,
+      "image": ""
+    }
+  ],
+  "services": [
+    {
+      "slug": "film-short-film-production",
+      "title": "Film & Short Film Production",
+      "category": "Production",
+      "description": "End-to-end support for films and short films, from planning and shoot execution through final delivery.",
+      "image": "/services/mdf-service-film&shortfilms.webp",
+      "modal": {
+        "eyebrow": "Film Production",
+        "title": "Film & Short Film Production",
+        "overview": "We support narrative productions from early planning through shoot execution and post-production, bringing creative and technical departments together around a clear production plan.",
+        "highlights": [
+          "Concept, development and production planning support",
+          "Crew, schedule, location and shoot coordination",
+          "Camera, lighting, art and on-set production support",
+          "Editing, colour, sound and final delivery coordination"
+        ],
+        "idealFor": "Short films, independent films, narrative projects, proof-of-concepts and story-led productions.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Film & Short Film Production service. I'd like to discuss my project, production requirements, timeline and next steps.\n\nProject details: "
+      }
+    },
+    {
+      "slug": "advertisement-brand-films",
+      "title": "Advertisement & Brand Films",
+      "category": "Commercial",
+      "description": "Story-led advertisement and brand films shaped around the audience, message and campaign objective.",
+      "image": "/services/mdf-service-advertisements.webp",
+      "modal": {
+        "eyebrow": "Commercial Production",
+        "title": "Advertisement & Brand Films",
+        "overview": "We create story-led commercial films that connect a brand message with strong visual storytelling, practical production and platform-ready delivery.",
+        "highlights": [
+          "Creative treatment and visual approach",
+          "Pre-production, casting, locations and scheduling",
+          "Commercial shoot production and direction support",
+          "Post-production and campaign-ready deliverables"
+        ],
+        "idealFor": "Brands, agencies, startups and businesses looking for advertisements, campaign films or branded storytelling.",
+        "contactSubject": "Brand / Business Inquiry",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Advertisement & Brand Films service. I'd like to discuss our brand, campaign objective, expected deliverables and production timeline.\n\nBrand / project details: "
+      }
+    },
+    {
+      "slug": "music-videos",
+      "title": "Music Videos",
+      "category": "Music",
+      "description": "Concept, production and visual storytelling for performance-led and narrative music videos.",
+      "image": "/services/mdf-service-music-videos.webp",
+      "modal": {
+        "eyebrow": "Music & Visuals",
+        "title": "Music Videos",
+        "overview": "We develop music-led visual concepts that match the energy, emotion and identity of the track, from performance setups to narrative-driven music videos.",
+        "highlights": [
+          "Concept and visual treatment development",
+          "Artist, location, production and shoot planning",
+          "Performance and narrative production support",
+          "Edit, colour and final music-video delivery"
+        ],
+        "idealFor": "Independent artists, singers, labels and music producers looking for performance or narrative music videos.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Music Video service. I'd like to discuss the song, visual direction, production requirements, budget range and timeline.\n\nSong / project details: "
+      }
+    },
+    {
+      "slug": "corporate-shoots",
+      "title": "Corporate Shoots",
+      "category": "Corporate",
+      "description": "Professional corporate films, interviews, internal communication and event-focused production.",
+      "image": "/services/mdf-service-coorporate-shoot.webp",
+      "modal": {
+        "eyebrow": "Corporate Content",
+        "title": "Corporate Shoots",
+        "overview": "We produce clean, professional corporate content that communicates clearly while still feeling visually considered and aligned with the organisation's identity.",
+        "highlights": [
+          "Corporate films and company profiles",
+          "Leadership interviews and testimonials",
+          "Internal communication and event coverage",
+          "Editing, graphics and final delivery support"
+        ],
+        "idealFor": "Companies, institutions, teams and organisations requiring professional communication, interview or event content.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Corporate Shoots service. I'd like to discuss our organisation, shoot requirement, expected deliverables and preferred timeline.\n\nRequirement details: "
+      }
+    },
+    {
+      "slug": "creative-content",
+      "title": "Creative Content Development",
+      "category": "Creative",
+      "description": "Development and production support for digital, social and story-driven creative content.",
+      "image": "/services/mdf-service-creative-content-development.webp",
+      "modal": {
+        "eyebrow": "Creative Development",
+        "title": "Creative Content Development",
+        "overview": "We help turn early ideas into production-ready creative concepts for digital, social and visual storytelling, with an approach that keeps the idea practical to execute.",
+        "highlights": [
+          "Idea development and creative direction",
+          "Content concepts and visual treatments",
+          "Digital and social video planning",
+          "Production approach and execution support"
+        ],
+        "idealFor": "Creators, brands and teams that have an idea or objective but need help shaping it into strong visual content.",
+        "contactSubject": "Collaboration",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Creative Content Development service. I have an idea / objective and would like help shaping the concept and production approach.\n\nIdea / requirement: "
+      }
+    },
+    {
+      "slug": "production-support",
+      "title": "Production & Post-Production Support",
+      "category": "Production",
+      "description": "Practical production coordination and post-production support built around the needs of each project.",
+      "image": "/services/mdf-service-production.webp",
+      "modal": {
+        "eyebrow": "Production Support",
+        "title": "Production & Post-Production Support",
+        "overview": "For projects that already have a creative direction, we can support specific production or post-production requirements without forcing a full-service workflow.",
+        "highlights": [
+          "Production coordination and on-set support",
+          "Crew and department coordination",
+          "Editing and post-production workflow support",
+          "Color Grading, sound and delivery coordination"
+        ],
+        "idealFor": "Production houses, directors, agencies and independent teams that need additional execution or post-production support.",
+        "contactSubject": "Production",
+        "contactMessage": "Hi M. Dadu Films team,\n\nI'm interested in your Production & Post-Production Support service. I'd like to discuss which parts of our current project need support and the expected timeline.\n\nCurrent project / support needed: "
+      }
+    }
+  ],
+  "brands": [
+    {
+      "name": "IndusInd Bank",
+      "logo": "/collaboration/mdf-brands (1).jpeg"
+    },
+    {
+      "name": "LoveLocal",
+      "logo": "/collaboration/mdf-brands (2).jpeg"
+    },
+    {
+      "name": "Mr. Shaw",
+      "logo": "/collaboration/mdf-brands (3).jpeg"
+    },
+    {
+      "name": "Mehta Cycle Store",
+      "logo": "/collaboration/mdf-brands (4).jpeg"
+    },
+    {
+      "name": "Kaibox Infotech & Logistics Pvt Ltd",
+      "logo": "/collaboration/mdf-brands (5).jpeg"
+    },
+    {
+      "name": "Intra Life Pvt Ltd",
+      "logo": "/collaboration/mdf-brands (6).jpeg"
+    }
+  ],
+  "aboutUs": {
+    "hero": {
+      "eyebrow": "Our Story",
+      "title": "Stories That Create Opportunities",
+      "description": "M. Dadu Films is more than a production house. We bring filmmakers, technicians, performers and creative collaborators together to build stories with purpose — from the first idea to the final frame.",
+      "image": "/about/about-hero.webp",
+      "imageAlt": "Film production crew working on a cinematic set",
+      "tags": [
+        "Film Production",
+        "Creative Collaboration",
+        "Talent & Casting"
+      ]
+    },
+    "stats": [
+      {
+        "value": 5,
+        "suffix": "+",
+        "label": "Years of Journey"
+      },
+      {
+        "value": 50,
+        "suffix": "+",
+        "label": "Projects Completed"
+      },
+      {
+        "value": 25,
+        "suffix": "+",
+        "label": "Films Produced / Showcased"
+      },
+      {
+        "value": 10,
+        "suffix": "K+",
+        "label": "Talents Connected"
+      },
+      {
+        "value": 100,
+        "suffix": "+",
+        "label": "Casting Opportunities"
+      }
+    ],
+    "story": {
+      "eyebrow": "Who We Are",
+      "title": "A production house built around storytelling and collaboration.",
+      "paragraphs": [
+        "M. Dadu Films brings together filmmakers, technicians, performers and creative collaborators to build visual stories with purpose. Our work spans narrative and commercial formats, but the approach stays consistent: understand the idea, prepare properly and give every department enough clarity to do its best work.",
+        "We believe good production is not only about what happens in front of the camera. It is the result of writing, planning, casting, cinematography, art, music, lighting, post-production and people working toward the same creative direction."
+      ]
+    },
+    "approach": {
+      "eyebrow": "How We Work",
+      "title": "From idea to final frame.",
+      "description": "A clear process keeps the creative conversation strong while production stays practical.",
+      "steps": [
+        {
+          "title": "Develop",
+          "description": "Clarify the idea, story, treatment and production path."
+        },
+        {
+          "title": "Produce",
+          "description": "Bring the right people, planning and execution together on set."
+        },
+        {
+          "title": "Finish",
+          "description": "Shape the final experience through edit, sound, colour and delivery."
+        }
+      ]
+    },
+    "vision": {
+      "symbol": "V",
+      "eyebrow": "Our Vision",
+      "title": "A creative ecosystem where stories and people can grow.",
+      "description": "To build a trusted creative ecosystem where original stories, skilled crews and emerging talent meet meaningful opportunities and can reach audiences beyond geography."
+    },
+    "mission": {
+      "symbol": "M",
+      "eyebrow": "Our Mission",
+      "title": "Make strong ideas possible through thoughtful production.",
+      "description": "To develop and produce story-led films and branded content with strong planning, honest collaboration and disciplined execution — from the first conversation through post-production and delivery."
+    },
+    "values": {
+      "eyebrow": "What Guides Us",
+      "title": "The values behind the work.",
+      "description": "The format may change from project to project, but these principles stay constant.",
+      "items": [
+        {
+          "symbol": "01",
+          "title": "Story First",
+          "description": "Every decision starts with the story, the audience and the emotion the work needs to carry.",
+          "icon": "story"
+        },
+        {
+          "symbol": "02",
+          "title": "Craft & Discipline",
+          "description": "Strong creative work needs thoughtful preparation, dependable execution and attention to the final frame.",
+          "icon": "craft"
+        },
+        {
+          "symbol": "03",
+          "title": "Collaboration",
+          "description": "Directors, technicians, artists, brands and emerging talent do their best work when the process stays open and respectful.",
+          "icon": "collaboration"
+        },
+        {
+          "symbol": "04",
+          "title": "Opportunity",
+          "description": "We want productions to create space for people to contribute, learn, perform and build meaningful creative work.",
+          "icon": "opportunity"
+        }
+      ]
+    },
+    "recognition": {
+      "eyebrow": "Recognition",
+      "title": "Festival Selections & Recognition",
+      "description": "Official selection laurels from the M. Dadu Films archive.",
+      "items": [
+        {
+          "title": "Black Cat Award International Film Festival",
+          "year": "2022",
+          "note": "Official Selection",
+          "image": "/awards/OFFICIAL-SELECTION-Black-Cat-Award-International-Film-Festival-2022-1.webp"
+        },
+        {
+          "title": "CMS International Children's Film Festival (ICFF)",
+          "year": "2023",
+          "note": "Official Selection",
+          "image": "/awards/OFFICIAL-SELECTION-CMSINTERNATIONAL-CHILDRENS-FILM-FESTIVAL-ICFF-2023-1.webp"
+        },
+        {
+          "title": "Radiance International Kids Art & Film Festival",
+          "year": "2022",
+          "note": "Official Selection",
+          "image": "/awards/OFFICIAL-SELECTION-RADIANCE-INTERNATIONAL-KIDS-ART-FILM-FESTIVAL-2022-1.webp"
+        },
+        {
+          "title": "Student World Impact Film Festival",
+          "year": "2023",
+          "note": "Official Selection",
+          "image": "/awards/OFFICIAL-SELECTION-Student-World-Impact-Film-Festival-2023.webp"
+        }
+      ]
+    },
+    "teamSection": {
+      "eyebrow": "The People Behind the Work",
+      "title": "Core Team",
+      "description": "Directors, producers and specialists working together across development, production, performance and post-production.",
+      "modalEyebrow": "Core Team"
+    },
+    "coreTeam": [
+      {
+        "name": "Yuvraj Pratap Singh",
+        "designation": "Director / Producer",
+        "shortBio": "Leads creative direction and production planning, helping shape projects from concept through execution.",
+        "details": "Works across direction and producing, connecting creative intent with practical production planning. His focus is keeping a project aligned from early development through shoot execution and final delivery.",
+        "focus": [
+          "Direction",
+          "Producing",
+          "Creative Development"
+        ],
+        "image": "/team/mdf-team-yuvraj-pratap-singh.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Aditya Mehta",
+        "designation": "Director / Writer",
+        "shortBio": "Works across direction and writing, developing story ideas into clear narratives for screen.",
+        "details": "Works at the intersection of writing and direction, shaping narrative structure, character and screen language. His role supports translating written ideas into clear, production-ready storytelling.",
+        "focus": [
+          "Direction",
+          "Screenwriting",
+          "Story Development"
+        ],
+        "image": "/team/mdf-team-aditya-mehta.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Alex",
+        "designation": "Director of Photography",
+        "shortBio": "Shapes cinematography, camera language and visual execution to support the mood and story of each production.",
+        "details": "Leads visual storytelling through cinematography, framing, camera movement and lighting choices. He works closely with direction and lighting teams to maintain a consistent visual language from setup to final frame.",
+        "focus": [
+          "Cinematography",
+          "Camera",
+          "Visual Language"
+        ],
+        "image": "/team/mdf-team-alex.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Raaj Aaryan",
+        "designation": "Director",
+        "shortBio": "Directs visual storytelling and performance, shaping scenes from creative interpretation through on-set execution.",
+        "details": "Works across direction and visual storytelling, guiding performance, scene execution and the overall creative approach on set. His focus is translating the intent of the script into clear, engaging screen moments while keeping the production aligned with the story.",
+        "focus": [
+          "Direction",
+          "Visual Storytelling",
+          "Performance"
+        ],
+        "image": "/team/mdf-team-raaz-aaryan.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Devendra Singh",
+        "designation": "Producer / Actor",
+        "shortBio": "Contributes both on screen and behind the scenes, supporting production coordination and performance requirements.",
+        "details": "Supports projects from both production and performance perspectives. His role bridges practical production needs with an actor's understanding of on-screen execution and collaboration.",
+        "focus": [
+          "Producing",
+          "Performance",
+          "Production Support"
+        ],
+        "image": "/team/mdf-team-devendra-singh.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Ravinder Singh",
+        "designation": "Producer",
+        "shortBio": "Supports production planning, resources and execution so projects can move smoothly from preparation to delivery.",
+        "details": "Focuses on production support, coordination and resource planning. He helps keep schedules, logistics and day-to-day production requirements moving in sync with the creative plan.",
+        "focus": [
+          "Producing",
+          "Coordination",
+          "Production Planning"
+        ],
+        "image": "/team/mdf-team-ravinder-singh.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Shivam Chaudhary",
+        "designation": "Production Head",
+        "shortBio": "Oversees production workflows and coordination, keeping teams, schedules and project requirements aligned.",
+        "details": "Coordinates production workflows across teams, schedules and day-to-day execution. His focus is creating a clear operating rhythm so creative and technical teams can concentrate on delivering the work.",
+        "focus": [
+          "Production Operations",
+          "Coordination",
+          "Workflow"
+        ],
+        "image": "/team/mdf-team-shivam-chaudhary.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Rahul Rasimo",
+        "designation": "Executive Producer / Director",
+        "shortBio": "Works across executive production and direction, supporting creative decisions and overall project delivery.",
+        "details": "Combines executive production oversight with directorial input, helping balance creative priorities with practical project needs. His role supports decision-making across development and execution.",
+        "focus": [
+          "Executive Production",
+          "Direction",
+          "Project Oversight"
+        ],
+        "image": "/team/mdf-team-rahul-rasimo.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Akash",
+        "designation": "Art Director",
+        "shortBio": "Shapes the visual world of productions through art direction, sets, props and design coordination.",
+        "details": "Develops the physical visual language of a production through set ideas, props, textures and art coordination. His work helps ensure the world in front of the camera supports the tone of the story.",
+        "focus": [
+          "Art Direction",
+          "Sets",
+          "Props"
+        ],
+        "image": "/team/mdf-team-akash.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Shailesh Singh",
+        "designation": "Music Producer / Singer",
+        "shortBio": "Contributes to the musical identity of projects through music production and vocal performance.",
+        "details": "Works on the musical side of productions, supporting composition, production and vocal performance. His focus is helping music feel connected to the emotion and identity of the visual story.",
+        "focus": [
+          "Music Production",
+          "Vocals",
+          "Sound Identity"
+        ],
+        "image": "/team/mdf-team-shailesh-singh-sanjay.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Pradeep Yadav",
+        "designation": "Casting Director",
+        "shortBio": "Supports casting requirements by identifying and coordinating suitable talent for production roles.",
+        "details": "Works with the creative and production teams to understand character requirements, identify suitable performers and coordinate the casting process from outreach through selection.",
+        "focus": [
+          "Casting",
+          "Talent Coordination",
+          "Character Matching"
+        ],
+        "image": "/team/mdf-team-pradeep-yadav.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      },
+      {
+        "name": "Sharad Chand Upadhyay",
+        "designation": "Anchor / Voice Over Artist",
+        "shortBio": "Works across anchoring and voice-over, bringing clear delivery and vocal presence to screen and audio content.",
+        "details": "Contributes spoken performance across anchoring and voice-over requirements. His role focuses on clear communication, vocal expression and adapting delivery to the tone of the production.",
+        "focus": [
+          "Anchoring",
+          "Voice Over",
+          "Presentation"
+        ],
+        "image": "/team/mdf-team-sharad.webp",
+        "instagram": "",
+        "facebook": "",
+        "x": "",
+        "linkedin": "",
+        "youtube": ""
+      }
+    ],
+    "quote": {
+      "eyebrow": "Our Belief",
+      "text": "Good Stories Create a Better Tomorrow",
+      "description": "The best work happens when a clear story, a prepared crew and the right collaborators move in the same direction.",
+      "attribution": "M. Dadu Films",
+      "image": "/about/mdf-about-supportive-image.webp",
+      "imageAlt": "Filmmaking team reviewing a scene together on set"
+    }
+  },
+  "servicesPage": {
+    "hero": {
+      "eyebrow": "Our Services",
+      "title": "From Idea to Final Delivery",
+      "description": "Film production, branded content, music videos, corporate shoots and creative production support built around the needs of each story.",
+      "mediaAlt": "M. Dadu Films production crew and filmmaking services",
+      "image": "/services/our-services-hero-image.webp",
+      "tags": [
+        "Film Production",
+        "Brand Content",
+        "Creative Support"
+      ]
+    },
+    "list": {
+      "eyebrow": "What We Do",
+      "title": "Production services shaped around the project.",
+      "description": "Explore a service and open Know More to see how we can support the project, what is included and how to start a conversation with our team.",
+      "buttonLabel": "Know More"
+    },
+    "homeSection": {
+      "eyebrow": "What We Offer",
+      "title": "Services",
+      "linkLabel": "Explore Services"
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "eyebrow": "Let's Talk",
+      "title": "We’d Love to Hear From You",
+      "description": "Whether you’re planning a production, representing a brand, looking to collaborate or reaching out about talent — every good project starts with a conversation.",
+      "image": "/contact/contact-us-hero-image.webp",
+      "imageAlt": "Creative filmmakers discussing a production inside a cinematic studio",
+      "tags": [
+        "Production Enquiries",
+        "Collaborations",
+        "Casting & Talent"
+      ]
+    },
+    "contactCards": [
+      {
+        "label": "Email",
+        "valueKey": "email",
+        "icon": "mail",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Phone",
+        "valueKey": "phone",
+        "icon": "phone",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Location",
+        "valueKey": "location",
+        "icon": "location",
+        "mailtoSubject": ""
+      },
+      {
+        "label": "Business Inquiries",
+        "valueKey": "email",
+        "icon": "briefcase",
+        "mailtoSubject": "Business Inquiry"
+      }
+    ],
+    "form": {
+      "serviceInquiryLabel": "Service Inquiry",
+      "eyebrow": "Send a Message",
+      "title": "Tell us what you’re working on.",
+      "description": "Share the basics and our team can review your enquiry and get back to you.",
+      "subjects": [
+        "General Inquiry",
+        "Production",
+        "Brand / Business Inquiry",
+        "Casting",
+        "Collaboration"
+      ],
+      "messagePlaceholder": "Tell us a little about your project, collaboration or enquiry...",
+      "submitLabel": "Send Message",
+      "sendingLabel": "Sending...",
+      "successMessage": "Thanks — your message has been received.",
+      "errorMessage": "Unable to send message.",
+      "privacyPrefix": "By sending this message, you provide your contact details so M. Dadu Films can review and respond to your enquiry. See our",
+      "privacyLinkLabel": "Privacy Policy"
+    },
+    "community": {
+      "eyebrow": "Join the Community",
+      "title": "Join us as a member and keep opportunities within reach.",
+      "description": "Build your profile once, use your personal dashboard to stay updated and apply to relevant projects and casting calls.",
+      "primaryCta": "Join as a Member",
+      "secondaryCta": "Explore Casting",
+      "benefits": [
+        {
+          "title": "Stay Updated",
+          "description": "See the latest casting calls, projects and community opportunities.",
+          "icon": "updates"
+        },
+        {
+          "title": "Build Your Profile",
+          "description": "Create a talent profile and keep your portfolio, skills and showreel ready.",
+          "icon": "profile"
+        },
+        {
+          "title": "Your Dashboard",
+          "description": "Track your profile, saved opportunities and applications in one place.",
+          "icon": "dashboard"
+        },
+        {
+          "title": "Apply Easily",
+          "description": "Apply to relevant projects and casting calls directly from your account.",
+          "icon": "apply"
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Let’s create together",
+      "title": "Good ideas start with a simple conversation.",
+      "description": "Whether it is production, casting, collaboration or community, reach out and let’s see what we can build together."
+    }
+  },
+  "auth": {
+    "mobileTagline": "Good People. Great Stories.",
+    "pages": {
+      "login": {
+        "eyebrow": "Member Access",
+        "title": "Welcome Back",
+        "description": "Sign in to continue your creative journey with M. Dadu Films.",
+        "visualTitle": "Good People.\nGreat Stories.",
+        "visualFooter": "Stories that move people.",
+        "bottomPrompt": "Don't have an account?",
+        "bottomLinkLabel": "Create one",
+        "image": "/auth/mdf-auth-login.webp",
+        "imageAlt": "Filmmaker working in a cinematic studio workspace"
+      },
+      "signup": {
+        "eyebrow": "Join The Community",
+        "title": "Create Your Account",
+        "description": "Join M. Dadu Films and be part of a community that brings powerful stories to life.",
+        "visualTitle": "Creative\nPeople.\nBrighter\nTomorrows.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Already have an account?",
+        "bottomLinkLabel": "Sign in",
+        "image": "/auth/mdf-auth-signup.webp",
+        "imageAlt": "Creative film team collaborating around storyboards in a studio"
+      },
+      "forgot-password": {
+        "eyebrow": "Account Recovery",
+        "title": "Forgot Password?",
+        "description": "Enter your account email and we’ll help you continue your journey.",
+        "visualTitle": "Every Story\nFinds Its Way\nBack.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Remember your password?",
+        "bottomLinkLabel": "Back to sign in",
+        "image": "/auth/mdf-auth-forget-password.webp",
+        "imageAlt": "Quiet cinematic creative workspace prepared for account recovery"
+      },
+      "reset-password": {
+        "eyebrow": "Secure Your Account",
+        "title": "Create New Password",
+        "description": "Choose a secure password to regain access to your creative profile.",
+        "visualTitle": "Back To\nCreating.",
+        "visualFooter": "Good People. Great Stories.",
+        "bottomPrompt": "Ready to continue?",
+        "bottomLinkLabel": "Sign in",
+        "image": "/auth/mdf-auth-forget-password.webp",
+        "imageAlt": "Quiet cinematic creative workspace prepared for account recovery"
+      }
+    }
+  },
+  "projectsPage": {
+    "hero": {
+      "eyebrow": "Our Projects",
+      "title": "Stories Moving From Idea to Screen",
+      "description": "Explore films, series, music and visual work being developed, produced and released through M. Dadu Films.",
+      "image": "/project/mdf-project-hero.webp",
+      "imageAlt": "Film production in progress on a cinematic set",
+      "tags": [
+        "Films & Series",
+        "Music & Visuals",
+        "Production Stories"
+      ]
+    }
+  },
+  "castingPage": {
+    "hero": {
+      "eyebrow": "Casting Calls",
+      "title": "Find the Opportunity That Fits Your Craft",
+      "description": "Discover open acting and crew opportunities from current and upcoming M. Dadu Films productions.",
+      "image": "/casting/mdf-casting-hero.webp",
+      "imageAlt": "Actor performing during a professional casting audition",
+      "tags": [
+        "Acting Opportunities",
+        "Crew Calls",
+        "Upcoming Productions"
+      ]
+    }
+  },
+  "talentPage": {
+    "hero": {
+      "eyebrow": "Talent Network",
+      "title": "Discover People Ready to Create",
+      "description": "Explore public member profiles across acting, crew, writing and creative disciplines, with filters for role, skills, location and availability.",
+      "image": "/talent/mdf-talent-hero.webp",
+      "imageAlt": "Creative talent and production professionals working together on set",
+      "tags": [
+        "Actors & Creators",
+        "Crew & Specialists",
+        "Creative Community"
+      ]
+    },
+    "supportingSection": {
+      "eyebrow": "Creative Community",
+      "title": "Build your profile. Be discoverable.",
+      "description": "Create a member profile, showcase your work and choose whether your verified talent profile is publicly discoverable.",
+      "image": "/talent/mdf-talent-supportive-image.webp",
+      "imageAlt": "Creative talent preparing for a professional film and casting opportunity"
+    },
+    "directory": {
+      "pageSize": 20,
+      "items": [
+        {
+          "id": "talent-aarav-mehta",
+          "name": "Aarav Mehta",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Mumbai",
+          "age": 28,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Screen Acting",
+            "Theatre",
+            "Improvisation"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Aarav Mehta is a actor based in Mumbai, with 4 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Screen Acting, Theatre, Improvisation.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-meera-joshi",
+          "name": "Meera Joshi",
+          "group": "Actor",
+          "role": "Actor / Voice Artist",
+          "location": "Indore",
+          "age": 26,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Screen Acting",
+            "Voice Over",
+            "Commercials"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Meera Joshi is a actor / voice artist based in Indore, with 3 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Screen Acting, Voice Over, Commercials.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-vihaan-kapoor",
+          "name": "Vihaan Kapoor",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Delhi",
+          "age": 31,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Theatre",
+            "Action",
+            "Hindi Dialogue"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Punjabi"
+          ],
+          "availability": "Limited",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Vihaan Kapoor is a actor based in Delhi, with 6 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Theatre, Action, Hindi Dialogue.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-ananya-saxena",
+          "name": "Ananya Saxena",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Lucknow",
+          "age": 24,
+          "gender": "Female",
+          "experienceYears": 2,
+          "experience": "2 years",
+          "skills": [
+            "Screen Acting",
+            "Dance",
+            "Self Tape"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Ananya Saxena is a actor based in Lucknow, with 2 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Screen Acting, Dance, Self Tape.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-kabir-singh",
+          "name": "Kabir Singh",
+          "group": "Actor",
+          "role": "Actor / Theatre Artist",
+          "location": "Bhopal",
+          "age": 34,
+          "gender": "Male",
+          "experienceYears": 8,
+          "experience": "8 years",
+          "skills": [
+            "Theatre",
+            "Character Acting",
+            "Improvisation"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Kabir Singh is a actor / theatre artist based in Bhopal, with 8 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Theatre, Character Acting, Improvisation.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-riya-chauhan",
+          "name": "Riya Chauhan",
+          "group": "Actor",
+          "role": "Actor / Dancer",
+          "location": "Noida",
+          "age": 23,
+          "gender": "Female",
+          "experienceYears": 2,
+          "experience": "2 years",
+          "skills": [
+            "Dance",
+            "Commercials",
+            "Screen Acting"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Riya Chauhan is a actor / dancer based in Noida, with 2 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Dance, Commercials, Screen Acting.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-advait-sharma",
+          "name": "Advait Sharma",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Pune",
+          "age": 29,
+          "gender": "Male",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Screen Acting",
+            "Comedy",
+            "Voice"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Marathi"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Advait Sharma is a actor based in Pune, with 5 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Screen Acting, Comedy, Voice.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-sana-mirza",
+          "name": "Sana Mirza",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Mumbai",
+          "age": 27,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Drama",
+            "Camera Acting",
+            "Urdu Dialogue"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Urdu"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Sana Mirza is a actor based in Mumbai, with 4 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Drama, Camera Acting, Urdu Dialogue.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-aryan-tripathi",
+          "name": "Aryan Tripathi",
+          "group": "Actor",
+          "role": "Actor / Model",
+          "location": "Lucknow",
+          "age": 25,
+          "gender": "Male",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Commercials",
+            "Screen Acting",
+            "Modelling"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Aryan Tripathi is a actor / model based in Lucknow, with 3 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Commercials, Screen Acting, Modelling.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-navya-rao",
+          "name": "Navya Rao",
+          "group": "Actor",
+          "role": "Actor",
+          "location": "Hyderabad",
+          "age": 30,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Screen Acting",
+            "Drama",
+            "Dance"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Telugu"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Navya Rao is a actor based in Hyderabad, with 6 years of creative experience. A screen and performance artist focused on grounded character work, camera preparation and collaborative on-set performance.",
+          "previousWork": "Selected experience includes independent films, short films, branded content, auditions, rehearsals and performance-led screen work.\n\nKey strengths: Screen Acting, Drama, Dance.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-kabir-verma",
+          "name": "Kabir Verma",
+          "group": "Crew",
+          "role": "Director of Photography",
+          "location": "Bhopal",
+          "age": 33,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Camera",
+            "Lighting",
+            "Documentary"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Kabir Verma is a director of photography based in Bhopal, with 7 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Camera, Lighting, Documentary.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-dev-arora",
+          "name": "Dev Arora",
+          "group": "Crew",
+          "role": "Editor",
+          "location": "Pune",
+          "age": 32,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Premiere Pro",
+            "DaVinci Resolve",
+            "Narrative Editing"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Dev Arora is a editor based in Pune, with 6 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Premiere Pro, DaVinci Resolve, Narrative Editing.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-rhea-kapoor",
+          "name": "Rhea Kapoor",
+          "group": "Crew",
+          "role": "Production Designer",
+          "location": "Mumbai",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Art Direction",
+            "Set Dressing",
+            "Props"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Rhea Kapoor is a production designer based in Mumbai, with 5 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Art Direction, Set Dressing, Props.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-manish-yadav",
+          "name": "Manish Yadav",
+          "group": "Crew",
+          "role": "Sound Recordist",
+          "location": "Lucknow",
+          "age": 35,
+          "gender": "Male",
+          "experienceYears": 9,
+          "experience": "9 years",
+          "skills": [
+            "Location Sound",
+            "Boom",
+            "Wireless Audio"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Manish Yadav is a sound recordist based in Lucknow, with 9 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Location Sound, Boom, Wireless Audio.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-priya-nair",
+          "name": "Priya Nair",
+          "group": "Crew",
+          "role": "Assistant Director",
+          "location": "Mumbai",
+          "age": 28,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Scheduling",
+            "Call Sheets",
+            "Set Coordination"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Malayalam"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Priya Nair is a assistant director based in Mumbai, with 4 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Scheduling, Call Sheets, Set Coordination.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-rahul-biswas",
+          "name": "Rahul Biswas",
+          "group": "Crew",
+          "role": "Gaffer",
+          "location": "Kolkata",
+          "age": 38,
+          "gender": "Male",
+          "experienceYears": 10,
+          "experience": "10 years",
+          "skills": [
+            "Lighting",
+            "Grip",
+            "Power Distribution"
+          ],
+          "languages": [
+            "Hindi",
+            "Bengali"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Rahul Biswas is a gaffer based in Kolkata, with 10 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Lighting, Grip, Power Distribution.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-neha-bhardwaj",
+          "name": "Neha Bhardwaj",
+          "group": "Crew",
+          "role": "Costume Stylist",
+          "location": "Delhi",
+          "age": 30,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Costume",
+            "Continuity",
+            "Look Development"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Neha Bhardwaj is a costume stylist based in Delhi, with 6 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Costume, Continuity, Look Development.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-omkar-patil",
+          "name": "Omkar Patil",
+          "group": "Crew",
+          "role": "Focus Puller",
+          "location": "Pune",
+          "age": 27,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Camera",
+            "Focus",
+            "Lens Support"
+          ],
+          "languages": [
+            "Hindi",
+            "Marathi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Omkar Patil is a focus puller based in Pune, with 4 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Camera, Focus, Lens Support.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-kriti-sen",
+          "name": "Kriti Sen",
+          "group": "Crew",
+          "role": "Makeup Artist",
+          "location": "Noida",
+          "age": 26,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Makeup",
+            "Hair",
+            "Continuity"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Kriti Sen is a makeup artist based in Noida, with 3 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Makeup, Hair, Continuity.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-rohan-suri",
+          "name": "Rohan Suri",
+          "group": "Crew",
+          "role": "Line Producer",
+          "location": "Delhi",
+          "age": 37,
+          "gender": "Male",
+          "experienceYears": 11,
+          "experience": "11 years",
+          "skills": [
+            "Budgeting",
+            "Logistics",
+            "Vendor Management"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Punjabi"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Rohan Suri is a line producer based in Delhi, with 11 years of creative experience. A film-production professional with practical on-set experience, department collaboration and a detail-focused working style.",
+          "previousWork": "Selected experience includes films, branded shoots, music videos and collaborative production workflows across independent sets.\n\nKey strengths: Budgeting, Logistics, Vendor Management.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-isha-rao",
+          "name": "Isha Rao",
+          "group": "Writer",
+          "role": "Screenwriter",
+          "location": "Delhi",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Screenwriting",
+            "Research",
+            "Story Development"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Isha Rao is a screenwriter based in Delhi, with 5 years of creative experience. A story professional working across research, development and screen-focused writing with an emphasis on character and structure.",
+          "previousWork": "Selected work includes scripts, dialogue, research, concept notes and story-development material for narrative and short-form productions.\n\nKey strengths: Screenwriting, Research, Story Development.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-aman-shukla",
+          "name": "Aman Shukla",
+          "group": "Writer",
+          "role": "Dialogue Writer",
+          "location": "Lucknow",
+          "age": 34,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Dialogue",
+            "Hindi",
+            "Comedy Writing"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Aman Shukla is a dialogue writer based in Lucknow, with 7 years of creative experience. A story professional working across research, development and screen-focused writing with an emphasis on character and structure.",
+          "previousWork": "Selected work includes scripts, dialogue, research, concept notes and story-development material for narrative and short-form productions.\n\nKey strengths: Dialogue, Hindi, Comedy Writing.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-suhani-garg",
+          "name": "Suhani Garg",
+          "group": "Writer",
+          "role": "Content Writer",
+          "location": "Indore",
+          "age": 25,
+          "gender": "Female",
+          "experienceYears": 3,
+          "experience": "3 years",
+          "skills": [
+            "Brand Films",
+            "Concept Notes",
+            "Research"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Suhani Garg is a content writer based in Indore, with 3 years of creative experience. A story professional working across research, development and screen-focused writing with an emphasis on character and structure.",
+          "previousWork": "Selected work includes scripts, dialogue, research, concept notes and story-development material for narrative and short-form productions.\n\nKey strengths: Brand Films, Concept Notes, Research.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-aditya-mishra",
+          "name": "Aditya Mishra",
+          "group": "Writer",
+          "role": "Screenwriter",
+          "location": "Mumbai",
+          "age": 32,
+          "gender": "Male",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Screenplay",
+            "Adaptation",
+            "Story Structure"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Aditya Mishra is a screenwriter based in Mumbai, with 6 years of creative experience. A story professional working across research, development and screen-focused writing with an emphasis on character and structure.",
+          "previousWork": "Selected work includes scripts, dialogue, research, concept notes and story-development material for narrative and short-form productions.\n\nKey strengths: Screenplay, Adaptation, Story Structure.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-farheen-khan",
+          "name": "Farheen Khan",
+          "group": "Writer",
+          "role": "Script Researcher",
+          "location": "Bhopal",
+          "age": 27,
+          "gender": "Female",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Research",
+            "Documentation",
+            "Story References"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Urdu"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Farheen Khan is a script researcher based in Bhopal, with 4 years of creative experience. A story professional working across research, development and screen-focused writing with an emphasis on character and structure.",
+          "previousWork": "Selected work includes scripts, dialogue, research, concept notes and story-development material for narrative and short-form productions.\n\nKey strengths: Research, Documentation, Story References.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-tanvi-menon",
+          "name": "Tanvi Menon",
+          "group": "Creator",
+          "role": "Voice Artist",
+          "location": "Bengaluru",
+          "age": 28,
+          "gender": "Female",
+          "experienceYears": 5,
+          "experience": "5 years",
+          "skills": [
+            "Voice Over",
+            "Dubbing",
+            "Commercial Voice"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Malayalam"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Tanvi Menon is a voice artist based in Bengaluru, with 5 years of creative experience. A multidisciplinary creative professional contributing specialist craft, visual ideas and collaborative execution across film and branded work.",
+          "previousWork": "Selected work includes creative collaborations, campaign content, music-led projects and specialist contributions to production and post-production.\n\nKey strengths: Voice Over, Dubbing, Commercial Voice.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-harsh-vardhan",
+          "name": "Harsh Vardhan",
+          "group": "Creator",
+          "role": "Music Composer",
+          "location": "Mumbai",
+          "age": 31,
+          "gender": "Male",
+          "experienceYears": 7,
+          "experience": "7 years",
+          "skills": [
+            "Background Score",
+            "Music Production",
+            "Arrangement"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Limited",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Harsh Vardhan is a music composer based in Mumbai, with 7 years of creative experience. A multidisciplinary creative professional contributing specialist craft, visual ideas and collaborative execution across film and branded work.",
+          "previousWork": "Selected work includes creative collaborations, campaign content, music-led projects and specialist contributions to production and post-production.\n\nKey strengths: Background Score, Music Production, Arrangement.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-nandini-paul",
+          "name": "Nandini Paul",
+          "group": "Creator",
+          "role": "Choreographer",
+          "location": "Kolkata",
+          "age": 29,
+          "gender": "Female",
+          "experienceYears": 6,
+          "experience": "6 years",
+          "skills": [
+            "Choreography",
+            "Performance Direction",
+            "Dance"
+          ],
+          "languages": [
+            "Hindi",
+            "English",
+            "Bengali"
+          ],
+          "availability": "Available",
+          "emailVerified": false,
+          "image": "",
+          "bio": "Nandini Paul is a choreographer based in Kolkata, with 6 years of creative experience. A multidisciplinary creative professional contributing specialist craft, visual ideas and collaborative execution across film and branded work.",
+          "previousWork": "Selected work includes creative collaborations, campaign content, music-led projects and specialist contributions to production and post-production.\n\nKey strengths: Choreography, Performance Direction, Dance.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-yash-malik",
+          "name": "Yash Malik",
+          "group": "Creator",
+          "role": "Photographer",
+          "location": "Delhi",
+          "age": 27,
+          "gender": "Male",
+          "experienceYears": 4,
+          "experience": "4 years",
+          "skills": [
+            "Portraits",
+            "BTS Photography",
+            "Editorial"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Available",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Yash Malik is a photographer based in Delhi, with 4 years of creative experience. A multidisciplinary creative professional contributing specialist craft, visual ideas and collaborative execution across film and branded work.",
+          "previousWork": "Selected work includes creative collaborations, campaign content, music-led projects and specialist contributions to production and post-production.\n\nKey strengths: Portraits, BTS Photography, Editorial.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        },
+        {
+          "id": "talent-aisha-qureshi",
+          "name": "Aisha Qureshi",
+          "group": "Creator",
+          "role": "Creative Director",
+          "location": "Noida",
+          "age": 33,
+          "gender": "Female",
+          "experienceYears": 8,
+          "experience": "8 years",
+          "skills": [
+            "Creative Direction",
+            "Brand Films",
+            "Visual References"
+          ],
+          "languages": [
+            "Hindi",
+            "English"
+          ],
+          "availability": "Booked",
+          "emailVerified": true,
+          "image": "",
+          "bio": "Aisha Qureshi is a creative director based in Noida, with 8 years of creative experience. A multidisciplinary creative professional contributing specialist craft, visual ideas and collaborative execution across film and branded work.",
+          "previousWork": "Selected work includes creative collaborations, campaign content, music-led projects and specialist contributions to production and post-production.\n\nKey strengths: Creative Direction, Brand Films, Visual References.",
+          "portfolio": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "showreel": "https://www.youtube.com/",
+          "videos": [
+            "https://www.youtube.com/",
+            "https://vimeo.com/"
+          ],
+          "socialLinks": [
+            "https://www.instagram.com/",
+            "https://www.imdb.com/"
+          ]
+        }
+      ]
+    }
+  },
+  "blogPage": {
+    "hero": {
+      "eyebrow": "Our Journal",
+      "title": "Notes From the Work Around the Work",
+      "description": "Practical casting advice, production stories and creative thinking from the world around M. Dadu Films.",
+      "image": "/blogs/mdf-blogs-hero.webp",
+      "imageAlt": "Filmmaker developing ideas and production stories in a cinematic workspace",
+      "tags": [
+        "Production Stories",
+        "Casting Advice",
+        "Creative Journal"
+      ]
+    },
+    "list": {
+      "eyebrow": "From the Journal",
+      "title": "Production notes, practical guides and industry thinking.",
+      "pageSize": 20
+    }
+  },
+  "homeTestimonials": {
+    "eyebrow": "Client Voices",
+    "title": "What collaborators say about working with us.",
+    "description": "People, performers and creative collaborators are at the centre of every production relationship.",
+    "items": [
+      {
+        "name": "Anshu Varshney",
+        "designation": "Actress & Model",
+        "image": "/testimonials/mdf-testimonial-ansshu-varshney.jpg",
+        "imageAlt": "Anshu Varshney",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      },
+      {
+        "name": "Lekha Prajapati",
+        "designation": "Actress",
+        "image": "/testimonials/mdf-testimonial-lekha-prajapati.jpg",
+        "imageAlt": "Lekha Prajapati",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      },
+      {
+        "name": "Shreedhar Dubey",
+        "designation": "Actor & Casting Director",
+        "image": "/testimonials/mdf-testimonial-shreedhar-dubey.png",
+        "imageAlt": "Shreedhar Dubey",
+        "comment": "",
+        "commentStatus": "pending-approved-copy"
+      }
+    ]
+  },
+  "homeCommunity": {
+    "eyebrow": "Creative Community",
+    "title": "Be Part of Our Creative Community",
+    "description": "Create your profile, showcase your talent and discover film opportunities built around real collaboration.",
+    "ctaLabel": "Join Now",
+    "ctaHref": "/signup",
+    "image": "/home/mdf-supporting-image.webp",
+    "imageAlt": "Creative filmmaking team reviewing a shot together on set"
+  },
+  "galleryPage": {
+    "hero": {
+      "eyebrow": "Our Gallery",
+      "title": "Frames From the Work Behind the Stories",
+      "description": "Explore recent production stills, behind-the-scenes moments and visual memories from the M. Dadu Films journey.",
+      "image": "/gallery/mdf-gallery-hero-image.webp",
+      "imageAlt": "M. Dadu Films gallery and behind-the-scenes visual archive",
+      "tags": [
+        "Featured Frames",
+        "Behind the Scenes",
+        "Public Library"
+      ]
+    },
+    "sectionIntro": {
+      "eyebrow": "Visual Archive",
+      "title": "Explore the gallery by section.",
+      "description": "Each section shows the 20 most recent uploads. Open the public library to browse the complete section with pagination."
+    },
+    "pageSize": 20,
+    "sections": [
+      {
+        "slug": "featured-images",
+        "title": "Featured Images",
+        "eyebrow": "Public Library",
+        "description": "A curated selection of frames, portraits and production moments from our recent work.",
+        "items": [
+          {
+            "id": "featured-images-01",
+            "title": "Featured 01",
+            "caption": "Featured Images gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-02",
+            "title": "Featured 02",
+            "caption": "Featured Images gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-03",
+            "title": "Featured 03",
+            "caption": "Featured Images gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-04",
+            "title": "Featured 04",
+            "caption": "Featured Images gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-05",
+            "title": "Featured 05",
+            "caption": "Featured Images gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-06",
+            "title": "Featured 06",
+            "caption": "Featured Images gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-07",
+            "title": "Featured 07",
+            "caption": "Featured Images gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-08",
+            "title": "Featured 08",
+            "caption": "Featured Images gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-09",
+            "title": "Featured 09",
+            "caption": "Featured Images gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-10",
+            "title": "Featured 10",
+            "caption": "Featured Images gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-11",
+            "title": "Featured 11",
+            "caption": "Featured Images gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-12",
+            "title": "Featured 12",
+            "caption": "Featured Images gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-13",
+            "title": "Featured 13",
+            "caption": "Featured Images gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-14",
+            "title": "Featured 14",
+            "caption": "Featured Images gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-15",
+            "title": "Featured 15",
+            "caption": "Featured Images gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-16",
+            "title": "Featured 16",
+            "caption": "Featured Images gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-17",
+            "title": "Featured 17",
+            "caption": "Featured Images gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-18",
+            "title": "Featured 18",
+            "caption": "Featured Images gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-19",
+            "title": "Featured 19",
+            "caption": "Featured Images gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-20",
+            "title": "Featured 20",
+            "caption": "Featured Images gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "featured-images-21",
+            "title": "Featured 21",
+            "caption": "Featured Images gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films featured images placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      },
+      {
+        "slug": "behind-the-scenes",
+        "title": "Behind the Scenes",
+        "eyebrow": "Public Library",
+        "description": "On-set moments, crew collaboration, camera setups and the work happening around the frame.",
+        "items": [
+          {
+            "id": "behind-the-scenes-01",
+            "title": "Behind the Scenes 01",
+            "caption": "Behind the Scenes gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-02",
+            "title": "Behind the Scenes 02",
+            "caption": "Behind the Scenes gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-03",
+            "title": "Behind the Scenes 03",
+            "caption": "Behind the Scenes gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-04",
+            "title": "Behind the Scenes 04",
+            "caption": "Behind the Scenes gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-05",
+            "title": "Behind the Scenes 05",
+            "caption": "Behind the Scenes gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-06",
+            "title": "Behind the Scenes 06",
+            "caption": "Behind the Scenes gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-07",
+            "title": "Behind the Scenes 07",
+            "caption": "Behind the Scenes gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-08",
+            "title": "Behind the Scenes 08",
+            "caption": "Behind the Scenes gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-09",
+            "title": "Behind the Scenes 09",
+            "caption": "Behind the Scenes gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-10",
+            "title": "Behind the Scenes 10",
+            "caption": "Behind the Scenes gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-11",
+            "title": "Behind the Scenes 11",
+            "caption": "Behind the Scenes gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-12",
+            "title": "Behind the Scenes 12",
+            "caption": "Behind the Scenes gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-13",
+            "title": "Behind the Scenes 13",
+            "caption": "Behind the Scenes gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-14",
+            "title": "Behind the Scenes 14",
+            "caption": "Behind the Scenes gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-15",
+            "title": "Behind the Scenes 15",
+            "caption": "Behind the Scenes gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-16",
+            "title": "Behind the Scenes 16",
+            "caption": "Behind the Scenes gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-17",
+            "title": "Behind the Scenes 17",
+            "caption": "Behind the Scenes gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-18",
+            "title": "Behind the Scenes 18",
+            "caption": "Behind the Scenes gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-19",
+            "title": "Behind the Scenes 19",
+            "caption": "Behind the Scenes gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-20",
+            "title": "Behind the Scenes 20",
+            "caption": "Behind the Scenes gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "behind-the-scenes-21",
+            "title": "Behind the Scenes 21",
+            "caption": "Behind the Scenes gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films behind the scenes placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      },
+      {
+        "slug": "others",
+        "title": "Others",
+        "eyebrow": "Public Library",
+        "description": "Events, community moments, references and visual memories that sit beyond a single production category.",
+        "items": [
+          {
+            "id": "others-01",
+            "title": "Others 01",
+            "caption": "Others gallery image 01",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 01",
+            "uploadedAt": "2026-09-22T12:00:00+05:30"
+          },
+          {
+            "id": "others-02",
+            "title": "Others 02",
+            "caption": "Others gallery image 02",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 02",
+            "uploadedAt": "2026-09-21T12:00:00+05:30"
+          },
+          {
+            "id": "others-03",
+            "title": "Others 03",
+            "caption": "Others gallery image 03",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 03",
+            "uploadedAt": "2026-09-20T12:00:00+05:30"
+          },
+          {
+            "id": "others-04",
+            "title": "Others 04",
+            "caption": "Others gallery image 04",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 04",
+            "uploadedAt": "2026-09-19T12:00:00+05:30"
+          },
+          {
+            "id": "others-05",
+            "title": "Others 05",
+            "caption": "Others gallery image 05",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 05",
+            "uploadedAt": "2026-09-18T12:00:00+05:30"
+          },
+          {
+            "id": "others-06",
+            "title": "Others 06",
+            "caption": "Others gallery image 06",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 06",
+            "uploadedAt": "2026-09-17T12:00:00+05:30"
+          },
+          {
+            "id": "others-07",
+            "title": "Others 07",
+            "caption": "Others gallery image 07",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 07",
+            "uploadedAt": "2026-09-16T12:00:00+05:30"
+          },
+          {
+            "id": "others-08",
+            "title": "Others 08",
+            "caption": "Others gallery image 08",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 08",
+            "uploadedAt": "2026-09-15T12:00:00+05:30"
+          },
+          {
+            "id": "others-09",
+            "title": "Others 09",
+            "caption": "Others gallery image 09",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 09",
+            "uploadedAt": "2026-09-14T12:00:00+05:30"
+          },
+          {
+            "id": "others-10",
+            "title": "Others 10",
+            "caption": "Others gallery image 10",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 10",
+            "uploadedAt": "2026-09-13T12:00:00+05:30"
+          },
+          {
+            "id": "others-11",
+            "title": "Others 11",
+            "caption": "Others gallery image 11",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 11",
+            "uploadedAt": "2026-09-12T12:00:00+05:30"
+          },
+          {
+            "id": "others-12",
+            "title": "Others 12",
+            "caption": "Others gallery image 12",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 12",
+            "uploadedAt": "2026-09-11T12:00:00+05:30"
+          },
+          {
+            "id": "others-13",
+            "title": "Others 13",
+            "caption": "Others gallery image 13",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 13",
+            "uploadedAt": "2026-09-10T12:00:00+05:30"
+          },
+          {
+            "id": "others-14",
+            "title": "Others 14",
+            "caption": "Others gallery image 14",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 14",
+            "uploadedAt": "2026-09-09T12:00:00+05:30"
+          },
+          {
+            "id": "others-15",
+            "title": "Others 15",
+            "caption": "Others gallery image 15",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 15",
+            "uploadedAt": "2026-09-08T12:00:00+05:30"
+          },
+          {
+            "id": "others-16",
+            "title": "Others 16",
+            "caption": "Others gallery image 16",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 16",
+            "uploadedAt": "2026-09-07T12:00:00+05:30"
+          },
+          {
+            "id": "others-17",
+            "title": "Others 17",
+            "caption": "Others gallery image 17",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 17",
+            "uploadedAt": "2026-09-06T12:00:00+05:30"
+          },
+          {
+            "id": "others-18",
+            "title": "Others 18",
+            "caption": "Others gallery image 18",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 18",
+            "uploadedAt": "2026-09-05T12:00:00+05:30"
+          },
+          {
+            "id": "others-19",
+            "title": "Others 19",
+            "caption": "Others gallery image 19",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 19",
+            "uploadedAt": "2026-09-04T12:00:00+05:30"
+          },
+          {
+            "id": "others-20",
+            "title": "Others 20",
+            "caption": "Others gallery image 20",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 20",
+            "uploadedAt": "2026-09-03T12:00:00+05:30"
+          },
+          {
+            "id": "others-21",
+            "title": "Others 21",
+            "caption": "Others gallery image 21",
+            "image": "",
+            "imageAlt": "M. Dadu Films others placeholder image 21",
+            "uploadedAt": "2026-09-02T12:00:00+05:30"
+          }
+        ]
+      }
+    ]
+  }
+}

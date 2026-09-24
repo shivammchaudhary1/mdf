@@ -21,6 +21,11 @@ import {
 } from "./application.dto";
 import { Application } from "./application.model";
 
+function indiaDateKey(now = new Date()) {
+  const india = new Date(now.getTime() + 330 * 60_000);
+  return new Date(Date.UTC(india.getUTCFullYear(), india.getUTCMonth(), india.getUTCDate()));
+}
+
 type ResolvedOpportunity = {
   type: "PROJECT" | "CASTING";
   id: Types.ObjectId;
@@ -55,7 +60,7 @@ export class ApplicationService {
     return {
       ...application,
       _id: String((application as { _id: unknown })._id),
-      userId: String(item.userId),
+      memberId: String(item.memberId),
       opportunityId: String(item.opportunityId),
       projectId: item.projectId ? String(item.projectId) : undefined,
       portfolioMediaIds: portfolio,
@@ -67,6 +72,7 @@ export class ApplicationService {
 
   private async resolveOpportunity(input: CreateApplicationDto): Promise<ResolvedOpportunity> {
     const id = objectId(input.opportunityId, "Opportunity not found.");
+    const today = indiaDateKey();
 
     if (!input.opportunityType || input.opportunityType === "CASTING") {
       const casting = await this.castings
@@ -75,7 +81,7 @@ export class ApplicationService {
           published: true,
           archived: false,
           status: "Open",
-          $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
+          $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gte: today } }],
         })
         .lean();
 
@@ -115,26 +121,26 @@ export class ApplicationService {
     throw new BadRequestException("This opportunity is no longer accepting applications.");
   }
 
-  async apply(userId: string, input: CreateApplicationDto) {
-    await this.rateLimits.consume("member-application", userId, 30, 86_400_000);
+  async apply(memberId: string, input: CreateApplicationDto) {
+    await this.rateLimits.consume("member-application", memberId, 30, 86_400_000);
 
     const opportunity = await this.resolveOpportunity(input);
 
-    await this.media.assertOwnedBy(userId, [...(input.portfolioMediaIds ?? [])], "image", "user-portfolio");
-    await this.media.assertOwnedBy(userId, [input.documentMediaId], "document", "user-resume");
+    await this.media.assertOwnedBy(memberId, [...(input.portfolioMediaIds ?? [])], "image", "member-portfolio");
+    await this.media.assertOwnedBy(memberId, [input.documentMediaId], "document", "member-resume");
 
-    const account = await this.accounts.findById(objectId(userId)).lean();
+    const account = await this.accounts.findById(objectId(memberId)).lean();
 
     if (!account || account.suspended) {
       throw new BadRequestException("Account is not available.");
     }
     const applicantProfile = await this.applications.db
       .collection("profiles")
-      .findOne({ userId: account._id }, { projection: { city: 1 } });
+      .findOne({ memberId: account._id }, { projection: { city: 1 } });
 
     try {
       const application = await this.applications.create({
-        userId: account._id,
+        memberId: account._id,
         opportunityType: opportunity.type,
         opportunityId: opportunity.id,
         projectId: opportunity.projectId,
@@ -169,9 +175,9 @@ export class ApplicationService {
     }
   }
 
-  async mine(userId: string, query: MemberApplicationQueryDto) {
+  async mine(memberId: string, query: MemberApplicationQueryDto) {
     const filter: QueryFilter<Application> = {
-      userId: objectId(userId),
+      memberId: objectId(memberId),
     };
 
     if (query.status) {
@@ -193,11 +199,11 @@ export class ApplicationService {
     };
   }
 
-  async mineById(userId: string, id: string) {
+  async mineById(memberId: string, id: string) {
     const application = await this.applications
       .findOne({
         _id: objectId(id),
-        userId: objectId(userId),
+        memberId: objectId(memberId),
       })
       .lean();
 
@@ -225,7 +231,14 @@ export class ApplicationService {
     if (query.search) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
 
-      filter.$or = [{ "applicant.name": search }, { "applicant.email": search }, { opportunityTitle: search }, { roleSnapshot: search }];
+      filter.$or = [
+        { "applicant.name": search },
+        { "applicant.email": search },
+        { "applicant.mobile": search },
+        { "applicant.city": search },
+        { opportunityTitle: search },
+        { roleSnapshot: search },
+      ];
     }
 
     const [result] = await this.applications.aggregate<{ items: Application[]; total: { count: number }[] }>([
@@ -253,39 +266,26 @@ export class ApplicationService {
   }
 
   async update(id: string, input: UpdateApplicationDto, actorId: string) {
-    const existing = await this.applications.findById(objectId(id)).select("+adminNotes").lean();
-    if (!existing) {
-      throw new NotFoundException("Application not found.");
-    }
-
-    const application = await this.applications
-      .findByIdAndUpdate(
-        objectId(id),
-        {
-          $set: {
-            status: input.status,
-            ...(input.adminNotes !== undefined ? { adminNotes: input.adminNotes.trim() } : {}),
-            reviewedBy: objectId(actorId),
-            reviewedAt: new Date(),
-          },
-        },
-        {
-          new: true,
-          runValidators: true,
-        },
-      )
-      .select("+adminNotes");
-
+    const application = await this.applications.findById(objectId(id)).select("+adminNotes");
     if (!application) {
       throw new NotFoundException("Application not found.");
     }
 
-    if (existing.status !== application.status) {
+    const previousStatus = application.status;
+    application.status = input.status;
+    if (input.adminNotes !== undefined) application.adminNotes = input.adminNotes.trim();
+    application.reviewedBy = objectId(actorId);
+    application.reviewedAt = new Date();
+
+    await application.save();
+
+    if (previousStatus !== application.status) {
+      const memberStatus = application.status === "Rejected" ? "Not Selected" : application.status;
       await this.mail
         .send(
           application.applicant.email,
           "Application status updated",
-          `Your application for ${application.opportunityTitle} is now ${application.status}.`,
+          `Your application for ${application.opportunityTitle} is now ${memberStatus}.`,
         )
         .catch(() => undefined);
     }
@@ -306,11 +306,12 @@ export class ApplicationService {
   }
 
   async opportunities(query: OpportunityQueryDto) {
+    const today = indiaDateKey();
     const castingMatch: Record<string, unknown> = {
       published: true,
       archived: false,
       status: "Open",
-      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gt: new Date() } }],
+      $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: { $gte: today } }],
     };
 
     const projectMatch: Record<string, unknown> = {

@@ -10,6 +10,16 @@ import { MediaService } from "../media/media.service";
 import { CreateProjectDto, ProjectQueryDto, UpdateProjectDto } from "./project.dto";
 import { Project } from "./project.model";
 
+function cleanString(value?: string) {
+  const cleaned = value?.trim();
+  return cleaned || undefined;
+}
+
+function cleanList(values?: string[]) {
+  if (!values) return values;
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
 @Injectable()
 export class ProjectService {
   constructor(
@@ -51,17 +61,31 @@ export class ProjectService {
       ...(query.tag ? { tags: query.tag } : {}),
     };
 
-    if (query.search) {
+    if (query.search?.trim()) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
-
-      filter.$or = [{ title: search }, { summary: search }, { location: search }];
+      filter.$or = [
+        { title: search },
+        { summary: search },
+        { description: search },
+        { location: search },
+        { type: search },
+        { tags: search },
+      ];
     }
 
     const [result] = await this.projects.aggregate<{ items: Project[]; total: { count: number }[] }>([
       { $match: filter },
+      // Projects without an explicit display order stay automatic and newest-first.
+      // An explicit display order remains available for deliberate pinning/ordering.
       { $sort: { order: 1, createdAt: -1, _id: -1 } },
-      { $facet: { items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }], total: [{ $count: "count" }] } },
+      {
+        $facet: {
+          items: [{ $skip: (query.page - 1) * query.limit }, { $limit: query.limit }],
+          total: [{ $count: "count" }],
+        },
+      },
     ]);
+
     const items = result?.items ?? [];
     const total = Number(result?.total?.[0]?.count ?? 0);
 
@@ -74,47 +98,66 @@ export class ProjectService {
           ])
           .toArray()
       : [];
+
     const totals = new Map(counts.map((item) => [String(item._id), item.count]));
+
     return {
-      items: items.map((item) => ({ ...this.serialize(item), ...(admin ? { applications: totals.get(String(item._id)) ?? 0 } : {}) })),
+      items: items.map((item) => ({
+        ...this.serialize(item),
+        ...(admin ? { applications: totals.get(String(item._id)) ?? 0 } : {}),
+      })),
       meta: pageMeta(query.page, query.limit, total),
     };
   }
 
   async bySlug(slug: string) {
-    const project = await this.projects
-      .findOne({
-        slug,
-        published: true,
-        archived: false,
-      })
-      .lean();
-
-    if (!project) {
-      throw new NotFoundException("Project not found.");
-    }
-
+    const project = await this.projects.findOne({ slug, published: true, archived: false }).lean();
+    if (!project) throw new NotFoundException("Project not found.");
     return this.serialize(project);
   }
 
   async byId(id: string) {
     const project = await this.projects.findById(objectId(id)).lean();
-
-    if (!project) {
-      throw new NotFoundException("Project not found.");
-    }
-
+    if (!project) throw new NotFoundException("Project not found.");
     return this.serialize(project);
+  }
+
+  private prepared(input: CreateProjectDto | UpdateProjectDto) {
+    return {
+      ...input,
+      ...(input.type !== undefined ? { type: cleanString(input.type) } : {}),
+      ...(input.summary !== undefined ? { summary: cleanString(input.summary) } : {}),
+      ...(input.description !== undefined ? { description: cleanString(input.description) } : {}),
+      ...(input.creditsText !== undefined ? { creditsText: cleanString(input.creditsText) } : {}),
+      ...(input.location !== undefined ? { location: cleanString(input.location) } : {}),
+      ...(input.body !== undefined ? { body: cleanList(input.body) } : {}),
+      ...(input.tags !== undefined ? { tags: cleanList(input.tags) } : {}),
+      ...(input.credits !== undefined
+        ? {
+            credits: input.credits
+              .map((credit) => ({ name: credit.name.trim(), role: credit.role.trim() }))
+              .filter((credit) => credit.name && credit.role),
+          }
+        : {}),
+      ...(input.links !== undefined
+        ? {
+            links: input.links.map((link) => ({ title: link.title.trim(), url: link.url.trim() })).filter((link) => link.title && link.url),
+          }
+        : {}),
+    };
   }
 
   async create(input: CreateProjectDto, actorId: string) {
     if (input.startDate && input.endDate && new Date(input.startDate) > new Date(input.endDate)) {
       throw new BadRequestException("Project end date must follow start date.");
     }
+    if ((input.galleryMediaIds?.length ?? 0) > 4) {
+      throw new BadRequestException("Project gallery can contain up to 4 images.");
+    }
 
     await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])], "image", "project");
 
-    const { startDate, endDate, coverMediaId, galleryMediaIds, ...rest } = input;
+    const { startDate, endDate, coverMediaId, galleryMediaIds, order, ...rest } = this.prepared(input);
 
     try {
       const project = new this.projects({
@@ -123,6 +166,7 @@ export class ProjectService {
         endDate: endDate ? new Date(endDate) : undefined,
         coverMediaId: coverMediaId ? new Types.ObjectId(coverMediaId) : undefined,
         galleryMediaIds: galleryMediaIds?.map((id) => new Types.ObjectId(id)),
+        ...(typeof order === "number" ? { order } : {}),
         createdBy: new Types.ObjectId(actorId),
         updatedBy: new Types.ObjectId(actorId),
       });
@@ -146,7 +190,6 @@ export class ProjectService {
       if (error && typeof error === "object" && "code" in error && error.code === 11000) {
         throw new ConflictException("This project slug is already in use.");
       }
-
       throw error;
     }
   }
@@ -158,14 +201,20 @@ export class ProjectService {
     const mergedStart =
       input.startDate === null ? undefined : input.startDate !== undefined ? new Date(input.startDate) : existing.startDate;
     const mergedEnd = input.endDate === null ? undefined : input.endDate !== undefined ? new Date(input.endDate) : existing.endDate;
+
     if (mergedStart && mergedEnd && mergedStart > mergedEnd) {
       throw new BadRequestException("Project end date must follow start date.");
+    }
+    if ((input.galleryMediaIds?.length ?? 0) > 4) {
+      throw new BadRequestException("Project gallery can contain up to 4 images.");
     }
 
     await this.media.assertOwnedBy(actorId, [input.coverMediaId, ...(input.galleryMediaIds ?? [])], "image", "project");
 
     const oldMedia = [existing.coverMediaId ? String(existing.coverMediaId) : undefined, ...(existing.galleryMediaIds ?? []).map(String)];
-    const update: Record<string, unknown> = { ...input, updatedBy: new Types.ObjectId(actorId) };
+    const prepared = this.prepared(input);
+    const update: Record<string, unknown> = { ...prepared, updatedBy: new Types.ObjectId(actorId) };
+    if (input.order === null) delete update.order;
     const unset: Record<string, 1> = {};
 
     if (input.startDate === null) {
@@ -190,11 +239,24 @@ export class ProjectService {
       unset.trailerUrl = 1;
     }
 
+    if (input.order === null) {
+      delete update.order;
+      unset.order = 1;
+    }
+
+    for (const key of ["type", "summary", "description", "creditsText", "location"] as const) {
+      if (key in prepared && prepared[key] === undefined) {
+        delete update[key];
+        unset[key] = 1;
+      }
+    }
+
     const project = await this.projects.findOneAndUpdate(
       { _id: objectId(id), archived: false },
       { $set: update, ...(Object.keys(unset).length ? { $unset: unset } : {}) },
       { new: true, runValidators: true },
     );
+
     if (!project) throw new NotFoundException("Project not found.");
 
     const currentMedia = [project.coverMediaId ? String(project.coverMediaId) : undefined, ...(project.galleryMediaIds ?? []).map(String)];
@@ -232,9 +294,12 @@ export class ProjectService {
       { new: true },
     );
 
-    if (!project) {
-      throw new NotFoundException("Project not found.");
-    }
+    if (!project) throw new NotFoundException("Project not found.");
+
+    await this.media.makePrivate([
+      project.coverMediaId ? String(project.coverMediaId) : undefined,
+      ...(project.galleryMediaIds ?? []).map(String),
+    ]);
 
     await this.audit.record({
       actorId,
@@ -244,9 +309,6 @@ export class ProjectService {
       summary: project.title,
     });
 
-    return {
-      message: "Project archived.",
-      id,
-    };
+    return { message: "Project archived.", id };
   }
 }

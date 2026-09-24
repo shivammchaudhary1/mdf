@@ -3,7 +3,7 @@ import { validateStorageKey } from "../src/modules/media/storage";
 
 describe("production media storage keys", () => {
   const id = "0123456789abcdef01234567";
-  const userId = "abcdef0123456789abcdef01";
+  const memberId = "abcdef0123456789abcdef01";
 
   it("accepts the approved asset hierarchy", () => {
     for (const folder of ["website-images", "projects", "castings", "blog", "gallery", "team", "bts", "shows"]) {
@@ -12,12 +12,14 @@ describe("production media storage keys", () => {
     }
   });
 
-  it("accepts user profile, portfolio and resume hierarchy", () => {
-    expect(validateStorageKey(`users/${userId}/profile-pic/${id}/profile.webp`)).toBe(`users/${userId}/profile-pic/${id}/profile.webp`);
-    expect(validateStorageKey(`users/${userId}/portfolio-images/${id}/medium.webp`)).toBe(
-      `users/${userId}/portfolio-images/${id}/medium.webp`,
+  it("accepts member profile, portfolio and resume hierarchy", () => {
+    expect(validateStorageKey(`members/${memberId}/profile-pic/${id}/profile.webp`)).toBe(
+      `members/${memberId}/profile-pic/${id}/profile.webp`,
     );
-    expect(validateStorageKey(`users/${userId}/resume/${id}/document.pdf`)).toBe(`users/${userId}/resume/${id}/document.pdf`);
+    expect(validateStorageKey(`members/${memberId}/portfolio-images/${id}/medium.webp`)).toBe(
+      `members/${memberId}/portfolio-images/${id}/medium.webp`,
+    );
+    expect(validateStorageKey(`members/${memberId}/resume/${id}/document.pdf`)).toBe(`members/${memberId}/resume/${id}/document.pdf`);
   });
 
   it("keeps legacy keys readable during migration", () => {
@@ -28,7 +30,7 @@ describe("production media storage keys", () => {
   it("rejects arbitrary paths and extensions", () => {
     expect(() => validateStorageKey("../secret")).toThrow("Invalid storage key.");
     expect(() => validateStorageKey(`assets/projects/${id}/original.png`)).toThrow("Invalid storage key.");
-    expect(() => validateStorageKey(`users/${userId}/resume/${id}/resume.exe`)).toThrow("Invalid storage key.");
+    expect(() => validateStorageKey(`members/${memberId}/resume/${id}/resume.exe`)).toThrow("Invalid storage key.");
   });
 
   it("defines every controlled upload purpose", () => {
@@ -41,9 +43,9 @@ describe("production media storage keys", () => {
       "team",
       "bts",
       "show",
-      "user-profile",
-      "user-portfolio",
-      "user-resume",
+      "member-profile",
+      "member-portfolio",
+      "member-resume",
     ]);
   });
 });

@@ -6,6 +6,8 @@ import { AuthController } from "./auth.controller";
 import { AdminGuard, SessionGuard } from "./auth.guard";
 import { AccountSchema, ResetSchema, SessionSchema } from "./auth.models";
 import { AuthService } from "./auth.service";
+import { MemberCodeService } from "./member-code.service";
+import { MemberSequenceSchema } from "./member-sequence.model";
 @Module({
   imports: [
     MailModule,
@@ -13,10 +15,11 @@ import { AuthService } from "./auth.service";
       { name: "Account", schema: AccountSchema },
       { name: "Session", schema: SessionSchema },
       { name: "PasswordReset", schema: ResetSchema },
+      { name: "MemberSequence", schema: MemberSequenceSchema },
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, SessionGuard, AdminGuard],
-  exports: [AuthService, SessionGuard, AdminGuard, MongooseModule],
+  providers: [AuthService, MemberCodeService, SessionGuard, AdminGuard],
+  exports: [AuthService, MemberCodeService, SessionGuard, AdminGuard, MongooseModule],
 })
 export class AuthModule {}

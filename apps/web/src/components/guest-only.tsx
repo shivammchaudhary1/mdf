@@ -10,17 +10,17 @@ import { useAppStore } from "@/store/app-store";
 export function GuestOnly({ children }: { children: ReactNode }) {
   const router = useRouter();
   const status = useAppStore((state) => state.authStatus);
-  const user = useAppStore((state) => state.user);
+  const account = useAppStore((state) => state.account);
 
   useEffect(() => {
     if (status === "unknown") void ensureSession();
   }, [status]);
 
   useEffect(() => {
-    if (status === "authenticated" && user) {
-      router.replace(user.role === "SUPER_ADMIN" ? "/admin" : "/member");
+    if (status === "authenticated" && account) {
+      router.replace(account.role === "SUPER_ADMIN" ? "/admin" : "/member");
     }
-  }, [router, status, user]);
+  }, [router, status, account]);
 
   if (status === "unknown" || status === "loading" || status === "authenticated") {
     return <LoadingState label="Checking your session…" />;

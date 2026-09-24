@@ -6,7 +6,7 @@ import { type FormEvent, type ReactNode, useState } from "react";
 
 import { GoogleAuthButton } from "@/components/google-auth-button";
 import { useToast } from "@/components/ui/toast-provider";
-import { api, type CurrentUser } from "@/services/api";
+import { api, type CurrentAccount } from "@/services/api";
 import { establishSession } from "@/services/auth-session";
 
 type Mode = "login" | "signup" | "contact" | "forgot-password" | "reset-password";
@@ -158,7 +158,7 @@ function LockIcon() {
   );
 }
 
-function UserIcon() {
+function MemberIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
@@ -200,7 +200,7 @@ function iconFor(field: string): ReactNode {
     return <LockIcon />;
   }
   if (field === "mobile") return <PhoneIcon />;
-  return <UserIcon />;
+  return <MemberIcon />;
 }
 
 export function AccountForm({ mode }: { mode: Mode }) {
@@ -294,7 +294,7 @@ export function AccountForm({ mode }: { mode: Mode }) {
 
       const path = mode === "contact" ? "/contact" : `/auth/${mode === "signup" ? "register" : mode}`;
 
-      const result = await api<CurrentUser & { message?: string }>(path, {
+      const result = await api<CurrentAccount & { message?: string }>(path, {
         method: "POST",
         body: JSON.stringify(body),
       });
@@ -314,7 +314,11 @@ export function AccountForm({ mode }: { mode: Mode }) {
       form.reset();
 
       if (mode === "login" || mode === "signup") {
-        router.push(result.role === "SUPER_ADMIN" ? "/admin" : "/member");
+        const requestedNext =
+          typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") ?? "" : "";
+        const safeNext = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "";
+
+        router.push(safeNext || (result.role === "SUPER_ADMIN" ? "/admin" : "/member"));
       }
 
       if (mode === "reset-password") {

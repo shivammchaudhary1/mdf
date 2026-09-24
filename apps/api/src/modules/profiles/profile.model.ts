@@ -1,7 +1,7 @@
 import { Schema, Types } from "mongoose";
 export interface Profile {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  memberId: Types.ObjectId;
   bio?: string;
   city?: string;
   profession?: string;
@@ -23,12 +23,13 @@ export interface Profile {
   savedOpportunityIds?: Types.ObjectId[];
   emailCastingAlerts: boolean;
   emailUpdates: boolean;
+  profileViews: number;
   createdAt: Date;
   updatedAt: Date;
 }
 export const ProfileSchema = new Schema<Profile>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true, unique: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Account", required: true, unique: true },
     bio: { type: String, maxlength: 2000 },
     city: { type: String, trim: true, maxlength: 100, index: true },
     profession: { type: String, trim: true, maxlength: 100, index: true },
@@ -58,6 +59,7 @@ export const ProfileSchema = new Schema<Profile>(
     savedOpportunityIds: { type: [Schema.Types.ObjectId], default: undefined },
     emailCastingAlerts: { type: Boolean, default: true, required: true },
     emailUpdates: { type: Boolean, default: true, required: true },
+    profileViews: { type: Number, default: 0, min: 0, required: true },
   },
   { timestamps: true, versionKey: false, minimize: true },
 );

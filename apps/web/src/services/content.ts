@@ -16,12 +16,14 @@ export type ApiContent = ContentItem & {
   details?: string[];
   credits?: Array<{ name: string; role: string }> | string;
   creditsText?: string;
+  links?: Array<{ title: string; url: string }>;
   acceptingApplications?: boolean;
   galleryImages?: string[];
   trailerUrl?: string;
   tags?: string[];
   seoTitle?: string;
   seoDescription?: string;
+  createdAt?: string;
   updatedAt?: string;
   publishedAt?: string;
   status?: string;

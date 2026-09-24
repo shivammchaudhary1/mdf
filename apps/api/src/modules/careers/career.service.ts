@@ -61,7 +61,7 @@ export class CareerService {
 
     if (query.search) {
       const search = new RegExp(escapeSearch(query.search.trim()), "i");
-      filter.$or = [{ name: search }, { email: search }, { role: search }, { city: search }];
+      filter.$or = [{ name: search }, { email: search }, { mobile: search }, { role: search }, { city: search }, { coverNote: search }];
     }
 
     const [result] = await this.careers.aggregate<{ items: CareerApplication[]; total: { count: number }[] }>([
@@ -75,6 +75,32 @@ export class CareerService {
     return {
       items: items.map((item) => this.serialize(item)),
       meta: pageMeta(query.page, query.limit, total),
+    };
+  }
+
+  async summary() {
+    const [result] = await this.careers.aggregate<{
+      total: number;
+      submitted: number;
+      inReview: number;
+      shortlisted: number;
+    }>([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          submitted: { $sum: { $cond: [{ $eq: ["$status", "Submitted"] }, 1, 0] } },
+          inReview: { $sum: { $cond: [{ $eq: ["$status", "In Review"] }, 1, 0] } },
+          shortlisted: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      submitted: Number(result?.submitted ?? 0),
+      inReview: Number(result?.inReview ?? 0),
+      shortlisted: Number(result?.shortlisted ?? 0),
     };
   }
 

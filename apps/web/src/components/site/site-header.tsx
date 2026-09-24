@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteMedia } from "@/components/site/site-media";
 import { useToast } from "@/components/ui/toast-provider";
-import data from "@/data/public-site.json";
+import data from "@/data/website-data.json";
 import { signOut } from "@/services/auth-session";
 import { useAppStore } from "@/store/app-store";
 import { usePublicUiStore } from "@/store/public-ui-store";
@@ -30,11 +30,11 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
   const toggle = usePublicUiStore((state) => state.toggleMobileMenu);
   const close = usePublicUiStore((state) => state.closeMobileMenu);
   const status = useAppStore((state) => state.authStatus);
-  const user = useAppStore((state) => state.user);
+  const account = useAppStore((state) => state.account);
   const profilePhoto = useAppStore((state) => state.profilePhoto);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
-  const dashboardHref = user?.role === "SUPER_ADMIN" ? "/admin" : "/member";
+  const dashboardHref = account?.role === "SUPER_ADMIN" ? "/admin" : "/member";
 
   useEffect(() => {
     if (!accountOpen) return;
@@ -69,7 +69,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
   }
 
   const profileControl =
-    status === "authenticated" && user ? (
+    status === "authenticated" && account ? (
       <div ref={accountRef} className="relative">
         <button
           type="button"
@@ -81,17 +81,17 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
           }`}
         >
           {profilePhoto ? (
-            <SiteMedia src={profilePhoto} alt={`${user.name} profile`} kind="team" className="h-full w-full rounded-full" />
+            <SiteMedia src={profilePhoto} alt={`${account.name} profile`} kind="team" className="h-full w-full rounded-full" />
           ) : (
-            <span className="grid h-full w-full place-items-center">{initials(user.name) || "ME"}</span>
+            <span className="grid h-full w-full place-items-center">{initials(account.name) || "ME"}</span>
           )}
         </button>
 
         {accountOpen && (
           <div className="absolute right-0 top-12 z-[70] w-56 rounded-2xl border border-black/10 bg-white p-2 text-[#111] shadow-2xl">
             <div className="border-b border-black/6 px-3 py-2">
-              <strong className="block truncate text-sm">{user.name}</strong>
-              <span className="block truncate text-xs text-[#777]">{user.email}</span>
+              <strong className="block truncate text-sm">{account.name}</strong>
+              <span className="block truncate text-xs text-[#777]">{account.email}</span>
             </div>
             <Link
               href={dashboardHref}
@@ -198,7 +198,7 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
               </Link>
             ))}
             <div className="mt-2 border-t border-black/5 pt-3">
-              {status === "authenticated" && user ? (
+              {status === "authenticated" && account ? (
                 <div className="grid gap-2">
                   <Link href={dashboardHref} onClick={close} className="site-button site-button-outline justify-center">
                     Dashboard

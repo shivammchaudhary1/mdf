@@ -1,5 +1,5 @@
-import { OurWorkPageView } from "@/components/site/our-work-page-view";
-export const metadata = { title: "Our Work" };
+import { redirect } from "next/navigation";
+
 export default function Page() {
-  return <OurWorkPageView />;
+  redirect("/services");
 }

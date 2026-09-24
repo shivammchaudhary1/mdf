@@ -173,7 +173,7 @@ try {
   assert.equal(shortlistedApplication.status, "Shortlisted");
   assert.equal(shortlistedApplication.adminNotes, undefined);
 
-  r = await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
+  r = await request(`/admin/members/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
   assert.equal(r.status, 200);
   r = await request("/talent?city=Indore&profession=Actor");
   assert.equal(r.status, 200);
@@ -240,13 +240,13 @@ try {
   const image = await sharp({ create: { width: 2400, height: 1600, channels: 3, background: "#555555" } }).png().toBuffer();
   const upload = new FormData();
   upload.append("file", new Blob([image], { type: "image/png" }), "test.png");
-  upload.append("purpose", "user-profile");
+  upload.append("purpose", "member-profile");
   r = await request("/media", { method: "POST", state: member, body: upload });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   const mediaId = r.data.id;
   const storedProfileMedia = await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(mediaId) });
-  assert.equal(storedProfileMedia.purpose, "user-profile");
-  assert.equal(storedProfileMedia.storagePrefix, `users/${memberId}/profile-pic/${mediaId}`);
+  assert.equal(storedProfileMedia.purpose, "member-profile");
+  assert.equal(storedProfileMedia.storagePrefix, `members/${memberId}/profile-pic/${mediaId}`);
   assert.equal((await request(`/media/${mediaId}/medium`)).status, 401);
   assert.equal((await request(`/media/${mediaId}/medium`, { state: member })).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: admin, body: { photoMediaId: mediaId } })).status, 400);
@@ -255,7 +255,7 @@ try {
 
   const documentUpload = new FormData();
   documentUpload.append("file", new Blob(["%PDF-1.4\nIntegration document"], { type: "application/pdf" }), "resume.pdf");
-  documentUpload.append("purpose", "user-resume");
+  documentUpload.append("purpose", "member-resume");
   r = await request("/media", { method: "POST", state: member, body: documentUpload });
   assert.equal(r.status, 201);
   const documentId = r.data.id;
@@ -282,7 +282,7 @@ try {
   assert.equal((await request(`/media/${sharedId}/medium`)).status, 200);
   const portfolioUpload = new FormData();
   portfolioUpload.append("file", new Blob([await sharp(image).resize(500).png().toBuffer()], { type: "image/png" }), "portfolio.png");
-  portfolioUpload.append("purpose", "user-portfolio");
+  portfolioUpload.append("purpose", "member-portfolio");
   r = await request("/media", { method: "POST", state: member, body: portfolioUpload });
   assert.equal(r.status, 201);
   const portfolioId = r.data.id;
@@ -310,7 +310,7 @@ try {
 
   const duplicatePortfolioUpload = new FormData();
   duplicatePortfolioUpload.append("file", new Blob([await sharp(image).resize(480).png().toBuffer()], { type: "image/png" }), "duplicate-portfolio.png");
-  duplicatePortfolioUpload.append("purpose", "user-portfolio");
+  duplicatePortfolioUpload.append("purpose", "member-portfolio");
   r = await request("/media", { method: "POST", state: member, body: duplicatePortfolioUpload });
   assert.equal(r.status, 201);
   const duplicatePortfolioId = r.data.id;
@@ -406,13 +406,13 @@ try {
   assert.equal((await request("/auth/me", { state: logoutAll })).status, 401);
 
   assert.equal((await request("/auth/login", { method: "POST", state: member, body: { email: memberInput.email, password: memberInput.password } })).status, 201);
-  assert.equal((await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { suspended: true } })).status, 200);
+  assert.equal((await request(`/admin/members/${memberId}`, { method: "PATCH", state: admin, body: { suspended: true } })).status, 200);
   assert.equal((await request("/auth/me", { state: member })).status, 401);
   assert.equal((await request("/auth/login", { method: "POST", body: { email: memberInput.email, password: memberInput.password } })).status, 401);
-  assert.equal((await request(`/admin/users/${memberId}`, { method: "PATCH", state: admin, body: { suspended: false } })).status, 200);
+  assert.equal((await request(`/admin/members/${memberId}`, { method: "PATCH", state: admin, body: { suspended: false } })).status, 200);
   assert.equal((await request("/auth/login", { method: "POST", state: member, body: { email: memberInput.email, password: memberInput.password } })).status, 201);
   const token = randomBytes(32).toString("base64url");
-  await mongoose.connection.collection("passwordresets").insertOne({ userId: new mongoose.Types.ObjectId(memberId), tokenHash: createHash("sha256").update(token).digest(), expiresAt: new Date(Date.now() + 60000) });
+  await mongoose.connection.collection("passwordresets").insertOne({ accountId: new mongoose.Types.ObjectId(memberId), tokenHash: createHash("sha256").update(token).digest(), expiresAt: new Date(Date.now() + 60000) });
   const resetBody = { token, password: "New-integration-pass-123", confirmPassword: "New-integration-pass-123" };
   assert.equal((await request("/auth/reset-password", { method: "POST", body: resetBody })).status, 201);
   assert.equal((await request("/auth/reset-password", { method: "POST", body: resetBody })).status, 400);

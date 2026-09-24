@@ -33,23 +33,23 @@ export class MediaController {
             "team",
             "bts",
             "show",
-            "user-profile",
-            "user-portfolio",
-            "user-resume",
+            "member-profile",
+            "member-portfolio",
+            "member-resume",
           ],
         },
       },
     },
   })
   upload(@Req() request: AuthRequest, @UploadedFile() file: Upload | undefined, @Body("purpose") purpose?: string) {
-    return this.service.upload(request.user.id, request.user.role, file, purpose);
+    return this.service.upload(request.account.id, request.account.role, file, purpose);
   }
 
   @Delete(":id")
   @ApiCookieAuth()
   @UseGuards(SessionGuard)
   remove(@Req() request: AuthRequest, @Param("id") id: string) {
-    return this.service.remove(id, { id: request.user.id, role: request.user.role });
+    return this.service.remove(id, { id: request.account.id, role: request.account.role });
   }
 
   @Get(":id/:variant")

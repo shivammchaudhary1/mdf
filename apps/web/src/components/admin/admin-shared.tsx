@@ -120,7 +120,7 @@ export function AdminMoreButton({ onEdit, onArchive }: { onEdit?: () => void; on
   }
 
   return (
-    <span className="ad-more-wrap">
+    <span className={`ad-more-wrap ${open ? "is-open" : ""}`}>
       <button type="button" className="ad-more" aria-label="More actions" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         <AdminIcon name="more" />
       </button>
@@ -139,15 +139,6 @@ export function AdminMoreButton({ onEdit, onArchive }: { onEdit?: () => void; on
                 Edit
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                toast.info("Duplication is not available for this item yet.");
-              }}
-            >
-              Duplicate
-            </button>
             <button
               type="button"
               onClick={() => {

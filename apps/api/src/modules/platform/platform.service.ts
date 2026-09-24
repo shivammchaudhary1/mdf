@@ -51,34 +51,205 @@ export class PlatformService {
   }
 
   async list(kind: string, q: ContentQueryDto, admin = false) {
+    const k = this.kind(kind);
+    const gallery = k === "gallery";
+    const blog = k === "blog";
+    const services = k === "services";
+    const team = k === "team";
+    const taggedContent = gallery || blog;
+
     const filter: Record<string, unknown> = {
-      kind: this.kind(kind),
+      kind: k,
       archived: false,
       ...(admin
         ? {}
         : { published: true, $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: new Date() } }] }),
       ...(q.category ? { category: q.category } : {}),
       ...(q.projectId ? { projectId: objectId(q.projectId) } : {}),
+      ...(taggedContent && q.tag ? { tags: q.tag } : {}),
     };
+
     const conditions: Record<string, unknown>[] = [];
+
     if (q.status) {
       if (q.status === "Published") conditions.push({ $or: [{ status: "Published" }, { status: { $exists: false }, published: true }] });
       else if (q.status === "Draft") conditions.push({ $or: [{ status: "Draft" }, { status: { $exists: false }, published: false }] });
       else conditions.push({ status: q.status });
     }
+
     if (q.search) {
       const s = new RegExp(escapeSearch(q.search.trim()), "i");
-      conditions.push({ $or: [{ title: s }, { description: s }, { category: s }] });
+      conditions.push({
+        $or: [
+          { title: s },
+          { description: s },
+          { category: s },
+          ...(taggedContent ? [{ tags: s }] : []),
+          ...(blog ? [{ "data.author": s }, { "data.publishedBy": s }] : []),
+          ...(services
+            ? [
+                { body: s },
+                { "data.modalEyebrow": s },
+                { "data.modalTitle": s },
+                { "data.overview": s },
+                { "data.idealFor": s },
+                { "data.contactSubject": s },
+              ]
+            : []),
+          ...(team
+            ? [
+                { role: s },
+                { body: s },
+                { "data.group": s },
+                { "data.details": s },
+              ]
+            : []),
+        ],
+      });
     }
+
     if (conditions.length) filter.$and = conditions;
+
+    const editorialSort: Record<string, 1 | -1> =
+      q.sort === "oldest"
+        ? { createdAt: 1, _id: 1 }
+        : q.sort === "title-asc"
+          ? { title: 1, _id: 1 }
+          : q.sort === "title-desc"
+            ? { title: -1, _id: -1 }
+            : q.sort === "order"
+              ? { order: 1, createdAt: -1, _id: -1 }
+              : q.sort === "updated"
+                ? { updatedAt: -1, _id: -1 }
+                : q.sort === "published"
+                  ? { publishedAt: -1, createdAt: -1, _id: -1 }
+                  : { createdAt: -1, _id: -1 };
+
+    const sort: Record<string, 1 | -1> =
+      taggedContent || (admin && (services || team))
+        ? editorialSort
+        : { order: 1, createdAt: -1, _id: -1 };
+
+    const listProjection = blog ? [{ $project: { body: 0 } }] : [];
+
     const [result] = await this.content.aggregate<{ items: ContentRecord[]; total: { count: number }[] }>([
       { $match: filter },
-      { $sort: { order: 1, createdAt: -1, _id: -1 } },
-      { $facet: { items: [{ $skip: (q.page - 1) * q.limit }, { $limit: q.limit }], total: [{ $count: "count" }] } },
+      { $sort: sort },
+      {
+        $facet: {
+          items: [...listProjection, { $skip: (q.page - 1) * q.limit }, { $limit: q.limit }],
+          total: [{ $count: "count" }],
+        },
+      },
     ]);
+
     const items = result?.items ?? [];
     const total = Number(result?.total?.[0]?.count ?? 0);
     return { items: items.map((item) => this.serialize(item)), meta: pageMeta(q.page, q.limit, total) };
+  }
+
+  async gallerySummary() {
+    const [result] = await this.content.aggregate<{
+      total: number;
+      published: number;
+      featured: number;
+      behindTheScenes: number;
+    }>([
+      { $match: { kind: "gallery", archived: false } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          published: { $sum: { $cond: ["$published", 1, 0] } },
+          featured: {
+            $sum: {
+              $cond: [{ $in: ["Featured", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+          behindTheScenes: {
+            $sum: {
+              $cond: [{ $in: ["Behind the Scenes", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      published: Number(result?.published ?? 0),
+      featured: Number(result?.featured ?? 0),
+      behindTheScenes: Number(result?.behindTheScenes ?? 0),
+    };
+  }
+
+  async blogSummary() {
+    const [result] = await this.content.aggregate<{
+      total: number;
+      published: number;
+      drafts: number;
+      scheduled: number;
+      featured: number;
+    }>([
+      { $match: { kind: "blog", archived: false } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          published: { $sum: { $cond: [{ $eq: ["$status", "Published"] }, 1, 0] } },
+          drafts: { $sum: { $cond: [{ $eq: ["$status", "Draft"] }, 1, 0] } },
+          scheduled: { $sum: { $cond: [{ $eq: ["$status", "Scheduled"] }, 1, 0] } },
+          featured: {
+            $sum: {
+              $cond: [{ $in: ["Featured", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      published: Number(result?.published ?? 0),
+      drafts: Number(result?.drafts ?? 0),
+      scheduled: Number(result?.scheduled ?? 0),
+      featured: Number(result?.featured ?? 0),
+    };
+  }
+
+  async servicesSummary() {
+    const filter = { kind: "services", archived: false } as const;
+
+    const [total, published, drafts, categories] = await Promise.all([
+      this.content.countDocuments(filter),
+      this.content.countDocuments({ ...filter, published: true }),
+      this.content.countDocuments({
+        ...filter,
+        $or: [{ status: "Draft" }, { status: { $exists: false }, published: false }],
+      }),
+      this.content.distinct("category", filter),
+    ]);
+
+    return {
+      total,
+      published,
+      drafts,
+      categories: categories.filter((value) => typeof value === "string" && value.trim()).length,
+    };
+  }
+
+  async teamSummary() {
+    const filter = { kind: "team", archived: false } as const;
+
+    const [total, published, coreTeam, creativeTeam, advisors] = await Promise.all([
+      this.content.countDocuments(filter),
+      this.content.countDocuments({ ...filter, published: true }),
+      this.content.countDocuments({ ...filter, category: "Core Team" }),
+      this.content.countDocuments({ ...filter, category: "Creative Team" }),
+      this.content.countDocuments({ ...filter, category: "Advisors" }),
+    ]);
+
+    return { total, published, coreTeam, creativeTeam, advisors };
   }
 
   async publicItem(kind: string, slug: string) {
@@ -101,7 +272,135 @@ export class PlatformService {
     return this.serialize(item);
   }
 
+  private validateBlogBody(body?: string[]) {
+    if (!body) return;
+
+    const allowedTags = new Set(["p", "h2", "h3", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote", "a", "br", "div"]);
+
+    for (const block of body) {
+      if (/<!--|<\/?(?:script|style|iframe|object|embed|form|input|button|img|svg|math)\b/i.test(block)) {
+        throw new BadRequestException("Blog content contains unsupported HTML.");
+      }
+
+      if (/\son[a-z]+\s*=|\sstyle\s*=|javascript:|data:/i.test(block)) {
+        throw new BadRequestException("Blog content contains unsafe HTML.");
+      }
+
+      for (const match of block.matchAll(/<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi)) {
+        const tag = match[1].toLowerCase();
+        if (!allowedTags.has(tag)) throw new BadRequestException("Blog content contains unsupported formatting.");
+      }
+
+      for (const match of block.matchAll(/<a\s+([^>]*)>/gi)) {
+        const attributes = match[1];
+        const href = attributes.match(/href\s*=\s*["']([^"']+)["']/i)?.[1];
+        if (!href || !/^(https?:\/\/|mailto:)/i.test(href)) {
+          throw new BadRequestException("Blog links must use http(s) or mailto URLs.");
+        }
+
+        const leftovers = attributes
+          .replace(/href\s*=\s*["'][^"']+["']/gi, "")
+          .replace(/target\s*=\s*["']_blank["']/gi, "")
+          .replace(/rel\s*=\s*["'][^"']*["']/gi, "")
+          .trim();
+
+        if (leftovers) throw new BadRequestException("Blog links contain unsupported attributes.");
+      }
+    }
+  }
+
+  private validateLegalBody(body?: string[]) {
+    if (!body) return;
+
+    const allowedTags = new Set(["p", "h2", "h3", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote", "a", "br", "div"]);
+
+    for (const block of body) {
+      if (/<!--|<\/?(?:script|style|iframe|object|embed|form|input|button|img|svg|math)\b/i.test(block)) {
+        throw new BadRequestException("Legal content contains unsupported HTML.");
+      }
+
+      if (/\son[a-z]+\s*=|\sstyle\s*=|javascript:|data:/i.test(block)) {
+        throw new BadRequestException("Legal content contains unsafe HTML.");
+      }
+
+      for (const match of block.matchAll(/<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi)) {
+        const tag = match[1].toLowerCase();
+        if (!allowedTags.has(tag)) throw new BadRequestException("Legal content contains unsupported formatting.");
+      }
+
+      for (const match of block.matchAll(/<a\s+([^>]*)>/gi)) {
+        const attributes = match[1];
+        const href = attributes.match(/href\s*=\s*["']([^"']+)["']/i)?.[1];
+
+        if (!href || !/^(https?:\/\/|mailto:)/i.test(href)) {
+          throw new BadRequestException("Legal links must use http(s) or mailto URLs.");
+        }
+
+        const leftovers = attributes
+          .replace(/href\s*=\s*["'][^"']+["']/gi, "")
+          .replace(/target\s*=\s*["']_blank["']/gi, "")
+          .replace(/rel\s*=\s*["'][^"']*["']/gi, "")
+          .trim();
+
+        if (leftovers) throw new BadRequestException("Legal links contain unsupported attributes.");
+      }
+    }
+  }
+
   private async validate(kind: ContentKind, input: ContentDto | UpdateContentDto, actorId: string) {
+    if (kind === "blog") this.validateBlogBody(input.body);
+    if (kind === "legal") this.validateLegalBody(input.body);
+
+    if (kind === "settings" && input.data) {
+      const companyName = input.data.companyName?.trim();
+      const email = input.data.email?.trim();
+
+      if (input.data.companyName !== undefined && !companyName) {
+        throw new BadRequestException("Public company name is required.");
+      }
+
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new BadRequestException("Enter a valid public company email.");
+      }
+
+      for (const key of ["website", "instagram", "youtube", "linkedin", "facebook"]) {
+        const value = input.data[key]?.trim();
+        if (value && !/^https:\/\//i.test(value)) {
+          throw new BadRequestException("Company website and social links must use HTTPS URLs.");
+        }
+      }
+    }
+
+    if (kind === "legal" && input.data?.effectiveDate) {
+      const value = input.data.effectiveDate.trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(new Date(`${value}T00:00:00Z`).getTime())) {
+        throw new BadRequestException("Legal effective date must be a valid YYYY-MM-DD date.");
+      }
+    }
+
+    if (
+      (kind === "services" || kind === "team") &&
+      input.body?.some((value) => /[<>]/.test(value))
+    ) {
+      throw new BadRequestException("Service and team list fields must use plain text.");
+    }
+
+    if (kind === "team" && input.data?.group) {
+      const groups = ["Core Team", "Creative Team", "Advisors"];
+      if (!groups.includes(input.data.group)) {
+        throw new BadRequestException("Choose a valid team group.");
+      }
+    }
+
+    if (kind === "team" && input.data) {
+      for (const key of ["instagram", "facebook", "x", "linkedin", "youtube"]) {
+        const value = input.data[key]?.trim();
+        if (value && !/^https:\/\//i.test(value)) {
+          throw new BadRequestException("Team social links must use HTTPS URLs.");
+        }
+      }
+    }
+
     if (
       input.data &&
       (Object.keys(input.data).length > 60 ||
@@ -202,6 +501,12 @@ export class PlatformService {
       unset.publishedAt = 1;
     } else if (input.publishedAt !== undefined) {
       update.publishedAt = new Date(input.publishedAt);
+    } else if (
+      ["blog", "services", "team", "legal"].includes(k) &&
+      input.status === "Published" &&
+      (existing.status === "Scheduled" || (existing.publishedAt?.getTime() ?? 0) > Date.now())
+    ) {
+      update.publishedAt = new Date();
     } else if (update.published === true && !existing.publishedAt && mergedStatus !== "Scheduled") {
       update.publishedAt = new Date();
     }

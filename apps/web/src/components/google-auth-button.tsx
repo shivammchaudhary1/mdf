@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useToast } from "@/components/ui/toast-provider";
 import { runtimeConfig } from "@/config/runtime";
-import { api, type CurrentUser } from "@/services/api";
+import { api, type CurrentAccount } from "@/services/api";
 import { establishSession } from "@/services/auth-session";
 
 type GoogleCredentialResponse = {
@@ -136,7 +136,7 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
             busyRef.current = true;
             setBusy(true);
 
-            void api<CurrentUser>("/auth/google", {
+            void api<CurrentAccount>("/auth/google", {
               method: "POST",
               body: JSON.stringify({
                 credential,
@@ -151,15 +151,15 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
                   : {}),
               }),
             })
-              .then(async (user) => {
-                await establishSession(user);
+              .then(async (account) => {
+                await establishSession(account);
                 toast.success(mode === "signup" ? "Account ready." : "Signed in with Google.");
-                router.replace(user.role === "SUPER_ADMIN" ? "/admin" : "/member");
+                router.replace(account.role === "SUPER_ADMIN" ? "/admin" : "/member");
               })
               .catch((error) => {
                 const message = error instanceof Error ? error.message : "Google sign-in failed.";
                 if (mode === "login" && /mobile number is required|accept the terms/i.test(message)) {
-                  toast.error("New Google users should use Create Account once to add mobile number and accept the policies.");
+                  toast.error("New Google members should use Create Account once to add mobile number and accept the policies.");
                 } else {
                   toast.error(message);
                 }

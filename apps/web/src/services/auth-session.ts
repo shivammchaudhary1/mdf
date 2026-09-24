@@ -2,12 +2,23 @@
 
 import { api, ApiError, cachedApi, invalidateApiCache } from "@/services/api";
 import type { MemberProfile } from "@/services/workspace";
-import { type SessionUser, useAppStore } from "@/store/app-store";
+import { type SessionAccount, useAppStore } from "@/store/app-store";
 
-let sessionPromise: Promise<SessionUser | null> | null = null;
+let sessionPromise: Promise<SessionAccount | null> | null = null;
 
-async function hydrateMemberPhoto(user: SessionUser, force = false) {
-  if (user.role !== "USER") {
+async function requestCurrentSession() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8_000);
+
+  try {
+    return await api<SessionAccount>("/auth/me", { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function hydrateMemberPhoto(account: SessionAccount, force = false) {
+  if (account.role !== "MEMBER") {
     useAppStore.getState().setProfilePhoto("");
     return;
   }
@@ -23,17 +34,17 @@ async function hydrateMemberPhoto(user: SessionUser, force = false) {
 export async function ensureSession(force = false) {
   const state = useAppStore.getState();
 
-  if (!force && state.authStatus === "authenticated" && state.user) return state.user;
+  if (!force && state.authStatus === "authenticated" && state.account) return state.account;
   if (!force && state.authStatus === "anonymous") return null;
   if (sessionPromise) return sessionPromise;
 
   state.setAuthLoading();
 
-  sessionPromise = api<SessionUser>("/auth/me")
-    .then(async (user) => {
-      useAppStore.getState().setAuthenticated(user);
-      await hydrateMemberPhoto(user, force);
-      return user;
+  sessionPromise = requestCurrentSession()
+    .then(async (account) => {
+      useAppStore.getState().setAuthenticated(account);
+      await hydrateMemberPhoto(account, force);
+      return account;
     })
     .catch((error) => {
       if (error instanceof ApiError && error.status === 401) {
@@ -51,10 +62,10 @@ export async function ensureSession(force = false) {
   return sessionPromise;
 }
 
-export async function establishSession(user: SessionUser) {
-  useAppStore.getState().setAuthenticated(user);
+export async function establishSession(account: SessionAccount) {
+  useAppStore.getState().setAuthenticated(account);
   invalidateApiCache();
-  await hydrateMemberPhoto(user, true);
+  await hydrateMemberPhoto(account, true);
 }
 
 export async function refreshSession() {

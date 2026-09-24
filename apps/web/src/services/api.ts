@@ -1,5 +1,5 @@
 import { runtimeConfig } from "@/config/runtime";
-import { type SessionUser, useAppStore } from "@/store/app-store";
+import { type SessionAccount, useAppStore } from "@/store/app-store";
 
 export class ApiError extends Error {
   constructor(
@@ -143,4 +143,4 @@ export async function cachedApi<T>(
   return request;
 }
 
-export type CurrentUser = SessionUser;
+export type CurrentAccount = SessionAccount;

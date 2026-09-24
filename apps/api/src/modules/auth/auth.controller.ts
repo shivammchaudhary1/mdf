@@ -52,7 +52,7 @@ export class AuthController {
       ...(session.remember ? { maxAge: session.duration } : {}),
     });
     const csrfToken = this.issueCsrf(response);
-    return { ...session.user, csrfToken };
+    return { ...session.account, csrfToken };
   }
   private clearCookies(response: Response) {
     response.clearCookie("mdadu_session", this.sessionCookieOptions());
@@ -77,23 +77,23 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     this.clearCookies(response);
-    return this.auth.logoutAll(request.user.id);
+    return this.auth.logoutAll(request.account.id);
   }
   @Get("me") @ApiCookieAuth() @UseGuards(SessionGuard) me(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
-    return { ...this.auth.publicPrincipal(request.user), csrfToken: this.issueCsrf(response) };
+    return { ...this.auth.publicPrincipal(request.account), csrfToken: this.issueCsrf(response) };
   }
   @Get("csrf") @ApiCookieAuth() @UseGuards(SessionGuard) csrf(@Res({ passthrough: true }) response: Response) {
     return { csrfToken: this.issueCsrf(response) };
   }
   @Get("sessions") @ApiCookieAuth() @UseGuards(SessionGuard) sessions(@Req() request: AuthRequest) {
-    return this.auth.listSessions(request.user.id, request.user.sessionId);
+    return this.auth.listSessions(request.account.id, request.account.sessionId);
   }
   @Delete("sessions/:id") @ApiCookieAuth() @UseGuards(SessionGuard) async revokeSession(
     @Req() request: AuthRequest,
     @Param("id") id: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.auth.revokeSession(request.user.id, id, request.user.sessionId);
+    const result = await this.auth.revokeSession(request.account.id, id, request.account.sessionId);
     if (result.currentSessionRevoked) this.clearCookies(response);
     return result;
   }
@@ -104,13 +104,13 @@ export class AuthController {
     @Req() request: AuthRequest,
     @Body() input: AccountSettingsDto,
   ) {
-    return this.auth.updateAccount(request.user, input);
+    return this.auth.updateAccount(request.account, input);
   }
   @Post("deactivate") @ApiCookieAuth() @UseGuards(SessionGuard) async deactivate(
     @Req() request: AuthRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.auth.deactivate(request.user.id);
+    const result = await this.auth.deactivate(request.account.id);
     this.clearCookies(response);
     return result;
   }

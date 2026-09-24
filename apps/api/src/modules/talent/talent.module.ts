@@ -5,6 +5,7 @@ import { AuthModule } from "../auth/auth.module";
 import { MediaModule } from "../media/media.module";
 import { ProfileSchema } from "../profiles/profile.model";
 import { ProjectSchema } from "../projects/project.model";
+import { ProfileViewSchema } from "./profile-view.model";
 import { SavedTalentListSchema } from "./saved-list.model";
 import { AdminTalentController, PublicTalentController } from "./talent.controller";
 import { TalentService } from "./talent.service";
@@ -14,6 +15,7 @@ import { TalentService } from "./talent.service";
     MediaModule,
     MongooseModule.forFeature([
       { name: "Profile", schema: ProfileSchema },
+      { name: "ProfileView", schema: ProfileViewSchema },
       { name: "SavedTalentList", schema: SavedTalentListSchema },
       { name: "Project", schema: ProjectSchema },
     ]),

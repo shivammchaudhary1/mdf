@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMemberData } from "@/components/member-data";
 import { SiteMedia } from "@/components/site/site-media";
@@ -13,13 +13,18 @@ import { type UploadedMediaResult, uploadMedia } from "@/services/workspace";
 function absoluteMediaUrl(value?: string) {
   if (!value) return "";
   if (/^https?:\/\//i.test(value)) return value;
+
   const origin = runtimeConfig.apiUrl.replace(/\/api\/v1\/?$/, "");
   return `${origin}${value.startsWith("/") ? value : `/${value}`}`;
 }
 
-function validHttps(value: string) {
+function validYoutubeUrl(value: string) {
   try {
-    return new URL(value).protocol === "https:";
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    return host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com");
   } catch {
     return false;
   }
@@ -30,7 +35,11 @@ export function MemberPortfolioSection() {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
-  const [showreel, setShowreel] = useState(profile.showreel ?? "");
+  const [introVideo, setIntroVideo] = useState(profile.showreel ?? "");
+
+  useEffect(() => {
+    setIntroVideo(profile.showreel ?? "");
+  }, [profile.showreel]);
 
   async function cleanupUploads(items: UploadedMediaResult[]) {
     await Promise.all(
@@ -41,6 +50,7 @@ export function MemberPortfolioSection() {
   async function removePhoto() {
     if (!removing || busy) return;
     setBusy(true);
+
     try {
       await api("/member/profile", {
         method: "PUT",
@@ -48,6 +58,7 @@ export function MemberPortfolioSection() {
           portfolioMediaIds: (profile.portfolioMediaIds ?? []).filter((id) => id !== removing),
         }),
       });
+
       await refresh();
       setRemoving(null);
       toast.success("Photograph removed from portfolio.");
@@ -60,6 +71,7 @@ export function MemberPortfolioSection() {
 
   function choosePhotos() {
     if (busy) return;
+
     const current = profile.portfolioMediaIds ?? [];
     const available = 8 - current.length;
 
@@ -72,6 +84,7 @@ export function MemberPortfolioSection() {
     input.type = "file";
     input.multiple = true;
     input.accept = "image/jpeg,image/png,image/webp";
+
     input.onchange = async () => {
       const files = Array.from(input.files ?? []);
       if (!files.length) return;
@@ -83,9 +96,10 @@ export function MemberPortfolioSection() {
 
       setBusy(true);
       const uploaded: UploadedMediaResult[] = [];
+
       try {
         for (const file of files) {
-          uploaded.push(await uploadMedia(file, "user-portfolio"));
+          uploaded.push(await uploadMedia(file, "member-portfolio"));
         }
 
         const next = [...new Set([...current, ...uploaded.map((item) => item.id)])];
@@ -98,6 +112,7 @@ export function MemberPortfolioSection() {
           method: "PUT",
           body: JSON.stringify({ portfolioMediaIds: next }),
         });
+
         await refresh();
         toast.success(`${files.length} photograph${files.length === 1 ? "" : "s"} added.`);
       } catch (error) {
@@ -107,22 +122,64 @@ export function MemberPortfolioSection() {
         setBusy(false);
       }
     };
+
     input.click();
   }
 
-  function chooseResume() {
+  function replacePhoto(index: number) {
     if (busy) return;
+
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "application/pdf";
+    input.accept = "image/jpeg,image/png,image/webp";
+
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
 
       setBusy(true);
       let uploaded: UploadedMediaResult | undefined;
+
       try {
-        uploaded = await uploadMedia(file, "user-resume");
+        uploaded = await uploadMedia(file, "member-portfolio");
+
+        await api(`/member/portfolio/${index}`, {
+          method: "PATCH",
+          body: JSON.stringify({ mediaId: uploaded.id }),
+        });
+
+        await refresh();
+        toast.success("Portfolio photograph replaced.");
+      } catch (error) {
+        if (uploaded && !uploaded.duplicate) {
+          await cleanupUploads([uploaded]);
+        }
+        toast.error(error instanceof Error ? error.message : "Unable to replace photograph.");
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    input.click();
+  }
+
+  function chooseResume() {
+    if (busy) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/pdf";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      setBusy(true);
+      let uploaded: UploadedMediaResult | undefined;
+
+      try {
+        uploaded = await uploadMedia(file, "member-resume");
+
         if (uploaded.kind !== "document") {
           throw new Error("Resume must be a PDF document.");
         }
@@ -131,6 +188,7 @@ export function MemberPortfolioSection() {
           method: "PUT",
           body: JSON.stringify({ resumeMediaId: uploaded.id }),
         });
+
         await refresh();
         toast.success(profile.resumeMediaId ? "Resume replaced." : "Resume uploaded.");
       } catch (error) {
@@ -140,17 +198,20 @@ export function MemberPortfolioSection() {
         setBusy(false);
       }
     };
+
     input.click();
   }
 
   async function removeResume() {
     if (!profile.resumeMediaId || busy) return;
     setBusy(true);
+
     try {
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({ resumeMediaId: null }),
       });
+
       await refresh();
       toast.success("Resume removed.");
     } catch (error) {
@@ -160,23 +221,27 @@ export function MemberPortfolioSection() {
     }
   }
 
-  async function saveShowreel() {
-    const value = showreel.trim();
-    if (value && !validHttps(value)) {
-      toast.error("Showreel must be a valid https:// URL.");
+  async function saveIntroVideo(nextValue = introVideo) {
+    const value = nextValue.trim();
+
+    if (value && !validYoutubeUrl(value)) {
+      toast.error("Intro / pitch video must be a valid YouTube URL.");
       return;
     }
 
     setBusy(true);
+
     try {
       await api("/member/profile", {
         method: "PUT",
         body: JSON.stringify({ showreel: value || null }),
       });
+
       await refresh();
-      toast.success(value ? "Showreel saved." : "Showreel removed.");
+      setIntroVideo(value);
+      toast.success(value ? "Intro / pitch video saved." : "Intro / pitch video removed.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to save showreel.");
+      toast.error(error instanceof Error ? error.message : "Unable to save intro / pitch video.");
     } finally {
       setBusy(false);
     }
@@ -188,8 +253,9 @@ export function MemberPortfolioSection() {
         <div>
           <p>Your work</p>
           <h1>My Portfolio</h1>
-          <span>Curate the photographs, showreel and material that represent your creative identity.</span>
+          <span>Curate the photographs, intro / pitch video and material that represent your creative identity.</span>
         </div>
+
         <button className="md-primary" disabled={busy || (profile.portfolioMediaIds?.length ?? 0) >= 8} onClick={choosePhotos}>
           + Add Photos
         </button>
@@ -199,8 +265,9 @@ export function MemberPortfolioSection() {
         <div>
           <p className="md-kicker">Portfolio health</p>
           <h2>Keep your casting material current.</h2>
-          <span>Use strong recent photographs, a current showreel and an updated PDF resume.</span>
+          <span>Use strong recent photographs, a current intro / pitch video and an updated PDF resume.</span>
         </div>
+
         <div>
           <strong>{data.portfolio.length}</strong>
           <span>photos</span>
@@ -215,6 +282,7 @@ export function MemberPortfolioSection() {
           </div>
           <span>{data.portfolio.length}/8 photographs</span>
         </div>
+
         <div className="md-portfolio-grid">
           {data.portfolio.map((item) => (
             <div key={item.id} className="md-portfolio-item">
@@ -223,11 +291,28 @@ export function MemberPortfolioSection() {
                 {item.title}
                 <span>{item.category}</span>
               </p>
-              <button type="button" onClick={() => setRemoving(item.id)} disabled={busy} aria-label={`Remove ${item.title}`}>
+              <button
+                className="md-remove-photo"
+                type="button"
+                onClick={() => setRemoving(item.id)}
+                disabled={busy}
+                aria-label={`Remove ${item.title}`}
+              >
                 ×
               </button>
+              {(profile.portfolioMediaIds?.length ?? 0) >= 8 && (
+                <button
+                  className="md-replace-photo"
+                  type="button"
+                  onClick={() => replacePhoto(data.portfolio.findIndex((photo) => photo.id === item.id))}
+                  disabled={busy}
+                >
+                  Replace
+                </button>
+              )}
             </div>
           ))}
+
           <button className="md-add-photo" disabled={busy || (profile.portfolioMediaIds?.length ?? 0) >= 8} onClick={choosePhotos}>
             <strong>{(profile.portfolioMediaIds?.length ?? 0) >= 8 ? "Maximum 8 photos" : "Add Photograph"}</strong>
             <span>JPG / PNG / WebP · up to 10 MB each</span>
@@ -238,36 +323,41 @@ export function MemberPortfolioSection() {
       <section className="md-media-grid">
         <article className="md-card">
           <p className="md-kicker">Video</p>
-          <h2>Showreel</h2>
+          <h2>Intro Video / Pitch Video</h2>
+          <p className="md-video-help">Upload your intro or pitch video to YouTube first, then paste the YouTube video link here.</p>
+
           <div className="md-field md-media-editor">
-            <span>HTTPS showreel URL</span>
+            <span>YouTube intro / pitch video URL</span>
             <input
               type="url"
-              value={showreel}
-              onChange={(event) => setShowreel(event.target.value)}
-              placeholder="https://youtube.com/..."
+              value={introVideo}
+              onChange={(event) => setIntroVideo(event.target.value)}
+              placeholder="https://youtube.com/watch?v=..."
               disabled={busy}
             />
+
             <div className="md-save-row">
               {profile.showreel && (
                 <a className="md-secondary" href={profile.showreel} target="_blank" rel="noreferrer">
-                  Open Showreel
+                  Open Video
                 </a>
               )}
+
               {profile.showreel && (
                 <button
                   className="md-secondary"
                   type="button"
                   disabled={busy}
                   onClick={() => {
-                    setShowreel("");
-                    void saveShowreel();
+                    setIntroVideo("");
+                    void saveIntroVideo("");
                   }}
                 >
                   Remove
                 </button>
               )}
-              <button className="md-primary" type="button" disabled={busy} onClick={() => void saveShowreel()}>
+
+              <button className="md-primary" type="button" disabled={busy} onClick={() => void saveIntroVideo()}>
                 {profile.showreel ? "Update Link" : "Save Link"}
               </button>
             </div>
@@ -277,18 +367,22 @@ export function MemberPortfolioSection() {
         <article className="md-card">
           <p className="md-kicker">Document</p>
           <h2>Resume / CV</h2>
+
           <div className="md-empty-media">
             <strong>{profile.resume ? "Resume uploaded" : "No resume uploaded"}</strong>
             <span>PDF · up to 10 MB</span>
+
             <div className="md-save-row">
               {profile.resume && (
                 <a className="md-secondary" href={absoluteMediaUrl(profile.resume)} target="_blank" rel="noreferrer">
                   Download Resume
                 </a>
               )}
+
               <button className="md-primary" type="button" disabled={busy} onClick={chooseResume}>
                 {profile.resume ? "Replace Resume" : "Upload Resume"}
               </button>
+
               {profile.resume && (
                 <button className="md-secondary" type="button" disabled={busy} onClick={() => void removeResume()}>
                   Remove

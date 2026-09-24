@@ -10,13 +10,13 @@ export default function DashboardRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    void ensureSession().then((user) => {
-      if (!user) {
+    void ensureSession().then((account) => {
+      if (!account) {
         router.replace("/login");
         return;
       }
 
-      router.replace(user.role === "SUPER_ADMIN" ? "/admin" : "/member");
+      router.replace(account.role === "SUPER_ADMIN" ? "/admin" : "/member");
     });
   }, [router]);
 

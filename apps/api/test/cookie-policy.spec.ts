@@ -7,7 +7,7 @@ import type { AuthService } from "../src/modules/auth/auth.service";
 
 describe("session cookie policy", () => {
   test.each([true, false])("production cookies are signed, secure and httpOnly (remember=%s)", async (remember) => {
-    const session = { token: "test-token", remember, duration: 86400000, user: { id: "test-user" } };
+    const session = { token: "test-token", remember, duration: 86400000, account: { id: "test-member" } };
     const auth = { login: jest.fn(async () => session) } as unknown as AuthService;
     const controller = new AuthController(auth, new ConfigService({ NODE_ENV: "production" }));
     const cookie = jest.fn();

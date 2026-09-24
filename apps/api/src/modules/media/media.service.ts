@@ -30,6 +30,13 @@ const IMAGE_VARIANTS = {
   large: { width: 1920, quality: 84 },
 } as const;
 
+const GALLERY_IMAGE_VARIANTS = {
+  thumb: { width: 400, height: 400, quality: 78 },
+  profile: { width: 800, height: 800, quality: 82 },
+  medium: { width: 1200, height: 1200, quality: 82 },
+  large: { width: 1920, height: 1920, quality: 84 },
+} as const;
+
 const ASSET_PURPOSES = new Set<MediaPurpose>(["website-image", "project", "casting", "blog", "gallery", "team", "bts", "show"]);
 
 export type MediaVariant = keyof typeof IMAGE_VARIANTS | "document";
@@ -72,12 +79,12 @@ export class MediaService {
         return `assets/bts/${mediaId}`;
       case "show":
         return `assets/shows/${mediaId}`;
-      case "user-profile":
-        return `users/${owner}/profile-pic/${mediaId}`;
-      case "user-portfolio":
-        return `users/${owner}/portfolio-images/${mediaId}`;
-      case "user-resume":
-        return `users/${owner}/resume/${mediaId}`;
+      case "member-profile":
+        return `members/${owner}/profile-pic/${mediaId}`;
+      case "member-portfolio":
+        return `members/${owner}/portfolio-images/${mediaId}`;
+      case "member-resume":
+        return `members/${owner}/resume/${mediaId}`;
       default:
         throw new BadRequestException("Unsupported media purpose.");
     }
@@ -133,7 +140,7 @@ export class MediaService {
     return Object.fromEntries(Object.keys(IMAGE_VARIANTS).map((variant) => [variant, `/api/v1/media/${id}/${variant}`]));
   }
 
-  async upload(ownerId: string, role: "USER" | "SUPER_ADMIN", file?: Upload, rawPurpose?: string) {
+  async upload(ownerId: string, role: "MEMBER" | "SUPER_ADMIN", file?: Upload, rawPurpose?: string) {
     if (!file) throw new BadRequestException("Select a file.");
     if (file.size > 10 * 1024 * 1024) throw new BadRequestException("Select a file up to 10 MB.");
 
@@ -142,7 +149,7 @@ export class MediaService {
       throw new ForbiddenException("Only administrators can upload website and production media.");
     }
 
-    const documentPurpose = purpose === "user-resume";
+    const documentPurpose = purpose === "member-resume";
     const isPdf = file.mimetype === "application/pdf" && file.buffer.subarray(0, 5).toString() === "%PDF-";
 
     if (documentPurpose && !isPdf) {
@@ -249,7 +256,9 @@ export class MediaService {
     const written: MediaVariant[] = [];
 
     try {
-      for (const [variant, settings] of Object.entries(IMAGE_VARIANTS)) {
+      const imageVariants = purpose === "gallery" ? GALLERY_IMAGE_VARIANTS : IMAGE_VARIANTS;
+
+      for (const [variant, settings] of Object.entries(imageVariants)) {
         const size = settings as { width: number; height?: number; quality: number };
         const buffer = await sharp(file.buffer, {
           limitInputPixels: 40_000_000,
@@ -308,7 +317,7 @@ export class MediaService {
   }
 
   async assertOwnedBy(
-    userId: string,
+    ownerId: string,
     values: (string | null | undefined)[],
     kind?: "image" | "document",
     purpose?: MediaPurpose | MediaPurpose[],
@@ -325,7 +334,7 @@ export class MediaService {
     const purposes = purpose ? (Array.isArray(purpose) ? purpose : [purpose]) : undefined;
     const count = await this.media.countDocuments({
       _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
-      ownerId: new Types.ObjectId(userId),
+      ownerId: new Types.ObjectId(ownerId),
       ...(kind ? { kind } : {}),
       ...(purposes ? { purpose: { $in: purposes } } : {}),
     });
@@ -418,8 +427,8 @@ export class MediaService {
     if ((record.kind === "document") !== (variant === "document")) throw new NotFoundException();
 
     if (record.kind === "document" || record.visibility !== "public") {
-      const user = await this.auth.authenticate(token);
-      if (String(record.ownerId) !== user.id && user.role !== "SUPER_ADMIN") throw new NotFoundException();
+      const account = await this.auth.authenticate(token);
+      if (String(record.ownerId) !== account.id && account.role !== "SUPER_ADMIN") throw new NotFoundException();
     }
 
     try {
@@ -449,7 +458,7 @@ export class MediaService {
     return true;
   }
 
-  async remove(id: string, actor: { id: string; role: "USER" | "SUPER_ADMIN" }) {
+  async remove(id: string, actor: { id: string; role: "MEMBER" | "SUPER_ADMIN" }) {
     const record = await this.media.findById(objectId(id));
     if (!record) throw new NotFoundException();
 

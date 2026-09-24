@@ -1,9 +1,17 @@
 import { Schema, Types } from "mongoose";
+
 export const projectStatuses = ["Development", "Pre-production", "In Production", "Completed", "Archived"] as const;
+
 export interface ProjectCredit {
   name: string;
   role: string;
 }
+
+export interface ProjectLink {
+  title: string;
+  url: string;
+}
+
 export interface Project {
   _id: Types.ObjectId;
   slug: string;
@@ -20,20 +28,34 @@ export interface Project {
   coverMediaId?: Types.ObjectId;
   galleryMediaIds?: Types.ObjectId[];
   credits?: ProjectCredit[];
+  links?: ProjectLink[];
   trailerUrl?: string;
   tags?: string[];
   published: boolean;
   archived: boolean;
-  order: number;
+  order?: number;
   createdBy: Types.ObjectId;
   updatedBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
+
 const CreditSchema = new Schema<ProjectCredit>(
-  { name: { type: String, required: true, maxlength: 100 }, role: { type: String, required: true, maxlength: 100 } },
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    role: { type: String, required: true, trim: true, maxlength: 100 },
+  },
   { _id: false, versionKey: false },
 );
+
+const LinkSchema = new Schema<ProjectLink>(
+  {
+    title: { type: String, required: true, trim: true, maxlength: 100 },
+    url: { type: String, required: true, trim: true, maxlength: 500 },
+  },
+  { _id: false, versionKey: false },
+);
+
 export const ProjectSchema = new Schema<Project>(
   {
     slug: { type: String, required: true, maxlength: 160 },
@@ -44,24 +66,35 @@ export const ProjectSchema = new Schema<Project>(
     body: { type: [String], default: undefined },
     creditsText: { type: String, maxlength: 5000 },
     status: { type: String, enum: projectStatuses, default: "Development", required: true },
-    location: { type: String, maxlength: 200 },
+    location: { type: String, trim: true, maxlength: 200 },
     startDate: Date,
     endDate: Date,
     coverMediaId: { type: Schema.Types.ObjectId, ref: "Media" },
-    galleryMediaIds: { type: [Schema.Types.ObjectId], ref: "Media", default: undefined },
+    galleryMediaIds: {
+      type: [Schema.Types.ObjectId],
+      ref: "Media",
+      default: undefined,
+      validate: {
+        validator: (value?: Types.ObjectId[]) => !value || value.length <= 4,
+        message: "Project gallery can contain up to 4 images.",
+      },
+    },
     credits: { type: [CreditSchema], default: undefined },
+    links: { type: [LinkSchema], default: undefined },
     trailerUrl: { type: String, maxlength: 500 },
     tags: { type: [String], default: undefined },
     published: { type: Boolean, default: false, required: true },
     archived: { type: Boolean, default: false, required: true },
-    order: { type: Number, default: 0, min: 0 },
+    order: { type: Number, min: 0, max: 10000 },
     createdBy: { type: Schema.Types.ObjectId, ref: "Account", required: true },
     updatedBy: { type: Schema.Types.ObjectId, ref: "Account", required: true },
   },
   { timestamps: true, versionKey: false, minimize: true },
 );
+
 ProjectSchema.index({ slug: 1 }, { unique: true });
 ProjectSchema.index({ published: 1, archived: 1, order: 1, createdAt: -1 });
+ProjectSchema.index({ archived: 1, createdAt: -1 });
 ProjectSchema.index({ status: 1, archived: 1, createdAt: -1 });
 ProjectSchema.index({ type: 1, archived: 1, createdAt: -1 });
 ProjectSchema.index({ tags: 1 });

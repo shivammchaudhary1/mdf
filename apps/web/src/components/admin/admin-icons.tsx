@@ -9,7 +9,7 @@ const paths: Record<string, ReactNode> = {
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </>
   ),
-  users: (
+  members: (
     <>
       <circle cx="9" cy="8" r="3" />
       <circle cx="17" cy="10" r="2.5" />
@@ -26,6 +26,12 @@ const paths: Record<string, ReactNode> = {
     <>
       <path d="M4 7h16v13H4z" />
       <path d="M8 7V4h8v3" />
+    </>
+  ),
+  services: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M8 12h8M12 8v8" />
     </>
   ),
   casting: (

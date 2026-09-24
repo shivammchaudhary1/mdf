@@ -25,6 +25,7 @@ export type ProfileRecord = {
   publicVisible?: boolean;
   emailCastingAlerts?: boolean;
   emailUpdates?: boolean;
+  profileViews?: number;
   createdAt?: string;
   completion?: number;
   savedOpportunityIds?: string[];
@@ -89,9 +90,9 @@ export type MediaPurpose =
   | "team"
   | "bts"
   | "show"
-  | "user-profile"
-  | "user-portfolio"
-  | "user-resume";
+  | "member-profile"
+  | "member-portfolio"
+  | "member-resume";
 
 export type UploadedMediaResult = {
   id: string;

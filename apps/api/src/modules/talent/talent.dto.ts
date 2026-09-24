@@ -82,7 +82,15 @@ export class TalentQueryDto extends PageQueryDto {
   @Max(100)
   ageMax?: number;
 }
-export class UserUpdateDto {
+export class PublicProfileViewDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(100)
+  visitorKey!: string;
+}
+
+export class MemberUpdateDto {
   @ApiPropertyOptional() @IsOptional() @IsBoolean() verified?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() suspended?: boolean;
 }

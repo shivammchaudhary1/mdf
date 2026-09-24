@@ -4,6 +4,11 @@ export type TalentRecord = {
   id: string;
   name: string;
   email: string;
+  mobile: string;
+  memberCode?: string;
+  authProvider?: string;
+  lastLoginAt?: string;
+  loginCount?: number;
   verified: boolean;
   suspended: boolean;
   createdAt: string;
@@ -14,6 +19,8 @@ export type MemberView = {
   id: string;
   name: string;
   email: string;
+  mobile: string;
+  memberCode: string;
   role: string;
   city: string;
   joined: string;
@@ -28,6 +35,8 @@ export const memberView = (x: TalentRecord): MemberView => ({
   id: x.id,
   name: x.name,
   email: x.email,
+  mobile: x.mobile ?? "",
+  memberCode: x.memberCode ?? "",
   verified: x.verified,
   status: x.suspended ? "Suspended" : x.verified ? "Active" : "Needs Review",
   role: x.profile?.profession ?? "",
@@ -50,6 +59,7 @@ export const applicationView = (x: ApplicationRecord) => ({
 });
 
 export type ProjectCredit = { name: string; role: string };
+export type ProjectLink = { title: string; url: string };
 
 export type ProjectRecord = {
   _id: string;
@@ -69,6 +79,7 @@ export type ProjectRecord = {
   galleryMediaIds?: string[];
   galleryImages?: string[];
   credits?: ProjectCredit[];
+  links?: ProjectLink[];
   trailerUrl?: string;
   tags?: string[];
   published: boolean;
@@ -98,10 +109,11 @@ export type ProjectView = {
   galleryMediaIds: string[];
   galleryImages: string[];
   credits: ProjectCredit[];
+  links: ProjectLink[];
   trailerUrl: string;
   tags: string[];
   published: boolean;
-  order: number;
+  order?: number;
 };
 
 export const projectView = (x: ProjectRecord): ProjectView => ({
@@ -125,10 +137,11 @@ export const projectView = (x: ProjectRecord): ProjectView => ({
   galleryMediaIds: x.galleryMediaIds ?? [],
   galleryImages: x.galleryImages ?? [],
   credits: x.credits ?? [],
+  links: x.links ?? [],
   trailerUrl: x.trailerUrl ?? "",
   tags: x.tags ?? [],
   published: !!x.published,
-  order: x.order ?? 0,
+  order: x.order,
 });
 
 export type CastingRecord = {
@@ -147,6 +160,7 @@ export type CastingRecord = {
   deadline?: string;
   status: string;
   closingSoon: boolean;
+  deadlineExpired?: boolean;
   acceptingApplications?: boolean;
   published: boolean;
   applications?: number;
@@ -176,6 +190,7 @@ export type CastingView = {
   shootDate: string;
   deadline: string;
   status: string;
+  workflowStatus: string;
   applications: number;
   ageMin?: number;
   ageMax?: number;
@@ -204,7 +219,8 @@ export const castingView = (x: CastingRecord): CastingView => ({
   location: x.location ?? "",
   shootDate: x.shootDate?.slice(0, 10) ?? "",
   deadline: x.deadline?.slice(0, 10) ?? "",
-  status: !x.published ? "Draft" : x.closingSoon ? "Closing Soon" : x.status,
+  status: !x.published ? "Draft" : x.deadlineExpired && x.status === "Open" ? "Closed" : x.closingSoon ? "Closing Soon" : x.status,
+  workflowStatus: x.status,
   applications: x.applications ?? 0,
   ageMin: x.ageMin,
   ageMax: x.ageMax,

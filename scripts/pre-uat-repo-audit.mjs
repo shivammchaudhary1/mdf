@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 const requiredRoutes = [
   "apps/web/src/app/page.tsx",
   "apps/web/src/app/about/page.tsx",
+  "apps/web/src/app/services/page.tsx",
   "apps/web/src/app/projects/page.tsx",
   "apps/web/src/app/projects/[slug]/page.tsx",
   "apps/web/src/app/our-work/page.tsx",
@@ -43,7 +44,6 @@ const requiredRuntime = [
   "apps/web/src/services/api.ts",
   "apps/web/src/services/auth-session.ts",
   "apps/web/src/store/app-store.ts",
-  "pendingTask.md",
 ];
 
 for (const path of [...requiredRoutes, ...requiredRuntime]) {
@@ -55,10 +55,10 @@ assert.match(siteHeader, /href="\/login"/, "Anonymous Login action is missing fr
 assert.match(siteHeader, /href="\/signup"/, "Anonymous Join/Signup action is missing from SiteHeader.");
 assert.match(siteHeader, /Dashboard/, "Authenticated dashboard action is missing from SiteHeader.");
 assert.match(siteHeader, /Logout/, "Authenticated logout action is missing from SiteHeader.");
-assert.match(siteHeader, /user\?\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"/, "Role-aware dashboard routing is missing.");
+assert.match(siteHeader, /account\?\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"/, "Role-aware dashboard routing is missing.");
 
 const guestOnly = readFileSync("apps/web/src/components/guest-only.tsx", "utf8");
-assert.match(guestOnly, /router\.replace\(user\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"\)/, "Guest auth-page redirect is missing.");
+assert.match(guestOnly, /router\.replace\(account\.role === "SUPER_ADMIN" \? "\/admin" : "\/member"\)/, "Guest auth-page redirect is missing.");
 
 const dashboard = readFileSync("apps/web/src/app/dashboard/page.tsx", "utf8");
 assert.match(dashboard, /ensureSession/, "/dashboard compatibility route must resolve the current session.");
@@ -77,6 +77,17 @@ for (const [name, source] of [
 assert.ok(!existsSync("apps/web/src/components/admin-workspace.tsx"), "Duplicate top-level AdminWorkspace still exists.");
 assert.ok(!existsSync("apps/web/src/data/admin-dashboard.json"), "Legacy admin fixture dataset still exists.");
 assert.ok(!existsSync("apps/web/src/data/member-dashboard.json"), "Legacy member fixture dataset still exists.");
+
+for (const legacyFile of [
+  "scripts/seed-dev.mjs",
+  "scripts/seed-our-work.mjs",
+  "docs/DEV_SEED.md",
+  "scripts/migrate-backend-v2.mjs",
+  "scripts/migrate-media-storage.mjs",
+  "scripts/upsert-group11-content.mjs",
+]) {
+  assert.ok(!existsSync(legacyFile), `Legacy database helper still exists: ${legacyFile}`);
+}
 
 const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
 for (const script of ["dev", "build", "typecheck", "test", "test:integration", "check", "verify", "audit:repo"]) {

@@ -9,7 +9,7 @@ export interface ApplicantSnapshot {
 }
 export interface Application {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  memberId: Types.ObjectId;
   opportunityType: (typeof opportunityTypes)[number];
   opportunityId: Types.ObjectId;
   projectId?: Types.ObjectId;
@@ -40,7 +40,7 @@ const ApplicantSnapshotSchema = new Schema<ApplicantSnapshot>(
 );
 export const ApplicationSchema = new Schema<Application>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
     opportunityType: { type: String, enum: opportunityTypes, required: true },
     opportunityId: { type: Schema.Types.ObjectId, required: true, index: true },
     projectId: { type: Schema.Types.ObjectId, ref: "Project", index: true },
@@ -60,8 +60,8 @@ export const ApplicationSchema = new Schema<Application>(
   },
   { timestamps: true, versionKey: false, minimize: true },
 );
-ApplicationSchema.index({ userId: 1, opportunityType: 1, opportunityId: 1 }, { unique: true });
-ApplicationSchema.index({ userId: 1, createdAt: -1 });
+ApplicationSchema.index({ memberId: 1, opportunityType: 1, opportunityId: 1 }, { unique: true });
+ApplicationSchema.index({ memberId: 1, createdAt: -1 });
 ApplicationSchema.index({ opportunityId: 1, status: 1, createdAt: -1 });
 ApplicationSchema.index({ projectId: 1, status: 1, createdAt: -1 });
 ApplicationSchema.index({ status: 1, createdAt: -1 });
