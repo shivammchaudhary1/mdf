@@ -57,8 +57,8 @@ export class ContentQueryDto extends PageQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(80) status?: string;
   @ApiPropertyOptional() @IsOptional() @IsMongoId() projectId?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) tag?: string;
-  @ApiPropertyOptional({ enum: ["newest", "oldest", "title-asc", "title-desc", "order"] })
+  @ApiPropertyOptional({ enum: ["newest", "oldest", "title-asc", "title-desc", "order", "updated", "published"] })
   @IsOptional()
-  @IsIn(["newest", "oldest", "title-asc", "title-desc", "order"])
+  @IsIn(["newest", "oldest", "title-asc", "title-desc", "order", "updated", "published"])
   sort?: string;
 }

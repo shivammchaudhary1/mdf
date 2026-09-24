@@ -53,6 +53,9 @@ export class PlatformService {
   async list(kind: string, q: ContentQueryDto, admin = false) {
     const k = this.kind(kind);
     const gallery = k === "gallery";
+    const blog = k === "blog";
+    const taggedContent = gallery || blog;
+
     const filter: Record<string, unknown> = {
       kind: k,
       archived: false,
@@ -61,7 +64,7 @@ export class PlatformService {
         : { published: true, $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: new Date() } }] }),
       ...(q.category ? { category: q.category } : {}),
       ...(q.projectId ? { projectId: objectId(q.projectId) } : {}),
-      ...(gallery && q.tag ? { tags: q.tag } : {}),
+      ...(taggedContent && q.tag ? { tags: q.tag } : {}),
     };
 
     const conditions: Record<string, unknown>[] = [];
@@ -79,30 +82,45 @@ export class PlatformService {
           { title: s },
           { description: s },
           { category: s },
-          ...(gallery ? [{ tags: s }] : []),
+          ...(taggedContent ? [{ tags: s }] : []),
+          ...(blog ? [{ "data.author": s }, { "data.publishedBy": s }] : []),
         ],
       });
     }
 
     if (conditions.length) filter.$and = conditions;
 
-    const sort: Record<string, 1 | -1> =
-      gallery && q.sort === "oldest"
+    const editorialSort: Record<string, 1 | -1> =
+      q.sort === "oldest"
         ? { createdAt: 1, _id: 1 }
-        : gallery && q.sort === "title-asc"
+        : q.sort === "title-asc"
           ? { title: 1, _id: 1 }
-          : gallery && q.sort === "title-desc"
+          : q.sort === "title-desc"
             ? { title: -1, _id: -1 }
-            : gallery && q.sort === "order"
+            : q.sort === "order"
               ? { order: 1, createdAt: -1, _id: -1 }
-              : gallery
-                ? { createdAt: -1, _id: -1 }
-                : { order: 1, createdAt: -1, _id: -1 };
+              : q.sort === "updated"
+                ? { updatedAt: -1, _id: -1 }
+                : q.sort === "published"
+                  ? { publishedAt: -1, createdAt: -1, _id: -1 }
+                  : { createdAt: -1, _id: -1 };
+
+    const sort: Record<string, 1 | -1> =
+      taggedContent
+        ? editorialSort
+        : { order: 1, createdAt: -1, _id: -1 };
+
+    const listProjection = blog ? [{ $project: { body: 0 } }] : [];
 
     const [result] = await this.content.aggregate<{ items: ContentRecord[]; total: { count: number }[] }>([
       { $match: filter },
       { $sort: sort },
-      { $facet: { items: [{ $skip: (q.page - 1) * q.limit }, { $limit: q.limit }], total: [{ $count: "count" }] } },
+      {
+        $facet: {
+          items: [...listProjection, { $skip: (q.page - 1) * q.limit }, { $limit: q.limit }],
+          total: [{ $count: "count" }],
+        },
+      },
     ]);
 
     const items = result?.items ?? [];
@@ -145,6 +163,40 @@ export class PlatformService {
     };
   }
 
+  async blogSummary() {
+    const [result] = await this.content.aggregate<{
+      total: number;
+      published: number;
+      drafts: number;
+      scheduled: number;
+      featured: number;
+    }>([
+      { $match: { kind: "blog", archived: false } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          published: { $sum: { $cond: [{ $eq: ["$status", "Published"] }, 1, 0] } },
+          drafts: { $sum: { $cond: [{ $eq: ["$status", "Draft"] }, 1, 0] } },
+          scheduled: { $sum: { $cond: [{ $eq: ["$status", "Scheduled"] }, 1, 0] } },
+          featured: {
+            $sum: {
+              $cond: [{ $in: ["Featured", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      published: Number(result?.published ?? 0),
+      drafts: Number(result?.drafts ?? 0),
+      scheduled: Number(result?.scheduled ?? 0),
+      featured: Number(result?.featured ?? 0),
+    };
+  }
+
   async publicItem(kind: string, slug: string) {
     const item = await this.content
       .findOne({
@@ -165,7 +217,46 @@ export class PlatformService {
     return this.serialize(item);
   }
 
+  private validateBlogBody(body?: string[]) {
+    if (!body) return;
+
+    const allowedTags = new Set(["p", "h2", "h3", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote", "a", "br", "div"]);
+
+    for (const block of body) {
+      if (/<!--|<\/?(?:script|style|iframe|object|embed|form|input|button|img|svg|math)\b/i.test(block)) {
+        throw new BadRequestException("Blog content contains unsupported HTML.");
+      }
+
+      if (/\son[a-z]+\s*=|\sstyle\s*=|javascript:|data:/i.test(block)) {
+        throw new BadRequestException("Blog content contains unsafe HTML.");
+      }
+
+      for (const match of block.matchAll(/<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi)) {
+        const tag = match[1].toLowerCase();
+        if (!allowedTags.has(tag)) throw new BadRequestException("Blog content contains unsupported formatting.");
+      }
+
+      for (const match of block.matchAll(/<a\s+([^>]*)>/gi)) {
+        const attributes = match[1];
+        const href = attributes.match(/href\s*=\s*["']([^"']+)["']/i)?.[1];
+        if (!href || !/^(https?:\/\/|mailto:)/i.test(href)) {
+          throw new BadRequestException("Blog links must use http(s) or mailto URLs.");
+        }
+
+        const leftovers = attributes
+          .replace(/href\s*=\s*["'][^"']+["']/gi, "")
+          .replace(/target\s*=\s*["']_blank["']/gi, "")
+          .replace(/rel\s*=\s*["'][^"']*["']/gi, "")
+          .trim();
+
+        if (leftovers) throw new BadRequestException("Blog links contain unsupported attributes.");
+      }
+    }
+  }
+
   private async validate(kind: ContentKind, input: ContentDto | UpdateContentDto, actorId: string) {
+    if (kind === "blog") this.validateBlogBody(input.body);
+
     if (
       input.data &&
       (Object.keys(input.data).length > 60 ||
@@ -266,6 +357,12 @@ export class PlatformService {
       unset.publishedAt = 1;
     } else if (input.publishedAt !== undefined) {
       update.publishedAt = new Date(input.publishedAt);
+    } else if (
+      k === "blog" &&
+      input.status === "Published" &&
+      (existing.status === "Scheduled" || (existing.publishedAt?.getTime() ?? 0) > Date.now())
+    ) {
+      update.publishedAt = new Date();
     } else if (update.published === true && !existing.publishedAt && mergedStatus !== "Scheduled") {
       update.publishedAt = new Date();
     }

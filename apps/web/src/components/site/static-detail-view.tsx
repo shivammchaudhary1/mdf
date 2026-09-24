@@ -6,6 +6,7 @@ import { CastingApplyPanel } from "@/components/site/casting-apply-panel";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
+import { absoluteSiteUrl } from "@/config/seo";
 import { getContentItem } from "@/services/content";
 
 type DetailKind = "projects" | "blogs" | "castings";
@@ -487,6 +488,102 @@ function CastingDetail({ item, slug }: { item: ContentItem; slug: string }) {
   );
 }
 
+function DynamicBlogDetail({ item, slug }: { item: ContentItem; slug: string }) {
+  const title = text(item.title) || "Story";
+  const summary = text(item.description);
+  const category = text(item.category) || "Journal";
+  const image = text(item.image);
+  const author = text(item.data?.author) || "M. Dadu Films";
+  const publishedBy = text(item.data?.publishedBy) || "M. Dadu Films Editorial";
+  const readTime = text(item.data?.readTime) || "1 min read";
+  const imageAlt = text(item.data?.imageAlt) || title;
+  const publishedAt = text(item.publishedAt) || text(item.createdAt);
+  const body = Array.isArray(item.body) ? item.body.filter((value) => typeof value === "string" && value.trim()) : [];
+  const tags = Array.isArray(item.tags) ? item.tags.map((value) => text(value)).filter(Boolean) : [];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description: summary,
+    datePublished: publishedAt || undefined,
+    dateModified: item.updatedAt || publishedAt || undefined,
+    author: { "@type": "Organization", name: author },
+    publisher: { "@type": "Organization", name: publishedBy },
+    mainEntityOfPage: absoluteSiteUrl(`/blog/${slug}`),
+    image: image || undefined,
+    keywords: tags.join(", ") || undefined,
+  };
+
+  return (
+    <>
+      <SiteHeader />
+      <main id="main-content">
+        <article className="site-shell py-8 lg:py-12">
+          <Link href="/blog" className="text-xs font-semibold text-[#777] transition hover:text-black">
+            ← Back to Blog
+          </Link>
+
+          <header className="mx-auto mt-9 max-w-4xl text-center">
+            <p className="site-kicker">{category}</p>
+            <h1 className="font-display mt-3 text-[clamp(2.6rem,6vw,5rem)] font-semibold leading-[.98] tracking-[-.035em]">
+              {title}
+            </h1>
+            {summary && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">{summary}</p>}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#888]">
+              <span>{author}</span>
+              <span>•</span>
+              {publishedAt && <time dateTime={publishedAt}>{dateLabel(publishedAt)}</time>}
+              {publishedAt && <span>•</span>}
+              <span>{readTime}</span>
+            </div>
+          </header>
+
+          <SiteMedia
+            src={image || undefined}
+            alt={imageAlt}
+            kind="blog"
+            className="mx-auto mt-10 aspect-[16/7] max-w-5xl rounded-[20px]"
+          />
+
+          <div className="mx-auto max-w-3xl py-10 sm:py-12">
+            {body.length ? (
+              <div
+                className="text-[15px] leading-8 text-[#595959]
+                  [&_p]:mb-4
+                  [&_h2]:font-display [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight sm:[&_h2]:text-3xl
+                  [&_h3]:font-display [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold
+                  [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6
+                  [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6
+                  [&_blockquote]:my-7 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--brand-red)] [&_blockquote]:bg-[#fafafa] [&_blockquote]:px-5 [&_blockquote]:py-4
+                  [&_a]:font-semibold [&_a]:text-[var(--brand-red)] [&_a]:underline"
+              >
+                {body.map((block, index) => (
+                  <div key={`${index}-${block.slice(0, 24)}`} dangerouslySetInnerHTML={{ __html: block }} />
+                ))}
+              </div>
+            ) : summary ? (
+              <p className="text-[17px] leading-8 text-[#4f4f4f]">{summary}</p>
+            ) : null}
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/blog" className="site-button site-button-outline">
+                More Articles
+              </Link>
+              <Link href="/contact" className="site-button site-button-primary">
+                Talk to M. Dadu Films
+              </Link>
+            </div>
+          </div>
+        </article>
+
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
+
 export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug: string }) {
   const item = await getContentItem(kind === "blogs" ? "blog" : kind === "castings" ? "casting" : "projects", slug);
   if (!item) notFound();
@@ -494,40 +591,5 @@ export async function StaticDetailView({ kind, slug }: { kind: DetailKind; slug:
   if (kind === "projects") return <ProjectDetail item={item} />;
   if (kind === "castings") return <CastingDetail item={item} slug={slug} />;
 
-  const title = text(item.title) || "Story";
-  const summary = text(item.description);
-  const category = text(item.category);
-  const image = text(item.image);
-
-  return (
-    <>
-      <SiteHeader />
-      <main id="main-content">
-        <section className="site-shell py-9 lg:py-14">
-          <Link href="/blog" className="text-xs font-semibold text-[#777] hover:text-black">
-            ← Back
-          </Link>
-
-          <div className="mx-auto mt-10 max-w-4xl text-center">
-            {category && <p className="site-kicker">{category}</p>}
-            <h1 className="font-display mt-3 text-4xl font-semibold leading-tight sm:text-6xl">{title}</h1>
-            {summary && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">{summary}</p>}
-          </div>
-
-          {image && <SiteMedia src={image} alt={title} kind="blog" className="mx-auto mt-10 aspect-[16/7] max-w-5xl rounded-[20px]" />}
-
-          {(item.body?.length || item.description) && (
-            <article className="mx-auto max-w-3xl py-10 text-[15px] leading-8 text-[#555]">
-              {(item.body?.length ? item.body : [item.description ?? ""]).filter(Boolean).map((section, index) => (
-                <p key={`${index}-${section.slice(0, 20)}`} className={index ? "mt-5" : ""}>
-                  {section}
-                </p>
-              ))}
-            </article>
-          )}
-        </section>
-      </main>
-      <SiteFooter />
-    </>
-  );
+  return <DynamicBlogDetail item={item} slug={slug} />;
 }

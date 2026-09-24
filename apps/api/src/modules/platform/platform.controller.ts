@@ -27,6 +27,9 @@ export class AdminContentController {
   @Get("gallery/summary") gallerySummary() {
     return this.service.gallerySummary();
   }
+  @Get("blog/summary") blogSummary() {
+    return this.service.blogSummary();
+  }
   @Get(":kind/:id") detail(@Param("kind") k: string, @Param("id") id: string) {
     return this.service.adminItem(k, id);
   }

@@ -1,4 +1,5 @@
 import { AdminApplicationsView } from "@/components/admin/admin-applications-view";
+import { AdminBlogView } from "@/components/admin/admin-blog-view";
 import { AdminCareersView } from "@/components/admin/admin-careers-view";
 import { AdminCastingView } from "@/components/admin/admin-casting-view";
 import { AdminContactsView } from "@/components/admin/admin-contacts-view";
@@ -44,7 +45,7 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "services" || safe === "work" ? (
         <AdminContentView kind="services" />
       ) : safe === "blog" ? (
-        <AdminContentView kind="blog" />
+        <AdminBlogView />
       ) : safe === "gallery" ? (
         <AdminGalleryView />
       ) : safe === "behind-the-scenes" ? (

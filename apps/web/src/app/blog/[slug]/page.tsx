@@ -14,6 +14,22 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const dynamicItem = await getContentItem("blog", slug).catch(() => undefined);
+
+  if (dynamicItem) {
+    return {
+      ...pageMetadata({
+        title: dynamicItem.seoTitle || dynamicItem.title,
+        description: dynamicItem.seoDescription || dynamicItem.description || "Read the latest from M. Dadu Films.",
+        path: `/blog/${slug}`,
+        image: dynamicItem.image,
+        type: "article",
+      }),
+      keywords: dynamicItem.tags,
+      authors: [{ name: dynamicItem.data?.author || "M. Dadu Films" }],
+    };
+  }
+
   const staticItem = websiteData.blogs.find((item) => item.slug === slug);
 
   if (staticItem) {
@@ -30,30 +46,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const item = await getContentItem("blog", slug).catch(() => undefined);
-
-  if (!item) {
-    return pageMetadata({
-      title: "Blog",
-      description: "Stories, production insights and updates from M. Dadu Films.",
-      path: `/blog/${slug}`,
-      noindex: true,
-    });
-  }
-
   return pageMetadata({
-    title: item.seoTitle || item.title,
-    description: item.seoDescription || item.description || "Read the latest from M. Dadu Films.",
+    title: "Blog",
+    description: "Stories, production insights and updates from M. Dadu Films.",
     path: `/blog/${slug}`,
-    image: item.image,
-    type: "article",
+    noindex: true,
   });
 }
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  const staticItem = websiteData.blogs.find((item) => item.slug === slug);
+  const dynamicItem = await getContentItem("blog", slug).catch(() => undefined);
 
+  if (dynamicItem) return <StaticDetailView kind="blogs" slug={slug} />;
+
+  const staticItem = websiteData.blogs.find((item) => item.slug === slug);
   if (staticItem) return <StaticBlogDetailView slug={slug} />;
+
   return <StaticDetailView kind="blogs" slug={slug} />;
 }

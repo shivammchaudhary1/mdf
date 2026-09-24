@@ -59,3 +59,6 @@ ContentSchema.index({ kind: 1, slug: 1 }, { unique: true });
 ContentSchema.index({ kind: 1, published: 1, archived: 1, order: 1, createdAt: -1 });
 ContentSchema.index({ projectId: 1, kind: 1, createdAt: -1 });
 ContentSchema.index({ tags: 1 });
+ContentSchema.index({ kind: 1, archived: 1, createdAt: -1 });
+ContentSchema.index({ kind: 1, archived: 1, updatedAt: -1 });
+ContentSchema.index({ kind: 1, archived: 1, publishedAt: -1 });

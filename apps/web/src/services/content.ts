@@ -23,6 +23,7 @@ export type ApiContent = ContentItem & {
   tags?: string[];
   seoTitle?: string;
   seoDescription?: string;
+  createdAt?: string;
   updatedAt?: string;
   publishedAt?: string;
   status?: string;
