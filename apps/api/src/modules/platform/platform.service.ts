@@ -309,8 +309,74 @@ export class PlatformService {
     }
   }
 
+  private validateLegalBody(body?: string[]) {
+    if (!body) return;
+
+    const allowedTags = new Set(["p", "h2", "h3", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote", "a", "br", "div"]);
+
+    for (const block of body) {
+      if (/<!--|<\/?(?:script|style|iframe|object|embed|form|input|button|img|svg|math)\b/i.test(block)) {
+        throw new BadRequestException("Legal content contains unsupported HTML.");
+      }
+
+      if (/\son[a-z]+\s*=|\sstyle\s*=|javascript:|data:/i.test(block)) {
+        throw new BadRequestException("Legal content contains unsafe HTML.");
+      }
+
+      for (const match of block.matchAll(/<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi)) {
+        const tag = match[1].toLowerCase();
+        if (!allowedTags.has(tag)) throw new BadRequestException("Legal content contains unsupported formatting.");
+      }
+
+      for (const match of block.matchAll(/<a\s+([^>]*)>/gi)) {
+        const attributes = match[1];
+        const href = attributes.match(/href\s*=\s*["']([^"']+)["']/i)?.[1];
+
+        if (!href || !/^(https?:\/\/|mailto:)/i.test(href)) {
+          throw new BadRequestException("Legal links must use http(s) or mailto URLs.");
+        }
+
+        const leftovers = attributes
+          .replace(/href\s*=\s*["'][^"']+["']/gi, "")
+          .replace(/target\s*=\s*["']_blank["']/gi, "")
+          .replace(/rel\s*=\s*["'][^"']*["']/gi, "")
+          .trim();
+
+        if (leftovers) throw new BadRequestException("Legal links contain unsupported attributes.");
+      }
+    }
+  }
+
   private async validate(kind: ContentKind, input: ContentDto | UpdateContentDto, actorId: string) {
     if (kind === "blog") this.validateBlogBody(input.body);
+    if (kind === "legal") this.validateLegalBody(input.body);
+
+    if (kind === "settings" && input.data) {
+      const companyName = input.data.companyName?.trim();
+      const email = input.data.email?.trim();
+
+      if (input.data.companyName !== undefined && !companyName) {
+        throw new BadRequestException("Public company name is required.");
+      }
+
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new BadRequestException("Enter a valid public company email.");
+      }
+
+      for (const key of ["website", "instagram", "youtube", "linkedin", "facebook"]) {
+        const value = input.data[key]?.trim();
+        if (value && !/^https:\/\//i.test(value)) {
+          throw new BadRequestException("Company website and social links must use HTTPS URLs.");
+        }
+      }
+    }
+
+    if (kind === "legal" && input.data?.effectiveDate) {
+      const value = input.data.effectiveDate.trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(new Date(`${value}T00:00:00Z`).getTime())) {
+        throw new BadRequestException("Legal effective date must be a valid YYYY-MM-DD date.");
+      }
+    }
 
     if (
       (kind === "services" || kind === "team") &&
@@ -436,7 +502,7 @@ export class PlatformService {
     } else if (input.publishedAt !== undefined) {
       update.publishedAt = new Date(input.publishedAt);
     } else if (
-      ["blog", "services", "team"].includes(k) &&
+      ["blog", "services", "team", "legal"].includes(k) &&
       input.status === "Published" &&
       (existing.status === "Scheduled" || (existing.publishedAt?.getTime() ?? 0) > Date.now())
     ) {
