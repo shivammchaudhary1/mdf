@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import http from "node:http";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -33,27 +34,153 @@ child.stdout.on("data", (x) => { output += x; });
 child.stderr.on("data", (x) => { output += x; });
 
 const jar = () => ({ cookies: new Map(), csrf: null });
-function saveCookies(response, state) {
-  const values = typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [response.headers.get("set-cookie")].filter(Boolean);
-  for (const header of values) {
+
+function headerBag(headers, setCookies = []) {
+  return {
+    get(name) {
+      const key = name.toLowerCase();
+      if (key === "set-cookie") return setCookies.length ? setCookies.join(", ") : null;
+      const value = headers[key];
+      return Array.isArray(value) ? value.join(", ") : value ?? null;
+    },
+    getSetCookie() {
+      return [...setCookies];
+    },
+  };
+}
+
+function saveCookies(headers, state) {
+  if (!state) return;
+
+  for (const header of headers.getSetCookie()) {
     const pair = header.split(";")[0];
     const i = pair.indexOf("=");
     if (i < 1) continue;
-    const name = pair.slice(0, i), value = pair.slice(i + 1);
-    if (value) state.cookies.set(name, value); else state.cookies.delete(name);
+
+    const name = pair.slice(0, i);
+    const value = pair.slice(i + 1);
+
+    if (value) state.cookies.set(name, value);
+    else state.cookies.delete(name);
   }
 }
-async function request(path, { method = "GET", body, state, csrf = true, origin } = {}) {
+
+async function requestWithHttp(path, { method, body, state, csrf, origin }) {
+  const url = new URL(base + path);
+  const payload = body === undefined ? undefined : JSON.stringify(body);
   const headers = {};
-  if (body !== undefined && !(body instanceof FormData)) headers["Content-Type"] = "application/json";
-  if (state?.cookies?.size) headers.Cookie = [...state.cookies].map(([k, v]) => `${k}=${v}`).join("; ");
-  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) headers["X-CSRF-Token"] = state.csrf;
+
+  if (payload !== undefined) {
+    headers["Content-Type"] = "application/json";
+    headers["Content-Length"] = Buffer.byteLength(payload);
+  }
+
+  if (state?.cookies?.size) {
+    headers.Cookie = [...state.cookies].map(([key, value]) => `${key}=${value}`).join("; ");
+  }
+
+  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    headers["X-CSRF-Token"] = state.csrf;
+  }
+
   if (origin) headers.Origin = origin;
-  const response = await fetch(base + path, { method, headers, body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body) });
-  if (state) saveCookies(response, state);
-  const data = (response.headers.get("content-type") ?? "").includes("json") ? await response.json() : await response.arrayBuffer();
-  if (state && data && typeof data === "object" && typeof data.csrfToken === "string") state.csrf = data.csrfToken;
-  return { status: response.status, data, headers: response.headers };
+
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        port: url.port,
+        path: `${url.pathname}${url.search}`,
+        method,
+        headers,
+      },
+      (response) => {
+        const chunks = [];
+
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("error", reject);
+        response.on("end", () => {
+          const buffer = Buffer.concat(chunks);
+          const setCookies = response.headersDistinct?.["set-cookie"] ?? [];
+          const headersView = headerBag(response.headers, setCookies);
+          saveCookies(headersView, state);
+
+          const contentType = headersView.get("content-type") ?? "";
+          let data;
+
+          if (contentType.includes("json")) {
+            try {
+              data = JSON.parse(buffer.toString("utf8"));
+            } catch {
+              data = null;
+            }
+          } else {
+            data = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+          }
+
+          if (state && data && typeof data === "object" && typeof data.csrfToken === "string") {
+            state.csrf = data.csrfToken;
+          }
+
+          resolve({
+            status: response.statusCode ?? 0,
+            data,
+            headers: headersView,
+          });
+        });
+      },
+    );
+
+    req.on("error", reject);
+    if (payload !== undefined) req.write(payload);
+    req.end();
+  });
+}
+
+async function request(path, { method = "GET", body, state, csrf = true, origin } = {}) {
+  if (!(body instanceof FormData)) {
+    return requestWithHttp(path, { method, body, state, csrf, origin });
+  }
+
+  const headers = {};
+
+  if (state?.cookies?.size) {
+    headers.Cookie = [...state.cookies].map(([key, value]) => `${key}=${value}`).join("; ");
+  }
+
+  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    headers["X-CSRF-Token"] = state.csrf;
+  }
+
+  if (origin) headers.Origin = origin;
+
+  const response = await fetch(base + path, {
+    method,
+    headers,
+    body,
+  });
+
+  const data = (response.headers.get("content-type") ?? "").includes("json")
+    ? await response.json()
+    : await response.arrayBuffer();
+
+  const headersView = headerBag(
+    Object.fromEntries(response.headers.entries()),
+    typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [],
+  );
+
+  saveCookies(headersView, state);
+
+  if (state && data && typeof data === "object" && typeof data.csrfToken === "string") {
+    state.csrf = data.csrfToken;
+  }
+
+  return {
+    status: response.status,
+    data,
+    headers: headersView,
+  };
 }
 
 try {
@@ -66,20 +193,32 @@ try {
   assert.ok(ready, output);
   await mongoose.connect(uri);
 
-  const member = jar(), admin = jar();
+  const member = jar(), admin = jar(), visitor = jar();
   const memberInput = { name: "Integration Member", email: "member@example.test", mobile: "+919999999999", password: "Integration-pass-123", confirmPassword: "Integration-pass-123", acceptTerms: true, acceptPrivacy: true };
   let r = await request("/auth/register", { method: "POST", body: memberInput, state: member });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   assert.ok(r.data.csrfToken);
   const memberId = r.data.id;
+
+  r = await request("/analytics/visit", { method: "POST", state: visitor });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.tracked, true);
+  assert.ok(visitor.cookies.has("mdadu_visitor"));
+  r = await request("/analytics/visit", { method: "POST", state: visitor });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(await mongoose.connection.collection("visitors").countDocuments(), 1);
+
   const consentAccount = await mongoose.connection.collection("accounts").findOne({ _id: new mongoose.Types.ObjectId(memberId) });
   assert.equal(consentAccount.termsVersion, "2026-09-19");
   assert.equal(consentAccount.privacyVersion, "2026-09-19");
   assert.ok(consentAccount.termsAcceptedAt);
   assert.ok(consentAccount.privacyAcceptedAt);
   assert.equal((await request("/auth/register", { method: "POST", body: { ...memberInput, email: "no-consent@example.test", acceptTerms: false } })).status, 400);
-  assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /HttpOnly/);
-  assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /SameSite=Lax/);
+  const registrationCookies = setCookieHeaders(r.headers);
+  const sessionCookie = registrationCookies.find((value) => value.startsWith("mdadu_session="));
+  assert.ok(sessionCookie, `Session cookie missing. Set-Cookie: ${registrationCookies.join(" | ")}`);
+  assert.match(sessionCookie, /HttpOnly/);
+  assert.match(sessionCookie, /SameSite=Lax/);
   assert.equal(r.data.passwordHash, undefined);
   assert.equal(r.headers.get("x-content-type-options"), "nosniff");
   assert.ok(r.headers.get("x-request-id"));
@@ -114,7 +253,7 @@ try {
 
   r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member, csrf: false });
   assert.equal(r.status, 403);
-  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", birthDate: "1995-04-20", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member });
+  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", gender: "Male", birthDate: "1995-04-20", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member });
   assert.equal(r.status, 200, JSON.stringify(r.data));
 
   r = await request("/auth/register", { method: "POST", body: { ...memberInput, name: "Admin", email: "admin@example.test", mobile: "+918888888888" }, state: admin });
@@ -421,6 +560,10 @@ try {
   r = await request("/admin/dashboard", { state: admin });
   assert.equal(r.status, 200);
   assert.ok(r.data.metrics.applications >= 1);
+  assert.equal(r.data.metrics.totalVisitors, 1);
+  assert.equal(typeof r.data.metrics.draftBlogCount, "number");
+  assert.ok(Array.isArray(r.data.latestApplications));
+  assert.ok(r.data.latestApplications.length <= 3);
   assert.equal((await request("/auth/login", { method: "POST", state: member, body: { email: memberInput.email, password: resetBody.password } })).status, 201);
   assert.equal((await request("/auth/deactivate", { method: "POST", state: member })).status, 201);
   assert.equal((await request("/auth/me", { state: member })).status, 401);

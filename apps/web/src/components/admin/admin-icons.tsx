@@ -16,6 +16,12 @@ const paths: Record<string, ReactNode> = {
       <path d="M3 20a6 6 0 0 1 12 0M14 16a5 5 0 0 1 7 4" />
     </>
   ),
+  visitors: (
+    <>
+      <path d="M3 12s3.5-5 9-5 9 5 9 5-3.5 5-9 5-9-5-9-5Z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </>
+  ),
   applications: (
     <>
       <rect x="5" y="4" width="14" height="17" rx="2" />

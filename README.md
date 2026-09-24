@@ -11,7 +11,7 @@ Production deployment remains frozen until UAT is explicitly approved.
 ## Stack
 
 - Next.js 16 / React 19 / TypeScript / Tailwind CSS / Zustand
-- NestJS 12 / Node.js 24.11.1
+- NestJS 12 / Node.js 26.10.0
 - MongoDB + Mongoose
 - REST API
 - signed opaque `httpOnly` sessions + CSRF/origin protection

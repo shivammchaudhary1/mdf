@@ -27,10 +27,10 @@ export function AdminDashboardView() {
       </section>
 
       <section className="ad-stat-grid">
-        {data.stats.map((s, i) => (
+        {data.stats.map((s) => (
           <article key={s.label} className="ad-stat-card">
             <div className="ad-stat-icon">
-              <AdminIcon name={i === 0 ? "members" : i === 1 ? "check" : i === 2 ? "casting" : "applications"} />
+              <AdminIcon name={s.icon} />
             </div>
             <div>
               <p>{s.label}</p>
