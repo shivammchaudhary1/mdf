@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { SiteMedia } from "@/components/site/site-media";
+import { type PublicCoreTeamMember, usePublicCoreTeam } from "@/components/site/use-public-core-team";
 import websiteData from "@/data/website-data.json";
 
-const team = websiteData.aboutUs.coreTeam;
-type TeamMember = (typeof team)[number];
+type TeamMember = PublicCoreTeamMember;
 type SocialName = "instagram" | "facebook" | "x" | "linkedin" | "youtube";
 
 const socials: Array<{ name: SocialName; label: string }> = [
@@ -94,6 +94,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
 }
 
 export function CoreTeamSection() {
+  const { team, loading } = usePublicCoreTeam();
   const [selected, setSelected] = useState<TeamMember | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -158,6 +159,13 @@ export function CoreTeamSection() {
             </article>
           ))}
         </div>
+
+        {!loading && !team.length && (
+          <div className="site-card mt-5 p-8 text-center sm:p-10">
+            <p className="font-display text-2xl font-semibold">Core team profiles are being updated.</p>
+            <p className="mt-2 text-sm text-[#777]">Published Core Team members will appear here.</p>
+          </div>
+        )}
       </div>
 
       {selected && (

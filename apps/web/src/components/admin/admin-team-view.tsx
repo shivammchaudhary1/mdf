@@ -45,6 +45,7 @@ type TeamItem = {
   focus: string[];
   coverMediaId?: string;
   image: string;
+  legacyImage: string;
   imageAlt: string;
   status: string;
   publishedAt: string;
@@ -77,7 +78,8 @@ function mapTeam(item: TeamSource): TeamItem {
     details: item.data?.details ?? "",
     focus: item.body ?? [],
     coverMediaId: item.coverMediaId,
-    image: item.coverImage ?? "",
+    image: item.coverImage ?? item.data?.image ?? "",
+    legacyImage: item.data?.image ?? "",
     imageAlt: item.data?.imageAlt ?? item.title,
     status: item.status ?? (item.published ? "Published" : "Draft"),
     publishedAt: item.publishedAt ?? "",
@@ -206,6 +208,7 @@ function TeamEditorDialog({
         data: {
           group,
           details,
+          image: uploadedId || removePhoto ? "" : item?.legacyImage ?? "",
           imageAlt: String(form.get("imageAlt") ?? "").trim() || name,
           instagram: String(form.get("instagram") ?? "").trim(),
           facebook: String(form.get("facebook") ?? "").trim(),
@@ -237,7 +240,7 @@ function TeamEditorDialog({
       onClose={onClose}
       eyebrow={editing ? "Edit team member" : "New team member"}
       title={editing ? item.name : "Add Team Member"}
-      description="Fields mirror the current Team and About Us core-team content without changing those public pages yet."
+      description="Fields power the public Team page and About Us Core Team section."
       width="wide"
     >
       <AdminDialogForm onSubmit={submit}>

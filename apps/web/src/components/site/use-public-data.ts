@@ -188,7 +188,7 @@ export function usePublicData(
               role: x.role ?? "",
               group: x.data?.group ?? "Core Team",
               bio: x.description ?? "",
-              image: mediaUrl(x.coverImage),
+              image: mediaUrl(x.coverImage ?? x.data?.image),
             }));
           if (domain === "gallery")
             updates.gallery = rows.map((x) => ({ title: x.title, category: x.category ?? "", image: mediaUrl(x.coverImage) }));
