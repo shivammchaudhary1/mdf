@@ -3,9 +3,11 @@
 import Link from "next/link";
 
 import { SiteMedia } from "@/components/site/site-media";
+import { usePublicServices } from "@/components/site/use-public-services";
 import websiteData from "@/data/website-data.json";
 
 export function ServicesSection() {
+  const { services } = usePublicServices();
   const page = websiteData.servicesPage;
 
   return (
@@ -23,7 +25,7 @@ export function ServicesSection() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {websiteData.services.slice(0, 6).map((service) => (
+          {services.slice(0, 6).map((service) => (
             <Link href="/services" key={service.slug} className="group site-card overflow-hidden">
               <SiteMedia
                 src={service.image}

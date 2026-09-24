@@ -477,6 +477,62 @@ try {
   assert.equal((await request(`/admin/castings/${castingId}/close`, { method: "PATCH", state: admin })).status, 200);
   assert.equal((await request("/member/applications", { method: "POST", state: other, body: { opportunityId: castingId, opportunityType: "CASTING", coverNote: "Cannot apply to a closed casting." } })).status, 400);
 
+  r = await request("/admin/content/services", {
+    method: "POST",
+    state: admin,
+    body: {
+      title: "Integration Service",
+      slug: "integration-service",
+      category: "Production",
+      description: "Integration service card description.",
+      body: ["Planning support", "Shoot coordination"],
+      status: "Published",
+      published: true,
+      order: 7,
+      data: {
+        modalEyebrow: "Production",
+        modalTitle: "Integration Service",
+        overview: "Integration service overview.",
+        idealFor: "Integration projects.",
+        contactSubject: "Production",
+        contactMessage: "Please contact us about this integration service.",
+        imageAlt: "Integration service image",
+      },
+    },
+  });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const serviceId = r.data._id;
+  assert.equal((await request("/admin/content/services/summary", { state: admin })).data.total, 1);
+  r = await request("/content/services?limit=100");
+  assert.equal(r.status, 200);
+  assert.equal(r.data.items.some((item) => item.slug === "integration-service"), true);
+  r = await request("/content/services/integration-service");
+  assert.equal(r.status, 200);
+  assert.equal(r.data.data.modalTitle, "Integration Service");
+  r = await request(`/admin/content/services/${serviceId}`, {
+    method: "PATCH",
+    state: admin,
+    body: {
+      title: "Updated Integration Service",
+      description: "Updated integration service card description.",
+      order: 2,
+      data: {
+        modalEyebrow: "Updated Production",
+        modalTitle: "Updated Integration Service",
+        overview: "Updated integration overview.",
+        idealFor: "Updated integration projects.",
+        contactSubject: "Production",
+        contactMessage: "Updated service enquiry.",
+        imageAlt: "Updated integration service image",
+      },
+    },
+  });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.title, "Updated Integration Service");
+  assert.equal((await request("/content/services/integration-service")).data.data.modalTitle, "Updated Integration Service");
+  assert.equal((await request(`/admin/content/services/${serviceId}`, { method: "DELETE", state: admin })).status, 200);
+  assert.equal((await request("/content/services/integration-service")).status, 404);
+
   for (const kind of ["blog", "team", "gallery", "behind-the-scenes", "shows", "settings", "legal"]) {
     r = await request(`/admin/content/${kind}`, { method: "POST", state: admin, body: { title: `Integration ${kind}`, slug: `integration-${kind}`, published: false, seoTitle: "Test SEO", body: ["Test content"] } });
     assert.equal(r.status, 201, JSON.stringify(r.data));
