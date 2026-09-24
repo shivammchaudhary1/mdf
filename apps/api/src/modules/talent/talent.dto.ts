@@ -91,7 +91,6 @@ export class PublicProfileViewDto {
 }
 
 export class MemberUpdateDto {
-  @ApiPropertyOptional() @IsOptional() @IsBoolean() verified?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() suspended?: boolean;
 }
 export class TalentListQueryDto extends PageQueryDto {

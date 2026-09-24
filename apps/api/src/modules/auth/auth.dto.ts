@@ -29,6 +29,9 @@ export class GoogleAuthDto {
   @ApiPropertyOptional() @IsOptional() @IsBoolean() acceptTerms?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() acceptPrivacy?: boolean;
 }
+export class VerifyEmailDto {
+  @ApiProperty() @IsString() @Matches(/^[A-Za-z0-9_-]{40,128}$/) token!: string;
+}
 export class ResetPasswordDto {
   @ApiProperty() @IsString() @Matches(/^[A-Za-z0-9_-]{40,128}$/) token!: string;
   @ApiProperty() @IsString() @MinLength(10) @MaxLength(128) password!: string;

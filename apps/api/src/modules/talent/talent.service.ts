@@ -290,7 +290,6 @@ export class TalentService {
       entityId: id,
       summary: a.name,
       metadata: {
-        ...(input.verified !== undefined ? { verified: input.verified } : {}),
         ...(input.suspended !== undefined ? { suspended: input.suspended } : {}),
       },
     });

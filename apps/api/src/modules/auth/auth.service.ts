@@ -14,8 +14,8 @@ import { type Model, Types } from "mongoose";
 import { RateLimitService } from "../../common/security/rate-limit.service";
 import { randomToken, sha256 } from "../../common/utils/crypto";
 import { MailService } from "../mail/mail.service";
-import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
-import { Account, type AuthProvider, PasswordReset, Session } from "./auth.models";
+import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto, VerifyEmailDto } from "./auth.dto";
+import { Account, type AuthProvider, EmailVerification, PasswordReset, Session } from "./auth.models";
 import { MemberCodeService } from "./member-code.service";
 import { hashPassword, tokenDigest, verifyPassword } from "./password";
 
@@ -39,6 +39,7 @@ export class AuthService {
   constructor(
     @InjectModel("Account") private readonly accounts: Model<Account>,
     @InjectModel("Session") private readonly sessions: Model<Session>,
+    @InjectModel("EmailVerification") private readonly emailVerifications: Model<EmailVerification>,
     @InjectModel("PasswordReset") private readonly resets: Model<PasswordReset>,
     private readonly mail: MailService,
     private readonly config: ConfigService,
@@ -111,6 +112,32 @@ export class AuthService {
     return new Types.ObjectId(String(account._id));
   }
 
+  private frontendOrigin() {
+    return String(this.config.get("FRONTEND_URL") ?? "http://localhost:3333").split(",")[0];
+  }
+
+  private transactionalFrom() {
+    return this.config.get<string>("NOREPLY_EMAIL")?.trim() || undefined;
+  }
+
+  private async sendVerification(account: AccountLike) {
+    const token = randomToken(32);
+    await this.emailVerifications.deleteMany({ accountId: this.accountId(account) });
+    await this.emailVerifications.create({
+      accountId: this.accountId(account),
+      tokenHash: tokenDigest(token),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    const url = `${this.frontendOrigin()}/verify-email#token=${token}`;
+    await this.mail.send(
+      account.email,
+      "Verify your email",
+      `Hi ${account.name},\n\nVerify your email address to complete your M. Dadu Films account verification.\n\nThis link expires in 24 hours.`,
+      { action: { label: "Verify Email", url }, eyebrow: "Account verification", from: this.transactionalFrom() },
+    );
+  }
+
   async register(input: RegisterDto, context: SessionContext) {
     if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
     await this.rateLimits.consume("register-email", input.email, 5, 60 * 60 * 1000);
@@ -132,9 +159,7 @@ export class AuthService {
         privacyAcceptedAt: acceptedAt,
         privacyVersion: this.legalVersion,
       });
-      await this.mail
-        .send(account.email, "Welcome to M. Dadu Films", `Welcome ${account.name}. Your community account is ready.`)
-        .catch(() => undefined);
+      await this.sendVerification(account).catch(() => undefined);
       return this.createSession(account, false, context);
     } catch (error: unknown) {
       if (typeof error === "object" && error && "code" in error && error.code === 11000)
@@ -180,6 +205,7 @@ export class AuthService {
         mobile: input.mobile.trim(),
         authProvider: "google",
         googleSub: payload.sub,
+        verified: true,
         termsAcceptedAt: acceptedAt,
         termsVersion: this.legalVersion,
         privacyAcceptedAt: acceptedAt,
@@ -191,6 +217,7 @@ export class AuthService {
         account.googleSub = payload.sub;
         account.authProvider = account.passwordHash ? "both" : "google";
       }
+      account.verified = true;
       account.lastLoginAt = new Date();
       account.loginCount = Number(account.loginCount ?? 0) + 1;
       await account.save();
@@ -254,6 +281,7 @@ export class AuthService {
     if (input.email && input.email !== account.email && account.authProvider !== "local") {
       throw new BadRequestException("The email linked to Google sign-in cannot be changed here.");
     }
+    const emailChanged = input.email !== undefined && input.email !== account.email;
     try {
       if (input.email !== undefined) account.email = input.email;
       if (input.mobile !== undefined) account.mobile = input.mobile;
@@ -263,6 +291,7 @@ export class AuthService {
         throw new ConflictException("This email is already registered.");
       throw error;
     }
+    if (emailChanged) await this.sendVerification(account).catch(() => undefined);
     return this.publicAccount(account);
   }
   async logoutAll(accountId: string) {
@@ -302,6 +331,46 @@ export class AuthService {
     return { message: "Session revoked.", currentSessionRevoked: sessionId === currentSessionId };
   }
 
+  async verifyEmail(input: VerifyEmailDto) {
+    const verification = await this.emailVerifications.findOneAndDelete({
+      tokenHash: tokenDigest(input.token),
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!verification) throw new BadRequestException("This verification link is invalid or expired.");
+
+    const account = await this.accounts.findByIdAndUpdate(
+      verification.accountId,
+      { $set: { verified: true } },
+      { new: true },
+    );
+
+    if (!account) throw new BadRequestException("This verification link is invalid or expired.");
+
+    await this.emailVerifications.deleteMany({ accountId: account._id });
+    await this.mail
+      .send(
+        account.email,
+        "Email verified",
+        `Hi ${account.name},\n\nYour email has been verified successfully. Welcome to the M. Dadu Films community.`,
+        { eyebrow: "Account verified", from: this.transactionalFrom() },
+      )
+      .catch(() => undefined);
+
+    return { message: "Email verified successfully." };
+  }
+
+  async resendVerification(input: EmailDto) {
+    await this.rateLimits.consume("verify-email", input.email, 5, 60 * 60 * 1000);
+    const account = await this.accounts.findOne({ email: input.email, suspended: false });
+
+    if (account && !account.verified) {
+      await this.sendVerification(account).catch(() => undefined);
+    }
+
+    return { message: "If this account needs verification, a new verification email will be sent." };
+  }
+
   async forgot(input: EmailDto) {
     await this.rateLimits.consume("forgot-email", input.email, 5, 60 * 60 * 1000);
     const account = await this.accounts.findOne({ email: input.email, suspended: false });
@@ -309,9 +378,14 @@ export class AuthService {
       const token = randomToken(32);
       await this.resets.deleteMany({ accountId: account._id });
       await this.resets.create({ accountId: account._id, tokenHash: tokenDigest(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) });
-      const origin = String(this.config.get("FRONTEND_URL") ?? "http://localhost:3333").split(",")[0];
+      const resetUrl = `${this.frontendOrigin()}/reset-password#token=${token}`;
       await this.mail
-        .send(account.email, "Reset your password", `Reset your password within one hour: ${origin}/reset-password#token=${token}`)
+        .send(
+          account.email,
+          "Reset your password",
+          `Hi ${account.name},\n\nWe received a request to reset your M. Dadu Films password. The link expires in one hour.\n\nIf you did not request this, you can ignore this email.`,
+          { action: { label: "Reset Password", url: resetUrl }, eyebrow: "Account security", from: this.transactionalFrom() },
+        )
         .catch(() => undefined);
     }
     return { message: "If that email is registered, a reset link will be sent." };
@@ -328,6 +402,14 @@ export class AuthService {
     account.authProvider = provider;
     await account.save();
     await this.sessions.deleteMany({ accountId: reset.accountId });
+    await this.mail
+      .send(
+        account.email,
+        "Password changed",
+        `Hi ${account.name},\n\nYour M. Dadu Films password was changed successfully. All previous sessions have been signed out.\n\nIf you did not make this change, contact the M. Dadu Films team immediately.`,
+        { eyebrow: "Account security", from: this.transactionalFrom() },
+      )
+      .catch(() => undefined);
     return { message: "Password updated. Please sign in." };
   }
 }

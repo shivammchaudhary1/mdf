@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import { type Model, type PipelineStage, type QueryFilter, Types } from "mongoose";
 
@@ -48,6 +49,7 @@ export class ApplicationService {
     private readonly castings: Model<Casting>,
     private readonly media: MediaService,
     private readonly mail: MailService,
+    private readonly config: ConfigService,
     private readonly audit: AuditService,
     private readonly rateLimits: RateLimitService,
   ) {}
@@ -162,8 +164,34 @@ export class ApplicationService {
       });
 
       await this.mail
-        .send(account.email, "Application received", `Your application for ${opportunity.title} has been received.`)
+        .send(
+          account.email,
+          "Application received",
+          `Hi ${account.name},\n\nYour application for ${opportunity.title} has been received. You can track its status from your member dashboard.`,
+          {
+            eyebrow: "Application confirmation",
+            from: this.config.get<string>("PRODUCTION_EMAIL")?.trim(),
+            fromName: "M. Dadu Films Production",
+          },
+        )
         .catch(() => undefined);
+
+      const recipient = this.config.get<string>("PRODUCTION_EMAIL");
+      if (recipient) {
+        await this.mail
+          .send(
+            recipient,
+            `New application: ${opportunity.title}`,
+            `Name: ${account.name}\nEmail: ${account.email}\nMobile: ${account.mobile}\nType: ${opportunity.type}\nOpportunity: ${opportunity.title}\nRole: ${opportunity.role || "Not specified"}`,
+            {
+              replyTo: account.email,
+              eyebrow: "New production application",
+              from: recipient,
+              fromName: "M. Dadu Films Production",
+            },
+          )
+          .catch(() => undefined);
+      }
 
       return this.serialize(application.toObject());
     } catch (error: unknown) {
@@ -285,7 +313,12 @@ export class ApplicationService {
         .send(
           application.applicant.email,
           "Application status updated",
-          `Your application for ${application.opportunityTitle} is now ${memberStatus}.`,
+          `Hi ${application.applicant.name},\n\nYour application for ${application.opportunityTitle} is now ${memberStatus}.`,
+          {
+          eyebrow: "Application update",
+          from: this.config.get<string>("PRODUCTION_EMAIL")?.trim(),
+          fromName: "M. Dadu Films Production",
+        },
         )
         .catch(() => undefined);
     }

@@ -40,14 +40,26 @@ export class ContactService {
 
     const recipient = this.config.get<string>("CONTACT_EMAIL");
     if (recipient) {
-      await this.mail.send(recipient, `Contact: ${input.subject}`, `${input.name} (${email})\n\n${input.message}`).catch(() => undefined);
+      await this.mail
+        .send(
+          recipient,
+          `New contact: ${input.subject}`,
+          `Name: ${input.name.trim()}\nEmail: ${email}\nSubject: ${input.subject.trim()}\n\n${input.message.trim()}`,
+          { replyTo: email, eyebrow: "Website enquiry", from: recipient, fromName: "M. Dadu Films Contact" },
+        )
+        .catch(() => undefined);
     }
 
     await this.mail
       .send(
         email,
         "We received your message",
-        `Hi ${input.name},\n\nThanks for contacting M. Dadu Films. We have received your message about "${input.subject}".`,
+        `Hi ${input.name.trim()},\n\nThanks for contacting M. Dadu Films. We received your message about "${input.subject.trim()}". Our team will review it and respond when appropriate.`,
+        {
+          eyebrow: "Contact confirmation",
+          from: recipient || this.config.get<string>("CONTACT_EMAIL")?.trim(),
+          fromName: "M. Dadu Films Contact",
+        },
       )
       .catch(() => undefined);
 
