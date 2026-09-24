@@ -130,7 +130,7 @@ export function CoreTeamSection() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {team.map((member) => (
-            <article key={member.name} className="group site-card flex h-full flex-col overflow-hidden">
+            <article key={member.id} className="group site-card flex h-full flex-col overflow-hidden">
               <SiteMedia
                 src={member.image}
                 alt={`${member.name}, ${member.designation}`}
@@ -166,7 +166,7 @@ export function CoreTeamSection() {
               {error ? "Unable to load Core Team." : "Core team profiles are being updated."}
             </p>
             <p className="mt-2 text-sm text-[#777]">
-              {error || "Published Core Team members will appear here."}
+              {error || "Published team members will appear here."}
             </p>
             {error && (
               <button type="button" onClick={() => void refresh()} className="site-button site-button-outline mt-5">

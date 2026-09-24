@@ -537,19 +537,19 @@ try {
     method: "POST",
     state: admin,
     body: {
-      title: "Public Team Contract",
-      slug: "public-team-contract",
-      category: "Core Team",
-      description: "Published team member for public Team contract coverage.",
+      title: "About Team Contract",
+      slug: "about-team-contract",
+      category: "Creative Team",
+      description: "Published Creative Team member rendered inside About Us Core Team.",
       body: ["Direction", "Production"],
       role: "Director",
       status: "Published",
       published: true,
       order: 0,
       data: {
-        group: "Core Team",
-        details: "Detailed public team profile.",
-        imageAlt: "Public Team Contract",
+        group: "Creative Team",
+        details: "Detailed About Us team profile.",
+        imageAlt: "About Team Contract",
         instagram: "",
         facebook: "",
         x: "",
@@ -559,47 +559,56 @@ try {
     },
   });
   assert.equal(r.status, 201, JSON.stringify(r.data));
-  const publicTeamId = r.data._id;
+  const aboutTeamId = r.data._id;
+  assert.equal(r.data.category, "Creative Team");
   assert.equal(r.data.status, "Published");
   assert.equal(r.data.published, true);
 
+  // About Us intentionally loads ALL Published Team records with no group filter.
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  const aboutTeamPublic = r.data.items.find((item) => item.slug === "about-team-contract");
+  assert.ok(aboutTeamPublic);
+  assert.equal(aboutTeamPublic.category, "Creative Team");
+  assert.equal(aboutTeamPublic.data?.group, "Creative Team");
+
+  // A Core Team-filtered request must NOT contain this Creative Team tagged member.
+  // This protects the reason the About frontend must use the unfiltered endpoint.
   r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
   assert.equal(r.status, 200, JSON.stringify(r.data));
-  assert.equal(r.data.items.some((item) => item.slug === "public-team-contract"), true);
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
 
-  await mongoose.connection.collection("contents").updateOne(
-    { _id: new mongoose.Types.ObjectId(publicTeamId) },
-    { $set: { published: false }, $unset: { category: "" } },
-  );
-  r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
-  assert.equal(r.status, 200, JSON.stringify(r.data));
-  assert.equal(r.data.items.some((item) => item.slug === "public-team-contract"), true);
-
-  r = await request(`/admin/content/team/${publicTeamId}`, {
+  r = await request(`/admin/content/team/${aboutTeamId}`, {
     method: "PATCH",
     state: admin,
     body: { status: "Draft", publishedAt: null },
   });
   assert.equal(r.status, 200, JSON.stringify(r.data));
-  r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
-  assert.equal(r.data.items.some((item) => item.slug === "public-team-contract"), false);
 
-  r = await request(`/admin/content/team/${publicTeamId}`, {
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
+
+  r = await request(`/admin/content/team/${aboutTeamId}`, {
     method: "PATCH",
     state: admin,
     body: {
       status: "Published",
-      category: "Core Team",
-      data: { group: "Core Team", details: "Detailed public team profile." },
+      category: "Creative Team",
+      data: { group: "Creative Team", details: "Detailed About Us team profile." },
     },
   });
   assert.equal(r.status, 200, JSON.stringify(r.data));
-  r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
-  assert.equal(r.data.items.some((item) => item.slug === "public-team-contract"), true);
 
-  assert.equal((await request(`/admin/content/team/${publicTeamId}`, { method: "DELETE", state: admin })).status, 200);
-  r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
-  assert.equal(r.data.items.some((item) => item.slug === "public-team-contract"), false);
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), true);
+
+  assert.equal(
+    (await request(`/admin/content/team/${aboutTeamId}`, { method: "DELETE", state: admin })).status,
+    200,
+  );
+
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
 
   for (const kind of ["blog", "team", "gallery", "behind-the-scenes", "shows", "settings", "legal"]) {
     r = await request(`/admin/content/${kind}`, { method: "POST", state: admin, body: { title: `Integration ${kind}`, slug: `integration-${kind}`, published: false, seoTitle: "Test SEO", body: ["Test content"] } });
