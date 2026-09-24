@@ -488,6 +488,69 @@ function CastingDetail({ item, slug }: { item: ContentItem; slug: string }) {
   );
 }
 
+function blogHtmlText(value: string) {
+  return value
+    .replace(/<br\s*\/?\s*>/gi, " ")
+    .replace(/<\/(?:p|h2|h3|li|blockquote|div)>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function blogAnchor(value: string, fallback: string) {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 72) || fallback
+  );
+}
+
+function blogArticleBlocks(body: string[]) {
+  const seen = new Map<string, number>();
+
+  return body.map((source, index) => {
+    let html = source.trim();
+    let level: 2 | 3 | undefined;
+    let label = "";
+
+    const heading = html.match(/^\s*<h([23])(?:\s[^>]*)?>([\s\S]*?)<\/h\1>\s*$/i);
+    const legacyHeading = html.match(/^\s*<p>\s*H([23]):\s*([\s\S]*?)<\/p>\s*$/i);
+    const legacyQuote = html.match(/^\s*<p>\s*Quote:\s*([\s\S]*?)<\/p>\s*$/i);
+
+    if (heading) {
+      level = Number(heading[1]) as 2 | 3;
+      label = blogHtmlText(heading[2]);
+    } else if (legacyHeading) {
+      level = Number(legacyHeading[1]) as 2 | 3;
+      label = blogHtmlText(legacyHeading[2]);
+      html = `<h${level}>${legacyHeading[2]}</h${level}>`;
+    } else if (legacyQuote) {
+      html = `<blockquote><p>${legacyQuote[1]}</p></blockquote>`;
+    }
+
+    if (!level || !label) return { html, id: "", label: "", level: undefined };
+
+    const base = blogAnchor(label, `section-${index + 1}`);
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    const id = count ? `${base}-${count + 1}` : base;
+
+    if (!/\sid\s*=/i.test(html)) {
+      html = html.replace(new RegExp(`<h${level}([^>]*)>`, "i"), `<h${level}$1 id="${id}">`);
+    }
+
+    return { html, id, label, level };
+  });
+}
+
 function DynamicBlogDetail({ item, slug }: { item: ContentItem; slug: string }) {
   const title = text(item.title) || "Story";
   const summary = text(item.description);
@@ -498,8 +561,19 @@ function DynamicBlogDetail({ item, slug }: { item: ContentItem; slug: string }) 
   const readTime = text(item.data?.readTime) || "1 min read";
   const imageAlt = text(item.data?.imageAlt) || title;
   const publishedAt = text(item.publishedAt) || text(item.createdAt);
+  const updatedAt = text(item.updatedAt);
   const body = Array.isArray(item.body) ? item.body.filter((value) => typeof value === "string" && value.trim()) : [];
-  const tags = Array.isArray(item.tags) ? item.tags.map((value) => text(value)).filter(Boolean) : [];
+  const tags = Array.isArray(item.tags)
+    ? [...new Set(item.tags.map((value) => text(value)).filter(Boolean))].slice(0, 12)
+    : [];
+
+  const blocks = blogArticleBlocks(body);
+  const outline = blocks
+    .filter((block): block is { html: string; id: string; label: string; level: 2 | 3 } => Boolean(block.id && block.label && block.level))
+    .slice(0, 12);
+
+  const words = blogHtmlText(body.join(" ")).split(/\\s+/).filter(Boolean).length;
+  const sectionCount = outline.length || body.length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -507,7 +581,7 @@ function DynamicBlogDetail({ item, slug }: { item: ContentItem; slug: string }) 
     headline: title,
     description: summary,
     datePublished: publishedAt || undefined,
-    dateModified: item.updatedAt || publishedAt || undefined,
+    dateModified: updatedAt || publishedAt || undefined,
     author: { "@type": "Organization", name: author },
     publisher: { "@type": "Organization", name: publishedBy },
     mainEntityOfPage: absoluteSiteUrl(`/blog/${slug}`),
@@ -518,67 +592,262 @@ function DynamicBlogDetail({ item, slug }: { item: ContentItem; slug: string }) 
   return (
     <>
       <SiteHeader />
-      <main id="main-content">
-        <article className="site-shell py-8 lg:py-12">
-          <Link href="/blog" className="text-xs font-semibold text-[#777] transition hover:text-black">
-            ← Back to Blog
-          </Link>
 
-          <header className="mx-auto mt-9 max-w-4xl text-center">
-            <p className="site-kicker">{category}</p>
-            <h1 className="font-display mt-3 text-[clamp(2.6rem,6vw,5rem)] font-semibold leading-[.98] tracking-[-.035em]">
-              {title}
-            </h1>
-            {summary && <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#6f6f6f]">{summary}</p>}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#888]">
-              <span>{author}</span>
-              <span>•</span>
-              {publishedAt && <time dateTime={publishedAt}>{dateLabel(publishedAt)}</time>}
-              {publishedAt && <span>•</span>}
-              <span>{readTime}</span>
-            </div>
-          </header>
+      <main id="main-content" className="bg-[#f7f6f3]">
+        <section className="border-b border-black/6 bg-[#fffdf9]">
+          <div className="site-shell py-3 sm:py-4">
+            <nav className="flex items-center gap-3 text-[11px] font-semibold text-[#888]" aria-label="Breadcrumb">
+              <Link href="/" className="transition hover:text-black">
+                Home
+              </Link>
+              <span aria-hidden="true">/</span>
+              <Link href="/blog" className="transition hover:text-black">
+                Blog
+              </Link>
+              <span aria-hidden="true">/</span>
+              <span className="max-w-[190px] truncate text-[#444] sm:max-w-sm">{title}</span>
+            </nav>
+          </div>
 
-          <SiteMedia
-            src={image || undefined}
-            alt={imageAlt}
-            kind="blog"
-            className="mx-auto mt-10 aspect-[16/7] max-w-5xl rounded-[20px]"
-          />
+          <div className="site-shell pb-7 pt-4 sm:pb-9 sm:pt-6">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,.5fr)] lg:items-end">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="rounded-full bg-[#111] px-3 py-1.5 text-[9px] font-black uppercase tracking-[.12em] text-white">
+                    M. Dadu Journal
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-[.15em] text-[var(--brand-red)]">{category}</span>
+                  <span className="h-px w-10 bg-[var(--brand-red)]" aria-hidden="true" />
+                </div>
 
-          <div className="mx-auto max-w-3xl py-10 sm:py-12">
-            {body.length ? (
-              <div
-                className="text-[15px] leading-8 text-[#595959]
-                  [&_p]:mb-4
-                  [&_h2]:font-display [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight sm:[&_h2]:text-3xl
-                  [&_h3]:font-display [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold
-                  [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6
-                  [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6
-                  [&_blockquote]:my-7 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--brand-red)] [&_blockquote]:bg-[#fafafa] [&_blockquote]:px-5 [&_blockquote]:py-4
-                  [&_a]:font-semibold [&_a]:text-[var(--brand-red)] [&_a]:underline"
-              >
-                {body.map((block, index) => (
-                  <div key={`${index}-${block.slice(0, 24)}`} dangerouslySetInnerHTML={{ __html: block }} />
-                ))}
+                <h1 className="font-display mt-5 max-w-5xl text-[clamp(3rem,6vw,6.7rem)] font-semibold leading-[.88] tracking-[-.055em] text-[#171717]">
+                  {title}
+                </h1>
+
+                {summary && (
+                  <p className="mt-6 max-w-3xl text-[15px] leading-7 text-[#686868] sm:text-base sm:leading-8">
+                    {summary}
+                  </p>
+                )}
+
+                {!!tags.length && (
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {tags.slice(0, 7).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-black/7 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.07em] text-[#6d6d6d]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : summary ? (
-              <p className="text-[17px] leading-8 text-[#4f4f4f]">{summary}</p>
-            ) : null}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/blog" className="site-button site-button-outline">
-                More Articles
-              </Link>
-              <Link href="/contact" className="site-button site-button-primary">
-                Talk to M. Dadu Films
-              </Link>
+              <aside className="overflow-hidden rounded-[18px] border border-black/7 bg-white shadow-[0_12px_32px_rgba(0,0,0,.035)]">
+                <div className="border-b border-black/6 px-4 py-3">
+                  <p className="text-[8px] font-black uppercase tracking-[.13em] text-[var(--brand-red)]">Article Brief</p>
+                </div>
+
+                <dl className="grid grid-cols-2">
+                  <div className="border-b border-r border-black/6 p-4">
+                    <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Written by</dt>
+                    <dd className="mt-1.5 text-[11px] font-semibold leading-4 text-[#333]">{author}</dd>
+                  </div>
+                  <div className="border-b border-black/6 p-4">
+                    <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Published by</dt>
+                    <dd className="mt-1.5 text-[11px] font-semibold leading-4 text-[#333]">{publishedBy}</dd>
+                  </div>
+                  <div className="border-r border-black/6 p-4">
+                    <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Published</dt>
+                    <dd className="mt-1.5 text-[11px] font-semibold text-[#333]">
+                      {publishedAt ? dateLabel(publishedAt) : "—"}
+                    </dd>
+                  </div>
+                  <div className="p-4">
+                    <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Read</dt>
+                    <dd className="mt-1.5 text-[11px] font-semibold text-[#333]">{readTime}</dd>
+                  </div>
+                </dl>
+              </aside>
+            </div>
+
+            <div className="relative mt-8 overflow-hidden rounded-[24px] bg-[#ece9e2] shadow-[0_20px_54px_rgba(0,0,0,.09)] sm:mt-10">
+              <SiteMedia
+                src={image || undefined}
+                alt={imageAlt}
+                kind="blog"
+                priority
+                className="aspect-[16/7] min-h-[280px] rounded-none sm:min-h-[360px]"
+                imageClassName="object-cover"
+              />
+
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/35 to-transparent"
+                aria-hidden="true"
+              />
+
+              <div className="absolute bottom-0 left-0 right-0 flex flex-wrap items-end justify-between gap-3 p-4 text-white sm:p-5">
+                <div>
+                  <span className="text-[8px] font-black uppercase tracking-[.12em] text-white/60">Journal Feature</span>
+                  <p className="mt-1 max-w-2xl text-[11px] font-semibold text-white/90">{imageAlt}</p>
+                </div>
+                <span className="rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-[9px] font-bold backdrop-blur-sm">
+                  {words.toLocaleString("en-IN")} words
+                </span>
+              </div>
             </div>
           </div>
-        </article>
+        </section>
+
+        <section className="site-section !py-8 sm:!py-10">
+          <div className="site-shell">
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,.55fr)]">
+              <article className="rounded-[20px] border border-black/6 bg-white p-6 shadow-[0_12px_36px_rgba(0,0,0,.025)] sm:p-7 lg:p-8">
+                <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-black/6 pb-5">
+                  <div>
+                    <p className="site-kicker">Article</p>
+                    <h2 className="font-display mt-1 text-2xl font-semibold">The full story</h2>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 text-[9px] font-bold text-[#888]">
+                    <span className="rounded-full bg-[#f7f6f3] px-3 py-1.5">{words.toLocaleString("en-IN")} words</span>
+                    <span className="rounded-full bg-[#f7f6f3] px-3 py-1.5">{sectionCount} section{sectionCount === 1 ? "" : "s"}</span>
+                  </div>
+                </div>
+
+                {blocks.length ? (
+                  <div
+                    className="text-[14px] leading-7 text-[#595959] sm:text-[15px] sm:leading-8
+                      [&_p]:mb-4
+                      [&_h2]:font-display [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:scroll-mt-28 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:text-[#202020] sm:[&_h2]:text-3xl
+                      [&_h3]:font-display [&_h3]:mb-2.5 [&_h3]:mt-7 [&_h3]:scroll-mt-28 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-[#2a2a2a]
+                      [&_ul]:my-5 [&_ul]:grid [&_ul]:gap-2 [&_ul]:rounded-2xl [&_ul]:bg-[#fafafa] [&_ul]:px-5 [&_ul]:py-4 [&_ul]:pl-9
+                      [&_ul]:list-disc
+                      [&_ol]:my-5 [&_ol]:grid [&_ol]:gap-2 [&_ol]:rounded-2xl [&_ol]:bg-[#fafafa] [&_ol]:px-5 [&_ol]:py-4 [&_ol]:pl-9
+                      [&_ol]:list-decimal
+                      [&_li]:pl-1
+                      [&_blockquote]:my-6 [&_blockquote]:rounded-r-2xl [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--brand-red)] [&_blockquote]:bg-[#fff7f7] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:font-display [&_blockquote]:text-lg [&_blockquote]:leading-7 [&_blockquote]:text-[#383838]
+                      [&_blockquote_p]:mb-0
+                      [&_a]:font-semibold [&_a]:text-[var(--brand-red)] [&_a]:underline"
+                  >
+                    {blocks.map((block, index) => (
+                      <div key={`${index}-${block.id || block.html.slice(0, 24)}`} dangerouslySetInnerHTML={{ __html: block.html }} />
+                    ))}
+                  </div>
+                ) : summary ? (
+                  <p className="text-[16px] leading-8 text-[#4f4f4f]">{summary}</p>
+                ) : (
+                  <p className="text-sm text-[#888]">Article content is not available yet.</p>
+                )}
+              </article>
+
+              <aside className="grid content-start gap-4 lg:sticky lg:top-24">
+                <section className="rounded-[20px] border border-black/6 bg-white p-5 shadow-[0_12px_36px_rgba(0,0,0,.025)]">
+                  <p className="site-kicker">At a glance</p>
+                  <h2 className="font-display mt-1 text-xl font-semibold">Article details</h2>
+
+                  <dl className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-[#f7f6f3] p-3">
+                      <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Author</dt>
+                      <dd className="mt-1 text-[11px] font-semibold leading-4 text-[#333]">{author}</dd>
+                    </div>
+                    <div className="rounded-xl bg-[#f7f6f3] p-3">
+                      <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Publisher</dt>
+                      <dd className="mt-1 text-[11px] font-semibold leading-4 text-[#333]">{publishedBy}</dd>
+                    </div>
+                    <div className="rounded-xl bg-[#f7f6f3] p-3">
+                      <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Read</dt>
+                      <dd className="mt-1 text-[11px] font-semibold text-[#333]">{readTime}</dd>
+                    </div>
+                    <div className="rounded-xl bg-[#f7f6f3] p-3">
+                      <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Words</dt>
+                      <dd className="mt-1 text-[11px] font-semibold text-[#333]">{words.toLocaleString("en-IN")}</dd>
+                    </div>
+                    {publishedAt && (
+                      <div className="col-span-2 rounded-xl bg-[#f7f6f3] p-3">
+                        <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Published</dt>
+                        <dd className="mt-1 text-[11px] font-semibold text-[#333]">{dateLabel(publishedAt)}</dd>
+                      </div>
+                    )}
+                    {updatedAt && updatedAt !== publishedAt && (
+                      <div className="col-span-2 rounded-xl bg-[#f7f6f3] p-3">
+                        <dt className="text-[8px] font-black uppercase tracking-[.08em] text-[#aaa]">Last updated</dt>
+                        <dd className="mt-1 text-[11px] font-semibold text-[#333]">{dateLabel(updatedAt)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </section>
+
+                {!!outline.length && (
+                  <nav
+                    className="rounded-[20px] border border-black/6 bg-white p-5 shadow-[0_12px_36px_rgba(0,0,0,.025)]"
+                    aria-label="Article sections"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="site-kicker">Navigate</p>
+                        <h2 className="font-display mt-1 text-xl font-semibold">On this page</h2>
+                      </div>
+                      <span className="text-[10px] font-semibold text-[#aaa]">{outline.length}</span>
+                    </div>
+
+                    <div className="mt-4 grid gap-1.5">
+                      {outline.map((heading) => (
+                        <a
+                          key={heading.id}
+                          href={`#${heading.id}`}
+                          className={`rounded-xl px-3 py-2 text-[11px] leading-4 text-[#666] transition hover:bg-[#f7f6f3] hover:text-[#111] ${
+                            heading.level === 3 ? "ml-3 border-l border-black/8" : "font-semibold"
+                          }`}
+                        >
+                          {heading.label}
+                        </a>
+                      ))}
+                    </div>
+                  </nav>
+                )}
+
+                {!!tags.length && (
+                  <section className="rounded-[20px] border border-black/6 bg-white p-5 shadow-[0_12px_36px_rgba(0,0,0,.025)]">
+                    <p className="site-kicker">Topics</p>
+                    <h2 className="font-display mt-1 text-xl font-semibold">Explore the themes</h2>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full border border-black/7 bg-[#fafafa] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.06em] text-[#666]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="rounded-[20px] bg-[#111] p-5 text-white shadow-[0_18px_45px_rgba(0,0,0,.14)]">
+                  <p className="text-[9px] font-black uppercase tracking-[.14em] text-[#ff5e67]">Keep exploring</p>
+                  <h2 className="font-display mt-2 text-2xl font-semibold leading-tight">More stories from M. Dadu Films.</h2>
+                  <p className="mt-3 text-xs leading-6 text-white/55">
+                    Browse more filmmaking insights or talk to the team about your next production.
+                  </p>
+                  <div className="mt-5 grid gap-2">
+                    <Link href="/blog" className="site-button site-button-primary">
+                      More Articles
+                    </Link>
+                    <Link href="/contact" className="site-button site-button-dark-outline">
+                      Talk to M. Dadu Films
+                    </Link>
+                  </div>
+                </section>
+              </aside>
+            </div>
+          </div>
+        </section>
 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </main>
+
       <SiteFooter />
     </>
   );
