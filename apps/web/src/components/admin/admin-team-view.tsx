@@ -45,6 +45,7 @@ type TeamItem = {
   focus: string[];
   coverMediaId?: string;
   image: string;
+  legacyImage: string;
   imageAlt: string;
   status: string;
   publishedAt: string;
@@ -77,7 +78,8 @@ function mapTeam(item: TeamSource): TeamItem {
     details: item.data?.details ?? "",
     focus: item.body ?? [],
     coverMediaId: item.coverMediaId,
-    image: item.coverImage ?? "",
+    image: item.coverImage ?? item.data?.image ?? "",
+    legacyImage: item.data?.image ?? "",
     imageAlt: item.data?.imageAlt ?? item.title,
     status: item.status ?? (item.published ? "Published" : "Draft"),
     publishedAt: item.publishedAt ?? "",
@@ -206,6 +208,7 @@ function TeamEditorDialog({
         data: {
           group,
           details,
+          image: uploadedId || removePhoto ? "" : item?.legacyImage ?? "",
           imageAlt: String(form.get("imageAlt") ?? "").trim() || name,
           instagram: String(form.get("instagram") ?? "").trim(),
           facebook: String(form.get("facebook") ?? "").trim(),
@@ -237,7 +240,7 @@ function TeamEditorDialog({
       onClose={onClose}
       eyebrow={editing ? "Edit team member" : "New team member"}
       title={editing ? item.name : "Add Team Member"}
-      description="Fields mirror the current Team and About Us core-team content without changing those public pages yet."
+      description="Published profiles appear in the About Us Core Team section. Team Group remains an admin organization tag."
       width="wide"
     >
       <AdminDialogForm onSubmit={submit}>
@@ -471,7 +474,7 @@ export function AdminTeamView() {
       <AdminPageHeader
         eyebrow="Website CMS"
         title="Team"
-        description="Manage team profiles with the same information structure already used by the Team page and About Us core-team section."
+        description="Manage profiles shown in the About Us Core Team section. Team Group is kept as an admin organization tag."
         action={<AdminPrimaryButton onClick={() => setCreating(true)}>Add Team Member</AdminPrimaryButton>}
       />
 
@@ -533,7 +536,7 @@ export function AdminTeamView() {
           <div>◎</div>
           <p className="ad-kicker">{query || group || status !== "All" ? "No results" : "Team CMS"}</p>
           <h2>{query || group || status !== "All" ? "No team members match these filters." : "Add your first backend team member."}</h2>
-          <p>The current Team and About Us pages remain unchanged until you decide to switch them to backend data.</p>
+          <p>Published team members appear automatically in the About Us Core Team section.</p>
           <button type="button" className="ad-dialog-primary" onClick={() => setCreating(true)}>Add Team Member</button>
         </section>
       )}
@@ -588,7 +591,7 @@ export function AdminTeamView() {
       <ConfirmDialog
         open={!!archiveTarget}
         title="Archive this team member?"
-        description={archiveTarget ? `"${archiveTarget.name}" will be removed from active backend team records. Current static Team/About pages remain unchanged.` : undefined}
+        description={archiveTarget ? `"${archiveTarget.name}" will be removed from the About Us Core Team section once archived.` : undefined}
         confirmLabel="Archive Member"
         destructive
         loading={archiving}

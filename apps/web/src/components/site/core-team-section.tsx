@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { SiteMedia } from "@/components/site/site-media";
+import { type PublicCoreTeamMember, usePublicCoreTeam } from "@/components/site/use-public-core-team";
 import websiteData from "@/data/website-data.json";
 
-const team = websiteData.aboutUs.coreTeam;
-type TeamMember = (typeof team)[number];
+type TeamMember = PublicCoreTeamMember;
 type SocialName = "instagram" | "facebook" | "x" | "linkedin" | "youtube";
 
 const socials: Array<{ name: SocialName; label: string }> = [
@@ -94,6 +94,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
 }
 
 export function CoreTeamSection() {
+  const { team, loading, error, refresh } = usePublicCoreTeam();
   const [selected, setSelected] = useState<TeamMember | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -129,7 +130,7 @@ export function CoreTeamSection() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {team.map((member) => (
-            <article key={member.name} className="group site-card flex h-full flex-col overflow-hidden">
+            <article key={member.id} className="group site-card flex h-full flex-col overflow-hidden">
               <SiteMedia
                 src={member.image}
                 alt={`${member.name}, ${member.designation}`}
@@ -158,6 +159,22 @@ export function CoreTeamSection() {
             </article>
           ))}
         </div>
+
+        {!loading && !team.length && (
+          <div className="site-card mt-5 p-8 text-center sm:p-10">
+            <p className="font-display text-2xl font-semibold">
+              {error ? "Unable to load Core Team." : "Core team profiles are being updated."}
+            </p>
+            <p className="mt-2 text-sm text-[#777]">
+              {error || "Published team members will appear here."}
+            </p>
+            {error && (
+              <button type="button" onClick={() => void refresh()} className="site-button site-button-outline mt-5">
+                Try Again
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {selected && (
