@@ -94,7 +94,7 @@ function SocialLinks({ member, large = false }: { member: TeamMember; large?: bo
 }
 
 export function CoreTeamSection() {
-  const { team, loading } = usePublicCoreTeam();
+  const { team, loading, error, refresh } = usePublicCoreTeam();
   const [selected, setSelected] = useState<TeamMember | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -162,8 +162,17 @@ export function CoreTeamSection() {
 
         {!loading && !team.length && (
           <div className="site-card mt-5 p-8 text-center sm:p-10">
-            <p className="font-display text-2xl font-semibold">Core team profiles are being updated.</p>
-            <p className="mt-2 text-sm text-[#777]">Published Core Team members will appear here.</p>
+            <p className="font-display text-2xl font-semibold">
+              {error ? "Unable to load Core Team." : "Core team profiles are being updated."}
+            </p>
+            <p className="mt-2 text-sm text-[#777]">
+              {error || "Published Core Team members will appear here."}
+            </p>
+            {error && (
+              <button type="button" onClick={() => void refresh()} className="site-button site-button-outline mt-5">
+                Try Again
+              </button>
+            )}
           </div>
         )}
       </div>

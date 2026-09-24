@@ -6,16 +6,16 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
 import { usePublicUiStore } from "@/store/public-ui-store";
 
-import { usePublicData } from "./use-public-data";
+import { usePublicTeam } from "./use-public-team";
 
 const tabs = ["Core Team", "Creative Team", "Advisors"];
 
 export function TeamPageView() {
-  const data = usePublicData("team");
+  const { team, loading, error, refresh } = usePublicTeam();
   const active = usePublicUiStore((state) => state.teamFilter);
   const setActive = usePublicUiStore((state) => state.setTeamFilter);
 
-  const visible = data.team.filter((member) => member.group === active);
+  const visible = team.filter((member) => member.group === active);
 
   return (
     <>
@@ -46,7 +46,19 @@ export function TeamPageView() {
               ))}
             </div>
 
-            {visible.length ? (
+            {loading ? (
+              <div className="site-card p-10 text-center">
+                <p className="font-display text-2xl font-semibold">Loading team…</p>
+              </div>
+            ) : error ? (
+              <div className="site-card p-10 text-center">
+                <p className="font-display text-2xl font-semibold">Unable to load team.</p>
+                <p className="mt-2 text-sm text-[#777]">{error}</p>
+                <button type="button" onClick={() => void refresh()} className="site-button site-button-outline mt-5">
+                  Try Again
+                </button>
+              </div>
+            ) : visible.length ? (
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((member) => (
                   <article key={member.name} className="site-card overflow-hidden">
@@ -65,8 +77,8 @@ export function TeamPageView() {
               </div>
             ) : (
               <div className="site-card p-10 text-center">
-                <p className="font-display text-2xl font-semibold">Advisors will be announced soon.</p>
-                <p className="mt-2 text-sm text-[#777]">This section is intentionally ready for real team data.</p>
+                <p className="font-display text-2xl font-semibold">No {active.toLowerCase()} members yet.</p>
+                <p className="mt-2 text-sm text-[#777]">Published members in this group will appear here.</p>
               </div>
             )}
           </div>
