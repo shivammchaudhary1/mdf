@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsIn,
   IsInt,
   IsMongoId,
   IsObject,
@@ -55,4 +56,9 @@ export class ContentQueryDto extends PageQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) category?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(80) status?: string;
   @ApiPropertyOptional() @IsOptional() @IsMongoId() projectId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) tag?: string;
+  @ApiPropertyOptional({ enum: ["newest", "oldest", "title-asc", "title-desc", "order"] })
+  @IsOptional()
+  @IsIn(["newest", "oldest", "title-asc", "title-desc", "order"])
+  sort?: string;
 }

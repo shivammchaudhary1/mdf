@@ -30,6 +30,13 @@ const IMAGE_VARIANTS = {
   large: { width: 1920, quality: 84 },
 } as const;
 
+const GALLERY_IMAGE_VARIANTS = {
+  thumb: { width: 400, height: 400, quality: 78 },
+  profile: { width: 800, height: 800, quality: 82 },
+  medium: { width: 1200, height: 1200, quality: 82 },
+  large: { width: 1920, height: 1920, quality: 84 },
+} as const;
+
 const ASSET_PURPOSES = new Set<MediaPurpose>(["website-image", "project", "casting", "blog", "gallery", "team", "bts", "show"]);
 
 export type MediaVariant = keyof typeof IMAGE_VARIANTS | "document";
@@ -249,7 +256,9 @@ export class MediaService {
     const written: MediaVariant[] = [];
 
     try {
-      for (const [variant, settings] of Object.entries(IMAGE_VARIANTS)) {
+      const imageVariants = purpose === "gallery" ? GALLERY_IMAGE_VARIANTS : IMAGE_VARIANTS;
+
+      for (const [variant, settings] of Object.entries(imageVariants)) {
         const size = settings as { width: number; height?: number; quality: number };
         const buffer = await sharp(file.buffer, {
           limitInputPixels: 40_000_000,

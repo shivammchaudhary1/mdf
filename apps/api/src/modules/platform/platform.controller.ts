@@ -24,6 +24,9 @@ export class AdminContentController {
   @Get(":kind") list(@Param("kind") k: string, @Query() q: ContentQueryDto) {
     return this.service.list(k, q, true);
   }
+  @Get("gallery/summary") gallerySummary() {
+    return this.service.gallerySummary();
+  }
   @Get(":kind/:id") detail(@Param("kind") k: string, @Param("id") id: string) {
     return this.service.adminItem(k, id);
   }

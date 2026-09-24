@@ -4,6 +4,7 @@ import { AdminCastingView } from "@/components/admin/admin-casting-view";
 import { AdminContactsView } from "@/components/admin/admin-contacts-view";
 import { AdminContentView } from "@/components/admin/admin-content-view";
 import { AdminDashboardView } from "@/components/admin/admin-dashboard-view";
+import { AdminGalleryView } from "@/components/admin/admin-gallery-view";
 import { AdminListsView } from "@/components/admin/admin-lists-view";
 import { AdminMembersView } from "@/components/admin/admin-members-view";
 import { AdminProjectsView } from "@/components/admin/admin-projects-view";
@@ -45,7 +46,7 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "blog" ? (
         <AdminContentView kind="blog" />
       ) : safe === "gallery" ? (
-        <AdminContentView kind="gallery" />
+        <AdminGalleryView />
       ) : safe === "behind-the-scenes" ? (
         <AdminContentView kind="bts" />
       ) : safe === "shows" ? (

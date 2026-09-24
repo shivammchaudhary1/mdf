@@ -51,34 +51,98 @@ export class PlatformService {
   }
 
   async list(kind: string, q: ContentQueryDto, admin = false) {
+    const k = this.kind(kind);
+    const gallery = k === "gallery";
     const filter: Record<string, unknown> = {
-      kind: this.kind(kind),
+      kind: k,
       archived: false,
       ...(admin
         ? {}
         : { published: true, $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: new Date() } }] }),
       ...(q.category ? { category: q.category } : {}),
       ...(q.projectId ? { projectId: objectId(q.projectId) } : {}),
+      ...(gallery && q.tag ? { tags: q.tag } : {}),
     };
+
     const conditions: Record<string, unknown>[] = [];
+
     if (q.status) {
       if (q.status === "Published") conditions.push({ $or: [{ status: "Published" }, { status: { $exists: false }, published: true }] });
       else if (q.status === "Draft") conditions.push({ $or: [{ status: "Draft" }, { status: { $exists: false }, published: false }] });
       else conditions.push({ status: q.status });
     }
+
     if (q.search) {
       const s = new RegExp(escapeSearch(q.search.trim()), "i");
-      conditions.push({ $or: [{ title: s }, { description: s }, { category: s }] });
+      conditions.push({
+        $or: [
+          { title: s },
+          { description: s },
+          { category: s },
+          ...(gallery ? [{ tags: s }] : []),
+        ],
+      });
     }
+
     if (conditions.length) filter.$and = conditions;
+
+    const sort: Record<string, 1 | -1> =
+      gallery && q.sort === "oldest"
+        ? { createdAt: 1, _id: 1 }
+        : gallery && q.sort === "title-asc"
+          ? { title: 1, _id: 1 }
+          : gallery && q.sort === "title-desc"
+            ? { title: -1, _id: -1 }
+            : gallery && q.sort === "order"
+              ? { order: 1, createdAt: -1, _id: -1 }
+              : gallery
+                ? { createdAt: -1, _id: -1 }
+                : { order: 1, createdAt: -1, _id: -1 };
+
     const [result] = await this.content.aggregate<{ items: ContentRecord[]; total: { count: number }[] }>([
       { $match: filter },
-      { $sort: { order: 1, createdAt: -1, _id: -1 } },
+      { $sort: sort },
       { $facet: { items: [{ $skip: (q.page - 1) * q.limit }, { $limit: q.limit }], total: [{ $count: "count" }] } },
     ]);
+
     const items = result?.items ?? [];
     const total = Number(result?.total?.[0]?.count ?? 0);
     return { items: items.map((item) => this.serialize(item)), meta: pageMeta(q.page, q.limit, total) };
+  }
+
+  async gallerySummary() {
+    const [result] = await this.content.aggregate<{
+      total: number;
+      published: number;
+      featured: number;
+      behindTheScenes: number;
+    }>([
+      { $match: { kind: "gallery", archived: false } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          published: { $sum: { $cond: ["$published", 1, 0] } },
+          featured: {
+            $sum: {
+              $cond: [{ $in: ["Featured", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+          behindTheScenes: {
+            $sum: {
+              $cond: [{ $in: ["Behind the Scenes", { $ifNull: ["$tags", []] }] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    return {
+      total: Number(result?.total ?? 0),
+      published: Number(result?.published ?? 0),
+      featured: Number(result?.featured ?? 0),
+      behindTheScenes: Number(result?.behindTheScenes ?? 0),
+    };
   }
 
   async publicItem(kind: string, slug: string) {
