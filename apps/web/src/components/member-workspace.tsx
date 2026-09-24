@@ -15,7 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
-import { refreshSession, signOut } from "@/services/auth-session";
+import { clearClientSession, refreshSession, signOut } from "@/services/auth-session";
 import { dateLabel, fetchPage, mediaUrl, type OpportunityRecord, type PageMeta } from "@/services/workspace";
 import { useMemberDashboardStore } from "@/store/member-dashboard-store";
 
@@ -566,6 +566,7 @@ function Settings() {
     setSaving(true);
     try {
       await api("/auth/deactivate", { method: "POST" });
+      clearClientSession();
       router.replace("/login");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to deactivate account.");

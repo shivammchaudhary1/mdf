@@ -73,11 +73,16 @@ export async function refreshSession() {
   return ensureSession(true);
 }
 
+export function clearClientSession() {
+  sessionPromise = null;
+  useAppStore.getState().clearSession();
+  invalidateApiCache();
+}
+
 export async function signOut() {
   try {
     await api("/auth/logout", { method: "POST" });
   } finally {
-    useAppStore.getState().clearSession();
-    invalidateApiCache();
+    clearClientSession();
   }
 }
