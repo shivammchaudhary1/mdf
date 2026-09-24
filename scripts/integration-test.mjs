@@ -199,6 +199,7 @@ try {
   assert.equal(r.status, 201, JSON.stringify(r.data));
   assert.ok(r.data.csrfToken);
   const memberId = r.data.id;
+  const registration = r;
 
   r = await request("/analytics/visit", { method: "POST", state: visitor });
   assert.equal(r.status, 200, JSON.stringify(r.data));
@@ -214,14 +215,14 @@ try {
   assert.ok(consentAccount.termsAcceptedAt);
   assert.ok(consentAccount.privacyAcceptedAt);
   assert.equal((await request("/auth/register", { method: "POST", body: { ...memberInput, email: "no-consent@example.test", acceptTerms: false } })).status, 400);
-  const registrationCookies = setCookieHeaders(r.headers);
+  const registrationCookies = registration.headers.getSetCookie();
   const sessionCookie = registrationCookies.find((value) => value.startsWith("mdadu_session="));
   assert.ok(sessionCookie, `Session cookie missing. Set-Cookie: ${registrationCookies.join(" | ")}`);
   assert.match(sessionCookie, /HttpOnly/);
   assert.match(sessionCookie, /SameSite=Lax/);
-  assert.equal(r.data.passwordHash, undefined);
-  assert.equal(r.headers.get("x-content-type-options"), "nosniff");
-  assert.ok(r.headers.get("x-request-id"));
+  assert.equal(registration.data.passwordHash, undefined);
+  assert.equal(registration.headers.get("x-content-type-options"), "nosniff");
+  assert.ok(registration.headers.get("x-request-id"));
   const forged = { cookies: new Map([["mdadu_session", "unsigned-forged-session"]]), csrf: null };
   assert.equal((await request("/auth/me", { state: forged })).status, 401);
   assert.equal(
@@ -353,7 +354,13 @@ try {
   assert.equal((await request(`/admin/lists/${listId}/members/${memberId}`, { method: "DELETE", state: admin })).data.members.length, 0);
   assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
   assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
-  assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId: "000000000000000000000000" } })).status, 404);
+  const unavailableMember = await request(`/admin/lists/${listId}/members`, {
+    method: "POST",
+    state: admin,
+    body: { memberId: "000000000000000000000000" },
+  });
+  assert.equal(unavailableMember.status, 400, JSON.stringify(unavailableMember.data));
+  assert.equal(unavailableMember.data.message, "This member is not available for shortlisting.");
   assert.equal((await request(`/admin/lists/${listId}`, { state: admin })).data.purpose, "Integration review");
   assert.equal((await request(`/admin/lists/${listId}`, { state: member })).status, 403);
 
@@ -436,13 +443,13 @@ try {
     gender: "Male",
     previousWork: "Short films and theatre",
     socialLinks: ["https://example.com/member"],
-    showreel: "https://example.com/showreel"
+    showreel: "https://www.youtube.com/watch?v=abcdefghijk"
   } });
   assert.equal(r.status, 200, JSON.stringify(r.data));
   assert.deepEqual(r.data.profile.skills, ["Acting", "Voice"]);
   assert.deepEqual(r.data.profile.languages, ["Hindi", "English"]);
   assert.equal(r.data.profile.previousWork, "Short films and theatre");
-  assert.equal(r.data.profile.showreel, "https://example.com/showreel");
+  assert.equal(r.data.profile.showreel, "https://www.youtube.com/watch?v=abcdefghijk");
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: "http://example.com/not-secure" } })).status, 400);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: null } })).status, 200);
   assert.equal((await request("/member/profile", { state: member })).data.profile.showreel, undefined);
