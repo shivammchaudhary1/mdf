@@ -30,6 +30,12 @@ export class AdminContentController {
   @Get("blog/summary") blogSummary() {
     return this.service.blogSummary();
   }
+  @Get("services/summary") servicesSummary() {
+    return this.service.servicesSummary();
+  }
+  @Get("team/summary") teamSummary() {
+    return this.service.teamSummary();
+  }
   @Get(":kind/:id") detail(@Param("kind") k: string, @Param("id") id: string) {
     return this.service.adminItem(k, id);
   }

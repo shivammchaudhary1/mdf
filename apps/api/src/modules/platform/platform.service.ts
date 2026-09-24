@@ -54,6 +54,8 @@ export class PlatformService {
     const k = this.kind(kind);
     const gallery = k === "gallery";
     const blog = k === "blog";
+    const services = k === "services";
+    const team = k === "team";
     const taggedContent = gallery || blog;
 
     const filter: Record<string, unknown> = {
@@ -84,6 +86,24 @@ export class PlatformService {
           { category: s },
           ...(taggedContent ? [{ tags: s }] : []),
           ...(blog ? [{ "data.author": s }, { "data.publishedBy": s }] : []),
+          ...(services
+            ? [
+                { body: s },
+                { "data.modalEyebrow": s },
+                { "data.modalTitle": s },
+                { "data.overview": s },
+                { "data.idealFor": s },
+                { "data.contactSubject": s },
+              ]
+            : []),
+          ...(team
+            ? [
+                { role: s },
+                { body: s },
+                { "data.group": s },
+                { "data.details": s },
+              ]
+            : []),
         ],
       });
     }
@@ -106,7 +126,7 @@ export class PlatformService {
                   : { createdAt: -1, _id: -1 };
 
     const sort: Record<string, 1 | -1> =
-      taggedContent
+      taggedContent || (admin && (services || team))
         ? editorialSort
         : { order: 1, createdAt: -1, _id: -1 };
 
@@ -197,6 +217,41 @@ export class PlatformService {
     };
   }
 
+  async servicesSummary() {
+    const filter = { kind: "services", archived: false } as const;
+
+    const [total, published, drafts, categories] = await Promise.all([
+      this.content.countDocuments(filter),
+      this.content.countDocuments({ ...filter, published: true }),
+      this.content.countDocuments({
+        ...filter,
+        $or: [{ status: "Draft" }, { status: { $exists: false }, published: false }],
+      }),
+      this.content.distinct("category", filter),
+    ]);
+
+    return {
+      total,
+      published,
+      drafts,
+      categories: categories.filter((value) => typeof value === "string" && value.trim()).length,
+    };
+  }
+
+  async teamSummary() {
+    const filter = { kind: "team", archived: false } as const;
+
+    const [total, published, coreTeam, creativeTeam, advisors] = await Promise.all([
+      this.content.countDocuments(filter),
+      this.content.countDocuments({ ...filter, published: true }),
+      this.content.countDocuments({ ...filter, category: "Core Team" }),
+      this.content.countDocuments({ ...filter, category: "Creative Team" }),
+      this.content.countDocuments({ ...filter, category: "Advisors" }),
+    ]);
+
+    return { total, published, coreTeam, creativeTeam, advisors };
+  }
+
   async publicItem(kind: string, slug: string) {
     const item = await this.content
       .findOne({
@@ -256,6 +311,29 @@ export class PlatformService {
 
   private async validate(kind: ContentKind, input: ContentDto | UpdateContentDto, actorId: string) {
     if (kind === "blog") this.validateBlogBody(input.body);
+
+    if (
+      (kind === "services" || kind === "team") &&
+      input.body?.some((value) => /[<>]/.test(value))
+    ) {
+      throw new BadRequestException("Service and team list fields must use plain text.");
+    }
+
+    if (kind === "team" && input.data?.group) {
+      const groups = ["Core Team", "Creative Team", "Advisors"];
+      if (!groups.includes(input.data.group)) {
+        throw new BadRequestException("Choose a valid team group.");
+      }
+    }
+
+    if (kind === "team" && input.data) {
+      for (const key of ["instagram", "facebook", "x", "linkedin", "youtube"]) {
+        const value = input.data[key]?.trim();
+        if (value && !/^https:\/\//i.test(value)) {
+          throw new BadRequestException("Team social links must use HTTPS URLs.");
+        }
+      }
+    }
 
     if (
       input.data &&
@@ -358,7 +436,7 @@ export class PlatformService {
     } else if (input.publishedAt !== undefined) {
       update.publishedAt = new Date(input.publishedAt);
     } else if (
-      k === "blog" &&
+      ["blog", "services", "team"].includes(k) &&
       input.status === "Published" &&
       (existing.status === "Scheduled" || (existing.publishedAt?.getTime() ?? 0) > Date.now())
     ) {

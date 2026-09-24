@@ -9,8 +9,10 @@ import { AdminGalleryView } from "@/components/admin/admin-gallery-view";
 import { AdminListsView } from "@/components/admin/admin-lists-view";
 import { AdminMembersView } from "@/components/admin/admin-members-view";
 import { AdminProjectsView } from "@/components/admin/admin-projects-view";
+import { AdminServicesView } from "@/components/admin/admin-services-view";
 import { AdminSettingsView } from "@/components/admin/admin-settings-view";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AdminTeamView } from "@/components/admin/admin-team-view";
 const valid = [
   "dashboard",
   "members",
@@ -43,7 +45,7 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "casting" ? (
         <AdminCastingView />
       ) : safe === "services" || safe === "work" ? (
-        <AdminContentView kind="services" />
+        <AdminServicesView />
       ) : safe === "blog" ? (
         <AdminBlogView />
       ) : safe === "gallery" ? (
@@ -53,7 +55,7 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "shows" ? (
         <AdminContentView kind="shows" />
       ) : safe === "team" ? (
-        <AdminContentView kind="team" />
+        <AdminTeamView />
       ) : safe === "lists" ? (
         <AdminListsView />
       ) : safe === "contacts" ? (

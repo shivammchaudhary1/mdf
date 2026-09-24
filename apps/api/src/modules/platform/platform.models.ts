@@ -62,3 +62,6 @@ ContentSchema.index({ tags: 1 });
 ContentSchema.index({ kind: 1, archived: 1, createdAt: -1 });
 ContentSchema.index({ kind: 1, archived: 1, updatedAt: -1 });
 ContentSchema.index({ kind: 1, archived: 1, publishedAt: -1 });
+
+ContentSchema.index({ kind: 1, archived: 1, category: 1, order: 1 });
+ContentSchema.index({ kind: 1, archived: 1, role: 1 });
