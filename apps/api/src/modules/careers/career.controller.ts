@@ -29,6 +29,11 @@ export class AdminCareerController {
     return this.careers.list(query);
   }
 
+  @Get("summary")
+  summary() {
+    return this.careers.summary();
+  }
+
   @Get(":id")
   detail(@Param("id") id: string) {
     return this.careers.detail(id);

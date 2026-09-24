@@ -24,6 +24,18 @@ export class AdminContentController {
   @Get(":kind") list(@Param("kind") k: string, @Query() q: ContentQueryDto) {
     return this.service.list(k, q, true);
   }
+  @Get("gallery/summary") gallerySummary() {
+    return this.service.gallerySummary();
+  }
+  @Get("blog/summary") blogSummary() {
+    return this.service.blogSummary();
+  }
+  @Get("services/summary") servicesSummary() {
+    return this.service.servicesSummary();
+  }
+  @Get("team/summary") teamSummary() {
+    return this.service.teamSummary();
+  }
   @Get(":kind/:id") detail(@Param("kind") k: string, @Param("id") id: string) {
     return this.service.adminItem(k, id);
   }

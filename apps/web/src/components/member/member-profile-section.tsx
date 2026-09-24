@@ -184,8 +184,6 @@ function MultiSelectField({
           )}
         </div>
       </details>
-
-
     </div>
   );
 }

@@ -192,7 +192,8 @@ export function AdminDialogActions({
         </button>
       )}
       <button type={primaryType} className="ad-dialog-primary" onClick={onPrimary}>
-        {primaryLabel}
+        <i className="ad-submit-spinner" aria-hidden="true" />
+        <span className="ad-submit-label">{primaryLabel}</span>
       </button>
     </div>
   );

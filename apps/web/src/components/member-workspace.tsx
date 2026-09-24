@@ -518,32 +518,32 @@ function Opportunities() {
       <section className={items.length ? "md-opportunity-grid" : "md-empty-opportunities"}>
         {items.length ? (
           items.map((o) => (
-          <article className="md-opportunity-card" key={o._id}>
-            <div className="md-opp-image">
-              <SiteMedia src={mediaUrl(o.coverImage)} alt={o.title} kind="team" className="h-full min-h-[210px]" />
-              <span>— match</span>
-              <button className={saved.includes(o._id) ? "saved" : ""} onClick={() => toggle(o._id)}>
-                <Icon name="bookmark" />
-              </button>
-            </div>
-            <div className="md-opp-body">
-              <p>
-                {o.category ?? ""} · {o.compensation || "—"}
-              </p>
-              <h2>{o.title}</h2>
-              <strong>{o.role ?? o.title}</strong>
-              <div>
-                <span>{o.location ?? "—"}</span>
-                <span>Deadline {dateLabel(o.deadline)}</span>
+            <article className="md-opportunity-card" key={o._id}>
+              <div className="md-opp-image">
+                <SiteMedia src={mediaUrl(o.coverImage)} alt={o.title} kind="team" className="h-full min-h-[210px]" />
+                <span>— match</span>
+                <button className={saved.includes(o._id) ? "saved" : ""} onClick={() => toggle(o._id)}>
+                  <Icon name="bookmark" />
+                </button>
               </div>
-              <button
-                className="md-primary full"
-                onClick={() => router.push(`/${o.opportunityType === "CASTING" ? "casting" : "projects"}/${o.slug}`)}
-              >
-                View & Apply
-              </button>
-            </div>
-          </article>
+              <div className="md-opp-body">
+                <p>
+                  {o.category ?? ""} · {o.compensation || "—"}
+                </p>
+                <h2>{o.title}</h2>
+                <strong>{o.role ?? o.title}</strong>
+                <div>
+                  <span>{o.location ?? "—"}</span>
+                  <span>Deadline {dateLabel(o.deadline)}</span>
+                </div>
+                <button
+                  className="md-primary full"
+                  onClick={() => router.push(`/${o.opportunityType === "CASTING" ? "casting" : "projects"}/${o.slug}`)}
+                >
+                  View & Apply
+                </button>
+              </div>
+            </article>
           ))
         ) : (
           <div className="md-empty-state">No opportunities found.</div>

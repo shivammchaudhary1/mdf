@@ -1,9 +1,9 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useDeferredValue, useState } from "react";
 
 import { AdminDialog, AdminDialogActions, AdminDialogForm, AdminDialogGrid, AdminFormField } from "@/components/admin/admin-dialog";
-import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch, AdminStatus } from "@/components/admin/admin-shared";
+import { AdminCollectionState, AdminFilters, AdminPageHeader, AdminSearch } from "@/components/admin/admin-shared";
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
@@ -12,6 +12,8 @@ import { dateLabel, mediaUrl } from "@/services/workspace";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 
 import { useAdminRecords } from "./use-admin-records";
+
+type ApplicationStatus = "Submitted" | "Under Review" | "Shortlisted" | "Selected" | "Rejected";
 
 type ApplicationRecord = {
   _id: string;
@@ -24,7 +26,7 @@ type ApplicationRecord = {
   showreelUrl?: string;
   pitch?: string;
   documentUrl?: string;
-  status: string;
+  status: ApplicationStatus;
   adminNotes?: string;
   createdAt: string;
 };
@@ -33,25 +35,29 @@ type ApplicationView = {
   id: string;
   applicant: string;
   email: string;
-  mobile: string;
   city: string;
   role: string;
   project: string;
-  type: string;
-  status: string;
+  rawStatus: ApplicationStatus;
   applied: string;
 };
+
+function statusLabel(status: ApplicationStatus) {
+  return status === "Rejected" ? "Not Selected" : status;
+}
+
+function StatusBadge({ value }: { value: ApplicationStatus }) {
+  return <span className={`ad-status ${value.toLowerCase().replaceAll(" ", "-")}`}>{statusLabel(value)}</span>;
+}
 
 const view = (record: ApplicationRecord): ApplicationView => ({
   id: record._id,
   applicant: record.applicant.name,
   email: record.applicant.email,
-  mobile: record.applicant.mobile,
   city: record.applicant.city ?? "—",
   role: record.roleSnapshot ?? record.opportunityTitle,
   project: record.opportunityTitle,
-  type: record.opportunityType,
-  status: record.status,
+  rawStatus: record.status,
   applied: dateLabel(record.createdAt),
 });
 
@@ -60,21 +66,29 @@ export function AdminApplicationsView() {
   const active = useAdminDashboardStore((state) => state.applicationFilter);
   const setActive = useAdminDashboardStore((state) => state.setApplicationFilter);
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query.trim());
   const [selected, setSelected] = useState<ApplicationRecord | null>(null);
+  const [reviewStatus, setReviewStatus] = useState<ApplicationStatus>("Submitted");
   const [detailLoading, setDetailLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [applications, , refresh, meta, setPage, , loading, error] = useAdminRecords(
-    `/admin/applications?search=${encodeURIComponent(query)}${active !== "All" ? `&status=${encodeURIComponent(active)}` : ""}`,
+  const backendStatus = active === "Not Selected" ? "Rejected" : active === "All" ? "" : active;
+
+  const [applications, setApplications, refresh, meta, setPage, , loading, error] = useAdminRecords(
+    `/admin/applications?search=${encodeURIComponent(deferredQuery)}${backendStatus ? `&status=${encodeURIComponent(backendStatus)}` : ""}`,
     view,
     true,
     1,
-    25,
+    20,
   );
 
   async function review(id: string) {
     setDetailLoading(true);
+
     try {
-      setSelected(await api<ApplicationRecord>(`/admin/applications/${id}`));
+      const result = await api<ApplicationRecord>(`/admin/applications/${id}`);
+      setSelected(result);
+      setReviewStatus(result.status);
     } catch (loadError) {
       toast.error(loadError instanceof Error ? loadError.message : "Unable to load application.");
     } finally {
@@ -84,22 +98,51 @@ export function AdminApplicationsView() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected) return;
+    if (!selected || saving) return;
+
     const form = new FormData(event.currentTarget);
+    setSaving(true);
 
     try {
-      await api(`/admin/applications/${selected._id}`, {
+      const updated = await api<ApplicationRecord>(`/admin/applications/${selected._id}`, {
         method: "PATCH",
         body: JSON.stringify({
-          status: String(form.get("status") ?? selected.status),
-          adminNotes: String(form.get("notes") ?? ""),
+          status: reviewStatus,
+          adminNotes: String(form.get("notes") ?? "").trim(),
         }),
       });
-      await refresh();
+
+      setApplications((current) =>
+        current.map((item) =>
+          item.id === updated._id
+            ? {
+                ...item,
+                rawStatus: updated.status,
+              }
+            : item,
+        ),
+      );
+
       setSelected(null);
-      toast.success("Application updated.", "The member will see the new status immediately.");
+
+      toast.success(
+        updated.status === "Selected"
+          ? "Applicant selected."
+          : updated.status === "Rejected"
+            ? "Applicant marked Not Selected."
+            : updated.status === "Shortlisted"
+              ? "Applicant shortlisted."
+              : "Application updated.",
+        "The member can see the updated status in My Applications.",
+      );
+
+      void refresh().catch(() => {
+        toast.info("Review was saved.", "Refresh the page if the application list does not update immediately.");
+      });
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : "Unable to update application.");
+      toast.error("Review was not saved.", saveError instanceof Error ? saveError.message : "Unable to update application.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -108,16 +151,16 @@ export function AdminApplicationsView() {
       <AdminPageHeader
         eyebrow="Casting workflow"
         title="Applications"
-        description="Review complete submissions, private notes, portfolio material and application status."
+        description="Review complete submissions, portfolio material, private notes and final selection status."
       />
 
       <section className="ad-toolbar">
         <AdminFilters
-          values={["All", "Submitted", "Under Review", "Shortlisted", "Selected", "Rejected"]}
+          values={["All", "Submitted", "Under Review", "Shortlisted", "Selected", "Not Selected"]}
           active={active}
           onChange={setActive}
         />
-        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant or project" />
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search applicant, email, phone, city or project" />
       </section>
 
       <AdminCollectionState
@@ -151,10 +194,10 @@ export function AdminApplicationsView() {
               </div>
               <span>{application.applied}</span>
               <span>{application.city}</span>
-              <AdminStatus value={application.status} />
+              <StatusBadge value={application.rawStatus} />
               <div className="ad-row-actions">
-                <button disabled={detailLoading} onClick={() => void review(application.id)}>
-                  Review
+                <button disabled={detailLoading || saving} onClick={() => void review(application.id)}>
+                  {detailLoading ? "Loading…" : "Review"}
                 </button>
               </div>
             </div>
@@ -166,7 +209,9 @@ export function AdminApplicationsView() {
 
       <AdminDialog
         open={!!selected}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          if (!saving) setSelected(null);
+        }}
         eyebrow="Application review"
         title={selected?.applicant.name ?? "Applicant"}
         description={selected ? `${selected.roleSnapshot ?? selected.opportunityTitle} · ${selected.opportunityTitle}` : ""}
@@ -175,22 +220,10 @@ export function AdminApplicationsView() {
         {selected && (
           <AdminDialogForm onSubmit={save}>
             <div className="ad-review-summary">
-              <div>
-                <span>Email</span>
-                <strong>{selected.applicant.email}</strong>
-              </div>
-              <div>
-                <span>Mobile</span>
-                <strong>{selected.applicant.mobile}</strong>
-              </div>
-              <div>
-                <span>City</span>
-                <strong>{selected.applicant.city ?? "—"}</strong>
-              </div>
-              <div>
-                <span>Applied</span>
-                <strong>{dateLabel(selected.createdAt)}</strong>
-              </div>
+              <div><span>Email</span><strong>{selected.applicant.email}</strong></div>
+              <div><span>Mobile</span><strong>{selected.applicant.mobile}</strong></div>
+              <div><span>City</span><strong>{selected.applicant.city ?? "—"}</strong></div>
+              <div><span>Applied</span><strong>{dateLabel(selected.createdAt)}</strong></div>
             </div>
 
             <section className="grid gap-3 rounded-xl border border-black/8 bg-[#fafaf8] p-4">
@@ -198,23 +231,17 @@ export function AdminApplicationsView() {
                 <span className="text-[10px] font-bold uppercase tracking-wide text-[#999]">Cover note</span>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#555]">{selected.coverNote}</p>
               </div>
+
               {selected.pitch && (
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wide text-[#999]">Pitch</span>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#555]">{selected.pitch}</p>
                 </div>
               )}
+
               <div className="flex flex-wrap gap-3">
-                {selected.showreelUrl && (
-                  <a href={selected.showreelUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">
-                    Showreel ↗
-                  </a>
-                )}
-                {selected.documentUrl && (
-                  <a href={selected.documentUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">
-                    Supporting PDF ↗
-                  </a>
-                )}
+                {selected.showreelUrl && <a href={selected.showreelUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">Showreel ↗</a>}
+                {selected.documentUrl && <a href={selected.documentUrl} target="_blank" rel="noreferrer" className="site-button site-button-outline">Supporting PDF ↗</a>}
               </div>
             </section>
 
@@ -235,22 +262,72 @@ export function AdminApplicationsView() {
               </section>
             )}
 
+            <section className="ad-application-decision">
+              <div>
+                <p className="ad-kicker">Decision</p>
+                <h3>Application outcome</h3>
+                <span>Shortlist first, or record the final selected / not selected outcome.</span>
+              </div>
+
+              <div className="ad-application-decision-actions three">
+                <button
+                  type="button"
+                  className={reviewStatus === "Shortlisted" ? "shortlisted" : ""}
+                  onClick={() => setReviewStatus("Shortlisted")}
+                >
+                  ★ Shortlist
+                </button>
+                <button
+                  type="button"
+                  className={reviewStatus === "Selected" ? "selected" : ""}
+                  onClick={() => setReviewStatus("Selected")}
+                >
+                  ✓ Selected
+                </button>
+                <button
+                  type="button"
+                  className={reviewStatus === "Rejected" ? "not-selected" : ""}
+                  onClick={() => setReviewStatus("Rejected")}
+                >
+                  × Not Selected
+                </button>
+              </div>
+            </section>
+
             <AdminDialogGrid>
               <AdminFormField label="Application Status">
-                <select name="status" defaultValue={selected.status}>
-                  <option>Submitted</option>
-                  <option>Under Review</option>
-                  <option>Shortlisted</option>
-                  <option>Selected</option>
-                  <option>Rejected</option>
+                <select
+                  value={reviewStatus}
+                  onChange={(event) => setReviewStatus(event.target.value as ApplicationStatus)}
+                  disabled={saving}
+                >
+                  <option value="Submitted">Submitted</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Shortlisted">Shortlisted</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Rejected">Not Selected</option>
                 </select>
               </AdminFormField>
+
               <AdminFormField label="Internal Review Notes" wide>
-                <textarea name="notes" rows={5} defaultValue={selected.adminNotes ?? ""} />
+                <textarea
+                  name="notes"
+                  rows={5}
+                  defaultValue={selected.adminNotes ?? ""}
+                  placeholder="Private notes visible only to admins"
+                  disabled={saving}
+                />
               </AdminFormField>
             </AdminDialogGrid>
 
-            <AdminDialogActions onCancel={() => setSelected(null)} primaryLabel="Save Review" />
+            <p className="ad-dialog-footnote">
+              The member sees Shortlisted, Selected or Not Selected immediately in My Applications. Internal notes remain private.
+            </p>
+
+            <AdminDialogActions
+              onCancel={() => setSelected(null)}
+              primaryLabel={saving ? "Saving Review…" : "Save Review"}
+            />
           </AdminDialogForm>
         )}
       </AdminDialog>

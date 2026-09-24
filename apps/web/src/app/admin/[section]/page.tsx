@@ -23,7 +23,7 @@ type Props = { params: Promise<{ section: string }> };
 export async function generateMetadata({ params }: Props) {
   const { section } = await params;
   const labels: Record<string, string> = {
-    members: "Members & Talent",
+    members: "Members",
     applications: "Applications",
     projects: "Projects",
     casting: "Casting Calls",

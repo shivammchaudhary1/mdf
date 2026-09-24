@@ -5,10 +5,12 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
 import websiteData from "@/data/website-data.json";
+import { type GallerySectionSlug, getPublicGallerySections } from "@/services/gallery-content";
 
-export function GalleryPageView() {
+export async function GalleryPageView() {
   const page = websiteData.galleryPage;
   const recentLimit = page.pageSize;
+  const dynamicSections = await getPublicGallerySections();
 
   return (
     <>
@@ -88,7 +90,8 @@ export function GalleryPageView() {
 
             <div className="mt-12 space-y-16">
               {page.sections.map((section) => {
-                const recent = section.items.slice(0, recentLimit);
+                const sectionSlug = section.slug as GallerySectionSlug;
+                const recent = (dynamicSections[sectionSlug] ?? []).slice(0, recentLimit);
 
                 return (
                   <section key={section.slug} aria-labelledby={`${section.slug}-title`}>
@@ -106,23 +109,32 @@ export function GalleryPageView() {
                       </Link>
                     </div>
 
-                    <Link
-                      href={`/gallery/${section.slug}`}
-                      className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-5"
-                      aria-label={`Open ${section.title} public library`}
-                    >
-                      {recent.map((item) => (
-                        <figure key={item.id} className="group overflow-hidden rounded-[14px] bg-white">
-                          <SiteMedia
-                            src={item.image}
-                            alt={item.imageAlt}
-                            kind="gallery"
-                            className="aspect-[4/3]"
-                            imageClassName="transition duration-500 group-hover:scale-[1.025]"
-                          />
-                        </figure>
-                      ))}
-                    </Link>
+                    {recent.length ? (
+                      <Link
+                        href={`/gallery/${section.slug}`}
+                        className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-5"
+                        aria-label={`Open ${section.title} public library`}
+                      >
+                        {recent.map((item) => (
+                          <figure key={item.id} className="group overflow-hidden rounded-[14px] bg-white">
+                            <SiteMedia
+                              src={item.image}
+                              alt={item.imageAlt}
+                              kind="gallery"
+                              className="aspect-[4/3]"
+                              imageClassName="transition duration-500 group-hover:scale-[1.025]"
+                            />
+                          </figure>
+                        ))}
+                      </Link>
+                    ) : (
+                      <div className="rounded-[18px] border border-dashed border-black/10 bg-white px-6 py-10 text-center sm:py-12">
+                        <p className="font-display text-xl font-semibold text-[#333]">No images published yet.</p>
+                        <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#888]">
+                          Published images for {section.title.toLowerCase()} will appear here automatically.
+                        </p>
+                      </div>
+                    )}
                   </section>
                 );
               })}

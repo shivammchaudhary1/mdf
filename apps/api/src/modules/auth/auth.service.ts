@@ -16,6 +16,7 @@ import { randomToken, sha256 } from "../../common/utils/crypto";
 import { MailService } from "../mail/mail.service";
 import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
 import { Account, type AuthProvider, PasswordReset, Session } from "./auth.models";
+import { MemberCodeService } from "./member-code.service";
 import { hashPassword, tokenDigest, verifyPassword } from "./password";
 
 export type SessionContext = { ip?: string; userAgent?: string };
@@ -42,6 +43,7 @@ export class AuthService {
     private readonly mail: MailService,
     private readonly config: ConfigService,
     private readonly rateLimits: RateLimitService,
+    private readonly memberCodes: MemberCodeService,
   ) {
     const clientId = this.config.get<string>("GOOGLE_CLIENT_ID");
     if (clientId) this.google = new OAuth2Client(clientId);
@@ -113,8 +115,13 @@ export class AuthService {
     if (input.password !== input.confirmPassword) throw new BadRequestException("Passwords must match.");
     await this.rateLimits.consume("register-email", input.email, 5, 60 * 60 * 1000);
     try {
+      if (await this.accounts.exists({ email: input.email })) {
+        throw new ConflictException("An account with this email already exists.");
+      }
+
       const acceptedAt = new Date();
       const account = await this.accounts.create({
+        memberCode: await this.memberCodes.next(acceptedAt),
         name: input.name.trim(),
         email: input.email,
         mobile: input.mobile.trim(),
@@ -167,6 +174,7 @@ export class AuthService {
       }
       const acceptedAt = new Date();
       account = await this.accounts.create({
+        memberCode: await this.memberCodes.next(acceptedAt),
         name: (input.name || payload.name || email.split("@")[0]).slice(0, 100),
         email,
         mobile: input.mobile.trim(),

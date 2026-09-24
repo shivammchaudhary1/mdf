@@ -6,6 +6,7 @@ export interface Account {
   name: string;
   email: string;
   mobile: string;
+  memberCode?: string;
   passwordHash?: string;
   role: MemberRole;
   authProvider: AuthProvider;
@@ -26,6 +27,7 @@ export const AccountSchema = new Schema<Account>(
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
     mobile: { type: String, required: true, trim: true, maxlength: 24 },
+    memberCode: { type: String, trim: true, lowercase: true, maxlength: 20 },
     passwordHash: { type: String, select: false },
     role: { type: String, enum: ["MEMBER", "SUPER_ADMIN"], default: "MEMBER", required: true },
     authProvider: { type: String, enum: ["local", "google", "both"], default: "local", required: true },
@@ -42,6 +44,7 @@ export const AccountSchema = new Schema<Account>(
   { timestamps: true, versionKey: false, minimize: true },
 );
 AccountSchema.index({ email: 1 }, { unique: true });
+AccountSchema.index({ memberCode: 1 }, { unique: true, partialFilterExpression: { memberCode: { $type: "string" } } });
 AccountSchema.index({ googleSub: 1 }, { unique: true, partialFilterExpression: { googleSub: { $type: "string" } } });
 AccountSchema.index({ role: 1, verified: 1, suspended: 1, createdAt: -1 });
 

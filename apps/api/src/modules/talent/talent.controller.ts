@@ -2,7 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Use
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 
 import { AdminGuard, AuthRequest, SessionGuard } from "../auth/auth.guard";
-import { CreateListDto, ListMemberDto, MemberUpdateDto, PublicProfileViewDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
+import {
+  CreateListDto,
+  ListMemberDto,
+  MemberUpdateDto,
+  PublicProfileViewDto,
+  TalentListQueryDto,
+  TalentQueryDto,
+  UpdateListDto,
+} from "./talent.dto";
 import { TalentService } from "./talent.service";
 @ApiTags("talent network")
 @Controller("talent")
@@ -38,6 +46,9 @@ export class AdminTalentController {
   }
   @Get("lists") lists(@Req() r: AuthRequest, @Query() q: TalentListQueryDto) {
     return this.talent.listSavedLists(r.account.id, q);
+  }
+  @Get("lists/summary") listSummary(@Req() r: AuthRequest) {
+    return this.talent.savedListSummary(r.account.id);
   }
   @Get("lists/:id") listDetail(@Req() r: AuthRequest, @Param("id") id: string) {
     return this.talent.listDetail(r.account.id, id);

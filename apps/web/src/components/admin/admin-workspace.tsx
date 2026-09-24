@@ -1,14 +1,19 @@
 import { AdminApplicationsView } from "@/components/admin/admin-applications-view";
+import { AdminBlogView } from "@/components/admin/admin-blog-view";
 import { AdminCareersView } from "@/components/admin/admin-careers-view";
 import { AdminCastingView } from "@/components/admin/admin-casting-view";
+import { AdminCompanySettingsView } from "@/components/admin/admin-company-settings-view";
 import { AdminContactsView } from "@/components/admin/admin-contacts-view";
 import { AdminContentView } from "@/components/admin/admin-content-view";
 import { AdminDashboardView } from "@/components/admin/admin-dashboard-view";
+import { AdminGalleryView } from "@/components/admin/admin-gallery-view";
+import { AdminLegalView } from "@/components/admin/admin-legal-view";
 import { AdminListsView } from "@/components/admin/admin-lists-view";
 import { AdminMembersView } from "@/components/admin/admin-members-view";
 import { AdminProjectsView } from "@/components/admin/admin-projects-view";
-import { AdminSettingsView } from "@/components/admin/admin-settings-view";
+import { AdminServicesView } from "@/components/admin/admin-services-view";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AdminTeamView } from "@/components/admin/admin-team-view";
 const valid = [
   "dashboard",
   "members",
@@ -41,17 +46,17 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "casting" ? (
         <AdminCastingView />
       ) : safe === "services" || safe === "work" ? (
-        <AdminContentView kind="services" />
+        <AdminServicesView />
       ) : safe === "blog" ? (
-        <AdminContentView kind="blog" />
+        <AdminBlogView />
       ) : safe === "gallery" ? (
-        <AdminContentView kind="gallery" />
+        <AdminGalleryView />
       ) : safe === "behind-the-scenes" ? (
         <AdminContentView kind="bts" />
       ) : safe === "shows" ? (
         <AdminContentView kind="shows" />
       ) : safe === "team" ? (
-        <AdminContentView kind="team" />
+        <AdminTeamView />
       ) : safe === "lists" ? (
         <AdminListsView />
       ) : safe === "contacts" ? (
@@ -59,9 +64,9 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
       ) : safe === "careers" ? (
         <AdminCareersView />
       ) : safe === "settings" ? (
-        <AdminSettingsView />
+        <AdminCompanySettingsView />
       ) : safe === "legal" ? (
-        <AdminSettingsView legal />
+        <AdminLegalView />
       ) : (
         <AdminDashboardView />
       )}

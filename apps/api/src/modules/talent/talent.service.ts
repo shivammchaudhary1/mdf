@@ -7,14 +7,18 @@ import { pageMeta } from "../../common/dto/pagination.dto";
 import { objectId } from "../../common/utils/object-id";
 import { escapeSearch } from "../../common/utils/search";
 import { Account, Session } from "../auth/auth.models";
+import { MemberCodeService } from "../auth/member-code.service";
 import { MediaService } from "../media/media.service";
 import { Profile } from "../profiles/profile.model";
 import { profileCompletion } from "../profiles/profile.service";
 import { Project } from "../projects/project.model";
 import { ProfileView } from "./profile-view.model";
 import { SavedTalentList } from "./saved-list.model";
-import { CreateListDto, MemberUpdateDto,TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
-type TalentRecord = Pick<Account, "_id" | "name" | "email" | "mobile" | "suspended" | "createdAt" | "verified"> & {
+import { CreateListDto, MemberUpdateDto, TalentListQueryDto, TalentQueryDto, UpdateListDto } from "./talent.dto";
+type TalentRecord = Pick<
+  Account,
+  "_id" | "name" | "email" | "mobile" | "memberCode" | "suspended" | "createdAt" | "verified" | "authProvider" | "lastLoginAt" | "loginCount"
+> & {
   profile?: Profile | null;
 };
 interface TalentPage {
@@ -42,6 +46,7 @@ export class TalentService {
     @InjectModel("Project") private readonly projects: Model<Project>,
     private readonly media: MediaService,
     private readonly audit: AuditService,
+    private readonly memberCodes: MemberCodeService,
   ) {}
   private pipeline(q: TalentQueryDto, publicOnly: boolean): PipelineStage[] {
     const a: Record<string, unknown> = {
@@ -97,7 +102,7 @@ export class TalentService {
         $match: {
           $or: [
             { name: s },
-            ...(publicOnly ? [] : [{ email: s }]),
+            ...(publicOnly ? [] : [{ email: s }, { mobile: s }, { memberCode: s }]),
             { "profile.city": s },
             { "profile.profession": s },
             { "profile.skills": s },
@@ -118,9 +123,7 @@ export class TalentService {
           city: p.city,
           profession: p.profession,
           gender: p.gender,
-          age: p.birthDate
-            ? Math.max(0, Math.floor((Date.now() - new Date(p.birthDate).getTime()) / 31557600000))
-            : undefined,
+          age: p.birthDate ? Math.max(0, Math.floor((Date.now() - new Date(p.birthDate).getTime()) / 31557600000)) : undefined,
           skills: p.skills,
           languages: p.languages,
           experience: p.experience,
@@ -136,6 +139,8 @@ export class TalentService {
           completion,
         }
       : null;
+    const adminPortfolioIds = (p?.portfolioMediaIds ?? []).map(String);
+    const resumeId = p?.resumeMediaId ? String(p.resumeMediaId) : undefined;
     const adminProfile = p
       ? {
           ...p,
@@ -143,7 +148,10 @@ export class TalentService {
           memberId: String(item._id),
           photoMediaId: photo,
           photo: photo ? this.media.urlsFor(photo).profile : undefined,
-          portfolioMediaIds: (p.portfolioMediaIds ?? []).map(String),
+          portfolioMediaIds: adminPortfolioIds,
+          portfolio: adminPortfolioIds.map((id) => this.media.urlsFor(id).medium),
+          resumeMediaId: resumeId,
+          resume: resumeId ? this.media.urlsFor(resumeId, "document").document : undefined,
           completion,
         }
       : null;
@@ -155,7 +163,11 @@ export class TalentService {
         : {
             email: item.email,
             mobile: item.mobile,
+            memberCode: item.memberCode,
             suspended: item.suspended,
+            authProvider: item.authProvider,
+            lastLoginAt: item.lastLoginAt,
+            loginCount: item.loginCount,
             createdAt: item.createdAt,
           }),
       verified: item.verified,
@@ -185,9 +197,7 @@ export class TalentService {
     return this.list(q, true);
   }
   async publicOptions() {
-    const eligibleMemberIds = await this.accounts
-      .find({ role: "MEMBER", verified: true, suspended: false })
-      .distinct("_id");
+    const eligibleMemberIds = await this.accounts.find({ role: "MEMBER", verified: true, suspended: false }).distinct("_id");
 
     const base = { memberId: { $in: eligibleMemberIds }, publicVisible: true };
     const [cities, professions, genders, languages, availabilities] = await Promise.all([
@@ -199,9 +209,9 @@ export class TalentService {
     ]);
 
     const tidy = (values: unknown[]) =>
-      [...new Set(values.filter((value): value is string => typeof value === "string" && !!value.trim()).map((value) => value.trim()))].sort(
-        (left, right) => left.localeCompare(right),
-      );
+      [
+        ...new Set(values.filter((value): value is string => typeof value === "string" && !!value.trim()).map((value) => value.trim())),
+      ].sort((left, right) => left.localeCompare(right));
 
     return {
       cities: tidy(cities),
@@ -240,7 +250,8 @@ export class TalentService {
     const fresh = await this.profiles.findById(profile._id).select("profileViews").lean();
     return { counted: inserted, profileViews: Number(fresh?.profileViews ?? 0) };
   }
-  listAdmin(q: TalentQueryDto) {
+  async listAdmin(q: TalentQueryDto) {
+    await this.memberCodes.ensureLegacyCodes();
     return this.list(q, false);
   }
   async publicDetail(id: string) {
@@ -257,6 +268,7 @@ export class TalentService {
     return this.serialize({ ...a, profile: p }, true);
   }
   async adminDetail(id: string) {
+    await this.memberCodes.ensureLegacyCodes();
     const a = await this.accounts.findOne({ _id: objectId(id), role: "MEMBER" }).lean();
     if (!a) throw new NotFoundException("Member not found.");
     const p = await this.profiles.findOne({ memberId: a._id }).lean();
@@ -320,12 +332,48 @@ export class TalentService {
       meta: pageMeta(q.page, q.limit, total),
     };
   }
+  async savedListSummary(ownerId: string) {
+    const owner = objectId(ownerId);
+
+    const [lists, linkedLists, aggregate] = await Promise.all([
+      this.lists.countDocuments({ ownerId: owner }),
+      this.lists.countDocuments({ ownerId: owner, projectId: { $exists: true, $ne: null } }),
+      this.lists.aggregate<{
+        savedEntries: { count: number }[];
+        uniqueTalent: { count: number }[];
+      }>([
+        { $match: { ownerId: owner } },
+        {
+          $facet: {
+            savedEntries: [
+              { $project: { count: { $size: { $ifNull: ["$memberIds", []] } } } },
+              { $group: { _id: null, count: { $sum: "$count" } } },
+            ],
+            uniqueTalent: [
+              { $unwind: "$memberIds" },
+              { $group: { _id: "$memberIds" } },
+              { $count: "count" },
+            ],
+          },
+        },
+      ]),
+    ]);
+
+    return {
+      lists,
+      linkedLists,
+      savedEntries: Number(aggregate?.[0]?.savedEntries?.[0]?.count ?? 0),
+      uniqueTalent: Number(aggregate?.[0]?.uniqueTalent?.[0]?.count ?? 0),
+    };
+  }
+
   private async validateList(ownerId: string, input: CreateListDto | UpdateListDto) {
     if (input.memberIds) {
       const u = [...new Set(input.memberIds)];
       const count = await this.accounts.countDocuments({
         _id: { $in: u.map((id) => objectId(id)) },
         role: "MEMBER",
+        suspended: false,
       });
       if (count !== u.length) throw new BadRequestException("One or more members no longer exist.");
     }
@@ -393,9 +441,12 @@ export class TalentService {
     };
   }
   async listDetail(ownerId: string, id: string) {
+    await this.memberCodes.ensureLegacyCodes();
+
     const l = await this.lists.findOne({ _id: objectId(id), ownerId: objectId(ownerId) }).lean();
     if (!l) throw new NotFoundException("Talent list not found.");
-    const members = l.memberIds?.length
+
+    const serialized = l.memberIds?.length
       ? (
           await this.accounts.aggregate<TalentRecord>([
             ...this.pipeline(new TalentQueryDto(), false),
@@ -403,17 +454,22 @@ export class TalentService {
           ])
         ).map((item) => this.serialize(item, false))
       : [];
+
+    const order = new Map((l.memberIds ?? []).map((memberId, index) => [String(memberId), index]));
+    serialized.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));
+
     return {
       ...l,
       _id: String(l._id),
       ownerId: String(l.ownerId),
       projectId: l.projectId ? String(l.projectId) : undefined,
       memberIds: (l.memberIds ?? []).map(String),
-      members: members.filter(Boolean),
+      members: serialized.filter(Boolean),
     };
   }
   async addMember(ownerId: string, id: string, memberId: string) {
-    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "MEMBER" }))) throw new NotFoundException("Member not found.");
+    if (!(await this.accounts.exists({ _id: objectId(memberId), role: "MEMBER", suspended: false })))
+      throw new BadRequestException("This member is not available for shortlisting.");
     const l = await this.lists.findOneAndUpdate(
       {
         _id: objectId(id),

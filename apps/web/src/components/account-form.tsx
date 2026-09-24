@@ -314,7 +314,11 @@ export function AccountForm({ mode }: { mode: Mode }) {
       form.reset();
 
       if (mode === "login" || mode === "signup") {
-        router.push(result.role === "SUPER_ADMIN" ? "/admin" : "/member");
+        const requestedNext =
+          typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") ?? "" : "";
+        const safeNext = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "";
+
+        router.push(safeNext || (result.role === "SUPER_ADMIN" ? "/admin" : "/member"));
       }
 
       if (mode === "reset-password") {

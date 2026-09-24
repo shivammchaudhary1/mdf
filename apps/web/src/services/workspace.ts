@@ -25,6 +25,7 @@ export type ProfileRecord = {
   publicVisible?: boolean;
   emailCastingAlerts?: boolean;
   emailUpdates?: boolean;
+  profileViews?: number;
   createdAt?: string;
   completion?: number;
   savedOpportunityIds?: string[];

@@ -5,17 +5,19 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
 import websiteData from "@/data/website-data.json";
+import { type GallerySectionSlug, getPublicGallerySection } from "@/services/gallery-content";
 
-export function GalleryLibraryView({ sectionSlug, pageNumber }: { sectionSlug: string; pageNumber: number }) {
+export async function GalleryLibraryView({ sectionSlug, pageNumber }: { sectionSlug: string; pageNumber: number }) {
   const gallery = websiteData.galleryPage;
   const section = gallery.sections.find((item) => item.slug === sectionSlug);
   if (!section) notFound();
 
+  const allItems = await getPublicGallerySection(section.slug as GallerySectionSlug);
   const pageSize = gallery.pageSize;
-  const pages = Math.max(1, Math.ceil(section.items.length / pageSize));
+  const pages = Math.max(1, Math.ceil(allItems.length / pageSize));
   const page = Math.min(Math.max(pageNumber, 1), pages);
   const start = (page - 1) * pageSize;
-  const items = section.items.slice(start, start + pageSize);
+  const items = allItems.slice(start, start + pageSize);
 
   return (
     <>
@@ -41,25 +43,40 @@ export function GalleryLibraryView({ sectionSlug, pageNumber }: { sectionSlug: s
             <h1 className="font-display mt-3 max-w-4xl text-4xl font-semibold leading-tight sm:text-6xl">{section.title}</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#707070]">{section.description}</p>
             <p className="mt-4 text-xs font-semibold text-[#999]">
-              Showing {section.items.length ? start + 1 : 0}–{Math.min(start + pageSize, section.items.length)} of {section.items.length}{" "}
-              images
+              Showing {allItems.length ? start + 1 : 0}–{Math.min(start + pageSize, allItems.length)} of {allItems.length} images
             </p>
           </div>
         </section>
 
         <section className="site-section bg-white">
           <div className="site-shell">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-              {items.map((item) => (
-                <figure key={item.id} className="overflow-hidden rounded-[14px] border border-black/6 bg-[#fafafa]">
-                  <SiteMedia src={item.image} alt={item.imageAlt} kind="gallery" className="aspect-[4/3]" />
-                  <figcaption className="px-4 py-3">
-                    <p className="text-xs font-semibold text-[#444]">{item.title}</p>
-                    <p className="mt-1 text-[11px] text-[#999]">{item.caption}</p>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+            {items.length ? (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                {items.map((item) => (
+                  <figure key={item.id} className="overflow-hidden rounded-[14px] border border-black/6 bg-[#fafafa]">
+                    <SiteMedia src={item.image} alt={item.imageAlt} kind="gallery" className="aspect-[4/3]" />
+                    <figcaption className="px-4 py-3">
+                      <p className="text-xs font-semibold text-[#444]">{item.title}</p>
+                      {item.caption && <p className="mt-1 text-[11px] text-[#999]">{item.caption}</p>}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            ) : (
+              <div className="mx-auto max-w-2xl rounded-[22px] border border-dashed border-black/10 bg-[#fafafa] px-6 py-14 text-center sm:px-10 sm:py-16">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-black/8 bg-white text-xl text-[#999]" aria-hidden="true">
+                  □
+                </div>
+                <p className="site-kicker mt-5">Public Library</p>
+                <h2 className="font-display mt-2 text-2xl font-semibold text-[#222]">No images published yet.</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#777]">
+                  Published images for {section.title.toLowerCase()} will appear here automatically.
+                </p>
+                <Link href="/gallery" className="site-button site-button-outline mt-6">
+                  ← Back to Gallery
+                </Link>
+              </div>
+            )}
 
             {pages > 1 && (
               <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label={`${section.title} pagination`}>

@@ -13,24 +13,46 @@ import { ensureSession, signOut } from "@/services/auth-session";
 import { useAdminDashboardStore } from "@/store/admin-dashboard-store";
 import { useAppStore } from "@/store/app-store";
 
-export const adminNav = [
-  ["dashboard", "Overview", "/admin"],
-  ["members", "Members & Talent", "/admin/members"],
-  ["applications", "Applications", "/admin/applications"],
-  ["projects", "Projects", "/admin/projects"],
-  ["casting", "Casting Calls", "/admin/casting"],
-  ["services", "Services", "/admin/services"],
-  ["blog", "Blog & News", "/admin/blog"],
-  ["gallery", "Gallery", "/admin/gallery"],
-  ["bts", "Behind the Scenes", "/admin/behind-the-scenes"],
-  ["shows", "Shows & Media", "/admin/shows"],
-  ["team", "Team", "/admin/team"],
-  ["lists", "Saved Talent Lists", "/admin/lists"],
-  ["contacts", "Contact Queries", "/admin/contacts"],
-  ["careers", "Career Applications", "/admin/careers"],
-  ["settings", "Company Settings", "/admin/settings"],
-  ["legal", "Legal Content", "/admin/legal"],
+type AdminNavItem = readonly [key: string, label: string, href: string];
+
+export const adminNavGroups = [
+  { label: "Overview", items: [["dashboard", "Overview", "/admin"]] },
+  {
+    label: "Operations",
+    items: [
+      ["projects", "Projects", "/admin/projects"],
+      ["casting", "Casting Calls", "/admin/casting"],
+      ["members", "Members", "/admin/members"],
+      ["applications", "Applications", "/admin/applications"],
+      ["lists", "Saved Talent Lists", "/admin/lists"],
+    ],
+  },
+  {
+    label: "Inbox",
+    items: [
+      ["contacts", "Contact Queries", "/admin/contacts"],
+      ["careers", "Career Applications", "/admin/careers"],
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      ["gallery", "Gallery", "/admin/gallery"],
+      ["blog", "Blog & News", "/admin/blog"],
+      ["services", "Services", "/admin/services"],
+      ["team", "Team", "/admin/team"],
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      ["settings", "Company Settings", "/admin/settings"],
+      ["legal", "Legal Content", "/admin/legal"],
+    ],
+  },
 ] as const;
+
+export const adminNav: AdminNavItem[] = adminNavGroups.flatMap<AdminNavItem>((group) => [...group.items]);
 
 export function AdminShell({ section, children }: { section: string; children: ReactNode }) {
   const pathname = usePathname();
@@ -99,15 +121,22 @@ export function AdminShell({ section, children }: { section: string; children: R
         </div>
 
         <nav className="ad-nav" aria-label="Administrator">
-          {adminNav.map(([key, label, href]) => {
-            const active = key === "dashboard" ? pathname === "/admin" : pathname.startsWith(href);
-            return (
-              <Link key={key} href={href} onClick={() => setOpen(false)} className={active ? "active" : ""}>
-                <AdminIcon name={key} />
-                <span>{label}</span>
-              </Link>
-            );
-          })}
+          {adminNavGroups.map((group) => (
+            <div className="ad-nav-group" key={group.label}>
+              <p className="ad-nav-group-label">{group.label}</p>
+              <div className="ad-nav-group-items">
+                {group.items.map(([key, label, href]) => {
+                  const active = key === "dashboard" ? pathname === "/admin" : pathname.startsWith(href);
+                  return (
+                    <Link key={key} href={href} onClick={() => setOpen(false)} className={active ? "active" : ""}>
+                      <AdminIcon name={key} />
+                      <span>{label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="ad-sidebar-bottom">

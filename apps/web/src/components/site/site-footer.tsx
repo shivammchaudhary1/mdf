@@ -54,17 +54,27 @@ function SocialIcon({ name }: { name: "linkedin" | "instagram" | "youtube" | "fa
 
 export function SiteFooter() {
   const [socials, setSocials] = useState<Socials>({});
+  const [copyright, setCopyright] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    void cachedApi<{ items: Array<{ slug?: string; data?: Socials }> }>("/content/settings?page=1&limit=100", { ttl: 300_000 })
-      .then((page) => {
-        if (!active) return;
-        const company = page.items.find((item) => item.slug === "company");
+    void Promise.allSettled([
+      cachedApi<{ items: Array<{ slug?: string; data?: Socials }> }>("/content/settings?page=1&limit=100", { ttl: 300_000 }),
+      cachedApi<{ items: Array<{ slug?: string; data?: Record<string, string> }> }>("/content/legal?page=1&limit=100", { ttl: 300_000 }),
+    ]).then(([settingsResult, legalResult]) => {
+      if (!active) return;
+
+      if (settingsResult.status === "fulfilled") {
+        const company = settingsResult.value.items.find((item) => item.slug === "company");
         setSocials(company?.data ?? {});
-      })
-      .catch(() => undefined);
+      }
+
+      if (legalResult.status === "fulfilled") {
+        const registration = legalResult.value.items.find((item) => item.slug === "registration");
+        setCopyright(registration?.data?.copyright ?? "");
+      }
+    });
 
     return () => {
       active = false;
@@ -168,9 +178,7 @@ export function SiteFooter() {
 
       <div className="w-full border-t border-black/6 bg-[#f3f1ed]">
         <div className="site-shell flex flex-col gap-3 py-4 text-[11px] text-[#818181] sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            © {new Date().getFullYear()} {companyName}. All rights reserved.
-          </span>
+          <span>{copyright || `© ${new Date().getFullYear()} ${companyName}. All rights reserved.`}</span>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <Link href="/privacy" className="transition hover:text-[#222]">

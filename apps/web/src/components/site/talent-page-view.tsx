@@ -238,7 +238,10 @@ export function TalentPageView() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              <div className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#f7f6f3] to-transparent lg:block" aria-hidden="true" />
+              <div
+                className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#f7f6f3] to-transparent lg:block"
+                aria-hidden="true"
+              />
             </div>
           </div>
         </section>
@@ -305,7 +308,9 @@ export function TalentPageView() {
                     >
                       <option value="">All cities</option>
                       {options.cities.map((city) => (
-                        <option key={city} value={city}>{city}</option>
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -320,7 +325,9 @@ export function TalentPageView() {
                     >
                       <option value="">All roles</option>
                       {options.professions.map((role) => (
-                        <option key={role} value={role}>{role}</option>
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -367,30 +374,48 @@ export function TalentPageView() {
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Language</span>
-                      <select className={inputClass} value={draft.language} onChange={(event) => setDraft({ ...draft, language: event.target.value })}>
+                      <select
+                        className={inputClass}
+                        value={draft.language}
+                        onChange={(event) => setDraft({ ...draft, language: event.target.value })}
+                      >
                         <option value="">Any language</option>
                         {options.languages.map((language) => (
-                          <option key={language} value={language}>{language}</option>
+                          <option key={language} value={language}>
+                            {language}
+                          </option>
                         ))}
                       </select>
                     </label>
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Gender</span>
-                      <select className={inputClass} value={draft.gender} onChange={(event) => setDraft({ ...draft, gender: event.target.value })}>
+                      <select
+                        className={inputClass}
+                        value={draft.gender}
+                        onChange={(event) => setDraft({ ...draft, gender: event.target.value })}
+                      >
                         <option value="">Any gender</option>
                         {options.genders.map((gender) => (
-                          <option key={gender} value={gender}>{gender}</option>
+                          <option key={gender} value={gender}>
+                            {gender}
+                          </option>
                         ))}
                       </select>
                     </label>
 
                     <label>
                       <span className="mb-1 block text-[8px] font-bold uppercase tracking-[.1em] text-[#888]">Availability</span>
-                      <select className={inputClass} value={draft.availability} onChange={(event) => setDraft({ ...draft, availability: event.target.value })}>
+                      <select
+                        className={inputClass}
+                        value={draft.availability}
+                        onChange={(event) => setDraft({ ...draft, availability: event.target.value })}
+                      >
                         <option value="">Any availability</option>
                         {options.availabilities.map((availability) => (
-                          <option key={availability} value={availability}>{availability}</option>
+                          <option key={availability} value={availability}>
+                            {availability}
+                          </option>
                         ))}
                       </select>
                     </label>
@@ -472,7 +497,11 @@ export function TalentPageView() {
                         key={talent.id}
                         className="group relative overflow-hidden rounded-[20px] border border-black/6 bg-white shadow-[0_14px_38px_rgba(0,0,0,.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,.08)]"
                       >
-                        <Link href={`/talent/${talent.id}`} aria-label={`View ${talent.name} portfolio`} className="absolute inset-0 z-10 cursor-pointer">
+                        <Link
+                          href={`/talent/${talent.id}`}
+                          aria-label={`View ${talent.name} portfolio`}
+                          className="absolute inset-0 z-10 cursor-pointer"
+                        >
                           <span className="sr-only">View {talent.name} portfolio</span>
                         </Link>
 
@@ -530,8 +559,13 @@ export function TalentPageView() {
                           </div>
 
                           <div className="mt-4 flex items-center justify-between gap-3 text-[10px] font-semibold text-[#999]">
-                            <span>{profile.age ? `${profile.age} yrs` : "Age not added"}{profile.gender ? ` · ${profile.gender}` : ""}</span>
-                            <span className="truncate text-right">{(profile.languages ?? []).slice(0, 2).join(" · ") || "Languages not added"}</span>
+                            <span>
+                              {profile.age ? `${profile.age} yrs` : "Age not added"}
+                              {profile.gender ? ` · ${profile.gender}` : ""}
+                            </span>
+                            <span className="truncate text-right">
+                              {(profile.languages ?? []).slice(0, 2).join(" · ") || "Languages not added"}
+                            </span>
                           </div>
                         </div>
                       </article>
@@ -552,7 +586,10 @@ export function TalentPageView() {
                   className="h-full"
                   imageClassName="object-cover object-center opacity-100"
                 />
-                <div className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#101010] via-[#101010]/55 to-transparent" aria-hidden="true" />
+                <div
+                  className="absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-[#101010] via-[#101010]/55 to-transparent"
+                  aria-hidden="true"
+                />
               </div>
 
               <div className="relative z-10 max-w-xl">
