@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import { type Model, Types } from "mongoose";
 
@@ -16,6 +17,7 @@ export class CareerService {
   constructor(
     @InjectModel("CareerApplication") private readonly careers: Model<CareerApplication>,
     private readonly mail: MailService,
+    private readonly config: ConfigService,
     private readonly audit: AuditService,
     private readonly rateLimits: RateLimitService,
   ) {}
@@ -47,9 +49,31 @@ export class CareerService {
       .send(
         input.email,
         "Career application received",
-        `Thank you for applying for ${input.role}. We have received your application and will contact you if your profile matches an opening.`,
+        `Hi ${input.name.trim()},\n\nThank you for applying for ${input.role.trim()}. We received your application and will contact you if your profile matches an opening.`,
+        {
+          eyebrow: "Careers",
+          from: this.config.get<string>("CAREERS_EMAIL")?.trim(),
+          fromName: "M. Dadu Films Careers",
+        },
       )
       .catch(() => undefined);
+
+    const recipient = this.config.get<string>("CAREERS_EMAIL");
+    if (recipient) {
+      await this.mail
+        .send(
+          recipient,
+          `Career application: ${input.role.trim()}`,
+          `Name: ${input.name.trim()}\nEmail: ${input.email}\nMobile: ${input.mobile.trim()}\nRole: ${input.role.trim()}\nCity: ${input.city?.trim() || "Not provided"}\n\nCover note:\n${input.coverNote.trim()}`,
+          {
+            replyTo: input.email,
+            eyebrow: "New career application",
+            from: recipient,
+            fromName: "M. Dadu Films Careers",
+          },
+        )
+        .catch(() => undefined);
+    }
 
     return this.serialize(application.toObject());
   }
@@ -131,7 +155,16 @@ export class CareerService {
 
     if (existing.status !== item.status) {
       await this.mail
-        .send(item.email, "Career application status updated", `Your application for ${item.role} is now ${item.status}.`)
+        .send(
+          item.email,
+          "Career application status updated",
+          `Hi ${item.name},\n\nYour application for ${item.role} is now ${item.status}.`,
+          {
+          eyebrow: "Careers",
+          from: this.config.get<string>("CAREERS_EMAIL")?.trim(),
+          fromName: "M. Dadu Films Careers",
+        },
+        )
         .catch(() => undefined);
     }
 

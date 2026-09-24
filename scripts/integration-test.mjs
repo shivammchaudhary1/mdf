@@ -200,6 +200,37 @@ try {
   assert.ok(r.data.csrfToken);
   const memberId = r.data.id;
   const registration = r;
+  assert.equal(r.data.verified, false);
+
+  const verificationToken = randomBytes(32).toString("base64url");
+  await mongoose.connection.collection("emailverifications").deleteMany({
+    accountId: new mongoose.Types.ObjectId(memberId),
+  });
+  await mongoose.connection.collection("emailverifications").insertOne({
+    accountId: new mongoose.Types.ObjectId(memberId),
+    tokenHash: createHash("sha256").update(verificationToken).digest(),
+    expiresAt: new Date(Date.now() + 60_000),
+    createdAt: new Date(),
+  });
+
+  r = await request("/auth/verify-email", {
+    method: "POST",
+    body: { token: verificationToken },
+  });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  assert.equal(
+    (await mongoose.connection.collection("accounts").findOne({ _id: new mongoose.Types.ObjectId(memberId) })).verified,
+    true,
+  );
+  assert.equal((await request("/auth/me", { state: member })).data.verified, true);
+  assert.equal(
+    (await request("/auth/verify-email", { method: "POST", body: { token: verificationToken } })).status,
+    400,
+  );
+  assert.equal(
+    (await request("/auth/resend-verification", { method: "POST", body: { email: memberInput.email } })).status,
+    201,
+  );
 
   r = await request("/analytics/visit", { method: "POST", state: visitor });
   assert.equal(r.status, 200, JSON.stringify(r.data));
@@ -313,8 +344,6 @@ try {
   assert.equal(shortlistedApplication.status, "Shortlisted");
   assert.equal(shortlistedApplication.adminNotes, undefined);
 
-  r = await request(`/admin/members/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
-  assert.equal(r.status, 200);
   r = await request("/talent?city=Indore&profession=Actor");
   assert.equal(r.status, 200);
   assert.ok(r.data.items.some((x) => x.id === memberId));

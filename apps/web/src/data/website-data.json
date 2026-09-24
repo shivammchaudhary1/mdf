@@ -2163,6 +2163,20 @@
       "description": "Whether it is production, casting, collaboration or community, reach out and let’s see what we can build together."
     }
   },
+  "careerPage": {
+    "hero": {
+      "eyebrow": "Careers",
+      "title": "Build Meaningful Work With Us",
+      "description": "Share your profile for production, creative, operational or platform opportunities and become part of a team built around stories, craft and collaboration.",
+      "image": "/career/mdf-career-hero.webp",
+      "imageAlt": "M. Dadu Films creative and film production team working together on set",
+      "tags": [
+        "Production",
+        "Creative",
+        "Operations"
+      ]
+    }
+  },
   "auth": {
     "mobileTagline": "Good People. Great Stories.",
     "pages": {

@@ -38,6 +38,25 @@ export function validateEnvironment(input: Record<string, unknown>) {
     throw new Error("AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.");
   const cookieDomain = String(input.COOKIE_DOMAIN ?? "").trim();
   if (cookieDomain && /[/\s:]/.test(cookieDomain)) throw new Error("COOKIE_DOMAIN must be a hostname/domain without scheme or path.");
+
+  const smtpKeys = ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM"];
+  const smtpConfigured = smtpKeys.some((key) => String(input[key] ?? "").trim());
+
+  if (smtpConfigured && smtpKeys.some((key) => !String(input[key] ?? "").trim())) {
+    throw new Error("SMTP_HOST, SMTP_USER, SMTP_PASSWORD and SMTP_FROM must be configured together.");
+  }
+
+  if (
+    nodeEnv === "production" &&
+    [...smtpKeys, "NOREPLY_EMAIL", "CONTACT_EMAIL", "CAREERS_EMAIL", "PRODUCTION_EMAIL"].some(
+      (key) => !String(input[key] ?? "").trim(),
+    )
+  ) {
+    throw new Error(
+      "Production requires SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, NOREPLY_EMAIL, CONTACT_EMAIL, CAREERS_EMAIL and PRODUCTION_EMAIL.",
+    );
+  }
+
   return {
     ...input,
     NODE_ENV: nodeEnv,

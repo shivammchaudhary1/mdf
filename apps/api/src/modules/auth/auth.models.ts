@@ -77,6 +77,25 @@ SessionSchema.index({ tokenHash: 1 }, { unique: true });
 SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 SessionSchema.index({ accountId: 1, createdAt: -1 });
 
+export interface EmailVerification {
+  _id: Types.ObjectId;
+  accountId: Types.ObjectId;
+  tokenHash: Buffer;
+  expiresAt: Date;
+  createdAt: Date;
+}
+export const EmailVerificationSchema = new Schema<EmailVerification>(
+  {
+    accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
+    tokenHash: { type: Buffer, required: true, select: false },
+    expiresAt: { type: Date, required: true },
+  },
+  { timestamps: { createdAt: true, updatedAt: false }, versionKey: false },
+);
+EmailVerificationSchema.index({ tokenHash: 1 }, { unique: true });
+EmailVerificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+EmailVerificationSchema.index({ accountId: 1, createdAt: -1 });
+
 export interface PasswordReset {
   _id: Types.ObjectId;
   accountId: Types.ObjectId;
