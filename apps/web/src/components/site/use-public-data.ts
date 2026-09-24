@@ -52,7 +52,7 @@ const empty = {
   },
   projects: [] as typeof template.projects,
   blogs: [] as PublicBlogPreview[],
-  team: template.team,
+  team: [] as typeof template.team,
   gallery: [] as typeof template.gallery,
   castings: [] as typeof template.castings,
   talents: [] as Array<(typeof template.talents)[number] & { id: string }>,
@@ -158,6 +158,7 @@ export function usePublicData(
             query(base, { category: options.filter && options.filter !== "All" ? options.filter : undefined, search: options.search }),
             page,
             limit,
+            domain === "team",
           );
           const rows = result.items;
           meta = result.meta;
@@ -186,7 +187,7 @@ export function usePublicData(
             updates.team = rows.map((x) => ({
               name: x.title,
               role: x.role ?? "",
-              group: x.data?.group ?? "Core Team",
+              group: x.data?.group ?? x.category ?? "Core Team",
               bio: x.description ?? "",
               image: mediaUrl(x.coverImage ?? x.data?.image),
             }));

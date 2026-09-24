@@ -59,7 +59,7 @@ export function usePublicCoreTeam() {
   useEffect(() => {
     let active = true;
 
-    void cachedApi<TeamPage>("/content/team?category=Core%20Team&page=1&limit=100", { ttl: 30_000 })
+    void cachedApi<TeamPage>("/content/team?category=Core%20Team&page=1&limit=100", { ttl: 30_000, force: true })
       .then((result) => {
         if (active) setTeam(result.items.map(mapMember));
       })
