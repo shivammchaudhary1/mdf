@@ -182,7 +182,7 @@ function ServiceEditorDialog({
 
     try {
       if (cover) {
-        const uploaded = await uploadMedia(cover, "website-image");
+        const uploaded = await uploadMedia(cover, "service");
         uploadedId = uploaded.id;
         uploadedDuplicate = !!uploaded.duplicate;
       }

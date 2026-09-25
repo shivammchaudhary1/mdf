@@ -27,6 +27,7 @@ export class PlatformService {
   }
 
   private mediaPurpose(kind: ContentKind): MediaPurpose {
+    if (kind === "services") return "service";
     if (kind === "blog") return "blog";
     if (kind === "gallery") return "gallery";
     if (kind === "team") return "team";

@@ -421,7 +421,7 @@ try {
   const mediaId = r.data.id;
   const storedProfileMedia = await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(mediaId) });
   assert.equal(storedProfileMedia.purpose, "member-profile");
-  assert.equal(storedProfileMedia.storagePrefix, `members/${memberId}/profile-pic/${mediaId}`);
+  assert.equal(storedProfileMedia.storagePrefix, `members/${memberId}/profile/${mediaId}`);
   assert.equal((await request(`/media/${mediaId}/medium`)).status, 401);
   assert.equal((await request(`/media/${mediaId}/medium`, { state: member })).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: admin, body: { photoMediaId: mediaId } })).status, 400);
@@ -464,7 +464,12 @@ try {
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [portfolioId] } })).status, 200);
   assert.equal((await request(`/media/${portfolioId}/medium`)).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
-  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 404);
+  // Replaced/removed successful media is retained as private archival media.
+  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 401);
+  assert.equal((await request(`/media/${portfolioId}/medium`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(portfolioId) }),
+  );
 
   r = await request("/member/profile", { method: "PUT", state: member, body: {
     skills: ["Acting", "Voice", "Acting"],
@@ -493,11 +498,19 @@ try {
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [duplicatePortfolioId] } })).status, 200);
   assert.equal((await request(`/media/${duplicatePortfolioId}`, { method: "DELETE", state: member })).status, 409);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
-  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`, { state: member })).status, 404);
+  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`)).status, 401);
+  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(duplicatePortfolioId) }),
+  );
 
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { resumeMediaId: null } })).status, 200);
   assert.equal((await request("/member/profile", { state: member })).data.profile.resumeMediaId, undefined);
-  assert.equal((await request(`/media/${documentId}/document`, { state: member })).status, 404);
+  assert.equal((await request(`/media/${documentId}/document`)).status, 401);
+  assert.equal((await request(`/media/${documentId}/document`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(documentId) }),
+  );
 
   const other = jar();
   assert.equal((await request("/auth/register", { method: "POST", state: other, body: { ...memberInput, email: "other@example.test" } })).status, 201);

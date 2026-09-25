@@ -2,6 +2,7 @@ import { Schema, Types } from "mongoose";
 
 export const mediaPurposes = [
   "website-image",
+  "service",
   "project",
   "casting",
   "blog",
