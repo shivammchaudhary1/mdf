@@ -181,6 +181,7 @@ export class AuthService {
   async googleLogin(input: GoogleAuthDto, context: SessionContext) {
     const clientId = this.config.get<string>("GOOGLE_CLIENT_ID");
     if (!this.google || !clientId) throw new ServiceUnavailableException("Google sign-in is not configured yet.");
+
     let payload;
     try {
       const ticket = await this.google.verifyIdToken({ idToken: input.credential, audience: clientId });
@@ -188,21 +189,24 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException("Google sign-in could not be verified.");
     }
-    if (!payload?.sub || !payload.email || !payload.email_verified)
+
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
       throw new UnauthorizedException("Google did not return a verified email address.");
+    }
+
     const email = payload.email.trim().toLowerCase();
-    let account = await this.accounts.findOne({ $or: [{ googleSub: payload.sub }, { email }] }).select("+googleSub +passwordHash");
+    let account = await this.accounts
+      .findOne({ $or: [{ googleSub: payload.sub }, { email }] })
+      .select("+googleSub +passwordHash");
+
     if (!account) {
-      if (!input.mobile) throw new BadRequestException("Mobile number is required to complete your first Google sign-in.");
-      if (input.acceptTerms !== true || input.acceptPrivacy !== true) {
-        throw new BadRequestException("Accept the Terms & Conditions and acknowledge the Privacy Policy to create an account.");
-      }
       const acceptedAt = new Date();
+
       account = await this.accounts.create({
         memberCode: await this.memberCodes.next(acceptedAt),
-        name: (input.name || payload.name || email.split("@")[0]).slice(0, 100),
+        name: (payload.name || email.split("@")[0]).slice(0, 100),
         email,
-        mobile: input.mobile.trim(),
+        mobile: "",
         authProvider: "google",
         googleSub: payload.sub,
         verified: true,
@@ -213,15 +217,18 @@ export class AuthService {
       });
     } else {
       if (account.suspended) throw new UnauthorizedException("Login failed. Check your account status.");
+
       if (!account.googleSub) {
         account.googleSub = payload.sub;
         account.authProvider = account.passwordHash ? "both" : "google";
       }
+
       account.verified = true;
       account.lastLoginAt = new Date();
       account.loginCount = Number(account.loginCount ?? 0) + 1;
       await account.save();
     }
+
     return this.createSession(account, !!input.remember, context);
   }
 

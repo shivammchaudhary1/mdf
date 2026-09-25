@@ -67,13 +67,6 @@ function loadGoogleIdentity() {
   return googleScriptPromise;
 }
 
-type SignupData = {
-  name: string;
-  mobile: string;
-  acceptTerms: boolean;
-  acceptPrivacy: boolean;
-};
-
 export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
   const toast = useToast();
   const router = useRouter();
@@ -104,35 +97,6 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
             const credential = response.credential;
             if (!credential || busyRef.current) return;
 
-            const form = host.current?.closest("form");
-            const formData = form ? new FormData(form) : null;
-            const extra: SignupData | undefined =
-              mode === "signup"
-                ? {
-                    name: String(formData?.get("name") ?? ""),
-                    mobile: String(formData?.get("mobile") ?? ""),
-                    acceptTerms: formData?.get("acceptTerms") === "on",
-                    acceptPrivacy: formData?.get("acceptPrivacy") === "on",
-                  }
-                : undefined;
-
-            if (mode === "signup") {
-              if (!extra?.name.trim()) {
-                toast.error("Enter your full name before continuing with Google.");
-                return;
-              }
-
-              if (!/^\+?[\d\s()-]{7,20}$/.test(extra.mobile.trim())) {
-                toast.error("Enter a valid mobile number before continuing with Google.");
-                return;
-              }
-
-              if (!extra.acceptTerms || !extra.acceptPrivacy) {
-                toast.error("Accept the Terms & Conditions and acknowledge the Privacy Policy first.");
-                return;
-              }
-            }
-
             busyRef.current = true;
             setBusy(true);
 
@@ -141,14 +105,6 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
               body: JSON.stringify({
                 credential,
                 remember: true,
-                ...(extra
-                  ? {
-                      name: extra.name.trim(),
-                      mobile: extra.mobile.trim(),
-                      acceptTerms: extra.acceptTerms,
-                      acceptPrivacy: extra.acceptPrivacy,
-                    }
-                  : {}),
               }),
             })
               .then(async (account) => {
@@ -158,11 +114,7 @@ export function GoogleAuthButton({ mode }: { mode: "login" | "signup" }) {
               })
               .catch((error) => {
                 const message = error instanceof Error ? error.message : "Google sign-in failed.";
-                if (mode === "login" && /mobile number is required|accept the terms/i.test(message)) {
-                  toast.error("New Google members should use Create Account once to add mobile number and accept the policies.");
-                } else {
-                  toast.error(message);
-                }
+                toast.error(message);
               })
               .finally(() => {
                 busyRef.current = false;
