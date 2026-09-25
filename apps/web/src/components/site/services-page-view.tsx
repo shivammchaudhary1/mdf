@@ -8,12 +8,12 @@ import { ServiceDetailsModal } from "@/components/site/service-details-modal";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteMedia } from "@/components/site/site-media";
+import { type PublicService, usePublicServices } from "@/components/site/use-public-services";
 import websiteData from "@/data/website-data.json";
 
-type Service = (typeof websiteData.services)[number];
-
 export function ServicesPageView() {
-  const [selected, setSelected] = useState<Service | null>(null);
+  const [selected, setSelected] = useState<PublicService | null>(null);
+  const { services, loading, error } = usePublicServices();
   const page = websiteData.servicesPage;
 
   return (
@@ -87,7 +87,7 @@ export function ServicesPageView() {
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {websiteData.services.map((service) => (
+              {services.map((service) => (
                 <article key={service.slug} className="group site-card flex h-full flex-col overflow-hidden">
                   <SiteMedia
                     src={service.image}
@@ -115,6 +115,15 @@ export function ServicesPageView() {
                 </article>
               ))}
             </div>
+
+            {!loading && !services.length && (
+              <div className="site-card mt-5 p-8 text-center sm:p-10">
+                <h3 className="font-display text-2xl font-semibold">Services are being updated.</h3>
+                <p className="mt-2 text-sm leading-6 text-[#777]">
+                  {error || "Published services will appear here as soon as they are available."}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -4,7 +4,7 @@ import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import type { Request, Response } from "express";
 
 import { randomToken } from "../../common/utils/crypto";
-import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
+import { AccountSettingsDto, EmailDto, GoogleAuthDto, LoginDto, RegisterDto, ResetPasswordDto, VerifyEmailDto } from "./auth.dto";
 import { AuthRequest, SessionGuard, sessionToken } from "./auth.guard";
 import { AuthService } from "./auth.service";
 
@@ -96,6 +96,12 @@ export class AuthController {
     const result = await this.auth.revokeSession(request.account.id, id, request.account.sessionId);
     if (result.currentSessionRevoked) this.clearCookies(response);
     return result;
+  }
+  @Post("verify-email") verifyEmail(@Body() input: VerifyEmailDto) {
+    return this.auth.verifyEmail(input);
+  }
+  @Post("resend-verification") resendVerification(@Body() input: EmailDto) {
+    return this.auth.resendVerification(input);
   }
   @Post("forgot-password") forgot(@Body() input: EmailDto) {
     return this.auth.forgot(input);

@@ -9,6 +9,7 @@ import { SecurityMiddleware } from "./common/middleware/security.middleware";
 import { SecurityModule } from "./common/security/security.module";
 import { validateEnvironment } from "./config/environment";
 import { AdminModule } from "./modules/admin/admin.module";
+import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { ApplicationModule } from "./modules/applications/application.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CareerModule } from "./modules/careers/career.module";
@@ -21,6 +22,7 @@ import { PlatformModule } from "./modules/platform/platform.module";
 import { ProfileModule } from "./modules/profiles/profile.module";
 import { ProjectModule } from "./modules/projects/project.module";
 import { TalentModule } from "./modules/talent/talent.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, validate: validateEnvironment }),
@@ -28,7 +30,11 @@ import { TalentModule } from "./modules/talent/talent.module";
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const uri = config.get<string>("MONGODB_URI");
-        if (!uri) throw new Error("MONGODB_URI is missing from the selected environment file.");
+
+        if (!uri) {
+          throw new Error("MONGODB_URI is missing from the selected environment file.");
+        }
+
         return {
           uri,
           appName: "mdadu-films-api",
@@ -47,6 +53,7 @@ import { TalentModule } from "./modules/talent/talent.module";
     MailModule,
     HealthModule,
     AuthModule,
+    AnalyticsModule,
     MediaModule,
     ProjectModule,
     CastingModule,

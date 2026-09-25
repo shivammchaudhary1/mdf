@@ -306,7 +306,11 @@ export function AccountForm({ mode }: { mode: Mode }) {
       if (mode === "login") {
         toast.success("Login successful.");
       } else if (mode === "signup") {
-        toast.success("Account created successfully.");
+        toast.success(
+          result.verified
+            ? "Account created successfully."
+            : "Account created. Check your email to verify your email address.",
+        );
       } else {
         toast.success(result.message ?? "Request completed successfully.");
       }

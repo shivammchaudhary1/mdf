@@ -1,0 +1,352 @@
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout exact CI-tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "26.10.0"
+          cache: "npm"
+
+      - name: Install build dependencies
+        run: npm ci
+
+      - name: Create production frontend env
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const keys = [
+            "NEXT_PUBLIC_API_URL",
+            "NEXT_PUBLIC_SITE_URL",
+            "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+          ];
+          const missing = keys.filter((key) => !String(process.env[key] ?? "").trim());
+          if (missing.length) throw new Error(`Missing production variables: ${missing.join(", ")}`);
+          fs.writeFileSync(
+            "apps/web/.env.prod",
+            keys.map((key) => `${key}=${JSON.stringify(process.env[key])}`).join("\n") + "\n",
+            { mode: 0o600 },
+          );
+          NODE
+
+      - name: Create production API env
+        env:
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          PORT: ${{ vars.PORT }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_MAX_POOL_SIZE: ${{ vars.MONGODB_MAX_POOL_SIZE }}
+          MONGODB_MIN_POOL_SIZE: ${{ vars.MONGODB_MIN_POOL_SIZE }}
+          MONGODB_MAX_IDLE_MS: ${{ vars.MONGODB_MAX_IDLE_MS }}
+          MONGODB_SERVER_SELECTION_TIMEOUT_MS: ${{ vars.MONGODB_SERVER_SELECTION_TIMEOUT_MS }}
+          MONGODB_AUTO_INDEX: ${{ vars.MONGODB_AUTO_INDEX }}
+          COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+          COOKIE_DOMAIN: ${{ vars.COOKIE_DOMAIN }}
+          SESSION_SHORT_HOURS: ${{ vars.SESSION_SHORT_HOURS }}
+          SESSION_REMEMBER_DAYS: ${{ vars.SESSION_REMEMBER_DAYS }}
+          SESSION_MAX_PER_ACCOUNT: ${{ vars.SESSION_MAX_PER_ACCOUNT }}
+          GENERAL_RATE_LIMIT_PER_MINUTE: ${{ vars.GENERAL_RATE_LIMIT_PER_MINUTE }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          STORAGE_DRIVER: ${{ vars.STORAGE_DRIVER }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USER: ${{ vars.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ vars.SMTP_FROM }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          CAREERS_EMAIL: ${{ vars.CAREERS_EMAIL }}
+          PRODUCTION_EMAIL: ${{ vars.PRODUCTION_EMAIL }}
+          NOREPLY_EMAIL: ${{ vars.NOREPLY_EMAIL }}
+          TRUST_PROXY: ${{ vars.TRUST_PROXY }}
+          AUDIT_RETENTION_DAYS: ${{ vars.AUDIT_RETENTION_DAYS }}
+          SWAGGER_ENABLED: ${{ vars.SWAGGER_ENABLED }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const keys = [
+            "NODE_ENV",
+            "PORT",
+            "FRONTEND_URL",
+            "MONGODB_URI",
+            "MONGODB_MAX_POOL_SIZE",
+            "MONGODB_MIN_POOL_SIZE",
+            "MONGODB_MAX_IDLE_MS",
+            "MONGODB_SERVER_SELECTION_TIMEOUT_MS",
+            "MONGODB_AUTO_INDEX",
+            "COOKIE_SECRET",
+            "COOKIE_DOMAIN",
+            "SESSION_SHORT_HOURS",
+            "SESSION_REMEMBER_DAYS",
+            "SESSION_MAX_PER_ACCOUNT",
+            "GENERAL_RATE_LIMIT_PER_MINUTE",
+            "GOOGLE_CLIENT_ID",
+            "STORAGE_DRIVER",
+            "AWS_REGION",
+            "S3_BUCKET",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "SMTP_HOST",
+            "SMTP_PORT",
+            "SMTP_USER",
+            "SMTP_PASSWORD",
+            "SMTP_FROM",
+            "CONTACT_EMAIL",
+            "CAREERS_EMAIL",
+            "PRODUCTION_EMAIL",
+            "NOREPLY_EMAIL",
+            "TRUST_PROXY",
+            "AUDIT_RETENTION_DAYS",
+            "SWAGGER_ENABLED",
+          ];
+
+          const allowEmpty = new Set(["COOKIE_DOMAIN"]);
+          const missing = keys.filter(
+            (key) => !allowEmpty.has(key) && !String(process.env[key] ?? "").trim(),
+          );
+          if (missing.length) throw new Error(`Missing production config: ${missing.join(", ")}`);
+
+          fs.writeFileSync(
+            "apps/api/.env.prod",
+            keys.map((key) => `${key}=${JSON.stringify(process.env[key] ?? "")}`).join("\n") + "\n",
+            { mode: 0o600 },
+          );
+          NODE
+
+      - name: Validate production env files
+        run: |
+          node scripts/check-env-files.mjs prod web
+          node scripts/check-env-files.mjs prod api
+
+      - name: Build frontend and backend on GitHub
+        run: |
+          npm run build -w @mdadu/web
+          npm run build -w @mdadu/api
+
+      - name: Stage frontend standalone runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf .deploy
+          mkdir -p .deploy/web .deploy/api
+
+          cp -a apps/web/.next/standalone/. .deploy/web/
+
+          if [ -f ".deploy/web/apps/web/server.js" ]; then
+            WEB_APP_DIR="apps/web"
+            WEB_SERVER="apps/web/server.js"
+          elif [ -f ".deploy/web/server.js" ]; then
+            WEB_APP_DIR="."
+            WEB_SERVER="server.js"
+          else
+            echo "Next standalone server.js was not found."
+            find .deploy/web -maxdepth 5 -type f | sort | head -100
+            exit 1
+          fi
+
+          mkdir -p ".deploy/web/${WEB_APP_DIR}/.next"
+          cp -a apps/web/.next/static ".deploy/web/${WEB_APP_DIR}/.next/static"
+
+          if [ -d apps/web/public ]; then
+            rm -rf ".deploy/web/${WEB_APP_DIR}/public"
+            cp -a apps/web/public ".deploy/web/${WEB_APP_DIR}/public"
+          fi
+
+          printf '%s\n' "$WEB_SERVER" > .deploy/web/server-path.txt
+
+      - name: Prepare backend production dependencies
+        run: npm ci --omit=dev --workspace=@mdadu/api --include-workspace-root=false
+
+      - name: Stage backend runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cp -a apps/api/dist .deploy/api/dist
+          cp -a apps/api/package.json .deploy/api/package.json
+          cp -a node_modules .deploy/api/node_modules
+
+      - name: Add PM2 runtime configuration
+        shell: bash
+        run: |
+          cat > .deploy/ecosystem.config.cjs <<'EOF'
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          const releaseRoot = __dirname;
+          const webRoot = path.join(releaseRoot, "web");
+          const apiRoot = path.join(releaseRoot, "api");
+          const webServer = fs.readFileSync(path.join(webRoot, "server-path.txt"), "utf8").trim();
+          const node = "/home/ubuntu/.nvm/versions/node/v26.10.0/bin/node";
+
+          module.exports = {
+            apps: [
+              {
+                name: "mdadu-web",
+                cwd: webRoot,
+                script: webServer,
+                interpreter: node,
+                env: {
+                  NODE_ENV: "production",
+                  HOSTNAME: "127.0.0.1",
+                  PORT: "3333",
+                },
+              },
+              {
+                name: "mdadu-api",
+                cwd: apiRoot,
+                script: "dist/main.js",
+                interpreter: node,
+                node_args: "--env-file=/var/www/mdadu-api/shared/.env.prod",
+                env: {
+                  NODE_ENV: "production",
+                },
+              },
+            ],
+          };
+          EOF
+
+      - name: Package release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE_SHA="${{ github.event.workflow_run.head_sha }}"
+          tar -C .deploy -czf "mdadu-${RELEASE_SHA}.tar.gz" .
+          echo "RELEASE_SHA=${RELEASE_SHA}" >> "$GITHUB_ENV"
+          echo "RELEASE_ARCHIVE=mdadu-${RELEASE_SHA}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Configure deployment SSH
+        env:
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -n "$LIGHTSAIL_HOST"
+          test -n "$LIGHTSAIL_USER"
+          test -n "$LIGHTSAIL_SSH_KEY"
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$LIGHTSAIL_SSH_KEY" > ~/.ssh/mdadu_deploy
+          chmod 600 ~/.ssh/mdadu_deploy
+          ssh-keyscan -H "$LIGHTSAIL_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload release and production env
+        env:
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          scp -i ~/.ssh/mdadu_deploy \
+            "$RELEASE_ARCHIVE" \
+            "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}:/tmp/${RELEASE_ARCHIVE}"
+
+          scp -i ~/.ssh/mdadu_deploy \
+            apps/api/.env.prod \
+            "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}:/tmp/mdadu-api.env.prod"
+
+      - name: Activate release on Lightsail
+        env:
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ssh -i ~/.ssh/mdadu_deploy "${LIGHTSAIL_USER}@${LIGHTSAIL_HOST}" \
+            "RELEASE_SHA='$RELEASE_SHA' RELEASE_ARCHIVE='$RELEASE_ARCHIVE' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          export NVM_DIR="$HOME/.nvm"
+          # shellcheck disable=SC1091
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          nvm use 26.10.0 >/dev/null
+
+          BASE="/var/www/mdadu-api"
+          RELEASE="$BASE/releases/$RELEASE_SHA"
+          CURRENT="$BASE/current"
+          SHARED="$BASE/shared"
+          PREVIOUS="$(readlink -f "$CURRENT" 2>/dev/null || true)"
+
+          mkdir -p "$BASE/releases" "$SHARED"
+          rm -rf "$RELEASE"
+          mkdir -p "$RELEASE"
+
+          tar -xzf "/tmp/$RELEASE_ARCHIVE" -C "$RELEASE"
+
+          install -m 600 /tmp/mdadu-api.env.prod "$SHARED/.env.prod"
+
+          ln -sfn "$RELEASE" "$CURRENT"
+
+          pm2 startOrReload "$CURRENT/ecosystem.config.cjs" --update-env
+          pm2 save
+
+          sleep 5
+
+          if ! curl -fsS --max-time 15 http://127.0.0.1:8888/api/v1/health >/dev/null; then
+            echo "API health check failed. Rolling back."
+            if [ -n "$PREVIOUS" ] && [ -d "$PREVIOUS" ]; then
+              ln -sfn "$PREVIOUS" "$CURRENT"
+              pm2 startOrReload "$CURRENT/ecosystem.config.cjs" --update-env
+              pm2 save
+            fi
+            exit 1
+          fi
+
+          if ! curl -fsS --max-time 15 http://127.0.0.1:3333/ >/dev/null; then
+            echo "Web health check failed. Rolling back."
+            if [ -n "$PREVIOUS" ] && [ -d "$PREVIOUS" ]; then
+              ln -sfn "$PREVIOUS" "$CURRENT"
+              pm2 startOrReload "$CURRENT/ecosystem.config.cjs" --update-env
+              pm2 save
+            fi
+            exit 1
+          fi
+
+          rm -f "/tmp/$RELEASE_ARCHIVE" /tmp/mdadu-api.env.prod
+
+          find "$BASE/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
+            | sort -nr \
+            | tail -n +6 \
+            | cut -d' ' -f2- \
+            | xargs -r rm -rf
+
+          echo "Production release active: $RELEASE_SHA"
+          REMOTE

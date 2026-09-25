@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast-provider";
 import { api } from "@/services/api";
+import { clearClientSession } from "@/services/auth-session";
 import { dateLabel } from "@/services/workspace";
 
 type SessionRecord = {
@@ -48,6 +49,7 @@ export function MemberSessions() {
     try {
       await api(`/auth/sessions/${session.id}`, { method: "DELETE" });
       if (session.current) {
+        clearClientSession();
         toast.info("This device was signed out.");
         router.replace("/login");
         return;
@@ -67,6 +69,7 @@ export function MemberSessions() {
     setBusyId("all");
     try {
       await api("/auth/logout-all", { method: "POST" });
+      clearClientSession();
       toast.info("All devices have been signed out.");
       router.replace("/login");
     } catch (error) {

@@ -42,6 +42,7 @@ type ServiceItem = {
   highlights: string[];
   coverMediaId?: string;
   image: string;
+  legacyImage: string;
   imageAlt: string;
   status: string;
   publishedAt: string;
@@ -72,7 +73,8 @@ function mapService(item: ServiceSource): ServiceItem {
     description: item.description ?? "",
     highlights: item.body ?? [],
     coverMediaId: item.coverMediaId,
-    image: item.coverImage ?? "",
+    image: item.coverImage ?? item.data?.image ?? "",
+    legacyImage: item.data?.image ?? "",
     imageAlt: item.data?.imageAlt ?? item.title,
     status: item.status ?? (item.published ? "Published" : "Draft"),
     publishedAt: item.publishedAt ?? "",
@@ -180,7 +182,7 @@ function ServiceEditorDialog({
 
     try {
       if (cover) {
-        const uploaded = await uploadMedia(cover, "website-image");
+        const uploaded = await uploadMedia(cover, "service");
         uploadedId = uploaded.id;
         uploadedDuplicate = !!uploaded.duplicate;
       }
@@ -207,6 +209,7 @@ function ServiceEditorDialog({
           idealFor,
           contactSubject: contactSubject || "Production",
           contactMessage,
+          image: uploadedId || removeCover ? "" : item?.legacyImage ?? "",
           imageAlt: String(form.get("imageAlt") ?? "").trim() || title,
         },
       };
@@ -233,7 +236,7 @@ function ServiceEditorDialog({
       onClose={onClose}
       eyebrow={editing ? "Edit service" : "New service"}
       title={editing ? item.title : "Create Service"}
-      description="Fields mirror the current Services page and Know More modal, without changing the public website yet."
+      description="Fields power the public Services page and Know More modal."
       width="wide"
     >
       <AdminDialogForm onSubmit={submit}>
@@ -480,7 +483,7 @@ export function AdminServicesView() {
       <AdminPageHeader
         eyebrow="Website CMS"
         title="Services"
-        description="Manage service cards and the detailed Know More content that will later power the public Services page."
+        description="Manage service cards and detailed Know More content shown on the public Services page."
         action={<AdminPrimaryButton onClick={() => setCreating(true)}>New Service</AdminPrimaryButton>}
       />
 
@@ -601,7 +604,7 @@ export function AdminServicesView() {
       <ConfirmDialog
         open={!!archiveTarget}
         title="Archive this service?"
-        description={archiveTarget ? `"${archiveTarget.title}" will be removed from active backend service records. The current static public Services page is not changed.` : undefined}
+        description={archiveTarget ? `"${archiveTarget.title}" will be removed from the public Services page and archived in the CMS.` : undefined}
         confirmLabel="Archive Service"
         destructive
         loading={archiving}

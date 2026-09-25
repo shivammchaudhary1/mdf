@@ -40,7 +40,7 @@ export function AdminMembersView() {
 
   const [members, , refresh, meta, setPage, , loading, error] = useAdminRecords(
     `/admin/members?search=${encodeURIComponent(deferredQuery)}${
-      active === "Verified" ? "&verified=true" : active === "Unverified" || active === "Needs Review" ? "&verified=false" : ""
+      active === "Verified" ? "&verified=true" : active === "Unverified" ? "&verified=false" : ""
     }`,
     memberView,
     true,
@@ -70,22 +70,6 @@ export function AdminMembersView() {
       toast.error(detailError instanceof Error ? detailError.message : "Unable to load member details.");
     } finally {
       setDetailLoading(false);
-    }
-  }
-
-  async function toggleVerify() {
-    if (!selectedView) return;
-
-    try {
-      await api(`/admin/members/${selectedView.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ verified: !selectedView.verified }),
-      });
-      await Promise.all([refresh(), loadOverview()]);
-      toast.success("Verification updated.");
-      setSelected(null);
-    } catch (updateError) {
-      toast.error(updateError instanceof Error ? updateError.message : "Unable to update member.");
     }
   }
 
@@ -121,7 +105,7 @@ export function AdminMembersView() {
           <strong>{overview?.members ?? "—"}</strong>
         </div>
         <div>
-          <span>Verified</span>
+          <span>Verified emails</span>
           <strong>{overview?.verified ?? "—"}</strong>
         </div>
         <div>
@@ -131,7 +115,7 @@ export function AdminMembersView() {
       </section>
 
       <section className="ad-toolbar">
-        <AdminFilters values={["All", "Verified", "Unverified", "Needs Review"]} active={active} onChange={setActive} />
+        <AdminFilters values={["All", "Verified", "Unverified"]} active={active} onChange={setActive} />
         <AdminSearch value={query} onChange={setQuery} placeholder="Search ID, name, email, phone or category" />
       </section>
 
@@ -175,9 +159,9 @@ export function AdminMembersView() {
                 {member.suspended ? (
                   <AdminStatus value="Suspended" />
                 ) : member.verified ? (
-                  <span className="verified">✓ Verified</span>
+                  <span className="verified">✓ Email verified</span>
                 ) : (
-                  <AdminStatus value="Needs Review" />
+                  <span>Email not verified</span>
                 )}
               </div>
 
@@ -216,7 +200,7 @@ export function AdminMembersView() {
             <section className="ad-member-detail-grid">
               <div><span>Category</span><strong>{profile?.profession || "—"}</strong></div>
               <div><span>City</span><strong>{profile?.city || "—"}</strong></div>
-              <div><span>Verification</span><strong>{selected.verified ? "Verified" : "Not verified"}</strong></div>
+              <div><span>Email verification</span><strong>{selected.verified ? "Verified" : "Not verified"}</strong></div>
               <div><span>Account</span><strong>{selected.suspended ? "Suspended" : "Active"}</strong></div>
               <div><span>Auth</span><strong>{selected.authProvider || "—"}</strong></div>
               <div><span>Joined</span><strong>{detailDate(selected.createdAt)}</strong></div>
@@ -294,9 +278,6 @@ export function AdminMembersView() {
               <button type="button" className="ad-dialog-cancel" onClick={() => setSelected(null)}>Close</button>
               <button type="button" className="ad-dialog-secondary" onClick={toggleSuspended}>
                 {selectedView.suspended ? "Reactivate" : "Suspend"}
-              </button>
-              <button type="button" className="ad-dialog-primary" onClick={toggleVerify}>
-                {selectedView.verified ? "Remove Verification" : "Verify Member"}
               </button>
             </div>
           </div>

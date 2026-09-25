@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import http from "node:http";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -33,27 +34,153 @@ child.stdout.on("data", (x) => { output += x; });
 child.stderr.on("data", (x) => { output += x; });
 
 const jar = () => ({ cookies: new Map(), csrf: null });
-function saveCookies(response, state) {
-  const values = typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [response.headers.get("set-cookie")].filter(Boolean);
-  for (const header of values) {
+
+function headerBag(headers, setCookies = []) {
+  return {
+    get(name) {
+      const key = name.toLowerCase();
+      if (key === "set-cookie") return setCookies.length ? setCookies.join(", ") : null;
+      const value = headers[key];
+      return Array.isArray(value) ? value.join(", ") : value ?? null;
+    },
+    getSetCookie() {
+      return [...setCookies];
+    },
+  };
+}
+
+function saveCookies(headers, state) {
+  if (!state) return;
+
+  for (const header of headers.getSetCookie()) {
     const pair = header.split(";")[0];
     const i = pair.indexOf("=");
     if (i < 1) continue;
-    const name = pair.slice(0, i), value = pair.slice(i + 1);
-    if (value) state.cookies.set(name, value); else state.cookies.delete(name);
+
+    const name = pair.slice(0, i);
+    const value = pair.slice(i + 1);
+
+    if (value) state.cookies.set(name, value);
+    else state.cookies.delete(name);
   }
 }
-async function request(path, { method = "GET", body, state, csrf = true, origin } = {}) {
+
+async function requestWithHttp(path, { method, body, state, csrf, origin }) {
+  const url = new URL(base + path);
+  const payload = body === undefined ? undefined : JSON.stringify(body);
   const headers = {};
-  if (body !== undefined && !(body instanceof FormData)) headers["Content-Type"] = "application/json";
-  if (state?.cookies?.size) headers.Cookie = [...state.cookies].map(([k, v]) => `${k}=${v}`).join("; ");
-  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) headers["X-CSRF-Token"] = state.csrf;
+
+  if (payload !== undefined) {
+    headers["Content-Type"] = "application/json";
+    headers["Content-Length"] = Buffer.byteLength(payload);
+  }
+
+  if (state?.cookies?.size) {
+    headers.Cookie = [...state.cookies].map(([key, value]) => `${key}=${value}`).join("; ");
+  }
+
+  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    headers["X-CSRF-Token"] = state.csrf;
+  }
+
   if (origin) headers.Origin = origin;
-  const response = await fetch(base + path, { method, headers, body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body) });
-  if (state) saveCookies(response, state);
-  const data = (response.headers.get("content-type") ?? "").includes("json") ? await response.json() : await response.arrayBuffer();
-  if (state && data && typeof data === "object" && typeof data.csrfToken === "string") state.csrf = data.csrfToken;
-  return { status: response.status, data, headers: response.headers };
+
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        port: url.port,
+        path: `${url.pathname}${url.search}`,
+        method,
+        headers,
+      },
+      (response) => {
+        const chunks = [];
+
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("error", reject);
+        response.on("end", () => {
+          const buffer = Buffer.concat(chunks);
+          const setCookies = response.headersDistinct?.["set-cookie"] ?? [];
+          const headersView = headerBag(response.headers, setCookies);
+          saveCookies(headersView, state);
+
+          const contentType = headersView.get("content-type") ?? "";
+          let data;
+
+          if (contentType.includes("json")) {
+            try {
+              data = JSON.parse(buffer.toString("utf8"));
+            } catch {
+              data = null;
+            }
+          } else {
+            data = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+          }
+
+          if (state && data && typeof data === "object" && typeof data.csrfToken === "string") {
+            state.csrf = data.csrfToken;
+          }
+
+          resolve({
+            status: response.statusCode ?? 0,
+            data,
+            headers: headersView,
+          });
+        });
+      },
+    );
+
+    req.on("error", reject);
+    if (payload !== undefined) req.write(payload);
+    req.end();
+  });
+}
+
+async function request(path, { method = "GET", body, state, csrf = true, origin } = {}) {
+  if (!(body instanceof FormData)) {
+    return requestWithHttp(path, { method, body, state, csrf, origin });
+  }
+
+  const headers = {};
+
+  if (state?.cookies?.size) {
+    headers.Cookie = [...state.cookies].map(([key, value]) => `${key}=${value}`).join("; ");
+  }
+
+  if (state?.csrf && csrf && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    headers["X-CSRF-Token"] = state.csrf;
+  }
+
+  if (origin) headers.Origin = origin;
+
+  const response = await fetch(base + path, {
+    method,
+    headers,
+    body,
+  });
+
+  const data = (response.headers.get("content-type") ?? "").includes("json")
+    ? await response.json()
+    : await response.arrayBuffer();
+
+  const headersView = headerBag(
+    Object.fromEntries(response.headers.entries()),
+    typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [],
+  );
+
+  saveCookies(headersView, state);
+
+  if (state && data && typeof data === "object" && typeof data.csrfToken === "string") {
+    state.csrf = data.csrfToken;
+  }
+
+  return {
+    status: response.status,
+    data,
+    headers: headersView,
+  };
 }
 
 try {
@@ -66,23 +193,67 @@ try {
   assert.ok(ready, output);
   await mongoose.connect(uri);
 
-  const member = jar(), admin = jar();
+  const member = jar(), admin = jar(), visitor = jar();
   const memberInput = { name: "Integration Member", email: "member@example.test", mobile: "+919999999999", password: "Integration-pass-123", confirmPassword: "Integration-pass-123", acceptTerms: true, acceptPrivacy: true };
   let r = await request("/auth/register", { method: "POST", body: memberInput, state: member });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   assert.ok(r.data.csrfToken);
   const memberId = r.data.id;
+  const registration = r;
+  assert.equal(r.data.verified, false);
+
+  const verificationToken = randomBytes(32).toString("base64url");
+  await mongoose.connection.collection("emailverifications").deleteMany({
+    accountId: new mongoose.Types.ObjectId(memberId),
+  });
+  await mongoose.connection.collection("emailverifications").insertOne({
+    accountId: new mongoose.Types.ObjectId(memberId),
+    tokenHash: createHash("sha256").update(verificationToken).digest(),
+    expiresAt: new Date(Date.now() + 60_000),
+    createdAt: new Date(),
+  });
+
+  r = await request("/auth/verify-email", {
+    method: "POST",
+    body: { token: verificationToken },
+  });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  assert.equal(
+    (await mongoose.connection.collection("accounts").findOne({ _id: new mongoose.Types.ObjectId(memberId) })).verified,
+    true,
+  );
+  assert.equal((await request("/auth/me", { state: member })).data.verified, true);
+  assert.equal(
+    (await request("/auth/verify-email", { method: "POST", body: { token: verificationToken } })).status,
+    400,
+  );
+  assert.equal(
+    (await request("/auth/resend-verification", { method: "POST", body: { email: memberInput.email } })).status,
+    201,
+  );
+
+  r = await request("/analytics/visit", { method: "POST", state: visitor });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.tracked, true);
+  assert.ok(visitor.cookies.has("mdadu_visitor"));
+  r = await request("/analytics/visit", { method: "POST", state: visitor });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(await mongoose.connection.collection("visitors").countDocuments(), 1);
+
   const consentAccount = await mongoose.connection.collection("accounts").findOne({ _id: new mongoose.Types.ObjectId(memberId) });
   assert.equal(consentAccount.termsVersion, "2026-09-19");
   assert.equal(consentAccount.privacyVersion, "2026-09-19");
   assert.ok(consentAccount.termsAcceptedAt);
   assert.ok(consentAccount.privacyAcceptedAt);
   assert.equal((await request("/auth/register", { method: "POST", body: { ...memberInput, email: "no-consent@example.test", acceptTerms: false } })).status, 400);
-  assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /HttpOnly/);
-  assert.match(r.headers.getSetCookie().find(x => x.startsWith("mdadu_session=")), /SameSite=Lax/);
-  assert.equal(r.data.passwordHash, undefined);
-  assert.equal(r.headers.get("x-content-type-options"), "nosniff");
-  assert.ok(r.headers.get("x-request-id"));
+  const registrationCookies = registration.headers.getSetCookie();
+  const sessionCookie = registrationCookies.find((value) => value.startsWith("mdadu_session="));
+  assert.ok(sessionCookie, `Session cookie missing. Set-Cookie: ${registrationCookies.join(" | ")}`);
+  assert.match(sessionCookie, /HttpOnly/);
+  assert.match(sessionCookie, /SameSite=Lax/);
+  assert.equal(registration.data.passwordHash, undefined);
+  assert.equal(registration.headers.get("x-content-type-options"), "nosniff");
+  assert.ok(registration.headers.get("x-request-id"));
   const forged = { cookies: new Map([["mdadu_session", "unsigned-forged-session"]]), csrf: null };
   assert.equal((await request("/auth/me", { state: forged })).status, 401);
   assert.equal(
@@ -114,7 +285,7 @@ try {
 
   r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member, csrf: false });
   assert.equal(r.status, 403);
-  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", birthDate: "1995-04-20", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member });
+  r = await request("/member/profile", { method: "PUT", body: { city: "Indore", profession: "Actor", gender: "Male", birthDate: "1995-04-20", skills: ["Acting"], languages: ["Hindi"], publicVisible: true }, state: member });
   assert.equal(r.status, 200, JSON.stringify(r.data));
 
   r = await request("/auth/register", { method: "POST", body: { ...memberInput, name: "Admin", email: "admin@example.test", mobile: "+918888888888" }, state: admin });
@@ -173,8 +344,6 @@ try {
   assert.equal(shortlistedApplication.status, "Shortlisted");
   assert.equal(shortlistedApplication.adminNotes, undefined);
 
-  r = await request(`/admin/members/${memberId}`, { method: "PATCH", state: admin, body: { verified: true } });
-  assert.equal(r.status, 200);
   r = await request("/talent?city=Indore&profession=Actor");
   assert.equal(r.status, 200);
   assert.ok(r.data.items.some((x) => x.id === memberId));
@@ -214,7 +383,13 @@ try {
   assert.equal((await request(`/admin/lists/${listId}/members/${memberId}`, { method: "DELETE", state: admin })).data.members.length, 0);
   assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
   assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId } })).data.members.length, 1);
-  assert.equal((await request(`/admin/lists/${listId}/members`, { method: "POST", state: admin, body: { memberId: "000000000000000000000000" } })).status, 404);
+  const unavailableMember = await request(`/admin/lists/${listId}/members`, {
+    method: "POST",
+    state: admin,
+    body: { memberId: "000000000000000000000000" },
+  });
+  assert.equal(unavailableMember.status, 400, JSON.stringify(unavailableMember.data));
+  assert.equal(unavailableMember.data.message, "This member is not available for shortlisting.");
   assert.equal((await request(`/admin/lists/${listId}`, { state: admin })).data.purpose, "Integration review");
   assert.equal((await request(`/admin/lists/${listId}`, { state: member })).status, 403);
 
@@ -246,7 +421,7 @@ try {
   const mediaId = r.data.id;
   const storedProfileMedia = await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(mediaId) });
   assert.equal(storedProfileMedia.purpose, "member-profile");
-  assert.equal(storedProfileMedia.storagePrefix, `members/${memberId}/profile-pic/${mediaId}`);
+  assert.equal(storedProfileMedia.storagePrefix, `members/${memberId}/profile/${mediaId}`);
   assert.equal((await request(`/media/${mediaId}/medium`)).status, 401);
   assert.equal((await request(`/media/${mediaId}/medium`, { state: member })).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: admin, body: { photoMediaId: mediaId } })).status, 400);
@@ -289,7 +464,12 @@ try {
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [portfolioId] } })).status, 200);
   assert.equal((await request(`/media/${portfolioId}/medium`)).status, 200);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
-  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 404);
+  // Replaced/removed successful media is retained as private archival media.
+  assert.equal((await request(`/media/${portfolioId}/medium`)).status, 401);
+  assert.equal((await request(`/media/${portfolioId}/medium`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(portfolioId) }),
+  );
 
   r = await request("/member/profile", { method: "PUT", state: member, body: {
     skills: ["Acting", "Voice", "Acting"],
@@ -297,13 +477,13 @@ try {
     gender: "Male",
     previousWork: "Short films and theatre",
     socialLinks: ["https://example.com/member"],
-    showreel: "https://example.com/showreel"
+    showreel: "https://www.youtube.com/watch?v=abcdefghijk"
   } });
   assert.equal(r.status, 200, JSON.stringify(r.data));
   assert.deepEqual(r.data.profile.skills, ["Acting", "Voice"]);
   assert.deepEqual(r.data.profile.languages, ["Hindi", "English"]);
   assert.equal(r.data.profile.previousWork, "Short films and theatre");
-  assert.equal(r.data.profile.showreel, "https://example.com/showreel");
+  assert.equal(r.data.profile.showreel, "https://www.youtube.com/watch?v=abcdefghijk");
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: "http://example.com/not-secure" } })).status, 400);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { showreel: null } })).status, 200);
   assert.equal((await request("/member/profile", { state: member })).data.profile.showreel, undefined);
@@ -318,11 +498,19 @@ try {
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [duplicatePortfolioId] } })).status, 200);
   assert.equal((await request(`/media/${duplicatePortfolioId}`, { method: "DELETE", state: member })).status, 409);
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { portfolioMediaIds: [] } })).status, 200);
-  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`, { state: member })).status, 404);
+  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`)).status, 401);
+  assert.equal((await request(`/media/${duplicatePortfolioId}/medium`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(duplicatePortfolioId) }),
+  );
 
   assert.equal((await request("/member/profile", { method: "PUT", state: member, body: { resumeMediaId: null } })).status, 200);
   assert.equal((await request("/member/profile", { state: member })).data.profile.resumeMediaId, undefined);
-  assert.equal((await request(`/media/${documentId}/document`, { state: member })).status, 404);
+  assert.equal((await request(`/media/${documentId}/document`)).status, 401);
+  assert.equal((await request(`/media/${documentId}/document`, { state: member })).status, 200);
+  assert.ok(
+    await mongoose.connection.collection("media").findOne({ _id: new mongoose.Types.ObjectId(documentId) }),
+  );
 
   const other = jar();
   assert.equal((await request("/auth/register", { method: "POST", state: other, body: { ...memberInput, email: "other@example.test" } })).status, 201);
@@ -330,6 +518,139 @@ try {
   assert.equal((await request(`/media/${documentId}/document`, { state: other })).status, 404);
   assert.equal((await request(`/admin/castings/${castingId}/close`, { method: "PATCH", state: admin })).status, 200);
   assert.equal((await request("/member/applications", { method: "POST", state: other, body: { opportunityId: castingId, opportunityType: "CASTING", coverNote: "Cannot apply to a closed casting." } })).status, 400);
+
+  r = await request("/admin/content/services", {
+    method: "POST",
+    state: admin,
+    body: {
+      title: "Integration Service",
+      slug: "integration-service",
+      category: "Production",
+      description: "Integration service card description.",
+      body: ["Planning support", "Shoot coordination"],
+      status: "Published",
+      published: true,
+      order: 7,
+      data: {
+        modalEyebrow: "Production",
+        modalTitle: "Integration Service",
+        overview: "Integration service overview.",
+        idealFor: "Integration projects.",
+        contactSubject: "Production",
+        contactMessage: "Please contact us about this integration service.",
+        imageAlt: "Integration service image",
+      },
+    },
+  });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const serviceId = r.data._id;
+  assert.equal((await request("/admin/content/services/summary", { state: admin })).data.total, 1);
+  r = await request("/content/services?limit=100");
+  assert.equal(r.status, 200);
+  assert.equal(r.data.items.some((item) => item.slug === "integration-service"), true);
+  r = await request("/content/services/integration-service");
+  assert.equal(r.status, 200);
+  assert.equal(r.data.data.modalTitle, "Integration Service");
+  r = await request(`/admin/content/services/${serviceId}`, {
+    method: "PATCH",
+    state: admin,
+    body: {
+      title: "Updated Integration Service",
+      description: "Updated integration service card description.",
+      order: 2,
+      data: {
+        modalEyebrow: "Updated Production",
+        modalTitle: "Updated Integration Service",
+        overview: "Updated integration overview.",
+        idealFor: "Updated integration projects.",
+        contactSubject: "Production",
+        contactMessage: "Updated service enquiry.",
+        imageAlt: "Updated integration service image",
+      },
+    },
+  });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.title, "Updated Integration Service");
+  assert.equal((await request("/content/services/integration-service")).data.data.modalTitle, "Updated Integration Service");
+  assert.equal((await request(`/admin/content/services/${serviceId}`, { method: "DELETE", state: admin })).status, 200);
+  assert.equal((await request("/content/services/integration-service")).status, 404);
+
+  r = await request("/admin/content/team", {
+    method: "POST",
+    state: admin,
+    body: {
+      title: "About Team Contract",
+      slug: "about-team-contract",
+      category: "Creative Team",
+      description: "Published Creative Team member rendered inside About Us Core Team.",
+      body: ["Direction", "Production"],
+      role: "Director",
+      status: "Published",
+      published: true,
+      order: 0,
+      data: {
+        group: "Creative Team",
+        details: "Detailed About Us team profile.",
+        imageAlt: "About Team Contract",
+        instagram: "",
+        facebook: "",
+        x: "",
+        linkedin: "",
+        youtube: "",
+      },
+    },
+  });
+  assert.equal(r.status, 201, JSON.stringify(r.data));
+  const aboutTeamId = r.data._id;
+  assert.equal(r.data.category, "Creative Team");
+  assert.equal(r.data.status, "Published");
+  assert.equal(r.data.published, true);
+
+  // About Us intentionally loads ALL Published Team records with no group filter.
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  const aboutTeamPublic = r.data.items.find((item) => item.slug === "about-team-contract");
+  assert.ok(aboutTeamPublic);
+  assert.equal(aboutTeamPublic.category, "Creative Team");
+  assert.equal(aboutTeamPublic.data?.group, "Creative Team");
+
+  // A Core Team-filtered request must NOT contain this Creative Team tagged member.
+  // This protects the reason the About frontend must use the unfiltered endpoint.
+  r = await request("/content/team?category=Core%20Team&page=1&limit=100&sort=order");
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
+
+  r = await request(`/admin/content/team/${aboutTeamId}`, {
+    method: "PATCH",
+    state: admin,
+    body: { status: "Draft", publishedAt: null },
+  });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
+
+  r = await request(`/admin/content/team/${aboutTeamId}`, {
+    method: "PATCH",
+    state: admin,
+    body: {
+      status: "Published",
+      category: "Creative Team",
+      data: { group: "Creative Team", details: "Detailed About Us team profile." },
+    },
+  });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), true);
+
+  assert.equal(
+    (await request(`/admin/content/team/${aboutTeamId}`, { method: "DELETE", state: admin })).status,
+    200,
+  );
+
+  r = await request("/content/team?page=1&limit=100&sort=order");
+  assert.equal(r.data.items.some((item) => item.slug === "about-team-contract"), false);
 
   for (const kind of ["blog", "team", "gallery", "behind-the-scenes", "shows", "settings", "legal"]) {
     r = await request(`/admin/content/${kind}`, { method: "POST", state: admin, body: { title: `Integration ${kind}`, slug: `integration-${kind}`, published: false, seoTitle: "Test SEO", body: ["Test content"] } });
@@ -421,6 +742,10 @@ try {
   r = await request("/admin/dashboard", { state: admin });
   assert.equal(r.status, 200);
   assert.ok(r.data.metrics.applications >= 1);
+  assert.equal(r.data.metrics.totalVisitors, 1);
+  assert.equal(typeof r.data.metrics.draftBlogCount, "number");
+  assert.ok(Array.isArray(r.data.latestApplications));
+  assert.ok(r.data.latestApplications.length <= 3);
   assert.equal((await request("/auth/login", { method: "POST", state: member, body: { email: memberInput.email, password: resetBody.password } })).status, 201);
   assert.equal((await request("/auth/deactivate", { method: "POST", state: member })).status, 201);
   assert.equal((await request("/auth/me", { state: member })).status, 401);

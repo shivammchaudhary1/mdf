@@ -4,21 +4,60 @@ import { dirname, resolve } from "node:path";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
 
+/*
+ * New production hierarchy:
+ *
+ * assets/website-images/{mediaId}/{variant}.webp
+ * assets/services/{mediaId}/{variant}.webp
+ * assets/projects/{mediaId}/{variant}.webp
+ * assets/castings/{mediaId}/{variant}.webp
+ * assets/blog/{mediaId}/{variant}.webp
+ * assets/gallery/{mediaId}/{variant}.webp   <- Gallery + BTS
+ * assets/team/{mediaId}/{variant}.webp
+ * assets/shows/{mediaId}/{variant}.webp
+ *
+ * members/{memberId}/profile/{mediaId}/{variant}.webp
+ * members/{memberId}/portfolio/{mediaId}/{variant}.webp
+ * members/{memberId}/resume/{mediaId}/document.pdf
+ *
+ * Legacy patterns are intentionally retained so already-uploaded development
+ * media remains readable after the structure change.
+ */
 const LEGACY_IMAGE = /^media\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
 const LEGACY_DOCUMENT = /^media\/[a-f0-9]{24}\/document\.pdf$/;
+const LEGACY_BTS_IMAGE = /^assets\/bts\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const LEGACY_MEMBER_IMAGE =
+  /^members\/[a-f0-9]{24}\/(profile-pic|portfolio-images)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+
 const ASSET_IMAGE =
-  /^assets\/(website-images|projects|castings|blog|gallery|team|bts|shows)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
-const MEMBER_IMAGE = /^members\/[a-f0-9]{24}\/(profile-pic|portfolio-images)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+  /^assets\/(website-images|services|projects|castings|blog|gallery|team|shows)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
+const MEMBER_IMAGE =
+  /^members\/[a-f0-9]{24}\/(profile|portfolio)\/[a-f0-9]{24}\/(thumb|profile|medium|large)\.webp$/;
 const MEMBER_DOCUMENT = /^members\/[a-f0-9]{24}\/resume\/[a-f0-9]{24}\/document\.pdf$/;
 
 export abstract class StorageAdapter {
   abstract write(key: string, data: Buffer, contentType?: string): Promise<void>;
   abstract read(key: string): Promise<Buffer>;
+
+  /*
+   * delete() is intentionally kept for rollback of failed/incomplete writes.
+   * Business-level successful media deletion is blocked in MediaService.
+   */
   abstract delete(key: string): Promise<void>;
 }
 
 export function validateStorageKey(key: string) {
-  if (![LEGACY_IMAGE, LEGACY_DOCUMENT, ASSET_IMAGE, MEMBER_IMAGE, MEMBER_DOCUMENT].some((pattern) => pattern.test(key))) {
+  if (
+    ![
+      LEGACY_IMAGE,
+      LEGACY_DOCUMENT,
+      LEGACY_BTS_IMAGE,
+      LEGACY_MEMBER_IMAGE,
+      ASSET_IMAGE,
+      MEMBER_IMAGE,
+      MEMBER_DOCUMENT,
+    ].some((pattern) => pattern.test(key))
+  ) {
     throw new Error("Invalid storage key.");
   }
 
@@ -111,6 +150,10 @@ export class S3StorageAdapter extends StorageAdapter {
     return Buffer.from(await response.Body.transformToByteArray());
   }
 
+  /*
+   * Used only to rollback failed/incomplete uploads before a successful Media
+   * record exists. Successful media retention is enforced by MediaService.
+   */
   async delete(key: string) {
     await this.client.send(
       new DeleteObjectCommand({

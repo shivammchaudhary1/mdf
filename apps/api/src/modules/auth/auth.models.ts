@@ -26,7 +26,7 @@ export const AccountSchema = new Schema<Account>(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
-    mobile: { type: String, required: true, trim: true, maxlength: 24 },
+    mobile: { type: String, default: "", trim: true, maxlength: 24 },
     memberCode: { type: String, trim: true, lowercase: true, maxlength: 20 },
     passwordHash: { type: String, select: false },
     role: { type: String, enum: ["MEMBER", "SUPER_ADMIN"], default: "MEMBER", required: true },
@@ -76,6 +76,25 @@ export const SessionSchema = new Schema<Session>(
 SessionSchema.index({ tokenHash: 1 }, { unique: true });
 SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 SessionSchema.index({ accountId: 1, createdAt: -1 });
+
+export interface EmailVerification {
+  _id: Types.ObjectId;
+  accountId: Types.ObjectId;
+  tokenHash: Buffer;
+  expiresAt: Date;
+  createdAt: Date;
+}
+export const EmailVerificationSchema = new Schema<EmailVerification>(
+  {
+    accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true, index: true },
+    tokenHash: { type: Buffer, required: true, select: false },
+    expiresAt: { type: Date, required: true },
+  },
+  { timestamps: { createdAt: true, updatedAt: false }, versionKey: false },
+);
+EmailVerificationSchema.index({ tokenHash: 1 }, { unique: true });
+EmailVerificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+EmailVerificationSchema.index({ accountId: 1, createdAt: -1 });
 
 export interface PasswordReset {
   _id: Types.ObjectId;

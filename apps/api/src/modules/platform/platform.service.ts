@@ -27,6 +27,7 @@ export class PlatformService {
   }
 
   private mediaPurpose(kind: ContentKind): MediaPurpose {
+    if (kind === "services") return "service";
     if (kind === "blog") return "blog";
     if (kind === "gallery") return "gallery";
     if (kind === "team") return "team";
@@ -58,18 +59,44 @@ export class PlatformService {
     const team = k === "team";
     const taggedContent = gallery || blog;
 
+    const now = new Date();
     const filter: Record<string, unknown> = {
       kind: k,
       archived: false,
-      ...(admin
-        ? {}
-        : { published: true, $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: new Date() } }] }),
-      ...(q.category ? { category: q.category } : {}),
+      ...(q.category && !(team && !admin) ? { category: q.category } : {}),
       ...(q.projectId ? { projectId: objectId(q.projectId) } : {}),
       ...(taggedContent && q.tag ? { tags: q.tag } : {}),
     };
 
     const conditions: Record<string, unknown>[] = [];
+
+    if (!admin) {
+      if (team) {
+        conditions.push({
+          $or: [
+            { status: "Published" },
+            { status: "Scheduled", published: true },
+            {
+              $and: [
+                { $or: [{ status: { $exists: false } }, { status: null }] },
+                { published: true },
+              ],
+            },
+          ],
+        });
+        conditions.push({
+          $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: now } }],
+        });
+        if (q.category) {
+          conditions.push({ $or: [{ category: q.category }, { "data.group": q.category }] });
+        }
+      } else {
+        filter.published = true;
+        conditions.push({
+          $or: [{ publishedAt: { $exists: false } }, { publishedAt: null }, { publishedAt: { $lte: now } }],
+        });
+      }
+    }
 
     if (q.status) {
       if (q.status === "Published") conditions.push({ $or: [{ status: "Published" }, { status: { $exists: false }, published: true }] });

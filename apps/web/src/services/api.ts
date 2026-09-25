@@ -15,7 +15,16 @@ let csrfToken: string | null = null;
 let csrfPromise: Promise<string | null> | null = null;
 const inFlight = new Map<string, Promise<unknown>>();
 const SAFE = new Set(["GET", "HEAD", "OPTIONS"]);
-const EXEMPT = new Set(["/auth/login", "/auth/google", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/contact"]);
+const EXEMPT = new Set([
+  "/auth/login",
+  "/auth/google",
+  "/auth/register",
+  "/auth/verify-email",
+  "/auth/resend-verification",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/contact",
+]);
 
 async function loadCsrf() {
   if (csrfToken) return csrfToken;

@@ -32,7 +32,7 @@ MongoDB
 - TypeScript
 - Tailwind CSS
 - NestJS
-- Node.js 24.11.1
+- Node.js 26.10.0
 - MongoDB / Mongoose
 - REST + Swagger
 - Amazon S3 later for production media
