@@ -73,7 +73,7 @@ export function validateEnvironment(input: Record<string, unknown>) {
     MONGODB_SERVER_SELECTION_TIMEOUT_MS: integer(input, "MONGODB_SERVER_SELECTION_TIMEOUT_MS", 10000, 1000, 120000),
     SESSION_SHORT_HOURS: integer(input, "SESSION_SHORT_HOURS", 12, 1, 168),
     SESSION_REMEMBER_DAYS: integer(input, "SESSION_REMEMBER_DAYS", 30, 1, 365),
-    SESSION_MAX_PER_ACCOUNT: integer(input, "SESSION_MAX_PER_USER", 10, 1, 25),
+    SESSION_MAX_PER_ACCOUNT: integer(input, "SESSION_MAX_PER_ACCOUNT", 10, 1, 25),
     GENERAL_RATE_LIMIT_PER_MINUTE: integer(input, "GENERAL_RATE_LIMIT_PER_MINUTE", 300, 60, 10000),
     AUDIT_RETENTION_DAYS: integer(input, "AUDIT_RETENTION_DAYS", 180, 30, 3650),
     TRUST_PROXY: bool(input, "TRUST_PROXY", nodeEnv === "production"),
