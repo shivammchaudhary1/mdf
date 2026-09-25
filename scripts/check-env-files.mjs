@@ -109,13 +109,9 @@ function validateApi(values, mode) {
     throw new Error(`apps/api/.env.${mode}: STORAGE_DRIVER must be local or s3.`);
   }
 
-  if (mode === "dev" && storage !== "local") {
-    throw new Error("apps/api/.env.dev must use STORAGE_DRIVER=local for the current local-development workflow.");
-  }
-
-  if (mode === "prod" && storage === "s3") {
+  if (storage === "s3") {
     if (!values.AWS_REGION || !values.S3_BUCKET) {
-      throw new Error("apps/api/.env.prod: AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.");
+      throw new Error(`apps/api/.env.${mode}: AWS_REGION and S3_BUCKET are required when STORAGE_DRIVER=s3.`);
     }
   }
 

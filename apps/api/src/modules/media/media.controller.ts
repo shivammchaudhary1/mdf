@@ -26,6 +26,7 @@ export class MediaController {
           type: "string",
           enum: [
             "website-image",
+            "service",
             "project",
             "casting",
             "blog",

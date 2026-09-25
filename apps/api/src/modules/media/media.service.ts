@@ -37,7 +37,17 @@ const GALLERY_IMAGE_VARIANTS = {
   large: { width: 1920, height: 1920, quality: 84 },
 } as const;
 
-const ASSET_PURPOSES = new Set<MediaPurpose>(["website-image", "project", "casting", "blog", "gallery", "team", "bts", "show"]);
+const ASSET_PURPOSES = new Set<MediaPurpose>([
+  "website-image",
+  "service",
+  "project",
+  "casting",
+  "blog",
+  "gallery",
+  "team",
+  "bts",
+  "show",
+]);
 
 export type MediaVariant = keyof typeof IMAGE_VARIANTS | "document";
 
@@ -65,6 +75,8 @@ export class MediaService {
     switch (purpose) {
       case "website-image":
         return `assets/website-images/${mediaId}`;
+      case "service":
+        return `assets/services/${mediaId}`;
       case "project":
         return `assets/projects/${mediaId}`;
       case "casting":
@@ -76,13 +88,15 @@ export class MediaService {
       case "team":
         return `assets/team/${mediaId}`;
       case "bts":
-        return `assets/bts/${mediaId}`;
+        // BTS remains a content/media purpose for compatibility, but all new
+        // BTS objects live inside the single Gallery S3 hierarchy.
+        return `assets/gallery/${mediaId}`;
       case "show":
         return `assets/shows/${mediaId}`;
       case "member-profile":
-        return `members/${owner}/profile-pic/${mediaId}`;
+        return `members/${owner}/profile/${mediaId}`;
       case "member-portfolio":
-        return `members/${owner}/portfolio-images/${mediaId}`;
+        return `members/${owner}/portfolio/${mediaId}`;
       case "member-resume":
         return `members/${owner}/resume/${mediaId}`;
       default:
@@ -453,8 +467,14 @@ export class MediaService {
 
     if (!record || (await this.referenced(record._id))) return false;
 
-    await this.deleteStored(record);
-    await record.deleteOne();
+    // Successful media is immutable archival storage. Replacing/removing a
+    // reference only makes the old media private; the DB record and S3 objects
+    // are deliberately retained for history/recovery.
+    if (record.visibility !== "private") {
+      record.visibility = "private";
+      await record.save();
+    }
+
     return true;
   }
 
@@ -479,9 +499,13 @@ export class MediaService {
       }
     }
 
-    await this.deleteStored(record);
-    await record.deleteOne();
+    // Application-level delete means "remove from active use", not physical
+    // deletion. The media record and S3 object variants are retained forever.
+    if (record.visibility !== "private") {
+      record.visibility = "private";
+      await record.save();
+    }
 
-    return { message: "Media deleted." };
+    return { message: "Media removed from active use and retained in storage." };
   }
 }

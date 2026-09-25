@@ -83,6 +83,7 @@ export type ContentRecord = {
 };
 export type MediaPurpose =
   | "website-image"
+  | "service"
   | "project"
   | "casting"
   | "blog"
