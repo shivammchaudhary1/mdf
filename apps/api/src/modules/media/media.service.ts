@@ -125,7 +125,7 @@ export class MediaService {
   }
 
   private async referenced(id: Types.ObjectId) {
-    const [profiles, applications, projects, castings, contents] = await Promise.all([
+    const [profiles, applications, projects, castings, contents, accounts] = await Promise.all([
       this.media.db.collection("profiles").countDocuments({
         $or: [{ photoMediaId: id }, { portfolioMediaIds: id }, { resumeMediaId: id }],
       }),
@@ -141,9 +141,10 @@ export class MediaService {
       this.media.db.collection("contents").countDocuments({
         $or: [{ coverMediaId: id }, { mediaIds: id }],
       }),
+      this.media.db.collection("accounts").countDocuments({ photoMediaId: id }),
     ]);
 
-    return profiles + applications + projects + castings + contents > 0;
+    return profiles + applications + projects + castings + contents + accounts > 0;
   }
 
   urlsFor(id: string, kind: "image" | "document" = "image") {
@@ -162,7 +163,6 @@ export class MediaService {
     if (ASSET_PURPOSES.has(purpose) && role !== "SUPER_ADMIN") {
       throw new ForbiddenException("Only administrators can upload website and production media.");
     }
-
     const documentPurpose = purpose === "member-resume";
     const isPdf = file.mimetype === "application/pdf" && file.buffer.subarray(0, 5).toString() === "%PDF-";
 

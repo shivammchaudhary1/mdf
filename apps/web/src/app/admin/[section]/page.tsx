@@ -16,6 +16,7 @@ const sections = [
   "lists",
   "contacts",
   "careers",
+  "profile",
   "settings",
   "legal",
 ];
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: Props) {
     lists: "Saved Talent Lists",
     contacts: "Contact Queries",
     careers: "Career Applications",
+    profile: "My Profile",
     settings: "Company Settings",
     legal: "Legal Content",
   };

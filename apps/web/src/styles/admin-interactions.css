@@ -1045,3 +1045,79 @@
 @media(min-width:700px){.ad-settings-metrics-v2,.ad-legal-metrics-v2{grid-template-columns:repeat(4,minmax(0,1fr))}.ad-settings-form-grid-v2{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-settings-form-grid-v2 .wide{grid-column:1/-1}.ad-legal-policy-grid-v2{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-legal-policy-meta-v2{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:980px){.ad-settings-layout-v2{grid-template-columns:minmax(0,1.55fr) minmax(260px,.55fr)}.ad-legal-layout-v2{grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr)}.ad-legal-editor-layout-v2{grid-template-columns:minmax(0,1.55fr) minmax(270px,.55fr)}}
 @media(max-width:640px){.ad-legal-registration-actions-v2{align-items:flex-start;flex-direction:column}.ad-settings-card-head-v2{align-items:flex-start;flex-direction:column}}
+
+/* ADMIN PROFILE SETTINGS V1 */
+.ad-avatar.has-photo,.ad-account-trigger.has-photo,.ad-profile-photo.has-photo{overflow:hidden;background:#ecece8;color:transparent}
+.ad-account-menu-wrap{position:relative;z-index:82}
+.ad-account-trigger{border:0;cursor:pointer;padding:0}
+.ad-account-menu-dismiss{position:fixed;inset:0;z-index:80;border:0;background:transparent;cursor:default}
+.ad-account-menu{position:absolute;top:calc(100% + 10px);right:0;z-index:83;display:grid;width:210px;overflow:hidden;border:1px solid #00000010;border-radius:13px;background:#fff;padding:6px;box-shadow:0 18px 44px #00000020}
+.ad-account-menu-head{display:grid;gap:3px;margin:2px 2px 5px;padding:9px 10px 11px;border-bottom:1px solid #0000000d}
+.ad-account-menu-head strong{overflow:hidden;text-overflow:ellipsis;font-size:9px;white-space:nowrap}
+.ad-account-menu-head span{overflow:hidden;text-overflow:ellipsis;color:#999;font-size:7.5px;white-space:nowrap}
+.ad-account-menu>a,.ad-account-menu>button{display:flex;min-height:36px;align-items:center;gap:9px;border:0;border-radius:8px;background:transparent;padding:0 10px;color:#555;text-align:left;font-size:8.5px;font-weight:750}
+.ad-account-menu>a:hover,.ad-account-menu>button:hover{background:#f6f6f3;color:#111}
+.ad-account-menu>button.danger{color:#c73841}
+.ad-account-menu svg{width:15px;height:15px}
+.ad-profile-layout{display:grid;gap:20px}
+.ad-profile-photo-row{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.ad-profile-photo{display:grid;width:92px;height:92px;flex:0 0 auto;place-items:center;border:1px solid #0000000e;border-radius:50%;background:var(--brand-red);color:#fff;font-family:var(--font-playfair),Georgia,serif;font-size:28px;font-weight:700;box-shadow:0 8px 24px #00000010}
+.ad-profile-photo-copy{display:grid;gap:8px}
+.ad-profile-photo-copy>strong{font-family:var(--font-playfair),Georgia,serif;font-size:20px}
+.ad-profile-photo-copy>span,.ad-profile-card-copy{color:#888;font-size:8.5px;line-height:1.6}
+.ad-profile-photo-copy>div,.ad-profile-save-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ad-profile-secondary{display:inline-flex;min-height:40px;align-items:center;justify-content:center;border:1px solid #00000013;border-radius:9px;background:#fff;padding:0 14px;color:#555;font-size:9px;font-weight:800}
+.ad-profile-secondary:hover{border-color:#00000025;color:#111}
+.ad-profile-save-row{justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1px solid #0000000d}
+.ad-profile-save-row-end{justify-content:flex-end}
+.ad-field small{color:#999;font-size:7.5px;line-height:1.45}
+.ad-field input:disabled{cursor:not-allowed;background:#f2f2ef;color:#888}
+.ad-profile-summary{height:max-content}
+.ad-profile-summary>p:not(.ad-kicker){margin-top:9px;color:#777;font-size:8.5px;line-height:1.65}
+.ad-profile-summary dl{display:grid;margin-top:18px}
+.ad-profile-summary dl>div{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:11px 0;border-top:1px solid #0000000d}
+.ad-profile-summary dt{color:#999;font-size:7.5px}
+.ad-profile-summary dd{font-size:8px;font-weight:800;text-align:right}
+.ad-profile-text-button{border:0;background:transparent;color:var(--brand-red);font-size:8px;font-weight:800}
+.ad-profile-text-button:disabled{opacity:.5}
+.ad-profile-session-list{display:grid;margin-top:14px}
+.ad-profile-session-row{display:grid;gap:10px;padding:13px 0;border-top:1px solid #0000000d}
+.ad-profile-session-copy{display:grid;gap:5px;min-width:0}
+.ad-profile-session-copy>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.ad-profile-session-copy strong{font-size:8.5px}
+.ad-profile-session-copy span,.ad-profile-session-copy i{border-radius:999px;background:#f1f1ee;padding:3px 6px;color:#777;font-size:6.8px;font-style:normal;font-weight:750}
+.ad-profile-session-copy span{background:#fff0f1;color:var(--brand-red)}
+.ad-profile-session-copy p{color:#999;font-size:7.5px}
+.ad-profile-session-row>button,.ad-profile-session-footer>button{justify-self:start;border:1px solid #00000012;border-radius:8px;background:#fff;padding:8px 10px;color:#555;font-size:7.5px;font-weight:800}
+.ad-profile-session-row>button:disabled,.ad-profile-session-footer>button:disabled{opacity:.5}
+.ad-profile-session-empty{margin-top:14px;border:1px dashed #d7d7d2;border-radius:10px;background:#fafaf8;padding:18px;color:#999;font-size:8px}
+.ad-profile-session-footer{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:12px;padding-top:14px;border-top:1px solid #0000000d}
+.ad-profile-session-footer>span{color:#999;font-size:7.5px;line-height:1.5}
+.ad-profile-session-footer>button{color:#c73841}
+
+@media(min-width:640px){
+  .ad-profile-photo-row{flex-direction:row;align-items:center}
+  .ad-profile-session-row{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+  .ad-profile-session-row>button{justify-self:end}
+  .ad-profile-session-footer{flex-direction:row;align-items:center;justify-content:space-between}
+}
+@media(min-width:1024px){
+  .ad-profile-layout{grid-template-columns:minmax(0,1.55fr) minmax(270px,.45fr);align-items:start}
+}
+
+/* ADMIN PROFILE ROUTE + DETAIL FIX V4 */
+.ad-profile-load-error{
+  display:grid;
+  justify-items:start;
+  gap:8px;
+  border:1px solid #efc7ca;
+  border-radius:14px;
+  background:#fff8f8;
+  padding:20px;
+}
+.ad-profile-load-error strong{font-size:10px}
+.ad-profile-load-error span{color:#8a6769;font-size:8.5px;line-height:1.55}
+.ad-profile-summary dd{
+  max-width:170px;
+  overflow-wrap:anywhere;
+}

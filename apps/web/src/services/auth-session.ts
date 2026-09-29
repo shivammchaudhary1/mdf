@@ -17,9 +17,9 @@ async function requestCurrentSession() {
   }
 }
 
-async function hydrateMemberPhoto(account: SessionAccount, force = false) {
-  if (account.role !== "MEMBER") {
-    useAppStore.getState().setProfilePhoto("");
+async function hydrateProfilePhoto(account: SessionAccount, force = false) {
+  if (account.role === "SUPER_ADMIN") {
+    useAppStore.getState().setProfilePhoto(account.photo ?? "");
     return;
   }
 
@@ -43,7 +43,7 @@ export async function ensureSession(force = false) {
   sessionPromise = requestCurrentSession()
     .then(async (account) => {
       useAppStore.getState().setAuthenticated(account);
-      await hydrateMemberPhoto(account, force);
+      await hydrateProfilePhoto(account, force);
       return account;
     })
     .catch((error) => {
@@ -65,7 +65,7 @@ export async function ensureSession(force = false) {
 export async function establishSession(account: SessionAccount) {
   useAppStore.getState().setAuthenticated(account);
   invalidateApiCache();
-  await hydrateMemberPhoto(account, true);
+  await hydrateProfilePhoto(account, true);
 }
 
 export async function refreshSession() {
