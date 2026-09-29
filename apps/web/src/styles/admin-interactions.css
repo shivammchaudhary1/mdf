@@ -623,14 +623,19 @@
 /* Keep project cards compact instead of stretching across the dashboard. */
 @media(min-width:1024px){
   .ad-project-grid{
-    grid-template-columns:repeat(auto-fill,minmax(260px,320px))!important;
-    justify-content:start;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    justify-content:stretch;
     align-items:start;
+  }
+}
+@media(min-width:1280px){
+  .ad-project-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
   }
 }
 .ad-project-card{
   width:100%;
-  max-width:320px;
+  max-width:none;
 }
 .ad-project-body{
   padding:14px!important;

@@ -15,6 +15,7 @@ import {
 import { SiteMedia } from "@/components/site/site-media";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { useToast } from "@/components/ui/toast-provider";
+import { runtimeConfig } from "@/config/runtime";
 import { type ProjectCredit, type ProjectLink, type ProjectView, projectView } from "@/services/admin-workspace";
 import { api } from "@/services/api";
 import { slugFor, uploadMedia } from "@/services/workspace";
@@ -75,6 +76,9 @@ const splitLines = (value: FormDataEntryValue | null) =>
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
+
+const projectMediaSrc = (value: string) =>
+  value.startsWith("/api/v1/media/") ? `${new URL(runtimeConfig.apiUrl).origin}${value}` : value;
 
 function trimRows<T extends Record<string, string>>(rows: T[]) {
   return rows
@@ -221,7 +225,7 @@ function ProjectFields({ edit, uploading }: { edit?: ProjectView; uploading: boo
           />
           {coverPreview && (
             <div className="ad-project-cover-preview">
-              <img src={coverPreview} alt="Selected cover preview" />
+              <img src={projectMediaSrc(coverPreview)} alt="Selected cover preview" />
               <span>Cover preview</span>
             </div>
           )}
@@ -232,7 +236,7 @@ function ProjectFields({ edit, uploading }: { edit?: ProjectView; uploading: boo
             {Array.from({ length: 4 }, (_, index) => (
               <label className="ad-project-gallery-slot" key={index}>
                 {galleryPreviews[index] ? (
-                  <img src={galleryPreviews[index]} alt={`Gallery preview ${index + 1}`} />
+                  <img src={projectMediaSrc(galleryPreviews[index])} alt={`Gallery preview ${index + 1}`} />
                 ) : (
                   <span>+ Image {index + 1}</span>
                 )}

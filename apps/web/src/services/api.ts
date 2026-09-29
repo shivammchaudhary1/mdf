@@ -73,15 +73,35 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     if (token) headers.set("X-CSRF-Token", token);
   }
 
-  const response = await fetch(`${runtimeConfig.apiUrl}${path}`, {
-    ...options,
-    method,
-    credentials: "include",
-    headers,
-    cache: "no-store",
-  });
+  const send = () =>
+    fetch(`${runtimeConfig.apiUrl}${path}`, {
+      ...options,
+      method,
+      credentials: "include",
+      headers,
+      cache: "no-store",
+    });
 
-  const data = await response.json().catch(() => null);
+  let response = await send();
+  let data = await response.json().catch(() => null);
+
+  const csrfErrorMessage = Array.isArray(data?.message) ? data.message.join(" ") : data?.message;
+  const retryCsrf =
+    response.status === 403 &&
+    !SAFE.has(method) &&
+    !EXEMPT.has(path) &&
+    typeof csrfErrorMessage === "string" &&
+    /(?:csrf|security\s+token|token.*(?:missing|invalid|recogn))/i.test(csrfErrorMessage);
+
+  if (retryCsrf) {
+    clearApiSecurityState();
+    const retryToken = await loadCsrf();
+    if (retryToken) {
+      headers.set("X-CSRF-Token", retryToken);
+      response = await send();
+      data = await response.json().catch(() => null);
+    }
+  }
 
   if (data && typeof data === "object" && typeof data.csrfToken === "string") {
     csrfToken = data.csrfToken;

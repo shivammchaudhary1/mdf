@@ -163,7 +163,7 @@ export function AdminShell({ section, children }: { section: string; children: R
             </div>
           </div>
           <div className="ad-topbar-right">
-            <AdminNotifications />
+            <AdminNotifications accountId={account.id} />
             <div className="ad-avatar ad-avatar-top" aria-label={`${admin.name} account`}>
               {admin.initials}
             </div>

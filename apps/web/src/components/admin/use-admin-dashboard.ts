@@ -110,6 +110,7 @@ export function useAdminDashboard() {
     growth,
     applications,
     recentActivity: result.activity.map((item) => ({
+      id: item._id,
       title: item.summary ?? item.action,
       meta: item.action,
       type: item.entityType,

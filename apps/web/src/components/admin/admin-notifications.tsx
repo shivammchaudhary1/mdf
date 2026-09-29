@@ -1,29 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AdminIcon } from "@/components/admin/admin-icons";
 
 import { useAdminDashboard } from "./use-admin-dashboard";
 
-export function AdminNotifications() {
+export function AdminNotifications({ accountId }: { accountId: string }) {
   const dashboard = useAdminDashboard();
-  const notifications = dashboard.recentActivity.map((x, i) => ({
-    id: `${x.title}-${x.time}-${i}`,
+  const notifications = dashboard.recentActivity.map((x) => ({
+    id: x.id,
     title: x.title,
     meta: x.meta,
     time: x.time,
     href: "/admin",
     unread: true,
   }));
+  const storageKey = `mdadu:admin-notifications-read:${accountId}`;
   const [open, setOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
+  const [readStateReady, setReadStateReady] = useState(false);
 
-  const unreadCount = notifications.filter((item) => item.unread && !readIds.includes(item.id)).length;
+  useEffect(() => {
+    setReadStateReady(false);
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      setReadIds(Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string").slice(-250) : []);
+    } catch {
+      setReadIds([]);
+    } finally {
+      setReadStateReady(true);
+    }
+  }, [storageKey]);
+
+  function rememberRead(ids: string[]) {
+    const next = [...new Set(ids)].slice(-250);
+    setReadIds(next);
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // Reading a notification should still work when browser storage is unavailable.
+    }
+  }
+
+  const unreadCount = readStateReady
+    ? notifications.filter((item) => item.unread && !readIds.includes(item.id)).length
+    : 0;
 
   function markAllRead() {
-    setReadIds(notifications.map((item) => item.id));
+    rememberRead([...readIds, ...notifications.map((item) => item.id)]);
   }
 
   return (
@@ -62,7 +89,7 @@ export function AdminNotifications() {
                     href={item.href}
                     className={unread ? "unread" : ""}
                     onClick={() => {
-                      setReadIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
+                      if (!readIds.includes(item.id)) rememberRead([...readIds, item.id]);
                       setOpen(false);
                     }}
                   >
