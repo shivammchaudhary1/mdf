@@ -6,6 +6,7 @@ export interface Account {
   name: string;
   email: string;
   mobile: string;
+  photoMediaId?: Types.ObjectId;
   memberCode?: string;
   passwordHash?: string;
   role: MemberRole;
@@ -27,6 +28,7 @@ export const AccountSchema = new Schema<Account>(
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
     mobile: { type: String, default: "", trim: true, maxlength: 24 },
+    photoMediaId: { type: Schema.Types.ObjectId, ref: "Media" },
     memberCode: { type: String, trim: true, lowercase: true, maxlength: 20 },
     passwordHash: { type: String, select: false },
     role: { type: String, enum: ["MEMBER", "SUPER_ADMIN"], default: "MEMBER", required: true },

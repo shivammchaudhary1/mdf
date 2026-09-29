@@ -25,6 +25,8 @@ export type AuthPrincipal = {
   name: string;
   email: string;
   mobile: string;
+  photoMediaId?: string;
+  photo?: string;
   role: "MEMBER" | "SUPER_ADMIN";
   verified: boolean;
   sessionId: string;
@@ -50,12 +52,20 @@ export class AuthService {
     if (clientId) this.google = new OAuth2Client(clientId);
   }
 
+  private profilePhoto(mediaId?: unknown) {
+    const id = mediaId ? String(mediaId) : "";
+    return {
+      photoMediaId: id || undefined,
+      photo: id ? `/api/v1/media/${id}/profile` : undefined,
+    };
+  }
   publicAccount(account: AccountLike) {
     return {
       id: String(account._id),
       name: account.name,
       email: account.email,
       mobile: account.mobile,
+      ...this.profilePhoto(account.photoMediaId),
       role: account.role,
       verified: account.verified,
     };
@@ -66,6 +76,7 @@ export class AuthService {
       name: principal.name,
       email: principal.email,
       mobile: principal.mobile,
+      ...this.profilePhoto(principal.photoMediaId),
       role: principal.role,
       verified: principal.verified,
     };

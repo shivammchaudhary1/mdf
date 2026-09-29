@@ -6,6 +6,7 @@ import { ApplicationSchema } from "../applications/application.model";
 import { AuthModule } from "../auth/auth.module";
 import { CastingSchema } from "../castings/casting.model";
 import { ContactSchema } from "../contact/contact.model";
+import { MediaModule } from "../media/media.module";
 import { ContentSchema } from "../platform/platform.models";
 import { ProjectSchema } from "../projects/project.model";
 import { AdminController } from "./admin.controller";
@@ -15,6 +16,7 @@ import { AdminService } from "./admin.service";
   imports: [
     AuthModule,
     AnalyticsModule,
+    MediaModule,
     MongooseModule.forFeature([
       { name: "Project", schema: ProjectSchema },
       { name: "Casting", schema: CastingSchema },
