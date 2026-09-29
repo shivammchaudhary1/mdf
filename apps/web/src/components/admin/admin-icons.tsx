@@ -9,6 +9,12 @@ const paths: Record<string, ReactNode> = {
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </>
   ),
+  leads: (
+    <>
+      <path d="M4 18V9M10 18V5M16 18v-7M22 18V3" />
+      <path d="M3 21h20" />
+    </>
+  ),
   members: (
     <>
       <circle cx="9" cy="8" r="3" />
