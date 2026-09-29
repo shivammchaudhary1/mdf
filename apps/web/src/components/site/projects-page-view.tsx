@@ -112,11 +112,11 @@ export function ProjectsPageView() {
             </form>
 
             {data.projects.length ? (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {data.projects.map((project) => (
-                  <Link key={project.slug} href={`/projects/${project.slug}`} className="site-card group overflow-hidden">
-                    {project.image && <SiteMedia src={project.image} alt={project.title} kind="project" className="aspect-[16/9]" />}
-                    <div className="p-5 sm:p-6">
+                  <Link key={project.slug} href={`/projects/${project.slug}`} className="site-card group flex h-full flex-col overflow-hidden">
+                    {project.image && <SiteMedia src={project.image} alt={project.title} kind="project" className="aspect-[16/10]" />}
+                    <div className="flex flex-1 flex-col p-5 sm:p-6">
                       {(project.category || project.status) && (
                         <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[.12em] text-[#888]">
                           {project.category && <span>{project.category}</span>}
@@ -124,9 +124,9 @@ export function ProjectsPageView() {
                           {project.status && <span>{project.status}</span>}
                         </div>
                       )}
-                      <h2 className="font-display mt-3 text-[22px] font-semibold">{project.title}</h2>
-                      {project.summary && <p className="mt-3 text-sm leading-6 text-[#707070]">{project.summary}</p>}
-                      <div className="mt-5 flex items-center justify-between gap-4 text-xs text-[#888]">
+                      <h2 className="font-display mt-3 min-h-[3.3rem] line-clamp-2 text-[22px] font-semibold leading-[1.18]">{project.title}</h2>
+                      {project.summary && <p className="mt-3 line-clamp-5 text-sm leading-6 text-[#707070]">{project.summary}</p>}
+                      <div className="mt-auto flex items-center justify-between gap-4 pt-5 text-xs text-[#888]">
                         <span>{project.location || ""}</span>
                         <span className="shrink-0 font-semibold text-[var(--brand-red)]">View project →</span>
                       </div>

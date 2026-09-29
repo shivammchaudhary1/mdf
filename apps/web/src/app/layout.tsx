@@ -83,7 +83,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-IN" data-scroll-behavior="smooth">
-      <body className={`${inter.variable} ${playfair.variable}`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${playfair.variable}`}>
         <OrganizationJsonLd />
         <AppProviders>{children}</AppProviders>
       </body>
