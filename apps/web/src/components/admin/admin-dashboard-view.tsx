@@ -94,7 +94,7 @@ export function AdminDashboardView() {
             </div>
             <div className="ad-activity-list">
               {data.recentActivity.map((x) => (
-                <div key={`${x.title}-${x.time}`}>
+                <div key={x.id}>
                   <span className="ad-activity-icon">
                     <AdminIcon
                       name={

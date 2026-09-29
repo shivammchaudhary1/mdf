@@ -1,0 +1,12 @@
+{
+  "name": "mdadu-v1-1-pre-crm-bugfix-v3",
+  "type": "delta-code-only",
+  "database_changes": false,
+  "prerequisite": "mdadu-v1-1-pre-crm-bugfix-v2 applied",
+  "changes": [
+    {
+      "path": "apps/web/src/components/admin/admin-dashboard-view.tsx",
+      "reason": "Use stable audit id as React key for Recent activity rows"
+    }
+  ]
+}
