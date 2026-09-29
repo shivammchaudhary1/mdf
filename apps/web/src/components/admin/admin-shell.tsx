@@ -22,6 +22,7 @@ export const adminNavGroups = [
     label: "Operations",
     items: [
       ["projects", "Projects", "/admin/projects"],
+      ["leads", "Leads CRM", "/admin/leads"],
       ["casting", "Casting Calls", "/admin/casting"],
       ["members", "Members", "/admin/members"],
       ["applications", "Applications", "/admin/applications"],
