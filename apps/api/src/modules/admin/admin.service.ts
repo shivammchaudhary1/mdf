@@ -1,15 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import type { Model } from "mongoose";
+import { type Model, Types } from "mongoose";
 
 import { AuditService } from "../../common/audit/audit.service";
+import { objectId } from "../../common/utils/object-id";
 import { AnalyticsService } from "../analytics/analytics.service";
 import { Application } from "../applications/application.model";
 import { Account } from "../auth/auth.models";
 import { Casting } from "../castings/casting.model";
 import { ContactMessage } from "../contact/contact.model";
+import { MediaService } from "../media/media.service";
 import { ContentRecord } from "../platform/platform.models";
 import { Project } from "../projects/project.model";
+import { AdminProfileDto } from "./admin.dto";
 
 @Injectable()
 export class AdminService {
@@ -22,7 +25,56 @@ export class AdminService {
     @InjectModel("Content") private readonly content: Model<ContentRecord>,
     private readonly analytics: AnalyticsService,
     private readonly audit: AuditService,
+    private readonly media: MediaService,
   ) {}
+
+  private serializeProfile(account: Account) {
+    const photoMediaId = account.photoMediaId ? String(account.photoMediaId) : undefined;
+    return {
+      id: String(account._id),
+      name: account.name,
+      email: account.email,
+      mobile: account.mobile,
+      role: account.role,
+      verified: account.verified,
+      authProvider: account.authProvider,
+      photoMediaId,
+      photo: photoMediaId ? `/api/v1/media/${photoMediaId}/profile` : undefined,
+      createdAt: account.createdAt,
+      updatedAt: account.updatedAt,
+      lastLoginAt: account.lastLoginAt,
+      loginCount: Number(account.loginCount ?? 0),
+    };
+  }
+
+  async profile(accountId: string) {
+    const account = await this.accounts.findOne({ _id: objectId(accountId), role: "SUPER_ADMIN" }).lean();
+    if (!account) throw new NotFoundException("Administrator account not found.");
+    return this.serializeProfile(account as Account);
+  }
+
+  async updateProfile(accountId: string, input: AdminProfileDto) {
+    const account = await this.accounts.findOne({ _id: objectId(accountId), role: "SUPER_ADMIN" });
+    if (!account) throw new NotFoundException("Administrator account not found.");
+
+    await this.media.assertOwnedBy(accountId, [input.photoMediaId], "image", "member-profile");
+
+    const previousPhotoId = account.photoMediaId ? String(account.photoMediaId) : undefined;
+    if (input.name !== undefined) account.name = input.name;
+    if (input.mobile !== undefined) account.mobile = input.mobile;
+    if (input.photoMediaId === null) account.set("photoMediaId", undefined);
+    else if (input.photoMediaId !== undefined) account.photoMediaId = new Types.ObjectId(input.photoMediaId);
+
+    await account.save();
+
+    const currentPhotoId = account.photoMediaId ? String(account.photoMediaId) : undefined;
+    if (currentPhotoId) await this.media.makePrivate([currentPhotoId]);
+    if (previousPhotoId && previousPhotoId !== currentPhotoId) {
+      await this.media.removeIfUnreferencedOwned(previousPhotoId, accountId).catch(() => undefined);
+    }
+
+    return this.serializeProfile(account);
+  }
 
   async metrics() {
     const d = new Date(Date.now() - 30 * 86400000);

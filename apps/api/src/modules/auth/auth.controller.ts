@@ -46,6 +46,11 @@ export class AuthController {
     response.cookie("mdadu_csrf", csrfToken, this.csrfCookieOptions());
     return csrfToken;
   }
+  private currentCsrf(request: Request, response: Response) {
+    const existing = request.cookies?.mdadu_csrf;
+    if (typeof existing === "string" && /^[A-Za-z0-9_-]{20,128}$/.test(existing)) return existing;
+    return this.issueCsrf(response);
+  }
   private setSession(response: Response, session: Awaited<ReturnType<AuthService["login"]>>) {
     response.cookie("mdadu_session", session.token, {
       ...this.sessionCookieOptions(),
@@ -80,10 +85,13 @@ export class AuthController {
     return this.auth.logoutAll(request.account.id);
   }
   @Get("me") @ApiCookieAuth() @UseGuards(SessionGuard) me(@Req() request: AuthRequest, @Res({ passthrough: true }) response: Response) {
-    return { ...this.auth.publicPrincipal(request.account), csrfToken: this.issueCsrf(response) };
+    return { ...this.auth.publicPrincipal(request.account), csrfToken: this.currentCsrf(request, response) };
   }
-  @Get("csrf") @ApiCookieAuth() @UseGuards(SessionGuard) csrf(@Res({ passthrough: true }) response: Response) {
-    return { csrfToken: this.issueCsrf(response) };
+  @Get("csrf") @ApiCookieAuth() @UseGuards(SessionGuard) csrf(
+    @Req() request: AuthRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return { csrfToken: this.currentCsrf(request, response) };
   }
   @Get("sessions") @ApiCookieAuth() @UseGuards(SessionGuard) sessions(@Req() request: AuthRequest) {
     return this.auth.listSessions(request.account.id, request.account.sessionId);

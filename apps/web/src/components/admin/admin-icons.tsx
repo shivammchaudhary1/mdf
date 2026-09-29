@@ -9,6 +9,12 @@ const paths: Record<string, ReactNode> = {
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
     </>
   ),
+  leads: (
+    <>
+      <path d="M4 18V9M10 18V5M16 18v-7M22 18V3" />
+      <path d="M3 21h20" />
+    </>
+  ),
   members: (
     <>
       <circle cx="9" cy="8" r="3" />
@@ -95,6 +101,19 @@ const paths: Record<string, ReactNode> = {
     <>
       <path d="M4 7h16v13H4z" />
       <path d="M8 7V4h8v3M8 12h8M12 9v6" />
+    </>
+  ),
+  profile: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+    </>
+  ),
+  external: (
+    <>
+      <path d="M14 5h5v5" />
+      <path d="M10 14 19 5" />
+      <path d="M19 13v6H5V5h6" />
     </>
   ),
   settings: (

@@ -7,9 +7,11 @@ import { AdminContactsView } from "@/components/admin/admin-contacts-view";
 import { AdminContentView } from "@/components/admin/admin-content-view";
 import { AdminDashboardView } from "@/components/admin/admin-dashboard-view";
 import { AdminGalleryView } from "@/components/admin/admin-gallery-view";
+import { AdminLeadsView } from "@/components/admin/admin-leads-view";
 import { AdminLegalView } from "@/components/admin/admin-legal-view";
 import { AdminListsView } from "@/components/admin/admin-lists-view";
 import { AdminMembersView } from "@/components/admin/admin-members-view";
+import { AdminProfileView } from "@/components/admin/admin-profile-view";
 import { AdminProjectsView } from "@/components/admin/admin-projects-view";
 import { AdminServicesView } from "@/components/admin/admin-services-view";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -19,6 +21,7 @@ const valid = [
   "members",
   "applications",
   "projects",
+  "leads",
   "casting",
   "services",
   "work",
@@ -30,6 +33,7 @@ const valid = [
   "lists",
   "contacts",
   "careers",
+  "profile",
   "settings",
   "legal",
 ] as const;
@@ -43,6 +47,8 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
         <AdminApplicationsView />
       ) : safe === "projects" ? (
         <AdminProjectsView />
+      ) : safe === "leads" ? (
+        <AdminLeadsView />
       ) : safe === "casting" ? (
         <AdminCastingView />
       ) : safe === "services" || safe === "work" ? (
@@ -63,6 +69,8 @@ export function AdminWorkspace({ section = "dashboard" }: { section?: string }) 
         <AdminContactsView />
       ) : safe === "careers" ? (
         <AdminCareersView />
+      ) : safe === "profile" ? (
+        <AdminProfileView />
       ) : safe === "settings" ? (
         <AdminCompanySettingsView />
       ) : safe === "legal" ? (

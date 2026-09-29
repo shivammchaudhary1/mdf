@@ -5,6 +5,7 @@ const sections = [
   "members",
   "applications",
   "projects",
+  "leads",
   "casting",
   "services",
   "work",
@@ -16,6 +17,7 @@ const sections = [
   "lists",
   "contacts",
   "careers",
+  "profile",
   "settings",
   "legal",
 ];
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: Props) {
     members: "Members",
     applications: "Applications",
     projects: "Projects",
+    leads: "Leads CRM",
     casting: "Casting Calls",
     services: "Services",
     work: "Services",
@@ -37,6 +40,7 @@ export async function generateMetadata({ params }: Props) {
     lists: "Saved Talent Lists",
     contacts: "Contact Queries",
     careers: "Career Applications",
+    profile: "My Profile",
     settings: "Company Settings",
     legal: "Legal Content",
   };

@@ -7,6 +7,8 @@ export type SessionAccount = {
   name: string;
   email: string;
   mobile: string;
+  photo?: string;
+  photoMediaId?: string;
   role: "MEMBER" | "SUPER_ADMIN";
   verified: boolean;
   csrfToken?: string;

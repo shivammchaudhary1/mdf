@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { AdminIcon } from "@/components/admin/admin-icons";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { BrandLogo } from "@/components/brand-logo";
+import { SiteMedia } from "@/components/site/site-media";
 import { LoadingState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toast-provider";
 import { ensureSession, signOut } from "@/services/auth-session";
@@ -21,6 +22,7 @@ export const adminNavGroups = [
     label: "Operations",
     items: [
       ["projects", "Projects", "/admin/projects"],
+      ["leads", "Leads CRM", "/admin/leads"],
       ["casting", "Casting Calls", "/admin/casting"],
       ["members", "Members", "/admin/members"],
       ["applications", "Applications", "/admin/applications"],
@@ -46,6 +48,7 @@ export const adminNavGroups = [
   {
     label: "System",
     items: [
+      ["profile", "My Profile", "/admin/profile"],
       ["settings", "Company Settings", "/admin/settings"],
       ["legal", "Legal Content", "/admin/legal"],
     ],
@@ -62,6 +65,8 @@ export function AdminShell({ section, children }: { section: string; children: R
   const setOpen = useAdminDashboardStore((state) => state.setMobileOpen);
   const status = useAppStore((state) => state.authStatus);
   const account = useAppStore((state) => state.account);
+  const profilePhoto = useAppStore((state) => state.profilePhoto);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const admin = {
     name: account?.name ?? "",
@@ -113,7 +118,13 @@ export function AdminShell({ section, children }: { section: string; children: R
         </div>
 
         <div className="ad-admin-chip">
-          <div className="ad-avatar">{admin.initials}</div>
+          <div className={`ad-avatar ${profilePhoto ? "has-photo" : ""}`}>
+            {profilePhoto ? (
+              <SiteMedia src={profilePhoto} alt={`${admin.name} profile`} kind="team" className="h-full w-full rounded-full" />
+            ) : (
+              admin.initials
+            )}
+          </div>
           <div>
             <strong>{admin.name}</strong>
             <span>Super Admin</span>
@@ -140,8 +151,6 @@ export function AdminShell({ section, children }: { section: string; children: R
         </nav>
 
         <div className="ad-sidebar-bottom">
-          <Link href="/">← Public Website</Link>
-          <Link href="/member">Member Dashboard</Link>
           <button onClick={() => void logout()}>
             <AdminIcon name="logout" />
             Sign Out
@@ -163,9 +172,58 @@ export function AdminShell({ section, children }: { section: string; children: R
             </div>
           </div>
           <div className="ad-topbar-right">
-            <AdminNotifications />
-            <div className="ad-avatar ad-avatar-top" aria-label={`${admin.name} account`}>
-              {admin.initials}
+            <AdminNotifications accountId={account.id} />
+            <div className="ad-account-menu-wrap">
+              <button
+                type="button"
+                className={`ad-avatar ad-avatar-top ad-account-trigger ${profilePhoto ? "has-photo" : ""}`}
+                aria-label={`${admin.name} account menu`}
+                aria-haspopup="menu"
+                aria-expanded={accountMenuOpen}
+                onClick={() => setAccountMenuOpen((value) => !value)}
+              >
+                {profilePhoto ? (
+                  <SiteMedia src={profilePhoto} alt={`${admin.name} profile`} kind="team" className="h-full w-full rounded-full" />
+                ) : (
+                  admin.initials
+                )}
+              </button>
+              {accountMenuOpen && (
+                <>
+                  <button
+                    type="button"
+                    className="ad-account-menu-dismiss"
+                    aria-label="Close account menu"
+                    onClick={() => setAccountMenuOpen(false)}
+                  />
+                  <div className="ad-account-menu" role="menu">
+                    <div className="ad-account-menu-head">
+                      <strong>{admin.name}</strong>
+                      <span>{account.email}</span>
+                    </div>
+                    <Link href="/admin/profile" role="menuitem" onClick={() => setAccountMenuOpen(false)}>
+                      <AdminIcon name="profile" />
+                      My Profile
+                    </Link>
+                    <Link href="/" role="menuitem" onClick={() => setAccountMenuOpen(false)}>
+                      <AdminIcon name="external" />
+                      Public Website
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="danger"
+                      onClick={() => {
+                        setAccountMenuOpen(false);
+                        void logout();
+                      }}
+                    >
+                      <AdminIcon name="logout" />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>

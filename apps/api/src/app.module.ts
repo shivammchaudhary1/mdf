@@ -16,6 +16,7 @@ import { CareerModule } from "./modules/careers/career.module";
 import { CastingModule } from "./modules/castings/casting.module";
 import { ContactModule } from "./modules/contact/contact.module";
 import { HealthModule } from "./modules/health/health.module";
+import { LeadModule } from "./modules/leads/lead.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { MediaModule } from "./modules/media/media.module";
 import { PlatformModule } from "./modules/platform/platform.module";
@@ -62,6 +63,7 @@ import { TalentModule } from "./modules/talent/talent.module";
     ProfileModule,
     TalentModule,
     ContactModule,
+    LeadModule,
     PlatformModule,
     AdminModule,
   ],
