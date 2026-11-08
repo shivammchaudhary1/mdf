@@ -16,7 +16,7 @@ export function HomePageView() {
 
   return (
     <>
-      <SiteHeader dark />
+      <SiteHeader dark showDevotionalBar />
       <main id="main-content">
         <section className="relative isolate min-h-[620px] overflow-hidden bg-[#070707] text-white lg:min-h-[720px]">
           <video
