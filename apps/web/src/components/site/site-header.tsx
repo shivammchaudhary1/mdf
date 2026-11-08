@@ -22,7 +22,13 @@ function initials(name?: string) {
     .toUpperCase();
 }
 
-export function SiteHeader({ dark = false }: { dark?: boolean }) {
+export function SiteHeader({
+  dark = false,
+  showDevotionalBar = false,
+}: {
+  dark?: boolean;
+  showDevotionalBar?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -139,6 +145,22 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
           : "sticky top-0 border-b border-black/5 bg-white/95 text-[#111] backdrop-blur-xl"
       }`}
     >
+      {showDevotionalBar && (
+        <div className="border-b border-white/10 bg-[#070707]/90">
+          <div className="site-shell flex h-9 items-center justify-center gap-3">
+            <span className="h-1 w-1 rounded-full bg-[var(--brand-red)]" aria-hidden="true" />
+            <p
+              lang="sa-Deva"
+              className="text-center text-[13px] font-semibold tracking-[.08em] text-[var(--brand-gold)] sm:text-sm"
+              style={{ fontFamily: '"Nirmala UI", "Noto Sans Devanagari", Mangal, sans-serif' }}
+            >
+              ॥ श्री गणेशाय नमः ॥
+            </p>
+            <span className="h-1 w-1 rounded-full bg-[var(--brand-red)]" aria-hidden="true" />
+          </div>
+        </div>
+      )}
+
       <div className="site-shell flex h-[76px] items-center justify-between gap-5">
         <Link href="/" aria-label="M. Dadu Films home" onClick={close}>
           <BrandLogo darkInk={!dark} className="!w-[108px] sm:!w-[118px]" />
@@ -185,7 +207,11 @@ export function SiteHeader({ dark = false }: { dark?: boolean }) {
       </div>
 
       {open && (
-        <div className="absolute inset-x-3 top-[80px] rounded-[20px] border border-black/10 bg-white p-3 text-[#111] shadow-2xl lg:hidden">
+        <div
+          className={`absolute inset-x-3 ${
+            showDevotionalBar ? "top-[116px]" : "top-[80px]"
+          } rounded-[20px] border border-black/10 bg-white p-3 text-[#111] shadow-2xl lg:hidden`}
+        >
           <nav className="grid gap-1" aria-label="Mobile primary">
             {data.navigation.map((item) => (
               <Link
